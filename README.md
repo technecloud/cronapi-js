@@ -28,12 +28,11 @@ Java library for CronApp's users
     <dependency>
         <groupId>br.com.cronapp</groupId>
         <artifactId>cronapi-java</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
 
 ## License
 
-This library is licensed under Apache 2.0. Full license text is
-available in [LICENSE](LICENSE).
+This library is licensed under MIT. Full license text is available in [LICENSE](LICENSE).
