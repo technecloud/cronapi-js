@@ -1,4 +1,4 @@
-package br.com.techne;
+package br.com.cronapp;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

@@ -1,4 +1,4 @@
-package br.com.techne;
+package br.com.cronapp;
 
 public class App {
     public static void main(String[] args) {
