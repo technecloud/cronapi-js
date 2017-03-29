@@ -1,0 +1,58 @@
+######################
+# VisualCode
+######################
+.vscode/**
+
+######################
+# Bower
+######################
+bower_components/**
+dist/**
+
+######################
+# Node
+######################
+/node/**
+/node_tmp/**
+/node_modules/**
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+######################
+# Windows
+######################
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+
+######################
+# Mac OSX
+######################
+.DS_Store
+.svn
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+######################
+# Logs
+######################
+*.log
+
+######################
+# ESLint
+######################
+.eslintcache
