@@ -5,27 +5,15 @@
   <groupId>br.com.cronapp</groupId>
   <artifactId>cronapi-java</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>${project.version}</version>
   <name>cronapi-java</name>
   <description>Public Java library for CronApp's users</description>
   <url>https://github.com/technecloud/cronapi-java</url>
   <properties>
-    <java.version>1.6</java.version>
+    <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
-  <distributionManagement>
-    <repository>
-      <id>central</id>
-      <name>artifactory.cronapp.io-releases</name>
-      <url>https://artifactory.cronapp.io/libs-release</url>
-    </repository>
-    <snapshotRepository>
-      <id>snapshots</id>
-      <name>artifactory.cronapp.io-snapshots</name>
-      <url>https://artifactory.cronapp.io/libs-snapshot</url>
-    </snapshotRepository>
-  </distributionManagement>
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -75,4 +63,35 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>development</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <project.version>0.0.1-SNAPSHOT</project.version>
+      </properties>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>snapshots</id>
+          <name>artifactory.cronapp.io-snapshots</name>
+          <url>https://artifactory.cronapp.io/libs-snapshot</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>production</id>
+      <properties>
+        <project.version>0.0.1</project.version>
+      </properties>
+      <distributionManagement>
+        <repository>
+          <id>central</id>
+          <name>artifactory.cronapp.io-releases</name>
+          <url>https://artifactory.cronapp.io/libs-release</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
 </project>
