@@ -3,6 +3,7 @@ package cronapi.conversion;
 import java.util.Base64;
 
 import cronapi.CronapiMetaData;
+import cronapi.Functions;
 import cronapi.Var;
 
 /**
@@ -15,26 +16,26 @@ import cronapi.Var;
  */
 @CronapiMetaData(category="Conversion", categorySynonymous={"Conversão", "Convert"})
 public class Operations {
-
-  /**
-   * Conversão	Base 64 para Texto 
-   */
-  @CronapiMetaData(type="function", name="Base64 para texto", nameSynonymous={"base64ToString"}, description="Função para converter base64 para texto", params={"Conteúdo em base64"})
-  protected static final String base64ToString(byte[] base64) throws Exception {
-    String value = null;
-    if (base64 != null && base64.length > 0) {
-      byte[] result = Base64.getDecoder().decode(base64);
-      value = new String(result);
-    }
-    return value; 
-  }	
+ 
+  @CronapiMetaData(type="function", name="Para lógico", nameSynonymous={"toBoolean"}, description="Função para converter para lógico", params={"Conteúdo"})
+  protected final Var toBoolean(Var var) throws Exception {
+    return new Var(Functions.stringToBoolean(var.getObjectAsString()));
+  }
   
-  /**
-   * Texto Para Texto Binário 
-   */
+  @CronapiMetaData(type="function", name="Base64 para texto", nameSynonymous={"base64ToString"}, description="Função para converter base64 para texto", params={"Conteúdo em base64"})
+  protected static final Var base64ToString(Var base64Var) throws Exception {
+    Var value = new Var();
+    String base64 = base64Var.getObjectAsString();
+    if (base64.length() > 0) {
+      value = new Var(Base64.getDecoder().decode(base64));
+    }
+    return value;
+  }
+  
   @CronapiMetaData(type="function", name="Texto para texto binário ", nameSynonymous={"asciiToBinary"}, description="Função para converter texto para texto binário", params={"Conteúdo em ascii"})
-  protected static final String asciiToBinary(String ascii) throws Exception {
+  protected static final Var asciiToBinary(Var asciiVar) throws Exception {
     StringBuilder binary = new StringBuilder();
+    String ascii = asciiVar.getObjectAsString();
     if (ascii.length() > 0) {
       for (int i = 0; i < ascii.length(); i++) {
         int value = ascii.charAt(i);
@@ -43,15 +44,16 @@ public class Operations {
         }
       }
     }
-    return binary.toString();
+    return new Var(binary.toString());
   }
   
   @CronapiMetaData(type="function", name="Texto binário para texto", nameSynonymous={"binaryToAscii"}, description="Função para converter texto binário para texto", params={"Conteúdo em texto binário"})
-  protected static final String binaryToAscii(String binary) throws Exception {
+  protected static final Var binaryToAscii(Var binaryVar) throws Exception {
     StringBuilder ascii = new StringBuilder();
+    String binary = binaryVar.getObjectAsString();
     if (binary.length() > 0) {
       if ((binary.length()) % 8 != 0) {
-        throw new Exception("O texto de parametro não é binário");
+        throw new Exception("Paramêtro não é binario");
       }
       for (int i = 0; i < binary.length(); i+=8) {
          String temp = binary.substring(i, i+8);
@@ -62,7 +64,7 @@ public class Operations {
          ascii.append((char) decimal);
       }
     }
-    return ascii.toString();
+    return new Var(ascii.toString());
   }
   
   @CronapiMetaData(type="function", name="Conversão	para bytes", nameSynonymous={"toBytes"}, description="Função para converter texto binário para texto", params={"Conteúdo em texto binário"})

@@ -190,5 +190,15 @@ public class Functions {
     }
     return r;
   }
+  
+  public static boolean stringToBoolean(String str) {
+    if (str == null)
+      return false;
+    str = str.trim();
+    return str.equals("1") || str.equalsIgnoreCase("S") || str.equalsIgnoreCase("V") || str.equalsIgnoreCase("T") || str.equalsIgnoreCase("Y")
+        || str.equalsIgnoreCase("true") || str.equalsIgnoreCase("verdade") || str.equalsIgnoreCase("verdadeiro") || str.equalsIgnoreCase("yes")
+        || str.equalsIgnoreCase("sim") || str.equalsIgnoreCase("on");
+  }
+
 
 }
