@@ -6,8 +6,7 @@
 ######################
 # Bower
 ######################
-bower_components/**
-dist/**
+bower_components/
 
 ######################
 # Node
