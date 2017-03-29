@@ -4,7 +4,7 @@
 	window.cronapi = {};
 	/**
 	 * @category Conversion
-	 * categorySynonymous Conversão|Convert
+	 * @categorySynonymous Conversão|Convert
 	 */
 	window.cronapi.conversion = {};
 	/**
