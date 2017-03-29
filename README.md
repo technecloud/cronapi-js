@@ -1,7 +1,14 @@
 # CronApi Java
 Java library for CronApp's users
 
-## Maven
+## Table of Contents
+  * [Installation](#installation)
+    * [Maven](#maven)
+  * [License](#license)
+
+## Installation
+
+##### Maven
 
 ```xml
 <repositories>
@@ -25,3 +32,8 @@ Java library for CronApp's users
     </dependency>
 </dependencies>
 ```
+
+## License
+
+This library is licensed under Apache 2.0. Full license text is
+available in [LICENSE](LICENSE).
