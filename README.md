@@ -26,7 +26,7 @@ Java library for CronApp's users
 
 <dependencies>
     <dependency>
-        <groupId>br.com.cronapp</groupId>
+        <groupId>io.cronapp</groupId>
         <artifactId>cronapi-java</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </dependency>
