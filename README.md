@@ -10,4 +10,4 @@ bower install cronapi-js
 
 ## License
 
-Licensed under MIT.
+This library is licensed under MIT. Full license text is available in [LICENSE](LICENSE).
