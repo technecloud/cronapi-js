@@ -3,7 +3,7 @@ package cronapi.conversion;
 import java.util.Base64;
 
 import cronapi.CronapiMetaData;
-
+import cronapi.Var;
 
 /**
  * Classe que representa ...
@@ -44,6 +44,30 @@ public class Operations {
       }
     }
     return binary.toString();
+  }
+  
+  @CronapiMetaData(type="function", name="Texto binário para texto", nameSynonymous={"binaryToAscii"}, description="Função para converter texto binário para texto", params={"Conteúdo em texto binário"})
+  protected static final String binaryToAscii(String binary) throws Exception {
+    StringBuilder ascii = new StringBuilder();
+    if (binary.length() > 0) {
+      if ((binary.length()) % 8 != 0) {
+        throw new Exception("O texto de parametro não é binário");
+      }
+      for (int i = 0; i < binary.length(); i+=8) {
+         String temp = binary.substring(i, i+8);
+         int decimal = 0;
+         for (int j = 0; j < 8; j++) {
+           decimal += ( (temp.charAt(7 - j) == '1') ? (1 << j) : 0 );
+         }
+         ascii.append((char) decimal);
+      }
+    }
+    return ascii.toString();
+  }
+  
+  @CronapiMetaData(type="function", name="Conversão	para bytes", nameSynonymous={"toBytes"}, description="Função para converter texto binário para texto", params={"Conteúdo em texto binário"})
+  protected final Var toBytes(Var var) throws Exception {
+    return new Var(var.getObjectAsString().getBytes());
   }
 
 }
