@@ -30,6 +30,124 @@
 	this.cronapi.conversion.teste = function(astring) {
 		parseBoolean(astring);
 	};
+	
+		/**
+	 * @category XML
+	 * @categorySynonymous XML|xml
+	 */
+	this.cronapi.xml = {};
+
+	/**
+	 * @type function
+	 * @name Obtém valor do elemento
+	 * @nameSynonymous XMLGetElementValue
+	 * @description Função que retorna o valor de um elemento
+	 * @param {string} node - Elemento passado para obter-se o valor;
+	 */
+	this.cronapi.xml.XMLGetElementValue = function(node) {
+		if (node.firstChild)
+			return node.firstChild.nodeValue;
+		else
+			return null;
+	};
+
+	/**
+	 * @type function
+	 * @name Obtém o primeiro filho do elemento
+	 * @nameSynonymous XMLGetChildElement
+	 * @description Função para retornar o nó
+	 * @param {Object} node - Elemento passado para obter-se o valor;
+	 * @param {string} childName - Filho a ser obtido do elemento;
+	 */
+	this.cronapi.xml.XMLGetChildElement = function(node, childName) {
+		var c = node.getElementsByTagName(childName);
+		if (c.length > 0)
+			return c[0];
+	};
+
+	/**
+	 * @type function
+	 * @name Obtém a raiz do elemento
+	 * @nameSynonymous XMLGetRoot
+	 * @description Função que retorna o elemento raiz a partir de um elemento
+	 * @param {Object} element - Elemento passado para obter-se a raiz
+	 */
+	this.cronapi.xml.XMLGetRoot = function(element) {
+		if (element)
+			return doc.documentElement;
+	};
+
+	/**
+	 * @type function
+	 * @name Obtém o atributo do elemento
+	 * @nameSynonymous XMLGetAttribute
+	 * @description Função que retorna o elemento raiz a partir de um elemento
+	 * @param {Object} element - Elemento passado para obter-se a raiz
+	 * @param {Object} attribute - Atributo a ser obtido
+	 */
+	this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
+		return node.getAttribute(attribute);
+	}
+
+	/**
+	 * @type function
+	 * @name Cria Document
+	 * @nameSynonymous XMLOpen
+	 * @description Função que cria um objeto Document a partir de uma String
+	 * @param {Object} XMLText - Elemento passado para obter-se a raiz
+	 */
+	this.cronapi.xml.XMLOpen = function(XMLText) {
+		var doc = null;
+		if (document.implementation && document.implementation.createDocument) { //Mozzila
+			var domParser = new DOMParser();
+			doc = domParser.parseFromString(XMLText, 'application/xml');
+			fixXMLDocument(doc);
+			return doc;
+		} else {//IE
+			doc = new ActiveXObject("MSXML2.DOMDocument");
+			doc.loadXML(XMLText);
+		}
+		return doc;
+	}
+
+	/**
+	 * @type function
+	 * @name Busca filhos do elemento
+	 * @nameSynonymous XMLGetChildrenElement
+	 * @description Função que retorna os filhos do tipo de um determinado elemento
+	 * @param {Object} node - Elemento passado para buscar os filhos
+	 * @param {Object} childName - Elemento do tipo a ser buscado
+	 */
+	this.cronapi.xml.XMLGetChildrenElement = function(node, childName) {
+		if (childName) {
+			return node.getElementsByTagName(childName);
+		} else {
+			return node.childNodes;
+		}
+	}
+
+	/**
+	 * @type function
+	 * @name Retorna o elemento pai
+	 * @nameSynonymous XMLGetParentElement
+	 * @description Função que retorna o pai de um elemento
+	 * @param {Object} node - Elemento a ser buscado o pai
+	 */
+	this.cronapi.xml.XMLGetParentElement = function XMLGetParentElement(node) {
+		return node.parentNode;
+	};
+
+	/**
+	 * @type function
+	 * @name Retorna a tag do elemento
+	 * @nameSynonymous XMLGetElementTagName
+	 * @description Função que retorna o nome da tag do elemento
+	 * @param {Object} node - Elemento a ser buscado a tag
+	 */
+	this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(
+			node) {
+		return node.tagName;
+	};
 
 	//Private functions
 	var parseBoolean = function(value) {
