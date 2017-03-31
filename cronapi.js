@@ -12,7 +12,7 @@
 	 * @name Texto para texto binário
 	 * @nameSynonymous asciiToBinary
 	 * @description Função para converter texto para texto binário
-	 * @param {string} astring - The x value.
+	 * @param {string} astring
 	 */
 	this.cronapi.conversion.asciiToBinary = function(astring) {
 		var binary = "";
@@ -26,6 +26,18 @@
 		}
 		return binary;
 	};
+	/**
+	 * @type function
+	 * @name {{sdsds}}  Para lógico
+	 * @nameSynonymous toBoolean
+	 * @description Função para converter para lógico
+	 * @description_en Função para converter para lógico
+	 
+	 * @param {string} value
+	 */
+	this.cronapi.conversion.toBoolean = function(value) {
+    return parseBoolean(value);
+  }
 
 	/**
 	 * @category XML
