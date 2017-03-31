@@ -9,8 +9,8 @@ gulp.task('default', function () {
     return gulp.src('cronapi.js')
         .pipe(uglify())
         .pipe(rename('cronapi.min.js'))
-        .pipe(gulp.dest('dist/'));
-        //.pipe(notify({ message: 'CronApi-JS build finished' }));
+        .pipe(gulp.dest('dist/'))
+        .pipe(notify({ message: 'CronApi-JS build finished' }));
 });
 /*gulp.task('i18n', function() {
   return gulp.src('i18n/')
