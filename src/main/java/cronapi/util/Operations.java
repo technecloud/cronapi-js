@@ -24,8 +24,8 @@ public class Operations {
 	}
 
 	// Copiar para área de transferência	
-	@CronapiMetaData(type = "function", name = "Copia texto para área de transferência", categorySynonymous = "copyTextToTransferArea", description = "Função que copia o texto para área de transferência", params = {
-			"Varíavel a ser copiada na área de transferência" })
+	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", categorySynonymous = "copyTextToTransferArea", description = "{{copyTextToTransferAreaDescription}}", params = {
+			"{{copyTextToTransferAreaParam0}}" })
 	public static final void copyTextToTransferArea(Var strVar) throws Exception {
 		String str = strVar.getObjectAsString();
 		java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -33,8 +33,8 @@ public class Operations {
 		clipboard.setContents(selection, null);
 	}
 
-	@CronapiMetaData(type = "function", name = "Executa linha de comando.", categorySynonymous = "shellExecute  ", description = "Função que executa uma linha de comando e retoan caso haja erro.", params = {
-			"Varíavel a ser executada", "Variavel que define se deve coletar e retornar o erro." })
+	@CronapiMetaData(type = "function", name = "{{shellExecuteName}}", categorySynonymous = "shellExecute ", description = "{{shellExecuteDescription}}", params = {
+			"{{shellExecuteParam0}}", "{{shellExecuteParam1}}" })
 	public static final Var shellExecute(Var cmdline, Var waitFor) throws Exception {
 		Boolean waitForCasted = (Boolean) waitFor.getObject();
 		Process p = Runtime.getRuntime().exec(cmdline.getObjectAsString());
@@ -52,14 +52,14 @@ public class Operations {
 	}
 
 	// Retorna um numério aleatório 
-	@CronapiMetaData(type = "function", name = "Retorna um número aleatório.", categorySynonymous = "random", description = "Função que retorna um inteiro positivo aleatório com valor máximo indicado no parâmetro.", params = {
-			"Varíavel que indica o valor máximo do random" })
+	@CronapiMetaData(type = "function", name = "{{randomName}}", categorySynonymous = "random", description = "{{randomDescription}}", params = {
+			"{{randomParam0}}" })
 	public static final Var random(Var maxValue) throws Exception {
 		return new Var(Math.round(Math.random() * maxValue.getObjectAsDouble()));
 	}
 
-	@CronapiMetaData(type = "function", name = "Comprime array de bytes.", categorySynonymous = "compressToZip", description = "Função que comprime um var para zip.", params = {
-			"Varíavel a ser comprimida" })
+	@CronapiMetaData(type = "function", name = "{{compressToZipName}}", categorySynonymous = "compressToZip", description = "{{compressToZipDescription}}", params = {
+			"{{compressToZipParam0}}" })
 	public static final Var compressToZip(Var value) throws Exception {
 		java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
 		java.util.zip.DeflaterOutputStream compresser = new java.util.zip.DeflaterOutputStream(output);
@@ -69,9 +69,8 @@ public class Operations {
 		return new Var(output.toByteArray());
 	}
 
-
-	@CronapiMetaData(type = "function", name = "Descompacta array de bytes.", categorySynonymous = "decodeZipFromByte", description = "Função que descompacta de zip para array de bytes.", params = {
-			"Varíavel a ser descompactada." })
+	@CronapiMetaData(type = "function", name = "{{decodeZipFromByteName}}", categorySynonymous = "decodeZipFromByte", description = "{{decodeZipFromByteDescription}}", params = {
+			"{{decodeZipFromByteParam0}}" })
 	public static final Var decodeZipFromByte(Var value) throws Exception {
 		java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream((byte[]) value.getObject());
 		java.util.zip.InflaterInputStream decompresser = new java.util.zip.InflaterInputStream(input);
@@ -86,6 +85,6 @@ public class Operations {
 		input.close();
 		return new Var(out.toByteArray());
 	}
-	
-	
+
+
 }
