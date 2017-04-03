@@ -112,6 +112,35 @@ public class Var implements Comparable {
 	} // end getObjectAsInt
 
 	/**
+	 * Get object as an boolean. 
+	 *
+	 * @return an bool whose value equals this object
+	 */
+	public boolean getObjectAsBoolean() {
+		switch (getType()) {
+		case STRING:
+			String s = (String) getObject();
+			if (s.equals("1") || s.equalsIgnoreCase("true")) {
+				s = "TRUE";
+			} else {
+				s = "FALSE";
+			}
+			return Boolean.valueOf(s);
+		case INT:
+			return (int) getObject() > 0;
+		case DOUBLE:
+			return new Double((double) getObject()).intValue() > 0;
+		case LIST:
+			// has no meaning
+			break;
+		default:
+			// has no meaning
+			break;
+		}
+		return false;
+	} // end getObjectAsBoolean
+
+	/**
 	 * Get object as a double. Does not make sense for a "LIST" type object.
 	 *
 	 * @return a double whose value equals this object
