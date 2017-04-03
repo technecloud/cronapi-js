@@ -30,7 +30,7 @@ public class Operations {
 	/**
 	 * Criar nova pasta 
 	 */
-	@CronapiMetaData(type="function", name="Criar pasta", nameSynonymous={"createFolder"}, description="Função para criar nova pasta", params={"Caminho que deve ser criado a pasta"})
+	@CronapiMetaData(type="function", name="{{CreateFolder}}", nameSynonymous={"createFolder"}, description="{{FunctionToCreateNewFolder}}", params={"{{PathMustBeCreatedForFolder}}"})
 	protected static final boolean folderCreate(String path) throws Exception {
 		File file = new File(path.trim());
 		return folderCreate(file);
@@ -39,7 +39,7 @@ public class Operations {
 	/**
 	 * Criar nova pasta 
 	 */
-	@CronapiMetaData(type="function", name="Criar pasta", nameSynonymous={"createFolder"},description="Função para criar nova pasta", params={"Caminho que deve ser criado a pasta"})
+	@CronapiMetaData(type="function", name="{{CreateFolder}}", nameSynonymous={"createFolder"},description="{{FunctionToCreateNewFolder}}", params={"{{PathMustBeCreatedForFolder}}"})
 	protected static final boolean folderCreate(File dir) throws Exception {
 		boolean created = true;
 		if (!dir.exists()) {
@@ -51,7 +51,7 @@ public class Operations {
 	/**
 	 * MD5 do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="MD5 do arquivo", nameSynonymous={"fileMD5"},description="Função para retornar o MD5 do arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{MD5OfFile}}", nameSynonymous={"fileMD5"},description="{{FunctionToReturnMD5OfFile}}", params={"{{PathOfFile}}"})
 	protected static final String fileMD5(String path) throws Exception {
 		return Functions.MD5AsStringFromFile(new File(path));
 	}
@@ -59,7 +59,7 @@ public class Operations {
 	/**
 	 * Remover Pasta de Arquivos
 	 */
-	@CronapiMetaData(type="function", name="Remover pasta de arquivos", nameSynonymous={"removeFolder", "deleteFolder"}, description="Função para remover pasta de arquivos", params={"Caminho da pasta"})
+	@CronapiMetaData(type="function", name="{{RemoveFolderFiles}}", nameSynonymous={"removeFolder", "deleteFolder"}, description="{{FunctionToRemoveFolderFiles}}", params={"{{PathOfFolder}}"})
 	protected static final boolean fileRemoveFolderAndChildren(String path) throws Exception {
 		File dir = new File(path.trim());
 		return fileRemoveFolderAndChildren(dir);
@@ -68,7 +68,7 @@ public class Operations {
 	/**
 	 * Remover Pasta de Arquivos
 	 */
-	@CronapiMetaData(type="function", name="Remover pasta de arquivos", nameSynonymous={"removeFolder", "deleteFolder"}, description="Função para remover pasta de arquivos", params={"Pasta"})
+	@CronapiMetaData(type="function", name="{{RemoveFolderFiles}}", nameSynonymous={"removeFolder", "deleteFolder"}, description="{{FunctionToRemoveFolderFiles}}", params={"{{Folder}}"})
 	protected static final boolean fileRemoveFolderAndChildren(File dir) throws Exception {
 		return Functions.deleteFolder(dir);
 	}
@@ -76,7 +76,7 @@ public class Operations {
 	/**
 	 * Obter MD5 do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Obter MD5 do arquivo", nameSynonymous={"getFileMD5"}, description="Função para obter MD5 do arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{GetMD5OfFile}}", nameSynonymous={"getFileMD5"}, description="{{FunctionToGetMD5OfFile}}", params={"{{PathOfFile}}"})
 	protected static final String getFileMD5(String filename) throws Exception {
 		java.io.File file = new java.io.File(filename);
 		return getFileMD5(file);
@@ -85,7 +85,7 @@ public class Operations {
 	/**
 	 * Obter MD5 do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Obter MD5 do Arquivo", nameSynonymous={"getFileMD5"}, description="Função para obter MD5 do arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{GetMD5OfFile}}", nameSynonymous={"getFileMD5"}, description="{{FunctionToGetMD5OfFile}}", params={"{{File}}"})
 	protected static final String getFileMD5(File file) throws Exception {
 		DataInputStream in = null;
 		FileInputStream fstream = null;
@@ -121,7 +121,7 @@ public class Operations {
 	/**
 	 * Pode Ler?
 	 */
-	@CronapiMetaData(type="function", name="Pode ler arquivo?", nameSynonymous={"fileCanRead"}, description="Função para verificar se pode ler o arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{CanReadyFile}}", nameSynonymous={"fileCanRead"}, description="{{FunctionToCheckIfCanReadFile}}", params={"{{PathOfFile}}"})
 	protected final boolean fileCanRead(String path) throws Exception {
 		File file = new File(path.trim());
 		return fileCanRead(file);
@@ -130,7 +130,7 @@ public class Operations {
 	/**
 	 * Pode Ler?
 	 */
-	@CronapiMetaData(type="function", name="Pode ler arquivo?", nameSynonymous={"fileCanRead"}, description="Função para verificar se pode ler o arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{CanReadyFile}}", nameSynonymous={"fileCanRead"}, description="{{FunctionToCheckIfCanReadFile}}", params={"{{File}}"})
 	protected final boolean fileCanRead(File file) throws Exception {
 		return file.canRead();
 	}
@@ -138,7 +138,7 @@ public class Operations {
 	/**
 	 * Pode Escrever?
 	 */
-	@CronapiMetaData(type="function", name="Pode escrever arquivo?", nameSynonymous={"fileCanWrite"}, description="Função para verificar se pode escrever o arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{CanWriteFile}}", nameSynonymous={"fileCanWrite"}, description="{{FunctionToCheckIfCanWriteFile}}", params={"{{PathOfFile}}"})
 	protected final boolean fileCanWrite(String path) throws Exception {
 		File file = new File(path.trim());
 		return fileCanWrite(file);
@@ -147,7 +147,7 @@ public class Operations {
 	/**
 	 * Pode Escrever?
 	 */
-	@CronapiMetaData(type="function", name="Pode escrever arquivo?", nameSynonymous={"fileCanWrite"}, description="Função para verificar se pode escrever o arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{CanWriteFile}}", nameSynonymous={"fileCanWrite"}, description="{{FunctionToCheckIfCanWriteFile}}", params={"{{File}}"})
 	protected final boolean fileCanWrite(File file) throws Exception {
 		return file.canWrite();
 	}
@@ -155,7 +155,7 @@ public class Operations {
 	/**
 	 * Criar Novo Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Criar novo arquivo", nameSynonymous={"fileCreate"}, description="Função para criar arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{CreateNewFile}}", nameSynonymous={"fileCreate"}, description="{{FunctionToCreateFile}}", params={"{{PathOfFile}}"})
 	protected static final void fileCreate(String path) throws Exception {
 		File file = new File(path.trim());
 		fileCreate(file);
@@ -164,7 +164,7 @@ public class Operations {
 	/**
 	 * Criar Novo Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Criar novo arquivo", nameSynonymous={"fileCreate"}, description="Função para criar arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{CreateNewFile}}", nameSynonymous={"fileCreate"}, description="{{FunctionToCreateFile}}", params={"{{File}}"})
 	protected static final void fileCreate(File file) throws Exception {
 		if (!file.exists()) {
 			OutputStream out = new FileOutputStream(file);
@@ -175,7 +175,7 @@ public class Operations {
 	/**
 	 * Remover Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Remover arquivo", nameSynonymous={"fileRemove"}, description="Função para remover arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{RemoveFile}}", nameSynonymous={"fileRemove"}, description="{{FunctionToRemoveFile}}", params={"{{PathOfFile}}"})
 	protected static final boolean fileRemove(String path) throws Exception {
 		File file = new File(path.trim());
 		return fileRemove(file);
@@ -184,7 +184,7 @@ public class Operations {
 	/**
 	 * Remover Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Remover arquivo", nameSynonymous={"fileRemove"}, description="Função para remover arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{RemoveFile}}", nameSynonymous={"fileRemove"}, description="{{FunctionToRemoveFile}}", params={"{{File}}"})
 	protected static final boolean fileRemove(File file) throws Exception {
 		return file.delete();
 	}
@@ -192,7 +192,7 @@ public class Operations {
 	/**
 	 * Existe o Arquivo?
 	 */
-	@CronapiMetaData(type="function", name="Existe arquivo?", nameSynonymous={"fileExists"}, description="Função para verificar se existe o arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{FileExists}}", nameSynonymous={"fileExists"}, description="{{FunctionToCheckIfExistFile}}", params={"{{PathOfFile}}"})
 	protected static final boolean fileExists(String path) throws Exception {
 		File file = new File(path.trim());
 		return fileExists(file);
@@ -201,7 +201,7 @@ public class Operations {
 	/**
 	 * Existe o Arquivo?
 	 */
-	@CronapiMetaData(type="function", name="Existe arquivo?", nameSynonymous={"fileExists"}, description="Função para verificar se existe o arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{FileExists}}", nameSynonymous={"fileExists"}, description="{{FunctionToCheckIfExistFile}}", params={"{{File}}"})
 	protected static final boolean fileExists(File file) throws Exception {
 		return file.exists();
 	}
@@ -209,7 +209,7 @@ public class Operations {
 	/**
 	 * Copiar Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Copiar arquivo", nameSynonymous={"fileCopy"}, description="Função para copiar o arquivo", params={"Caminho de origem", "Caminho de destino"})
+	@CronapiMetaData(type="function", name="{{CopyFile}}", nameSynonymous={"fileCopy"}, description="{{FunctionToCopyFile}}", params={"{{SourcePath}}", "{{DestinationPath}}"})
 	protected static final void fileCopy(String pathFrom, String pathTo) throws Exception {
 		File from = new File(pathFrom.trim());
 		File to = new File(pathTo.trim());
@@ -219,7 +219,7 @@ public class Operations {
 	/**
 	 * Copiar Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Copiar arquivo", nameSynonymous={"fileCopy"}, description="Função para copiar o arquivo", params={"Arquivo de origem", "Pasta de destino"})
+	@CronapiMetaData(type="function", name="{{CopyFile}}", nameSynonymous={"fileCopy"}, description="{{FunctionToCopyFile}}", params={"{{SourceFile}}", "{{DestinationFolder}}"})
 	protected static final void fileCopy(File pathFrom, File pathTo) throws Exception {
 		Functions.copyFileTo(pathFrom, pathTo);
 	}
@@ -227,7 +227,7 @@ public class Operations {
 	/**
 	 * Obter Pai do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Obter pai do arquivo", nameSynonymous={"fileGetParent"}, description="Função para obter o pai do arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{GetParentOfFile}}", nameSynonymous={"fileGetParent"}, description="{{FunctionToGetParentOfFile}}", params={"{{PathOfFile}}"})
 	protected static final String fileGetParent(String path) throws Exception {
 		File file = new File(path.trim());
 		return fileGetParent(file);
@@ -236,7 +236,7 @@ public class Operations {
 	/**
 	 * Obter Pai do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Obter pai do arquivo", nameSynonymous={"fileGetParent"}, description="Função para obter o pai do arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{GetParentOfFile}}", nameSynonymous={"fileGetParent"}, description="{{FunctionToGetParentOfFile}}", params={"{{File}}"})
 	protected static final String fileGetParent(File file) throws Exception {
 		if (file.exists()) {
 			return file.getParent();
@@ -248,7 +248,7 @@ public class Operations {
 	/**
 	 * Renomear Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Renomear arquivo", nameSynonymous={"fileRename"}, description="Função para renomear arquivo", params={"Caminho do arquivo", "Novo nome do arquivo"})
+	@CronapiMetaData(type="function", name="{{RenameFile}}", nameSynonymous={"fileRename"}, description="{{FunctionToRenameFile}}", params={"{{PathOfFile}}", "{{NewNameOfFile}}"})
 	protected static final boolean fileRename(String path, String name) throws Exception {
 		File from = new File(path.trim());
 		return fileRename(from, name);
@@ -257,7 +257,7 @@ public class Operations {
 	/**
 	 * Renomear Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Renomear arquivo", nameSynonymous={"fileRename"}, description="Função para renomear arquivo", params={"Arquivo", "Novo nome do arquivo"})
+	@CronapiMetaData(type="function", name="{{RenameFile}}", nameSynonymous={"fileRename"}, description="{{FunctionToRenameFile}}", params={"{{File}}", "{{NewNameOfFile}}"})
 	protected static final boolean fileRename(File from, String name) throws Exception {
 		File to = new File(from.getParentFile(), name.trim());
 		return from.renameTo(to);
@@ -266,7 +266,7 @@ public class Operations {
 	/**
 	 * Mover Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Mover arquivo", nameSynonymous={"fileMove"}, description="Função para mover arquivo", params={"Caminho de origem do arquivo", "Caminho de destino do arquivo"})
+	@CronapiMetaData(type="function", name="{{MoveFile}}", nameSynonymous={"fileMove"}, description="{{FunctionToMoveFile}}", params={"{{PathOfSourceFile}}", "{{PathOfDestinationFile}}"})
 	protected static final boolean fileMove(String pathFrom, String pathTo) throws Exception {
 		File from = new File(pathFrom.trim());
 		return fileMove(from, pathTo);
@@ -275,7 +275,7 @@ public class Operations {
 	/**
 	 * Mover Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Mover arquivo", nameSynonymous={"fileMove"}, description="Função para mover arquivo", params={"Arquivo", "Caminho de destino do arquivo"})
+	@CronapiMetaData(type="function", name="{{MoveFile}}", nameSynonymous={"fileMove"}, description="{{FunctionToMoveFile}}", params={"{{File}}", "{{PathOfDestinationFile}}"})
 	protected static final boolean fileMove(File from, String pathTo) throws Exception {
 		File to = new File(pathTo.trim());
 		return from.renameTo(to);
@@ -284,7 +284,7 @@ public class Operations {
 	/**
 	 * Forçar criação do diretorio para o arquivo
 	 */
-	@CronapiMetaData(type="function", name="Forçar criação da pasta para o arquivo", nameSynonymous={"forceDirectories", "forceFolder", "forceCreateDirectories", "forceCreateFolder"}, description="Função para forçar criação da pasta para o arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{ForceFolderCreateToFile}}", nameSynonymous={"forceDirectories", "forceFolder", "forceCreateDirectories", "forceCreateFolder"}, description="{{FunctionToForceFolderCreateToFile}}", params={"{{PathOfFile}}"})
 	protected static final boolean forceDirectories(String path) throws Exception {
 		return new File(path).getParentFile().mkdirs();
 	}
@@ -292,23 +292,15 @@ public class Operations {
 	/**
 	 * Forçar criação do diretorio para o arquivo
 	 */
-	@CronapiMetaData(type="function", name="Forçar criação da pasta para o arquivo", nameSynonymous={"forceDirectories", "forceFolder", "forceCreateDirectories", "forceCreateFolder"}, description="Função para forçar criação da pasta para o arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{ForceFolderCreateToFile}}", nameSynonymous={"forceDirectories", "forceFolder", "forceCreateDirectories", "forceCreateFolder"}, description="{{FunctionToForceFolderCreateToFile}}", params={"{{File}}"})
 	protected static final boolean forceDirectories(File file) throws Exception {
 		return file.getParentFile().mkdirs();
 	}
 
 	/**
-	 * Criar pasta
-	 */
-	@CronapiMetaData(type="function", name="Criar pasta", nameSynonymous={"createFolder", "createDirectory"}, description="Função para criar pasta", params={"Caminho da pasta"})
-	protected static final boolean createFolder(String absolutePath) throws Exception {
-		return new File(absolutePath).mkdirs();
-	}
-
-	/**
 	 * Abrir arquivo para escrita
 	 */
-	@CronapiMetaData(type="function", name="Abrir arquivo para escrita", nameSynonymous={"fileOpenToWrite"}, description="Função para abrir arquivo para escrita", params={"Caminho do arquivo", "Adicionar conteudo?"})
+	@CronapiMetaData(type="function", name="{{OpenFileToWrite}}", nameSynonymous={"fileOpenToWrite"}, description="{{FunctionToOpenFileToWrite}}", params={"{{PathOfFile}}", "{{AddContent}}"})
 	protected static final FileOutputStream fileOpenToWrite(String url, boolean append) throws Exception {
 		FileOutputStream out = new FileOutputStream(new File(url), append);
 		return out;
@@ -317,7 +309,7 @@ public class Operations {
 	/**
 	 * Abrir arquivo para escrita
 	 */
-	@CronapiMetaData(type="function", name="Abrir arquivo para escrita", nameSynonymous={"fileOpenToWrite"}, description="Função para abrir arquivo para escrita", params={"Arquivo", "Adicionar conteudo?"})
+	@CronapiMetaData(type="function", name="{{OpenFileToWrite}}", nameSynonymous={"fileOpenToWrite"}, description="{{FunctionToOpenFileToWrite}}", params={"{{File}}", "{{AddContent}}"})
 	protected static final FileOutputStream fileOpenToWrite(File file, boolean append) throws Exception {
 		FileOutputStream out = new FileOutputStream(file, append);
 		return out;
@@ -326,32 +318,32 @@ public class Operations {
 	/**
 	 * Abrir arquivo para leitura
 	 */
-	@CronapiMetaData(type="function", name="Abrir arquivo para leitura", nameSynonymous={"fileOpenToRead"}, description="Função para abrir arquivo para leitura", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{OpenFileToRead}}", nameSynonymous={"fileOpenToRead"}, description="{{FunctionToOpenFileToRead}}", params={"{{PathOfFile}}"})
 	protected static final FileInputStream fileOpenToRead(String url) throws Exception {
 		FileInputStream in = new FileInputStream(new File(url));
 		return in;
 	}
 
 	/**
-	 * Adicionar contéudo a arquivo
+	 * Adicionar conteúdo a arquivo
 	 */
-	@CronapiMetaData(type="function", name="Adicionar contéudo a arquivo", nameSynonymous={"fileAppend"}, description="Função para adicionar contéudo a arquivo", params={"Stream do arquivo", "Conteúdo do arquivo"})
+	@CronapiMetaData(type="function", name="{{AddContentToFile}}", nameSynonymous={"fileAppend"}, description="{{FunctionToAddContentToFile}}", params={"{{StreamOfFile}}", "{{ContentOfFile}}"})
 	protected static final void fileAppend(FileOutputStream out, byte[] content) throws Exception {
 		out.write(content);
 	}
 
 	/**
-	 * Adicionar contéudo a arquivo
+	 * Adicionar conteúdo a arquivo
 	 */
-	@CronapiMetaData(type="function", name="Adicionar contéudo a arquivo", nameSynonymous={"fileAppend"}, description="Função para adicionar contéudo a arquivo", params={"Stream do arquivo", "Conteúdo do arquivo"})
+	@CronapiMetaData(type="function", name="{{AddContentToFile}}", nameSynonymous={"fileAppend"}, description="{{FunctionToAddContentToFile}}", params={"{{StreamOfFile}}", "{{ContentOfFile}}"})
 	protected static final void fileAppend(FileOutputStream out, String content) throws Exception {
 		out.write(content.getBytes());
 	}
 
 	/**
-	 * Ler contéudo do arquivo
+	 * Ler conteúdo do arquivo
 	 */
-	@CronapiMetaData(type="function", name="Ler conteúdo do arquivo", nameSynonymous={"fileRead"}, description="Função para ler conteúdo do arquivo", params={"Stream do arquivo", "Tamanho"})
+	@CronapiMetaData(type="function", name="{{ReadContentOfFile}}", nameSynonymous={"fileRead"}, description="{{FunctionToReadContentOfFile}}", params={"{{StreamOfFile}}", "{{Size}}"})
 	protected static final String fileRead(FileInputStream in, Long size) throws Exception {
 		byte[] b = new byte[size.intValue()];
 		if (in.available() != 0) {
@@ -362,17 +354,21 @@ public class Operations {
 	}
 
 	/**
-	 * Ler todo contéudo do arquivo
+	 * Ler todo contéudo do arquivos
 	 */
-	@CronapiMetaData(type="function", name="Ler todo conteúdo do arquivo", nameSynonymous={"fileReadAll"}, description="Função para ler todo conteúdo do arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{ReadAllContentOfFile}}", nameSynonymous={"fileReadAll"}, description="{{FunctionToReadAllContentOfFile}}", params={"{{StreamOfFile}}"})
 	protected static final StringBuffer fileReadAll(FileInputStream in) throws Exception {
 		return Functions.getFileContent(in);
 	}
 
+  /**
+   * Teste
+   */
+
 	/**
 	 * Ler uma linha do arquivo
 	 */
-	@CronapiMetaData(type="function", name="Ler linha do arquivo", nameSynonymous={"fileReadLine"}, description="Função para ler linha do arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{ReadLineOfFile}}", nameSynonymous={"fileReadLine"}, description="{{FunctionToReadLineOfFile}}", params={"{{StreamOfFile}}"})
 	protected static final String fileReadLine(FileInputStream in) throws Exception {
 		DataInputStream dis = new DataInputStream(in);
 		String inputLine;
@@ -384,7 +380,7 @@ public class Operations {
 	/**
 	 * Limpar o arquivo
 	 */
-	@CronapiMetaData(type="function", name="Limpar arquivo", nameSynonymous={"fileFlush"}, description="Função para limpar arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{ClearFile}}", nameSynonymous={"fileFlush"}, description="{{FunctionToClearFile}}", params={"{{StreamOfFile}}"})
 	protected static final void fileFlush(FileOutputStream fos) throws Exception {
 		fos.flush();
 	}
@@ -392,7 +388,7 @@ public class Operations {
 	/**
 	 * Fechar o arquivo
 	 */
-	@CronapiMetaData(type="function", name="Fechar o arquivo", nameSynonymous={"fileClose"}, description="Função para fechar o arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{CloseFile}}", nameSynonymous={"fileClose"}, description="{{FunctionToCloseFile}}", params={"{{StreamOfFile}}"})
 	protected static final void fileClose(FileOutputStream fos) throws Exception {
 		fos.flush();
 		fos.close();
@@ -401,7 +397,7 @@ public class Operations {
 	/**
 	 * Fechar o arquivo
 	 */
-	@CronapiMetaData(type="function", name="Fechar o arquivo", nameSynonymous={"fileClose"}, description="Função para fechar o arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{CloseFile}}", nameSynonymous={"fileClose"}, description="{{FunctionToCloseFile}}", params={"{{StreamOfFile}}"})
 	protected static final void fileClose(FileInputStream fis) throws Exception {
 		fis.close();
 	}
@@ -409,7 +405,7 @@ public class Operations {
 	/**
 	 * Diretorio temporário da aplicação
 	 */
-	@CronapiMetaData(type="function", name="Diretorio temporário da aplicação", nameSynonymous={"fileTempDir"}, description="Função para retornar diretorio temporário da aplicação", params={})
+	@CronapiMetaData(type="function", name="{{ApplicationTemporaryFolder}}", nameSynonymous={"fileTempDir"}, description="{{FunctionToReturnApplicationTemporaryFolder}}", params={})
 	protected static final String fileTempDir() throws Exception {
 		URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
 		File tempDirectory = new File(location.getFile() + "/tmp");
@@ -421,7 +417,7 @@ public class Operations {
 	/**
 	 * Ler todo conteudo do arquivo
 	 */
-	@CronapiMetaData(type="function", name="Ler todo conteúdo do arquivo em bytes", nameSynonymous={"fileReadAllToBytes"}, description="Função para ler todo conteúdo do arquivo em bytes", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{ReadAllContentFileInBytes}}", nameSynonymous={"fileReadAllToBytes"}, description="{{FunctionToReadAllContentFileInBytes}}", params={"{{StreamOfFile}}"})
 	protected static final byte[] fileReadAllToBytes(FileInputStream fis) throws Exception {
 		long length = fis.getChannel().size();
 		byte[] bytes = new byte[(int) length];
@@ -440,7 +436,7 @@ public class Operations {
 	/**
 	 * Checar se é final do arquivo
 	 */
-	@CronapiMetaData(type="function", name="É final do arquivo?", nameSynonymous={"isFileEoF"}, description="Função para verificar se é final do arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{IsEndOfFile}}", nameSynonymous={"isFileEoF"}, description="{{FunctionToCheckIsEndOfFile}}", params={"{{StreamOfFile}}"})
 	protected static final boolean isFileEoF(FileInputStream fis) throws Exception {
 		return fis.getChannel().position() == fis.getChannel().size();
 	}
@@ -448,7 +444,7 @@ public class Operations {
 	/**
 	 * Obter o tamanho do arquivo
 	 */
-	@CronapiMetaData(type="function", name="Tamanho do arquivo", nameSynonymous={"fileGetSize"}, description="Função para obter o tamanho do arquivo", params={"Stream do arquivo"})
+	@CronapiMetaData(type="function", name="{{SizeOfFile}}", nameSynonymous={"fileGetSize"}, description="{{FunctionToGetSizeOfFile}}", params={"{{StreamOfFile}}"})
 	protected static final long fileGetSize(FileInputStream fis) throws Exception {
 		return fis.getChannel().size();
 	}
@@ -456,7 +452,7 @@ public class Operations {
 	/**
 	 * Conteudo do diretorio
 	 */
-	@CronapiMetaData(type="function", name="Conteúdo da pasta", nameSynonymous={"contentOfDirectory", "contentOfFolder"}, description="Função para obter o conteúdo da pasta", params={"Pasta"})
+	@CronapiMetaData(type="function", name="{{ContentOfFolder}}", nameSynonymous={"contentOfDirectory", "contentOfFolder"}, description="{{FunctionToGetContentOfFolder}}", params={"{{Folder}}"})
 	protected static final List<String> contentOfDirectory(File dir) throws Exception {
 		List<String> filesList = new ArrayList<String>();
 		String[] files = dir.list();
@@ -471,7 +467,7 @@ public class Operations {
 	/**
 	 * É arquivo?
 	 */
-	@CronapiMetaData(type="function", name="É arquivo?", nameSynonymous={"isFile"}, description="Função verificar se é arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{IsFile}}", nameSynonymous={"isFile"}, description="{{FunctionToCheckIsFile}}", params={"{{PathOfFile}}"})
 	protected static final boolean isFile(String path) {
 		File file = new File(path);
 		return isFile(file);
@@ -480,7 +476,7 @@ public class Operations {
 	/**
 	 * É arquivo?
 	 */
-	@CronapiMetaData(type="function", name="É arquivo?", nameSynonymous={"isFile"}, description="Função verificar se é arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{IsFile}}", nameSynonymous={"isFile"}, description="{{FunctionToCheckIsFile}}", params={"{{File}}"})
 	protected static final boolean isFile(File file) {
 		return file.isFile();
 	}
@@ -488,7 +484,7 @@ public class Operations {
 	/**
 	 * É diretorio?
 	 */
-	@CronapiMetaData(type="function", name="É pasta?", nameSynonymous={"isDirectory", "isFolder"}, description="Função verificar se é pasta", params={"Caminho da pasta"})
+	@CronapiMetaData(type="function", name="{{IsFolder}}", nameSynonymous={"isDirectory", "isFolder"}, description="{{FunctionToCheckIsFolder}}", params={"{{PathOfFolder}}"})
 	protected static final boolean isDirectory(String path) {
 		File dir = new File(path);
 		return isDirectory(dir);
@@ -497,7 +493,7 @@ public class Operations {
 	/**
 	 * É diretorio?
 	 */
-	@CronapiMetaData(type="function", name="É pasta?", nameSynonymous={"isDirectory", "isFolder"}, description="Função verificar se é pasta", params={"Pasta"})
+	@CronapiMetaData(type="function", name="{{IsFolder}}", nameSynonymous={"isDirectory", "isFolder"}, description="{{FunctionToCheckIsFolder}}", params={"{{Folder}}"})
 	protected static final boolean isDirectory(File dir) {
 		return dir.isDirectory();
 	}
@@ -505,7 +501,7 @@ public class Operations {
 	/**
 	 * Obter Total de Linhas do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Total linhas arquivo", nameSynonymous={"fileGetNumberOfLines"}, description="Função para obter o total de linhas do arquivo", params={"Caminho do arquivo"})
+	@CronapiMetaData(type="function", name="{{TotalLinesFile}}", nameSynonymous={"fileGetNumberOfLines"}, description="{{FunctionToGetTotalLinesFile}}", params={"{{PathOfFile}}"})
 	protected static final int fileGetNumberOfLines(String path) throws Exception {
 		File f = new File(path);
 		return fileGetNumberOfLines(f);
@@ -514,7 +510,7 @@ public class Operations {
 	/**
 	 * Obter Total de Linhas do Arquivo
 	 */
-	@CronapiMetaData(type="function", name="Total linhas arquivo", nameSynonymous={"fileGetNumberOfLines"}, description="Função para obter o total de linhas do arquivo", params={"Arquivo"})
+	@CronapiMetaData(type="function", name="{{TotalLinesFile}}", nameSynonymous={"fileGetNumberOfLines"}, description="{{FunctionToGetTotalLinesFile}}", params={"{{File}}"})
 	protected static final int fileGetNumberOfLines(File f) throws Exception {
 		FileInputStream in = new FileInputStream(f);
 		BufferedReader dis = new BufferedReader(new InputStreamReader(in));
@@ -528,7 +524,7 @@ public class Operations {
 	/**
 	 *  Download Arquivo a partir de URL
 	 */
-	@CronapiMetaData(type="function", name="Download arquivo a partir de URL", nameSynonymous={"downloadFileFromUrl"}, description="Função para fazer download de arquivo a partir de URL", params={"Endereço url", "Caminho da pasta para salvar o arquivo", "Nome do arquivo", "Extensão do arquivo"})
+	@CronapiMetaData(type="function", name="{{DownloadFileFromUrl}}", nameSynonymous={"downloadFileFromUrl"}, description="{{FunctionToDownloadFileFromUrl}}", params={"{{URLAddress}}", "{{FolderPathToSaveFile}}", "{{NameOfFile}}", "{{FileExtension}}"})
 	public static final boolean downloadFileFromUrl(String urlAddress, String pathLocal, String name, String extension) {
 		try {
 			java.net.URL url = new java.net.URL(urlAddress);
@@ -554,7 +550,7 @@ public class Operations {
 	/**
 	 *  Ler Todo Arquivo Definindo Charset	
 	 */
-	@CronapiMetaData(type="function", name="Ler todo arquivo definindo Charset", nameSynonymous={"fileReadContentWithCharset"}, description="Função para ler todo arquivo definindo Charset", params={"Stream do arquivo", "Charset"})
+	@CronapiMetaData(type="function", name="{{ReadAllFileWithCharset}}", nameSynonymous={"fileReadContentWithCharset"}, description="{{FunctionToReadAllFileWithCharset}}", params={"{{StreamOfFile}}", "{{Charset}}"})
 	protected static final StringBuilder fileReadContentWithCharset(FileInputStream fstream, String charset) throws Exception {
 		StringBuilder r = new StringBuilder();
 
