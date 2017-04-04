@@ -85,11 +85,13 @@ public class Operations {
 			"convertToAscii" }, description = "{{functionToConvertToAscii}}", params = { "{{content}}" })
 	protected static final Var chrToAscii(Var value) throws Exception {
 		Var ascii = new Var(null);
-		if (value.getObjectAsString() != null && value.getObjectAsString().length() > 0) {
+		if (value.getObjectAsString() != null && value.getObjectAsString().isEmpty()) {
 			ascii = new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
 		}
 		return ascii;
 	}
+	
+	
 
 	@CronapiMetaData(type = "function", name = "{{convertHexadecimalToInt}}", nameSynonymous = { "hexToInt",
 			"hexadecimalToInteger" }, description = "{{functionToConvertHexadecimalToInt}}", params = { "{{content}}" })
@@ -99,7 +101,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameSynonymous = {
 			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = { "{{content}}" })
-	protected final Var arrayToList(Var arrayVar) throws Exception {
+	protected static final Var arrayToList(Var arrayVar) throws Exception {
 		Object array = arrayVar.getObject();
 		if (array instanceof byte[]) {
 			byte[] bytes = (byte[]) array;
@@ -115,4 +117,20 @@ public class Operations {
 		}
 		return new Var(l);
 	}
+
+	@CronapiMetaData(type = "function", name = "{{convertBase64ToBinary}}", nameSynonymous = {
+			"base64ToBinary" }, description = "{{functionToConvertBase64ToBinary}}", params = { "{{content}}" })
+	protected static final Var base64ToBinary(Var base64) throws Exception {
+		Var binary = new Var(null);
+		byte[] temp = Functions.getFromBase64(base64.getObjectAsString());
+		if (temp != null)
+			binary = new Var(temp);
+		return binary;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertStringToJs}}", nameSynonymous = {
+			"stringToJs" }, description = "{{functionToConvertStringToJs}}", params = { "{{content}}" })
+	protected static final Var stringToJs(Var val) throws Exception {
+    return new Var(Functions.stringToJs(val.getObjectAsString()));
+  }
 }

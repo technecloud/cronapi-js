@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
-
-import com.sun.scenario.Settings;
+import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Classe que representa ...
@@ -191,13 +192,96 @@ public class Functions {
     return r;
   }
   
-  public static boolean stringToBoolean(String str) {
+  public static boolean stringToBoolean(final String str) {
     if (str == null)
       return false;
-    str = str.trim();
-    return str.equals("1") || str.equalsIgnoreCase("S") || str.equalsIgnoreCase("V") || str.equalsIgnoreCase("T") || str.equalsIgnoreCase("Y")
-        || str.equalsIgnoreCase("true") || str.equalsIgnoreCase("verdade") || str.equalsIgnoreCase("verdadeiro") || str.equalsIgnoreCase("yes")
-        || str.equalsIgnoreCase("sim") || str.equalsIgnoreCase("on");
+    return Boolean.valueOf(str.trim());
+  }
+  
+  public static byte[] getFromBase64(String base64) {
+    byte[] bytes = null;
+    if (base64 != null && !base64.equals("")) {
+      bytes = Base64.getDecoder().decode(base64); 
+    }
+    return bytes;
+  }
+  
+  public static String stringToJs(String string) {
+    return stringToJs(string, false);
+  }
+
+  public static String stringToJs(String string, boolean onlyOneLine) {
+    return stringToJs(string, onlyOneLine, false);
+  }
+
+  public static String stringToJs(String string, boolean onlyOneLine, boolean preventCrossSiteScripting) {
+    if (string != null) {
+      StringBuffer sb = new StringBuffer(string.length());
+      int len = string.length();
+      char c;
+      for (int i = 0; i < len; i++) {
+        c = string.charAt(i);
+        if (c == '\\') {
+          sb.append("\\\\");
+        } else if (c == '\'') {
+          sb.append("\\'");
+        } else if (c == '"') {
+          sb.append("\\\"");
+        } else if (c == '\n') {
+          if (!onlyOneLine)
+            sb.append("\\n");
+          else
+            sb.append(" ");
+        } else if (c == '\r') {
+        } else {
+          sb.append(c);
+        }
+      }
+      if (preventCrossSiteScripting) {
+        return splitTags(sb.toString());
+      }
+      return sb.toString().replaceAll("<script", "<scr\'+\'ipt").replaceAll("</script", "</scr\'+\'ipt");
+    } else {
+      return "";
+    }
+  }
+  
+  public static String splitTags(String value) {
+    StringBuilder result = new StringBuilder();
+    Pattern pattern = Pattern.compile("<([^<>\\s\\/]+)[^<>]*>|<\\/([^<>\\s\\/]+)");
+    Matcher matcher = pattern.matcher(value);
+    int lastIndex = 0;
+    while (matcher.find()) {
+      String tagName1 = matcher.group(1);
+      String tagName;
+      int start;
+      int end;
+      if (tagName1 != null) {
+        start = matcher.start(1);
+        end = matcher.end(1);
+        tagName = tagName1;
+      } else {
+        start = matcher.start(2);
+        end = matcher.end(2);
+        tagName = matcher.group(2);
+      }
+      result.append(value.substring(lastIndex, start));
+      result.append(splitValue(tagName, "\'+\'"));
+      lastIndex = end;
+    }
+    result.append(value.substring(lastIndex));
+    return result.toString();
+  }
+  
+  public static String splitValue(String value, String separator) {
+    if (value == null) {
+      return null;
+    }
+    if (value.length() <= 1) {
+      return value;
+    }
+    int splitIndex = (int) Math.floor(((double) value.length() / 2));
+    return value.substring(0, splitIndex) + separator + value.substring(splitIndex, value.length());
   }
 
 
