@@ -9,10 +9,10 @@
 	this.cronapi.conversion = {};
 	/**
 	 * @type function
-	 * @name Texto para texto binário
+	 * @name {{textToTextBinary}}
 	 * @nameSynonymous asciiToBinary
-	 * @description Função para converter texto para texto binário
-	 * @param {string} astring
+	 * @description {{functionToConvertTextInTextBinary}}
+	 * @param astring {{contentInAscii}}
 	 */
 	this.cronapi.conversion.asciiToBinary = function(astring) {
 		var binary = "";
@@ -28,17 +28,14 @@
 	};
 	/**
 	 * @type function
-	 * @name {{sdsds}}  Para lógico
+	 * @name {{toLogic}}
 	 * @nameSynonymous toBoolean
-	 * @description Função para converter para lógico
-	 * @description_en Função para converter para lógico
-	 
-	 * @param {string} value
+	 * @description {{functionConvertToLogic}}
+	 * @param value {{content}}
 	 */
 	this.cronapi.conversion.toBoolean = function(value) {
-    return parseBoolean(value);
-  }
-
+		return parseBoolean(value);
+	}
 	/**
 	 * @category XML
 	 * @categorySynonymous XML|xml
@@ -50,7 +47,7 @@
 	 * @name Obtém valor do elemento
 	 * @nameSynonymous XMLGetElementValue
 	 * @description Função que retorna o valor de um elemento
-	 * @param {string} node - Elemento passado para obter-se o valor;
+	 * @param node Elemento passado para obter-se o valor;
 	 */
 	this.cronapi.xml.XMLGetElementValue = function(node) {
 		if (node.firstChild)
@@ -64,8 +61,8 @@
 	 * @name Obtém o primeiro filho do elemento
 	 * @nameSynonymous XMLGetChildElement
 	 * @description Função para retornar o nó
-	 * @param {Object} node - Elemento passado para obter-se o valor;
-	 * @param {string} childName - Filho a ser obtido do elemento;
+	 * @param node Elemento passado para obter-se o valor;
+	 * @param childName Filho a ser obtido do elemento;
 	 */
 	this.cronapi.xml.XMLGetChildElement = function(node, childName) {
 		var c = node.getElementsByTagName(childName);
@@ -78,7 +75,7 @@
 	 * @name Obtém a raiz do elemento
 	 * @nameSynonymous XMLGetRoot
 	 * @description Função que retorna o elemento raiz a partir de um elemento
-	 * @param {Object} element - Elemento passado para obter-se a raiz
+	 * @param element Elemento passado para obter-se a raiz
 	 */
 	this.cronapi.xml.XMLGetRoot = function(element) {
 		if (element)
@@ -177,13 +174,14 @@
 				|| value == "VERDADEIRO" || value == "YES" || value == "SIM";
 	};
 
-	var removeAccents = function (value) {
+	var removeAccents = function(value) {
 		withAccents = 'áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ';
 		withoutAccents = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
 		newValue = '';
 		for (i = 0; i < value.length; i++) {
 			if (withAccents.search(value.substr(i, 1)) >= 0) {
-				newValue += withoutAccents.substr(withAccents.search(value.substr(i, 1)), 1);
+				newValue += withoutAccents.substr(withAccents.search(value
+						.substr(i, 1)), 1);
 			} else {
 				newValue += value.substr(i, 1);
 			}
