@@ -18,12 +18,12 @@ import cronapi.i18n.Messages;
 @CronapiMetaData(category="Conversion", categorySynonymous={"Conversão", "Convert"})
 public class Operations {
  
-  @CronapiMetaData(type="function", name="{{ToLogic}}", nameSynonymous={"toBoolean"}, description="{{FunctionConvertToLogic}}", params={"{{Content}}"})
+  @CronapiMetaData(type="function", name="{{toLogic}}", nameSynonymous={"toBoolean"}, description="{{functionConvertToLogic}}", params={"{{content}}"})
   protected final Var toBoolean(Var var) throws Exception {
     return new Var(Functions.stringToBoolean(var.getObjectAsString()));
   }
   
-  @CronapiMetaData(type="function", name="{{Base64ToText}}", nameSynonymous={"base64ToString"}, description="{{FunctionConvertBase64ToText}}", params={"{{ContentInBase64}}"})
+  @CronapiMetaData(type="function", name="{{base64ToText}}", nameSynonymous={"base64ToString"}, description="{{functionConvertBase64ToText}}", params={"{{contentInBase64}}"})
   protected static final Var base64ToString(Var base64Var) throws Exception {
     Var value = new Var();
     String base64 = base64Var.getObjectAsString();
@@ -33,7 +33,7 @@ public class Operations {
     return value;
   }
   
-  @CronapiMetaData(type="function", name="{{TextToTextBinary}}", nameSynonymous={"asciiToBinary"}, description="{{FunctionToConvertTextInTextBinary}}", params={"{{ContentInAscii}}"})
+  @CronapiMetaData(type="function", name="{{textToTextBinary}}", nameSynonymous={"asciiToBinary"}, description="{{functionToConvertTextInTextBinary}}", params={"{{contentInAscii}}"})
   protected static final Var asciiToBinary(Var asciiVar) throws Exception {
     StringBuilder binary = new StringBuilder();
     String ascii = asciiVar.getObjectAsString();
@@ -48,13 +48,13 @@ public class Operations {
     return new Var(binary.toString());
   }
   
-  @CronapiMetaData(type="function", name="{{TextBinaryToText}}", nameSynonymous={"binaryToAscii"}, description="{{FunctionToConvertTextBinaryToText}}", params={"{{ContentInTextBinary}}"})
+  @CronapiMetaData(type="function", name="{{textBinaryToText}}", nameSynonymous={"binaryToAscii"}, description="{{functionToConvertTextBinaryToText}}", params={"{{contentInTextBinary}}"})
   protected static final Var binaryToAscii(Var binaryVar) throws Exception {
     StringBuilder ascii = new StringBuilder();
     String binary = binaryVar.getObjectAsString();
     if (binary.length() > 0) {
       if ((binary.length()) % 8 != 0) {
-        throw new Exception(Messages.getString("ParameterNotBinary"));
+        throw new Exception(Messages.getString("parameterNotBinary"));
       }
       for (int i = 0; i < binary.length(); i+=8) {
          String temp = binary.substring(i, i+8);
@@ -68,7 +68,7 @@ public class Operations {
     return new Var(ascii.toString());
   }
   
-  @CronapiMetaData(type="function", name="{{ConvertToBytes}}", nameSynonymous={"toBytes"}, description="{{FunctionToConvertTextBinaryToText}}", params={"{{ContentInTextBinary}}"})
+  @CronapiMetaData(type="function", name="{{convertToBytes}}", nameSynonymous={"toBytes"}, description="{{functionToConvertTextBinaryToText}}", params={"{{contentInTextBinary}}"})
   protected final Var toBytes(Var var) throws Exception {
     return new Var(var.getObjectAsString().getBytes());
   }
