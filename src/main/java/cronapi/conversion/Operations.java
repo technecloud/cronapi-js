@@ -1,6 +1,8 @@
 package cronapi.conversion;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import cronapi.CronapiMetaData;
 import cronapi.Functions;
@@ -75,17 +77,42 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameSynonymous = {
 			"toBytes" }, description = "{{functionToConvertTextBinaryToText}}", params = { "{{contentInTextBinary}}" })
-	protected final Var toBytes(Var var) throws Exception {
+	protected static final Var toBytes(Var var) throws Exception {
 		return new Var(var.getObjectAsString().getBytes());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{convertToAscii}}", nameSynonymous = {
-			"chrToAscii", "convertToAscii" }, description = "{{functionToConvertToAscii}}", params = { "{{content}}" })
-	protected final Var chrToAscii(Var value) throws Exception {
+	@CronapiMetaData(type = "function", name = "{{convertToAscii}}", nameSynonymous = { "chrToAscii",
+			"convertToAscii" }, description = "{{functionToConvertToAscii}}", params = { "{{content}}" })
+	protected static final Var chrToAscii(Var value) throws Exception {
 		Var ascii = new Var(null);
 		if (value.getObjectAsString() != null && value.getObjectAsString().length() > 0) {
 			ascii = new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
 		}
 		return ascii;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertHexadecimalToInt}}", nameSynonymous = { "hexToInt",
+			"hexadecimalToInteger" }, description = "{{functionToConvertHexadecimalToInt}}", params = { "{{content}}" })
+	protected static final Var hexToInt(Var value) {
+		return new Var(Integer.valueOf(value.getObjectAsString(), 16).intValue());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameSynonymous = {
+			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = { "{{content}}" })
+	protected final Var arrayToList(Var arrayVar) throws Exception {
+		Object array = arrayVar.getObject();
+		if (array instanceof byte[]) {
+			byte[] bytes = (byte[]) array;
+			List l = new ArrayList(bytes.length);
+			for (int i = 0; i < bytes.length; i++) {
+				l.add(bytes[i]);
+			}
+			return new Var(l);
+		}
+		List l = new ArrayList(java.lang.reflect.Array.getLength(array));
+		for (int i = 0; i < java.lang.reflect.Array.getLength(array); i++) {
+			l.add(java.lang.reflect.Array.get(array, i));
+		}
+		return new Var(l);
 	}
 }
