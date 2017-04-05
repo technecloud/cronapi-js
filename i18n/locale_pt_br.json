@@ -4,5 +4,12 @@
 	"contentInAscii": "Conteúdo em ascii",
 	"toLogic": "Para lógico",
 	"functionConvertToLogic": "Função para converter para lógico",
-	"content": "Conteúdo"
+	"convertToBytes": "Conversão para bytes",
+	"functionToConvertTextBinaryToText": "Função para converter texto binário para texto",
+	"contentInTextBinary": "Conteúdo em texto binário",
+	"convertToAscii": "Converter char para código ASCII",
+	"functionToConvertToAscii": "Função para converter char para código ASCII",
+	"content": "Conteúdo",
+	"convertStringToJs": "Converter texto para texto escapado javascript",
+	"functionToConvertStringToJs": "Função para converter texto para texto escapado javascript"
 }

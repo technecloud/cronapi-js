@@ -2,17 +2,20 @@
 	'use strict';
 
 	this.cronapi = {};
+
 	/**
-	 * @category Conversion
-	 * @categorySynonymous Conversão|Convert
+	 * @category CONVERSION
+	 * @categoryTags Conversão|Convert
 	 */
 	this.cronapi.conversion = {};
+
 	/**
 	 * @type function
 	 * @name {{textToTextBinary}}
-	 * @nameSynonymous asciiToBinary
+	 * @nameTags asciiToBinary
 	 * @description {{functionToConvertTextInTextBinary}}
-	 * @param astring {{contentInAscii}}
+	 * @param {String} astring {{contentInAscii}}
+	 * @returns {String}
 	 */
 	this.cronapi.conversion.asciiToBinary = function(astring) {
 		var binary = "";
@@ -26,28 +29,72 @@
 		}
 		return binary;
 	};
+
 	/**
 	 * @type function
 	 * @name {{toLogic}}
-	 * @nameSynonymous toBoolean
+	 * @nameTags toBoolean
 	 * @description {{functionConvertToLogic}}
-	 * @param value {{content}}
+	 * @param {String} value {{content}}
+	 * @returns {Boolean}
 	 */
 	this.cronapi.conversion.toBoolean = function(value) {
 		return parseBoolean(value);
 	}
+
+	/**
+	 * @type function
+	 * @name {{convertToBytes}}
+	 * @nameTags toBytes
+	 * @description {{functionToConvertTextBinaryToText}}
+	 * @param {Object} value {{contentInTextBinary}}
+	 * @returns {String}
+	 */
+	this.cronapi.conversion.toBytes = function(obj) {
+		return obj ? obj.toString() : "";
+	}
+
+	/**
+	 * @type function
+	 * @name {{convertToAscii}}
+	 * @nameTags chrToAscii, convertToAscii
+	 * @description {{functionToConvertToAscii}}
+	 * @param {String} value {{content}}
+	 * @returns {String}
+	 */
+	this.cronapi.conversion.chrToAscii = function(achar) {
+		if (isNullable(achar)) {
+			return null;
+		} else {
+			return (achar.charCodeAt(0));
+		}
+	}
+	
+	/**
+	 * @type function
+	 * @name {{convertStringToJs}}
+	 * @nameTags stringToJs
+	 * @description {{functionToConvertStringToJs}}
+	 * @param {String} value {{content}}
+	 * @returns {String}
+	 */
+	this.cronapi.conversion.stringToJs = function(value) {
+    return stringToJs(value);
+  }
+
 	/**
 	 * @category XML
-	 * @categorySynonymous XML|xml
+	 * @categoryTags XML|xml
 	 */
 	this.cronapi.xml = {};
 
 	/**
 	 * @type function
 	 * @name Obtém valor do elemento
-	 * @nameSynonymous XMLGetElementValue
+	 * @nameTags XMLGetElementValue
 	 * @description Função que retorna o valor de um elemento
-	 * @param node Elemento passado para obter-se o valor;
+	 * @param {Object} node Elemento passado para obter-se o valor;
+	 * @returns {String}
 	 */
 	this.cronapi.xml.XMLGetElementValue = function(node) {
 		if (node.firstChild)
@@ -59,10 +106,11 @@
 	/**
 	 * @type function
 	 * @name Obtém o primeiro filho do elemento
-	 * @nameSynonymous XMLGetChildElement
+	 * @nameTags XMLGetChildElement
 	 * @description Função para retornar o nó
-	 * @param node Elemento passado para obter-se o valor;
-	 * @param childName Filho a ser obtido do elemento;
+	 * @param {Object} node Elemento passado para obter-se o valor;
+	 * @param {String} childName Filho a ser obtido do elemento;
+	 * @returns {String}
 	 */
 	this.cronapi.xml.XMLGetChildElement = function(node, childName) {
 		var c = node.getElementsByTagName(childName);
@@ -73,9 +121,10 @@
 	/**
 	 * @type function
 	 * @name Obtém a raiz do elemento
-	 * @nameSynonymous XMLGetRoot
+	 * @nameTags XMLGetRoot
 	 * @description Função que retorna o elemento raiz a partir de um elemento
-	 * @param element Elemento passado para obter-se a raiz
+	 * @param {Object} element Elemento passado para obter-se a raiz
+	 * @returns {Object}
 	 */
 	this.cronapi.xml.XMLGetRoot = function(element) {
 		if (element)
@@ -85,10 +134,11 @@
 	/**
 	 * @type function
 	 * @name Obtém o atributo do elemento
-	 * @nameSynonymous XMLGetAttribute
+	 * @nameTags XMLGetAttribute
 	 * @description Função que retorna o elemento raiz a partir de um elemento
 	 * @param {Object} element - Elemento passado para obter-se a raiz
 	 * @param {Object} attribute - Atributo a ser obtido
+	 * @returns {String}
 	 */
 	this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
 		return node.getAttribute(attribute);
@@ -97,9 +147,10 @@
 	/**
 	 * @type function
 	 * @name Cria Document
-	 * @nameSynonymous XMLOpen
+	 * @nameTags XMLOpen
 	 * @description Função que cria um objeto Document a partir de uma String
 	 * @param {Object} XMLText - Elemento passado para obter-se a raiz
+	 * @returns {Object}
 	 */
 	this.cronapi.xml.XMLOpen = function(XMLText) {
 		var doc = null;
@@ -118,10 +169,11 @@
 	/**
 	 * @type function
 	 * @name Busca filhos do elemento
-	 * @nameSynonymous XMLGetChildrenElement
+	 * @nameTags XMLGetChildrenElement
 	 * @description Função que retorna os filhos do tipo de um determinado elemento
 	 * @param {Object} node - Elemento passado para buscar os filhos
 	 * @param {Object} childName - Elemento do tipo a ser buscado
+	 * @returns {Object}
 	 */
 	this.cronapi.xml.XMLGetChildrenElement = function(node, childName) {
 		if (childName) {
@@ -134,9 +186,10 @@
 	/**
 	 * @type function
 	 * @name Retorna o elemento pai
-	 * @nameSynonymous XMLGetParentElement
+	 * @nameTags XMLGetParentElement
 	 * @description Função que retorna o pai de um elemento
 	 * @param {Object} node - Elemento a ser buscado o pai
+	 * @returns {Object}
 	 */
 	this.cronapi.xml.XMLGetParentElement = function XMLGetParentElement(node) {
 		return node.parentNode;
@@ -145,9 +198,10 @@
 	/**
 	 * @type function
 	 * @name Retorna a tag do elemento
-	 * @nameSynonymous XMLGetElementTagName
+	 * @nameTags XMLGetElementTagName
 	 * @description Função que retorna o nome da tag do elemento
 	 * @param {Object} node - Elemento a ser buscado a tag
+	 * @returns {String}
 	 */
 	this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
 		return node.tagName;
@@ -323,7 +377,7 @@
 	}
 
 	var convertNonUnicodeChars = function(value) {
-		if (IE && !isNullable(value) && value.length > 0) {
+		if (!isNullable(value) && value.length > 0) {
 			return value.replace(/\x80/g, String.fromCharCode(8364));
 		}
 		return value;

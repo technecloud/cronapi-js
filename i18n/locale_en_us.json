@@ -1,8 +1,15 @@
 {
-	"TextToTextBinary": "Text for binary text",
-	"FunctionToConvertTextInTextBinary": "Function to convert text to binary text",
-	"ContentInAscii": "Ascii content",
-	"ToLogic": "For logic",
-	"FunctionConvertToLogic": "Function to convert to logical",
-	"Content": "Content"
+	"textToTextBinary": "Text for binary text",
+	"functionToConvertTextInTextBinary": "Function to convert text to binary text",
+	"contentInAscii": "Ascii content",
+	"toLogic": "For logic",
+	"functionConvertToLogic": "Function to convert to logical",
+	"convertToBytes": "Conversion to bytes",
+	"functionToConvertTextBinaryToText": "Function to convert binary text to text",
+	"contentInTextBinary": "Binary text content",
+	"convertToAscii": "Convert char to ASCII code",
+	"functionToConvertToAscii": "Function to convert char to ASCII code",
+	"content": "Content",
+	"convertStringToJs": "Convert javascript text to escaped text",
+	"functionToConvertStringToJs": "Function to convert text to javascript escaping text"
 }
