@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 
 import cronapi.CronapiMetaData;
 import cronapi.Var;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa ...
@@ -14,7 +16,7 @@ import cronapi.Var;
  * @since 2017-03-31
  *
  */
-@CronapiMetaData(category = "Util", categorySynonymous = { "Util", "Operations" })
+@CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
 
 	/**
@@ -24,8 +26,8 @@ public class Operations {
 	}
 
 	// Copiar para área de transferência	
-	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", categorySynonymous = "copyTextToTransferArea", description = "{{copyTextToTransferAreaDescription}}", params = {
-			"{{copyTextToTransferAreaParam0}}" })
+	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = "copyTextToTransferArea", description = "{{copyTextToTransferAreaDescription}}", params = {
+			"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
 	public static final void copyTextToTransferArea(Var strVar) throws Exception {
 		String str = strVar.getObjectAsString();
 		java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -33,8 +35,8 @@ public class Operations {
 		clipboard.setContents(selection, null);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{shellExecuteName}}", categorySynonymous = "shellExecute ", description = "{{shellExecuteDescription}}", params = {
-			"{{shellExecuteParam0}}", "{{shellExecuteParam1}}" })
+	@CronapiMetaData(type = "function", name = "{{shellExecuteName}}", nameTags = "shellExecute ", description = "{{shellExecuteDescription}}", params = {
+			"{{shellExecuteParam0}}", "{{shellExecuteParam1}}" }, paramsType = { ObjectType.STRING, ObjectType.BOOLEAN }, returnType = ObjectType.STRING)
 	public static final Var shellExecute(Var cmdline, Var waitFor) throws Exception {
 		Boolean waitForCasted = (Boolean) waitFor.getObject();
 		Process p = Runtime.getRuntime().exec(cmdline.getObjectAsString());
@@ -52,14 +54,14 @@ public class Operations {
 	}
 
 	// Retorna um numério aleatório 
-	@CronapiMetaData(type = "function", name = "{{randomName}}", categorySynonymous = "random", description = "{{randomDescription}}", params = {
-			"{{randomParam0}}" })
+	@CronapiMetaData(type = "function", name = "{{randomName}}", nameTags = "random", description = "{{randomDescription}}", params = {
+			"{{randomParam0}}" }, paramsType = { ObjectType.FLOAT }, returnType = ObjectType.FLOAT)
 	public static final Var random(Var maxValue) throws Exception {
 		return new Var(Math.round(Math.random() * maxValue.getObjectAsDouble()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{compressToZipName}}", categorySynonymous = "compressToZip", description = "{{compressToZipDescription}}", params = {
-			"{{compressToZipParam0}}" })
+	@CronapiMetaData(type = "function", name = "{{compressToZipName}}", nameTags = "compressToZip", description = "{{compressToZipDescription}}", params = {
+			"{{compressToZipParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var compressToZip(Var value) throws Exception {
 		java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
 		java.util.zip.DeflaterOutputStream compresser = new java.util.zip.DeflaterOutputStream(output);
@@ -69,8 +71,8 @@ public class Operations {
 		return new Var(output.toByteArray());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{decodeZipFromByteName}}", categorySynonymous = "decodeZipFromByte", description = "{{decodeZipFromByteDescription}}", params = {
-			"{{decodeZipFromByteParam0}}" })
+	@CronapiMetaData(type = "function", name = "{{decodeZipFromByteName}}", nameTags = "decodeZipFromByte", description = "{{decodeZipFromByteDescription}}", params = {
+			"{{decodeZipFromByteParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var decodeZipFromByte(Var value) throws Exception {
 		java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream((byte[]) value.getObject());
 		java.util.zip.InflaterInputStream decompresser = new java.util.zip.InflaterInputStream(input);
@@ -85,6 +87,5 @@ public class Operations {
 		input.close();
 		return new Var(out.toByteArray());
 	}
-
 
 }
