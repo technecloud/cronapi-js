@@ -111,6 +111,19 @@
     }
     return null;
   }
+  
+  /**
+	 * @type function
+	 * @name {{convertIntToHex}}
+	 * @nameTags intToHex
+	 * @description {{functionToConvertIntToHex}}
+	 * @param {String} value {{content}}
+	 * @returns {String}
+	 */
+  this.cronapi.conversion.intToHex = function(value) {
+    return Number(value).toString(16).toUpperCase();
+  }
+  
 
 	/**
 	 * @category XML
