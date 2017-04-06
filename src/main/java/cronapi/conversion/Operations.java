@@ -1,7 +1,9 @@
 package cronapi.conversion;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
@@ -45,17 +47,15 @@ public class Operations {
 					"{{contentInAscii}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var asciiToBinary(Var asciiVar) throws Exception {
 		byte[] bytes = asciiVar.getObjectAsString().getBytes();
-    StringBuilder binary = new StringBuilder();
-    for (byte b : bytes)
-    {
-       int val = b;
-       for (int i = 0; i < 8; i++)
-       {
-          binary.append((val & 128) == 0 ? 0 : 1);
-          val <<= 1;
-       }
-    }
-    return new Var(binary.toString());
+		StringBuilder binary = new StringBuilder();
+		for (byte b : bytes) {
+			int val = b;
+			for (int i = 0; i < 8; i++) {
+				binary.append((val & 128) == 0 ? 0 : 1);
+				val <<= 1;
+			}
+		}
+		return new Var(binary.toString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{textBinaryToText}}", nameTags = {
@@ -63,19 +63,19 @@ public class Operations {
 					"{{contentInTextBinary}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var binaryToAscii(Var binaryVar) throws Exception {
 		StringBuilder sb = new StringBuilder();
-    char[] chars = binaryVar.getObjectAsString().replaceAll("\\s", "").toCharArray();
-    for(int j = 0; j < chars.length; j += 8) {
-      int idx = 0;
-      int sum = 0;
-      for(int i = 7; i >= 0; i--) {
-        if(chars[i + j] == '1') {
-          sum += 1 << idx;
-        }
-        idx++;
-      }
-      sb.append(Character.toChars(sum));
-    }
-    return new Var(sb.toString());
+		char[] chars = binaryVar.getObjectAsString().replaceAll("\\s", "").toCharArray();
+		for (int j = 0; j < chars.length; j += 8) {
+			int idx = 0;
+			int sum = 0;
+			for (int i = 7; i >= 0; i--) {
+				if (chars[i + j] == '1') {
+					sum += 1 << idx;
+				}
+				idx++;
+			}
+			sb.append(Character.toChars(sum));
+		}
+		return new Var(sb.toString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameTags = {
@@ -127,5 +127,29 @@ public class Operations {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var stringToJs(Var val) throws Exception {
 		return new Var(Utils.stringToJs(val.getObjectAsString()));
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertStringToDate}}", nameTags = {
+			"stringToDate" }, description = "{{functionToConvertStringToDate}}", params = {
+					"{{content}}, {{mask}}" }, paramsType = { ObjectType.STRING,
+							ObjectType.STRING }, returnType = ObjectType.DATETIME)
+	protected static final Var stringToDate(Var val, Var mask) throws Exception {
+		String defaultMask = "dd/MM/yyyy";
+		String maskToUse = (mask.getObjectAsString() != null && !mask.getObjectAsString().isEmpty())
+				? mask.getObjectAsString() : defaultMask;
+		SimpleDateFormat formato = new SimpleDateFormat(maskToUse);
+		Date data = formato.parse(val.getObjectAsString());
+		return new Var(data);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {
+			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = {
+					"{{content}}, {{minSize}}" }, paramsType = { ObjectType.INTEGER,
+							ObjectType.INTEGER }, returnType = ObjectType.STRING)
+	protected final Var intToHex(Var value, Var minSize) throws Exception {
+		String hex = Integer.toHexString(value.getObjectAsInt());
+		while (hex.length() < minSize.getObjectAsInt())
+			hex = "0" + hex;
+		return new Var(hex);
 	}
 }
