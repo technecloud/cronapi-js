@@ -11,5 +11,7 @@
 	"functionToConvertToAscii": "Function to convert char to ASCII code",
 	"content": "Content",
 	"convertStringToJs": "Convert javascript text to escaped text",
-	"functionToConvertStringToJs": "Function to convert text to javascript escaping text"
+	"functionToConvertStringToJs": "Function to convert text to javascript escaping text",
+	"convertStringToDate": "Convert text to data",
+  "functionToConvertStringToDate": "Function to convert text to data"
 }

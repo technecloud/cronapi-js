@@ -81,6 +81,36 @@
 	this.cronapi.conversion.stringToJs = function(value) {
     return stringToJs(value);
   }
+  
+  /**
+	 * @type function
+	 * @name {{convertStringToDate}}
+	 * @nameTags stringToDate
+	 * @description {{functionToConvertStringToDate}}
+	 * @param {String} value {{content}}
+	 * @returns {Date}
+	 */
+  this.cronapi.conversion.stringToDate = function(value) {
+    var pattern = /^\s*(\d+)[\/\.-](\d+)[\/\.-](\d+)(\s(\d+):(\d+):(\d+))?\s*$/;
+    if (value) {
+      if (value instanceof Date)
+        return value;
+      else if (pattern.test(value)) { 
+        var splited = pattern.exec(value);
+        var userLang = (navigator.language || navigator.userLanguage).split("-")[0];
+        
+        if (userLang == "pt" || userLang == "en") {
+          var functionToCall = eval(userLang + "Date");
+          return functionToCall(splited);
+        }
+        else
+          return new Date(value);
+      }
+      else
+        return new Date(value);
+    }
+    return null;
+  }
 
 	/**
 	 * @category XML
@@ -208,6 +238,36 @@
 	};
 
 	//Private variables and functions
+	var ptDate = function(varray) {
+	  var date;
+	  var day = varray[1];
+    var month = varray[2];
+    var year = varray[3];
+    var hour = varray[5];
+    var minute = varray[6];
+    var second = varray[7];
+    if (hour) 
+      date = new Date(year, month-1, day, hour, minute, second);
+    else
+      date = new Date(year, month-1, day, 0, 0, 0);
+    return date;
+	}
+	
+	var enDate = function(varray) {
+	  var date;
+	  var month = varray[1];
+    var day = varray[2];
+    var year = varray[3];
+    var hour = varray[5];
+    var minute = varray[6];
+    var second = varray[7];
+    if (hour) 
+      date = new Date(year, month-1, day, hour, minute, second);
+    else
+      date = new Date(year, month-1, day, 0, 0, 0);
+    return date;
+	}
+	
 	var parseBoolean = function(value) {
 		if (value == null || typeof value == "undefined") {
 			return false;
