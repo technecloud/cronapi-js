@@ -124,6 +124,17 @@
     return Number(value).toString(16).toUpperCase();
   }
   
+  /**
+	 * @type function
+	 * @name {{convertToLong}}
+	 * @nameTags toLong
+	 * @description {{functionToConvertToLong}}
+	 * @param {Object} value {{content}}
+	 * @returns {Long}
+	 */
+  this.cronapi.conversion.toLong = function(value) {
+    return parseInt(value);
+  }
 
 	/**
 	 * @category XML

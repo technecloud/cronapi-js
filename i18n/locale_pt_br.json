@@ -14,7 +14,9 @@
 	"functionToConvertStringToJs": "Função para converter texto para texto escapado javascript",
 	"convertStringToDate": "Converter texto para data",
 	"functionToConvertStringToDate": "Função para converter texto para data",
-	"minSize":"Tamanho mínimo",
-  "convertIntToHex":"Converter inteiro para hexadecimal",
-  "functionToConvertIntToHex":"Função para converter inteiro para hexadecimal"
+	"minSize": "Tamanho mínimo",
+	"convertIntToHex": "Converter inteiro para hexadecimal",
+	"functionToConvertIntToHex": "Função para converter inteiro para hexadecimal",
+	"convertToLong": "Converter para long",
+	"functionToConvertToLong": "Função para converter para long"
 }

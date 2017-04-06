@@ -13,8 +13,10 @@
 	"convertStringToJs": "Convert javascript text to escaped text",
 	"functionToConvertStringToJs": "Function to convert text to javascript escaping text",
 	"convertStringToDate": "Convert text to data",
-  "functionToConvertStringToDate": "Function to convert text to data",
-  "minSize":"Minimum size",
-  "convertIntToHex":"Convert to hexadecimal",
-  "functionToConvertIntToHex":"Function to convert integer to hexadecimal"
+	"functionToConvertStringToDate": "Function to convert text to data",
+	"minSize": "Minimum size",
+	"convertIntToHex": "Convert to hexadecimal",
+	"functionToConvertIntToHex": "Function to convert integer to hexadecimal",
+	"convertToLong": "Convert to long",
+	"functionToConvertToLong": "Function to convert to long"
 }
