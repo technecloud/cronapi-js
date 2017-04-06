@@ -7,13 +7,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
-import cronapi.Functions;
+import cronapi.Utils;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
@@ -38,12 +41,12 @@ public class Operations {
 					"{{pathMustBeCreatedForFolder}}" }, paramsType = {
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	protected static final Var folderCreate(Var path) throws Exception {
-		boolean created = true;
+		boolean success = true;
 		File dir = new File(path.getObjectAsString().trim());
 		if (!dir.exists()) {
-			created = dir.mkdirs();
+			success = dir.mkdirs();
 		}
-		return new Var(created);
+		return new Var(success);
 	}
 
 	/**
@@ -53,7 +56,7 @@ public class Operations {
 			"fileMD5" }, description = "{{functionToReturnMD5OfFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var fileMD5(Var path) throws Exception {
-		return new Var(Functions.MD5AsStringFromFile(new File(path.getObjectAsString().trim())));
+		return new Var(Utils.MD5AsStringFromFile(new File(path.getObjectAsString().trim())));
 	}
 
 	/**
@@ -62,48 +65,9 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{removeFolderFiles}}", nameTags = { "removeFolder",
 			"deleteFolder" }, description = "{{functionToRemoveFolderFiles}}", params = {
 					"{{pathOfFolder}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileRemoveFolderAndChildren(Var path) throws Exception {
+	protected static final Var fileRemoveAllFolder(Var path) throws Exception {
 		File dir = new File(path.getObjectAsString().trim());
-		return new Var(Functions.deleteFolder(dir));
-	}
-
-	/**
-	 * Obter MD5 do Arquivo
-	 */
-	@CronapiMetaData(type = "function", name = "{{getMD5OfFile}}", nameTags = {
-			"getFileMD5" }, description = "{{functionToGetMD5OfFile}}", params = {
-					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
-	protected static final Var getFileMD5(Var fileToGetMD5) throws Exception {
-		java.io.File file = new java.io.File(fileToGetMD5.getObjectAsString().trim());
-		DataInputStream in = null;
-		FileInputStream fstream = null;
-
-		try {
-			java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
-
-			fstream = new java.io.FileInputStream(file);
-			in = new java.io.DataInputStream(fstream);
-			byte[] bin = new byte[254];
-			while (in.available() != 0) {
-				int bytes = in.read(bin);
-				md5.update(bin, 0, bytes);
-			}
-
-			int idx;
-
-			byte[] b = md5.digest();
-			int[] hash = Functions.convertBytes(b);
-			String result = "";
-			for (idx = 0; idx < hash.length; idx++) {
-				result += Functions.fix2Zeros(Integer.toHexString(hash[idx]));
-			}
-			return new Var(result);
-		} finally {
-			if (in != null)
-				in.close();
-			if (fstream != null)
-				fstream.close();
-		}
+		return new Var(Utils.deleteFolder(dir));
 	}
 
 	/**
@@ -135,11 +99,8 @@ public class Operations {
 			"fileCreate" }, description = "{{functionToCreateFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING })
 	protected static final void fileCreate(Var path) throws Exception {
-		File file = new File(path.getObjectAsString().trim());
-		if (!file.exists()) {
-			OutputStream out = new FileOutputStream(file);
-			out.close();
-		}
+		if (!Files.exists(Paths.get(path.getObjectAsString().trim()), LinkOption.NOFOLLOW_LINKS))
+			Files.createFile(Paths.get(path.getObjectAsString().trim()));
 	}
 
 	/**
@@ -149,8 +110,8 @@ public class Operations {
 			"fileRemove" }, description = "{{functionToRemoveFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	protected static final Var fileRemove(Var path) throws Exception {
-		File file = new File(path.getObjectAsString().trim());
-		return new Var(file.delete());
+		Path p = Paths.get(path.getObjectAsString().trim());
+		return new Var(Files.deleteIfExists(p));
 	}
 
 	/**
@@ -160,8 +121,8 @@ public class Operations {
 			"fileExists" }, description = "{{functionToCheckIfExistFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	protected static final Var fileExists(Var path) throws Exception {
-		File file = new File(path.getObjectAsString().trim());
-		return new Var(file.exists());
+		Path p = Paths.get(path.getObjectAsString().trim());
+		return new Var(Files.exists(p, LinkOption.NOFOLLOW_LINKS));
 	}
 
 	/**
@@ -173,7 +134,7 @@ public class Operations {
 	protected static final void fileCopy(Var pathFrom, Var pathTo) throws Exception {
 		File from = new File(pathFrom.getObjectAsString().trim());
 		File to = new File(pathTo.getObjectAsString().trim());
-		Functions.copyFileTo(from, to);
+		Utils.copyFileTo(from, to);
 	}
 
 	/**
@@ -273,13 +234,10 @@ public class Operations {
 					"{{size}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.INTEGER }, returnType = ObjectType.STRING)
 	protected static final Var fileRead(Var input, Var size) throws Exception {
-		byte[] b = new byte[size.getObjectAsInt()];
+		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
-		if (in.available() != 0) {
-			int bytes = in.read(b);
-			return new Var(new String(b, 0, bytes));
-		}
-		return new Var(null);
+		int bytes = in.read(byteSizeToRead);
+		return new Var(new String(byteSizeToRead, 0, bytes));
 	}
 
 	/**
@@ -290,7 +248,7 @@ public class Operations {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	protected static final Var fileReadAll(Var input) throws Exception {
 		FileInputStream in = (FileInputStream) input.getObject();
-		return new Var(Functions.getFileContent(in).toString());
+		return new Var(Utils.getFileContent(in).toString());
 	}
 
 	/**
@@ -300,11 +258,10 @@ public class Operations {
 			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	protected static final Var fileReadLine(Var input) throws Exception {
-		FileInputStream in = (FileInputStream) input.getObject();
-		DataInputStream dis = new DataInputStream(in);
-		String inputLine;
-		if ((inputLine = dis.readLine()) != null)
-			return new Var(inputLine);
+		BufferedReader reader = new BufferedReader(new InputStreamReader((FileInputStream) input.getObject()));
+		String line = reader.readLine();
+		if (line != null)
+			return new Var(line);
 		return new Var(null);
 	}
 
@@ -356,19 +313,12 @@ public class Operations {
 			"fileReadAllToBytes" }, description = "{{functionToReadAllContentFileInBytes}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	protected static final Var fileReadAllToBytes(Var input) throws Exception {
-		FileInputStream fis = (FileInputStream) input.getObject();
-		long length = fis.getChannel().size();
-		byte[] bytes = new byte[(int) length];
-		int offset = 0;
-		int numRead = 0;
-		while (offset < bytes.length && (numRead = fis.read(bytes, offset, bytes.length - offset)) >= 0) {
-			offset += numRead;
-		}
-		if (offset < bytes.length) {
-			throw new IOException("{{couldNotReadContentsFile}}");
-		}
-		fis.close();
-		return new Var(bytes);
+		FileInputStream fin = (FileInputStream) input.getObject();
+		long length = fin.getChannel().size();
+		byte fileContent[] = new byte[(int) length];
+		fin.read(fileContent);
+		fin.close();
+		return new Var(fileContent);
 	}
 
 	/**
@@ -439,14 +389,9 @@ public class Operations {
 			"fileGetNumberOfLines" }, description = "{{functionToGetTotalLinesFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.INTEGER)
 	protected static final Var fileGetNumberOfLines(Var path) throws Exception {
-		File f = new File(path.getObjectAsString());
-		FileInputStream in = new FileInputStream(f);
-		BufferedReader dis = new BufferedReader(new InputStreamReader(in));
-		int i = 0;
-		for (; dis.readLine() != null; i++)
-			;
-		in.close();
-		return new Var(i);
+		Path p = Paths.get(path.getObjectAsString());
+    long lineCount = Files.lines(p).count();
+    return new Var(lineCount);
 	}
 
 	/**
@@ -473,7 +418,6 @@ public class Operations {
 			}
 			is.close();
 			fos.close();
-			java.io.File file = new java.io.File(pathLocal + name.getObjectAsString() + extension.getObjectAsString());
 			return new Var(true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -489,47 +433,18 @@ public class Operations {
 					"{{streamOfFileToRead}}", "{{charset}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var fileReadContentWithCharset(Var finp, Var charsetSelected) throws Exception {
-		StringBuilder r = new StringBuilder();
-
-		String charset = charsetSelected.getObjectAsString();
-		FileInputStream fstream = (FileInputStream) finp.getObject();
-		DataInputStream in = null;
-		try {
-			in = new DataInputStream(fstream);
-			byte[] b = new byte[254];
-			while (in.available() != 0) {
-				int bytes = in.read(b);
-				r.append(new String(b, 0, bytes, charset));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException ex) {
-					//
-				}
-			}
-			if (fstream != null) {
-				try {
-					fstream.close();
-				} catch (IOException ex) {
-					//
-				}
-			}
-		}
-		return new Var(r.toString());
+    String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream)finp.getObject(), charsetSelected.getObjectAsString());
+    return new Var(result);
 	}
 
 	/**
 	 *  Descompactar arquivo zip	
 	 */
 	@CronapiMetaData(type = "function", name = "{{unZipFile}}", nameTags = {
-			"fileReadContentWithCharset" }, description = "{{functionToUnZipFile}}", params = {
+			"unZip" }, description = "{{functionToUnZipFile}}", params = {
 					"{{streamOfFileToRead}}",
 					"{{destinationFolder}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
-	protected static void unZipItApache(Var zippedFile, Var destFolder) throws Exception {
+	protected static void unZip(Var zippedFile, Var destFolder) throws Exception {
 		FileInputStream zipFile = (FileInputStream) zippedFile.getObject();
 		String outputFolder = destFolder.getObjectAsString();
 		if (!outputFolder.endsWith("/")) {

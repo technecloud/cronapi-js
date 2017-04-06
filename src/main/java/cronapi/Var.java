@@ -17,7 +17,7 @@ public class Var implements Comparable {
 
 	public enum Type {
 
-		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN
+		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, LONG
 	};
 
 	private Type _type;
@@ -99,8 +99,12 @@ public class Var implements Comparable {
 			return Integer.parseInt((String) getObject());
 		case INT:
 			return (int) getObject();
+		case BOOLEAN:
+			return ((boolean) getObject()) ? 1 : 0;
 		case DOUBLE:
 			return new Double((double) getObject()).intValue();
+		case LONG:
+			return new Long((long) getObject()).intValue();
 		case LIST:
 			// has no meaning
 			break;
@@ -128,8 +132,12 @@ public class Var implements Comparable {
 			return Boolean.valueOf(s);
 		case INT:
 			return (int) getObject() > 0;
+		case BOOLEAN:
+			return (boolean) getObject();
 		case DOUBLE:
 			return new Double((double) getObject()).intValue() > 0;
+		case LONG:
+			return new Long((long) getObject()).intValue() > 0;
 		case LIST:
 			// has no meaning
 			break;
@@ -151,8 +159,12 @@ public class Var implements Comparable {
 			return Double.parseDouble((String) getObject());
 		case INT:
 			return new Integer((int) getObject()).doubleValue();
+		case BOOLEAN:
+			return ((boolean) getObject()) ? 1.0 : 0.0;
 		case DOUBLE:
 			return (double) getObject();
+		case LONG:
+			return new Long((long) getObject()).doubleValue();
 		case LIST:
 			// has no meaning
 			break;
@@ -520,30 +532,41 @@ public class Var implements Comparable {
 		} else if (_object instanceof String) {
 			_type = Type.STRING;
 		} else {
-			// must be a number or a list
-			// try to see if its a double
 			try {
-				Double d = (double) _object;
-				// it was a double, so keep going
-				_type = Type.DOUBLE;
-			} catch (Exception ex) {
-				// not a double, see if it is an integer
+				Boolean b = (boolean) _object;
+				_type = Type.BOOLEAN;
+			} catch (Exception nBo) {
+				// must be a number or a list
+				// try to see if its a double
 				try {
-					Integer i = (int) _object;
-					// it was an integer
-					_type = Type.INT;
-				} catch (Exception ex2) {
-					// not a double or integer, might be an array
-					if (_object instanceof LinkedList) {
-						_type = Type.LIST;
-					} else if (_object instanceof List) {
-						_type = Type.LIST;
-						_object = new LinkedList<>((List) _object);
-					} else {
-						_type = Type.UNKNOWN;
+					Double d = (double) _object;
+					// it was a double, so keep going
+					_type = Type.DOUBLE;
+				} catch (Exception ex) {
+					try {
+						Long d = (long) _object;
+						_type = Type.LONG;
+					} catch (Exception exL) {
+						// not a double, see if it is an integer
+						try {
+							Integer i = (int) _object;
+							// it was an integer
+							_type = Type.INT;
+						} catch (Exception ex2) {
+							// not a double or integer, might be an array
+							if (_object instanceof LinkedList) {
+								_type = Type.LIST;
+							} else if (_object instanceof List) {
+								_type = Type.LIST;
+								_object = new LinkedList<>((List) _object);
+							} else {
+								_type = Type.UNKNOWN;
+							}
+						} // end not an integer
 					}
-				} // end not an integer
-			} // end not a double
+
+				} // end not a double  
+			}
 		} // end else not a string
 	} // end inferType
 

@@ -1,15 +1,14 @@
 package cronapi.conversion;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
-import cronapi.Functions;
+import cronapi.Utils;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.i18n.Messages;
 
 /**
  * Classe que representa ...
@@ -26,7 +25,7 @@ public class Operations {
 			"toBoolean" }, description = "{{functionConvertToLogic}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	protected final Var toBoolean(Var var) throws Exception {
-		return new Var(Functions.stringToBoolean(var.getObjectAsString()));
+		return new Var(Utils.stringToBoolean(var.getObjectAsString()));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{base64ToText}}", nameTags = {
@@ -45,39 +44,38 @@ public class Operations {
 			"asciiToBinary" }, description = "{{functionToConvertTextInTextBinary}}", params = {
 					"{{contentInAscii}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var asciiToBinary(Var asciiVar) throws Exception {
-		StringBuilder binary = new StringBuilder();
-		String ascii = asciiVar.getObjectAsString();
-		if (ascii.length() > 0) {
-			for (int i = 0; i < ascii.length(); i++) {
-				int value = ascii.charAt(i);
-				for (int j = 7; j >= 0; j--) {
-					binary.append((value >> j) & 1);
-				}
-			}
-		}
-		return new Var(binary.toString());
+		byte[] bytes = asciiVar.getObjectAsString().getBytes();
+    StringBuilder binary = new StringBuilder();
+    for (byte b : bytes)
+    {
+       int val = b;
+       for (int i = 0; i < 8; i++)
+       {
+          binary.append((val & 128) == 0 ? 0 : 1);
+          val <<= 1;
+       }
+    }
+    return new Var(binary.toString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{textBinaryToText}}", nameTags = {
 			"binaryToAscii" }, description = "{{functionToConvertTextBinaryToText}}", params = {
 					"{{contentInTextBinary}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var binaryToAscii(Var binaryVar) throws Exception {
-		StringBuilder ascii = new StringBuilder();
-		String binary = binaryVar.getObjectAsString();
-		if (binary.length() > 0) {
-			if ((binary.length()) % 8 != 0) {
-				throw new Exception(Messages.getString("parameterNotBinary"));
-			}
-			for (int i = 0; i < binary.length(); i += 8) {
-				String temp = binary.substring(i, i + 8);
-				int decimal = 0;
-				for (int j = 0; j < 8; j++) {
-					decimal += ((temp.charAt(7 - j) == '1') ? (1 << j) : 0);
-				}
-				ascii.append((char) decimal);
-			}
-		}
-		return new Var(ascii.toString());
+		StringBuilder sb = new StringBuilder();
+    char[] chars = binaryVar.getObjectAsString().replaceAll("\\s", "").toCharArray();
+    for(int j = 0; j < chars.length; j += 8) {
+      int idx = 0;
+      int sum = 0;
+      for(int i = 7; i >= 0; i--) {
+        if(chars[i + j] == '1') {
+          sum += 1 << idx;
+        }
+        idx++;
+      }
+      sb.append(Character.toChars(sum));
+    }
+    return new Var(sb.toString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameTags = {
@@ -102,27 +100,15 @@ public class Operations {
 			"hexadecimalToInteger" }, description = "{{functionToConvertHexadecimalToInt}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.INTEGER)
 	protected static final Var hexToInt(Var value) {
-		return new Var(Integer.valueOf(value.getObjectAsString(), 16).intValue());
+		return new Var(Integer.parseInt(value.getObjectAsString(), 16));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
 			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.LIST }, returnType = ObjectType.LIST)
 	protected static final Var arrayToList(Var arrayVar) throws Exception {
-		Object array = arrayVar.getObject();
-		if (array instanceof byte[]) {
-			byte[] bytes = (byte[]) array;
-			List l = new ArrayList(bytes.length);
-			for (int i = 0; i < bytes.length; i++) {
-				l.add(bytes[i]);
-			}
-			return new Var(l);
-		}
-		List l = new ArrayList(java.lang.reflect.Array.getLength(array));
-		for (int i = 0; i < java.lang.reflect.Array.getLength(array); i++) {
-			l.add(java.lang.reflect.Array.get(array, i));
-		}
-		return new Var(l);
+		List<?> t = Arrays.asList(arrayVar.getObject());
+		return new Var(t);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertBase64ToBinary}}", nameTags = {
@@ -130,7 +116,7 @@ public class Operations {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
 	protected static final Var base64ToBinary(Var base64) throws Exception {
 		Var binary = new Var(null);
-		byte[] temp = Functions.getFromBase64(base64.getObjectAsString());
+		byte[] temp = Utils.getFromBase64(base64.getObjectAsString());
 		if (temp != null)
 			binary = new Var(temp);
 		return binary;
@@ -140,6 +126,6 @@ public class Operations {
 			"stringToJs" }, description = "{{functionToConvertStringToJs}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	protected static final Var stringToJs(Var val) throws Exception {
-		return new Var(Functions.stringToJs(val.getObjectAsString()));
+		return new Var(Utils.stringToJs(val.getObjectAsString()));
 	}
 }
