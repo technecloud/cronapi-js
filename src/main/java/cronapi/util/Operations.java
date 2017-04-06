@@ -55,7 +55,7 @@ public class Operations {
 
 	// Retorna um numério aleatório 
 	@CronapiMetaData(type = "function", name = "{{randomName}}", nameTags = "random", description = "{{randomDescription}}", params = {
-			"{{randomParam0}}" }, paramsType = { ObjectType.FLOAT }, returnType = ObjectType.FLOAT)
+			"{{randomParam0}}" }, paramsType = { ObjectType.DOUBLE }, returnType = ObjectType.DOUBLE)
 	public static final Var random(Var maxValue) throws Exception {
 		return new Var(Math.round(Math.random() * maxValue.getObjectAsDouble()));
 	}

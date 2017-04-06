@@ -177,3 +177,5 @@ mask=Mask
 minSize=Minimum size
 convertIntToHex=Convert to hexadecimal
 functionToConvertIntToHex=Function to convert integer to hexadecimal
+convertToLong=Convert to long
+functionToConvertToLong=Function to convert to long

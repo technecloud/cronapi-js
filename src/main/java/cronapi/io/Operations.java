@@ -232,7 +232,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{readContentOfFile}}", nameTags = {
 			"fileRead" }, description = "{{functionToReadContentOfFile}}", params = { "{{streamOfFileToRead}}",
 					"{{size}}" }, paramsType = { ObjectType.OBJECT,
-							ObjectType.INTEGER }, returnType = ObjectType.STRING)
+							ObjectType.LONG }, returnType = ObjectType.STRING)
 	protected static final Var fileRead(Var input, Var size) throws Exception {
 		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
@@ -387,7 +387,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{totalLinesFile}}", nameTags = {
 			"fileGetNumberOfLines" }, description = "{{functionToGetTotalLinesFile}}", params = {
-					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.INTEGER)
+					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LONG)
 	protected static final Var fileGetNumberOfLines(Var path) throws Exception {
 		Path p = Paths.get(path.getObjectAsString());
     long lineCount = Files.lines(p).count();

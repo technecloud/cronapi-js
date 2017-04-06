@@ -174,6 +174,33 @@ public class Var implements Comparable {
 		}
 		return 0.0;
 	} // end get object as double
+	
+	/**
+	 * Get object as a long. Does not make sense for a "LIST" type object.
+	 *
+	 * @return a long whose value equals this object
+	 */
+	public long getObjectAsLong() {
+		switch (getType()) {
+		case STRING:
+			return Long.parseLong((String) getObject());
+		case INT:
+			return new Integer((int) getObject()).longValue();
+		case BOOLEAN:
+			return ((boolean) getObject()) ? 1 : 0;
+		case DOUBLE:
+			return new Double((double) getObject()).longValue();
+		case LONG:
+			return (long) getObject();
+		case LIST:
+			// has no meaning
+			break;
+		default:
+			// has no meaning
+			break;
+		}
+		return 0;
+	} // end get object as double
 
 	/**
 	 * Get object as a string.

@@ -87,7 +87,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertToAscii}}", nameTags = { "chrToAscii",
 			"convertToAscii" }, description = "{{functionToConvertToAscii}}", params = {
-					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.FLOAT)
+					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.DOUBLE)
 	protected static final Var chrToAscii(Var value) throws Exception {
 		Var ascii = new Var(null);
 		if (value.getObjectAsString() != null && value.getObjectAsString().isEmpty()) {
@@ -98,9 +98,9 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertHexadecimalToInt}}", nameTags = { "hexToInt",
 			"hexadecimalToInteger" }, description = "{{functionToConvertHexadecimalToInt}}", params = {
-					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.INTEGER)
+					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LONG)
 	protected static final Var hexToInt(Var value) {
-		return new Var(Integer.parseInt(value.getObjectAsString(), 16));
+		return new Var(Long.parseLong(value.getObjectAsString(), 16));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
@@ -131,7 +131,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertStringToDate}}", nameTags = {
 			"stringToDate" }, description = "{{functionToConvertStringToDate}}", params = {
-					"{{content}}, {{mask}}" }, paramsType = { ObjectType.STRING,
+					"{{content}}", "{{mask}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.DATETIME)
 	protected static final Var stringToDate(Var val, Var mask) throws Exception {
 		String defaultMask = "dd/MM/yyyy";
@@ -144,12 +144,19 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {
 			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = {
-					"{{content}}, {{minSize}}" }, paramsType = { ObjectType.INTEGER,
-							ObjectType.INTEGER }, returnType = ObjectType.STRING)
+					"{{content}}", "{{minSize}}" }, paramsType = { ObjectType.LONG,
+							ObjectType.LONG }, returnType = ObjectType.STRING)
 	protected final Var intToHex(Var value, Var minSize) throws Exception {
-		String hex = Integer.toHexString(value.getObjectAsInt());
+		String hex = Long.toHexString(value.getObjectAsInt());
 		while (hex.length() < minSize.getObjectAsInt())
 			hex = "0" + hex;
 		return new Var(hex);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertToLong}}", nameTags = {
+			"toLong" }, description = "{{functionToConvertToLong}}", params = {
+					"{{content}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.LONG)
+	protected final Var toLong(Var value) throws Exception {
+		return new Var(value.getObjectAsLong());
 	}
 }
