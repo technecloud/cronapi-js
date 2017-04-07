@@ -48,5 +48,9 @@
 	"monthsToIncrement": "Months to increase",
 	"incYear": "Increase year by date",
 	"functionToIncYear": "Function to increment year in date",
-	"yearsToIncrement": "Years to increase"
+	"yearsToIncrement": "Years to increase",
+	"getNow": "Get current date and time",
+	"functionToGetNow": "Function to get current date and time",
+	"getDaysBetweenDates": "Get days total between dates",
+	"functionToGetDaysBetweenDates": "Function to get days total between dates"
 }

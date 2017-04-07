@@ -248,6 +248,23 @@
   
   /**
 	 * @type function
+	 * @name {{getDaysBetweenDates}}
+	 * @nameTags getDaysBetweenDates|getDaysDiffDate|diffDatesDays
+	 * @description {{functionToGetDaysBetweenDates}}
+	 * @param {Date} value {{largerDateToBeSubtracted}}
+	 * @param {Date} value {{smallerDateToBeSubtracted}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getDaysBetweenDates = function(date, date2) {
+    var DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+    var dateVar = cronapi.conversion.stringToDate(date);
+    var date2Var = cronapi.conversion.stringToDate(date2);
+    var daysBetween = Math.round((dateVar.getTime() - date2Var.getTime()) / DAY_IN_MILLIS);
+    return daysBetween;
+  }
+  
+  /**
+	 * @type function
 	 * @name {{getMonthsBetweenDates}}
 	 * @nameTags getMonthsBetweenDates|getMonthsDiffDate|diffDatesMonths
 	 * @description {{functionToGetMonthsBetweenDates}}
@@ -338,6 +355,17 @@
     var dateVar = cronapi.conversion.stringToDate(date);
     dateVar.setFullYear(dateVar.getFullYear() + year);
     return dateVar;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getNow}}
+	 * @nameTags getNow|now|getDate
+	 * @description {{functionToGetNow}}
+	 * @returns {Date}
+	 */
+  this.cronapi.dateTime.getNow = function() {
+    return new Date();
   }
   
 	/**
