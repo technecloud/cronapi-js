@@ -33,5 +33,20 @@
 	"getMonthFromDate": "Get month of date",
 	"functionToGetMonthFromDate": "Function to get date month",
 	"getDayFromDate": "Get date day",
-	"functionToGetDayFromDate": "Function to get date day"
+	"functionToGetDayFromDate": "Function to get date day",
+	"getMonthsBetweenDates": "Get total of months between dates",
+	"functionToGetMonthsBetweenDates": "Function to get total of months between dates",
+	"largerDateToBeSubtracted": "Larger date to be subtracted",
+	"smallerDateToBeSubtracted": "Minor date to be subtracted",
+	"getYearsBetweenDates": "Get total of years between dates",
+	"functionToGetYearsBetweenDates": "Function to get total of years between dates",
+	"incDay": "Increment day on date",
+	"functionToIncDay": "Function to increment day in date",
+	"daysToIncrement": "Days to increase",
+	"incMonth": "Increase month on date",
+	"functionToIncMonth": "Function to increment month in date",
+	"monthsToIncrement": "Months to increase",
+	"incYear": "Increase year by date",
+	"functionToIncYear": "Function to increment year in date",
+	"yearsToIncrement": "Years to increase"
 }

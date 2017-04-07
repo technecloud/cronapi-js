@@ -246,6 +246,100 @@
     return 0;
   }
   
+  /**
+	 * @type function
+	 * @name {{getMonthsBetweenDates}}
+	 * @nameTags getMonthsBetweenDates|getMonthsDiffDate|diffDatesMonths
+	 * @description {{functionToGetMonthsBetweenDates}}
+	 * @param {Date} value {{largerDateToBeSubtracted}}
+	 * @param {Date} value {{smallerDateToBeSubtracted}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getMonthsBetweenDates = function(date, date2) {
+    var monthBetween = 0;
+    var yearBetween = 0;
+    var dateVar = cronapi.conversion.stringToDate(date);
+    var date2Var = cronapi.conversion.stringToDate(date2);
+    if (dateVar && date2Var) {
+      yearBetween = (dateVar.getFullYear() - date2Var.getFullYear()) * 12;
+      monthBetween = dateVar.getMonth() - date2Var.getMonth();
+      monthBetween += yearBetween;
+      if (date2Var < dateVar && dateVar.getDate() < date2Var.getDate()) 
+      	monthBetween--;      	
+      else if (date2Var > dateVar && dateVar.getDate() > date2Var.getDate())
+        monthBetween++;
+    }
+    return monthBetween;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getYearsBetweenDates}}
+	 * @nameTags getYearsBetweenDates|getYearsDiffDate|diffDatesYears
+	 * @description {{functionToGetYearsBetweenDates}}
+	 * @param {Date} value {{largerDateToBeSubtracted}}
+	 * @param {Date} value {{smallerDateToBeSubtracted}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getYearsBetweenDates = function(date, date2) {
+    var yearBetween = 0;
+    var dateVar = cronapi.conversion.stringToDate(date);
+    var date2Var = cronapi.conversion.stringToDate(date2);
+    if (dateVar && date2Var) {
+      yearBetween = (dateVar.getFullYear() - date2Var.getFullYear());
+      if (date2Var < dateVar && (dateVar.getDate() < date2Var.getDate() || dateVar.getMonth() < date2Var.getMonth())) 
+      	yearBetween--;      	
+      else if (date2Var > dateVar && (dateVar.getDate() > date2Var.getDate() || dateVar.getMonth() > date2Var.getMonth()))
+        yearBetween++;
+    }
+    return yearBetween;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{incDay}}
+	 * @nameTags incDay|increaseDay
+	 * @description {{functionToIncDay}}
+	 * @param {Date} value {{date}}
+	 * @param {int} value {{daysToIncrement}}
+	 * @returns {Date}
+	 */
+  this.cronapi.dateTime.incDay = function(date, day) {
+    var dateVar = cronapi.conversion.stringToDate(date);
+    dateVar.setDate(dateVar.getDate() + day);
+    return dateVar;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{incMonth}}
+	 * @nameTags incMonth|increaseMonth
+	 * @description {{functionToIncMonth}}
+	 * @param {Date} value {{date}}
+	 * @param {int} value {{monthsToIncrement}}
+	 * @returns {Date}
+	 */
+  this.cronapi.dateTime.incMonth = function(date, month) {
+    var dateVar = cronapi.conversion.stringToDate(date);
+    dateVar.setMonth(dateVar.getMonth() + month);
+    return dateVar;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{incYear}}
+	 * @nameTags incYear|increaseYear
+	 * @description {{functionToIncYear}}
+	 * @param {Date} value {{date}}
+	 * @param {int} value {{yearsToIncrement}}
+	 * @returns {Date}
+	 */
+  this.cronapi.dateTime.incYear = function(date, year) {
+    var dateVar = cronapi.conversion.stringToDate(date);
+    dateVar.setFullYear(dateVar.getFullYear() + year);
+    return dateVar;
+  }
+  
 	/**
 	 * @category XML
 	 * @categoryTags XML|xml
@@ -323,7 +417,7 @@
 			doc = domParser.parseFromString(XMLText, 'application/xml');
 			fixXMLDocument(doc);
 			return doc;
-		} else {//IE
+		} else {
 			doc = new ActiveXObject("MSXML2.DOMDocument");
 			doc.loadXML(XMLText);
 		}
