@@ -18,5 +18,20 @@
 	"convertIntToHex": "Converter inteiro para hexadecimal",
 	"functionToConvertIntToHex": "Função para converter inteiro para hexadecimal",
 	"convertToLong": "Converter para long",
-	"functionToConvertToLong": "Função para converter para long"
+	"functionToConvertToLong": "Função para converter para long",
+	"convertToString": "Converter para texto",
+	"functionToConvertToString": "Função para converter para texto",
+	"getMinuteFromDate": "Obter minuto da data",
+	"functionToGetMinuteFromDate": "Função para obter minuto da data",
+	"date": "Data",
+	"getSecondFromDate": "Obter segundo da data",
+	"functionToGetSecondFromDate": "Função para obter segundo da data",
+	"getHourFromDate": "Obter hora da data",
+	"functionToGetHourFromDate": "Função para obter hora da data",
+	"getYearFromDate": "Obter ano da data",
+	"functionToGetYearFromDate": "Função para obter ano da data",
+	"getMonthFromDate": "Obter mês da data",
+	"functionToGetMonthFromDate": "Função para obter mês da data",
+	"getDayFromDate": "Obter dia da data",
+	"functionToGetDayFromDate": "Função para obter dia da data"
 }

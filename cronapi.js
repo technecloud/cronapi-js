@@ -62,11 +62,11 @@
 	 * @param {String} value {{content}}
 	 * @returns {String}
 	 */
-	this.cronapi.conversion.chrToAscii = function(achar) {
-		if (isNullable(achar)) {
+	this.cronapi.conversion.chrToAscii = function(value) {
+		if (!value) {
 			return null;
 		} else {
-			return (achar.charCodeAt(0));
+			return (value.charCodeAt(0));
 		}
 	}
 	
@@ -135,7 +135,117 @@
   this.cronapi.conversion.toLong = function(value) {
     return parseInt(value);
   }
+  
+  /**
+	 * @type function
+	 * @name {{convertToString}}
+	 * @nameTags toString
+	 * @description {{functionToConvertToString}}
+	 * @param {Object} value {{content}}
+	 * @returns {String}
+	 */
+  this.cronapi.conversion.toString = function(value) {
+    if (value)
+      return new String(value)
+    return "";
+  }
 
+  /**
+	 * @category DATETIME
+	 * @categoryTags Date|Datetime|Data|Hora
+	 */
+	this.cronapi.dateTime = {};
+  
+  /**
+	 * @type function
+	 * @name {{getSecondFromDate}}
+	 * @nameTags getSecond
+	 * @description {{functionToGetSecondFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getSecond = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getSeconds();
+    return 0;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getMinuteFromDate}}
+	 * @nameTags getMinute
+	 * @description {{functionToGetMinuteFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getMinute = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getMinutes();
+    return 0;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getHourFromDate}}
+	 * @nameTags getHour
+	 * @description {{functionToGetHourFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getHour = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getHours();
+    return 0;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getYearFromDate}}
+	 * @nameTags getYear
+	 * @description {{functionToGetYearFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getYear = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getFullYear();
+    return 0;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getMonthFromDate}}
+	 * @nameTags getMonth
+	 * @description {{functionToGetMonthFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getMonth = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getMonth() + 1;
+    return 0;
+  }
+  
+  /**
+	 * @type function
+	 * @name {{getDayFromDate}}
+	 * @nameTags getDay
+	 * @description {{functionToGetDayFromDate}}
+	 * @param {Date} value {{date}}
+	 * @returns {int}
+	 */
+  this.cronapi.dateTime.getDay = function(value) {
+    var date  = cronapi.conversion.stringToDate(value);
+    if (date)
+      return date.getDate();
+    return 0;
+  }
+  
 	/**
 	 * @category XML
 	 * @categoryTags XML|xml
@@ -340,7 +450,7 @@
 	var isEvent = function(object) {
 		var isEvent = false;
 		try {
-			if (!isNullable(object)) {
+			if (object) {
 				if (object.isEvent) {
 					isEvent = true;
 				} else {
@@ -461,7 +571,7 @@
 	}
 
 	var convertNonUnicodeChars = function(value) {
-		if (!isNullable(value) && value.length > 0) {
+		if (value && value.length > 0) {
 			return value.replace(/\x80/g, String.fromCharCode(8364));
 		}
 		return value;
@@ -678,7 +788,7 @@
 	var stringToJs = function(value) {
 		var formated = "";
 
-		if (!isNullable(value)) {
+		if (value) {
 			value = value.toString();
 			for (var i = 0; i < value.length; i++) {
 				var c = value.charAt(i);
@@ -712,7 +822,7 @@
 	}
 
 	var serialize = function(_obj, useQuot, recursive, emptyIfNull) {
-		if (isNullable(_obj)) {
+		if (!_obj) {
 			return (emptyIfNull ? '' : 'null');
 		}
 
@@ -794,12 +904,6 @@
 		}
 	}
 
-	var isNullable = function(value, dontCheckEmpty) {
-		return (value == null || typeof value == 'undefined'
-				|| (!dontCheckEmpty && value === '') || (value.toString && value
-				.toString() == 'NaN'));
-	}
-
 	var parseBoolean = function(value) {
 		if (value == null || typeof value == "undefined") {
 			return false;
@@ -821,7 +925,7 @@
 	}
 
 	var parseNumeric = function(value) {
-		if (isNullable(value)) {
+		if (!value) {
 			return 0.0;
 		}
 
@@ -849,7 +953,7 @@
 	}
 
 	var removeZeroFromBeginString = function(value) {
-		if (!isNullable(value)) {
+		if (value) {
 			while (value.charAt(0) == "0" && value.length > 1) {
 				value = value.substring(1);
 			}
@@ -958,7 +1062,7 @@
 	}
 
 	var testRegularExpression = function(value, regularExpression) {
-		if (isNullable(value)) {
+		if (!value) {
 			return true;
 		}
 		return (value.search(regularExpression) == 0);
