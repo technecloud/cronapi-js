@@ -1,5 +1,6 @@
 package cronapi.dateTime;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -68,6 +69,18 @@ public class Operations {
 		return getFromCalendar(value, Calendar.DAY_OF_MONTH);
 	}
 
+	@CronapiMetaData(type = "function", name = "{{getDaysBetweenDates}}", nameTags = { "getDaysBetweenDates",
+			"getDaysDiffDate", "diffDatesDays" }, description = "{{functionToGetDaysBetweenDates}}", params = {
+					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
+							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
+	public static final Var getDaysBetweenDates(Var dateVar, Var date2Var) throws Exception {
+		final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+		Date date = ((Date) dateVar.getObject());
+		Date date2 = ((Date) date2Var.getObject());
+		int daysBetween = (int) ((date.getTime() - date2.getTime()) / DAY_IN_MILLIS);
+		return new Var(daysBetween);
+	}
+
 	@CronapiMetaData(type = "function", name = "{{getMonthsBetweenDates}}", nameTags = { "getMonthsBetweenDates",
 			"getMonthsDiffDate", "diffDatesMonths" }, description = "{{functionToGetMonthsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
@@ -105,37 +118,52 @@ public class Operations {
 			yearBetween++;
 		return new Var(yearBetween);
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{incDay}}", nameTags = { "incDay",
-			"increaseDay" }, description = "{{functionToIncDay}}", params = {
-					"{{date}}", "{{daysToIncrement}}" }, paramsType = {
-							ObjectType.DATETIME, ObjectType.LONG }, returnType = ObjectType.DATETIME)
+			"increaseDay" }, description = "{{functionToIncDay}}", params = { "{{date}}",
+					"{{daysToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incDay(Var value, Var day) throws Exception {
-    Calendar d = Calendar.getInstance();
-    d.setTime((Date)value.getObject());
-    d.add(Calendar.DAY_OF_MONTH, day.getObjectAsInt());
-    return new Var(d.getTime());
-  }	
-  
+		Calendar d = Calendar.getInstance();
+		d.setTime((Date) value.getObject());
+		d.add(Calendar.DAY_OF_MONTH, day.getObjectAsInt());
+		return new Var(d.getTime());
+	}
+
 	@CronapiMetaData(type = "function", name = "{{incMonth}}", nameTags = { "incMonth",
-			"increaseMonth" }, description = "{{functionToIncMonth}}", params = {
-					"{{date}}", "{{monthsToIncrement}}" }, paramsType = {
-							ObjectType.DATETIME, ObjectType.LONG }, returnType = ObjectType.DATETIME)
+			"increaseMonth" }, description = "{{functionToIncMonth}}", params = { "{{date}}",
+					"{{monthsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incMonth(Var value, Var month) throws Exception {
-    Calendar d = Calendar.getInstance();
-    d.setTime((Date)value.getObject());
-    d.add(Calendar.MONTH, month.getObjectAsInt());
-    return new Var(d.getTime());
-  }	
-  
-  @CronapiMetaData(type = "function", name = "{{incYear}}", nameTags = { "incYear",
-			"increaseYear" }, description = "{{functionToIncYear}}", params = {
-					"{{date}}", "{{yearsToIncrement}}" }, paramsType = {
-							ObjectType.DATETIME, ObjectType.LONG }, returnType = ObjectType.DATETIME)
+		Calendar d = Calendar.getInstance();
+		d.setTime((Date) value.getObject());
+		d.add(Calendar.MONTH, month.getObjectAsInt());
+		return new Var(d.getTime());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{incYear}}", nameTags = { "incYear",
+			"increaseYear" }, description = "{{functionToIncYear}}", params = { "{{date}}",
+					"{{yearsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incYear(Var value, Var year) throws Exception {
-    Calendar d = Calendar.getInstance();
-    d.setTime((Date)value.getObject());
-    d.add(Calendar.YEAR, year.getObjectAsInt());
-    return new Var(d.getTime());
-  }	
+		Calendar d = Calendar.getInstance();
+		d.setTime((Date) value.getObject());
+		d.add(Calendar.YEAR, year.getObjectAsInt());
+		return new Var(d.getTime());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{getNow}}", nameTags = { "getNow", "now",
+			"getDate" }, description = "{{functionToGetNow}}", returnType = ObjectType.DATETIME)
+	public static final Var getNow() throws Exception {
+		return new Var(new Date());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {
+			"formatDateTime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
+					"{{mask}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.STRING }, returnType = ObjectType.STRING)
+	public static final Var formatDateTime(Var value, Var format) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat(format.getObjectAsString());
+		return new Var(sdf.format((Date) value.getObject()));
+	}
 }
