@@ -12,7 +12,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -93,6 +95,12 @@ public class Utils {
 
 	public static String stringToJs(String string) {
 		return StringEscapeUtils.escapeJavaScript(string);
+	}
+	
+	public static int getFromCalendar(Date date, int field) {
+	  Calendar c = Calendar.getInstance();
+	  c.setTime(date);
+	  return c.get(field);
 	}
 
 }

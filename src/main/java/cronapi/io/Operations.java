@@ -1,11 +1,9 @@
 package cronapi.io;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,7 +38,7 @@ public class Operations {
 			"createFolder" }, description = "{{functionToCreateNewFolder}}", params = {
 					"{{pathMustBeCreatedForFolder}}" }, paramsType = {
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var folderCreate(Var path) throws Exception {
+	public static final Var folderCreate(Var path) throws Exception {
 		boolean success = true;
 		File dir = new File(path.getObjectAsString().trim());
 		if (!dir.exists()) {
@@ -55,7 +53,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{MD5OfFile}}", nameTags = {
 			"fileMD5" }, description = "{{functionToReturnMD5OfFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
-	protected static final Var fileMD5(Var path) throws Exception {
+	public static final Var fileMD5(Var path) throws Exception {
 		return new Var(Utils.MD5AsStringFromFile(new File(path.getObjectAsString().trim())));
 	}
 
@@ -65,7 +63,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{removeFolderFiles}}", nameTags = { "removeFolder",
 			"deleteFolder" }, description = "{{functionToRemoveFolderFiles}}", params = {
 					"{{pathOfFolder}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileRemoveAllFolder(Var path) throws Exception {
+	public static final Var fileRemoveAllFolder(Var path) throws Exception {
 		File dir = new File(path.getObjectAsString().trim());
 		return new Var(Utils.deleteFolder(dir));
 	}
@@ -76,7 +74,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{canReadyFile}}", nameTags = {
 			"fileCanRead" }, description = "{{functionToCheckIfCanReadFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected final Var fileCanRead(Var path) throws Exception {
+	public final Var fileCanRead(Var path) throws Exception {
 		File file = new File(path.getObjectAsString().trim());
 		return new Var(file.canRead());
 	}
@@ -87,7 +85,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{canWriteFile}}", nameTags = {
 			"fileCanWrite" }, description = "{{functionToCheckIfCanWriteFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected final Var fileCanWrite(Var path) throws Exception {
+	public final Var fileCanWrite(Var path) throws Exception {
 		File file = new File(path.getObjectAsString().trim());
 		return new Var(file.canWrite());
 	}
@@ -98,7 +96,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{createNewFile}}", nameTags = {
 			"fileCreate" }, description = "{{functionToCreateFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING })
-	protected static final void fileCreate(Var path) throws Exception {
+	public static final void fileCreate(Var path) throws Exception {
 		if (!Files.exists(Paths.get(path.getObjectAsString().trim()), LinkOption.NOFOLLOW_LINKS))
 			Files.createFile(Paths.get(path.getObjectAsString().trim()));
 	}
@@ -109,7 +107,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{removeFile}}", nameTags = {
 			"fileRemove" }, description = "{{functionToRemoveFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileRemove(Var path) throws Exception {
+	public static final Var fileRemove(Var path) throws Exception {
 		Path p = Paths.get(path.getObjectAsString().trim());
 		return new Var(Files.deleteIfExists(p));
 	}
@@ -120,7 +118,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{fileExists}}", nameTags = {
 			"fileExists" }, description = "{{functionToCheckIfExistFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileExists(Var path) throws Exception {
+	public static final Var fileExists(Var path) throws Exception {
 		Path p = Paths.get(path.getObjectAsString().trim());
 		return new Var(Files.exists(p, LinkOption.NOFOLLOW_LINKS));
 	}
@@ -131,7 +129,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{copyFile}}", nameTags = {
 			"fileCopy" }, description = "{{functionToCopyFile}}", params = { "{{sourcePath}}",
 					"{{destinationPath}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING })
-	protected static final void fileCopy(Var pathFrom, Var pathTo) throws Exception {
+	public static final void fileCopy(Var pathFrom, Var pathTo) throws Exception {
 		File from = new File(pathFrom.getObjectAsString().trim());
 		File to = new File(pathTo.getObjectAsString().trim());
 		Utils.copyFileTo(from, to);
@@ -143,7 +141,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{getParentOfFile}}", nameTags = {
 			"fileGetParent" }, description = "{{functionToGetParentOfFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
-	protected static final Var fileGetParent(Var path) throws Exception {
+	public static final Var fileGetParent(Var path) throws Exception {
 		File file = new File(path.getObjectAsString().trim());
 		if (file.exists()) {
 			return new Var(file.getParent());
@@ -159,7 +157,7 @@ public class Operations {
 			"fileRename" }, description = "{{functionToRenameFile}}", params = { "{{pathOfFile}}",
 					"{{newNameOfFile}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileRename(Var path, Var name) throws Exception {
+	public static final Var fileRename(Var path, Var name) throws Exception {
 		File from = new File(path.getObjectAsString().trim());
 		File to = new File(from.getParentFile(), name.getObjectAsString().trim());
 		return new Var(from.renameTo(to));
@@ -172,7 +170,7 @@ public class Operations {
 			"fileMove" }, description = "{{functionToMoveFile}}", params = { "{{pathOfSourceFile}}",
 					"{{pathOfDestinationFile}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var fileMove(Var pathFrom, Var pathTo) throws Exception {
+	public static final Var fileMove(Var pathFrom, Var pathTo) throws Exception {
 		File from = new File(pathFrom.getObjectAsString().trim());
 		File to = new File(pathTo.getObjectAsString().trim());
 		return new Var(from.renameTo(to));
@@ -185,7 +183,7 @@ public class Operations {
 			"forceFolder", "forceCreateDirectories",
 			"forceCreateFolder" }, description = "{{functionToForceFolderCreateToFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var forceDirectories(Var path) throws Exception {
+	public static final Var forceDirectories(Var path) throws Exception {
 		return new Var(new File(path.getObjectAsString()).getParentFile().mkdirs());
 	}
 
@@ -196,7 +194,7 @@ public class Operations {
 			"fileOpenToWrite" }, description = "{{functionToOpenFileToWrite}}", params = { "{{pathOfFile}}",
 					"{{addContent}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.BOOLEAN }, returnType = ObjectType.OBJECT)
-	protected static final Var fileOpenToWrite(Var url, Var append) throws Exception {
+	public static final Var fileOpenToWrite(Var url, Var append) throws Exception {
 		FileOutputStream out = new FileOutputStream(new File(url.getObjectAsString()), append.getObjectAsBoolean());
 		return new Var(out);
 	}
@@ -207,7 +205,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{openFileToRead}}", nameTags = {
 			"fileOpenToRead" }, description = "{{functionToOpenFileToRead}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
-	protected static final Var fileOpenToRead(Var url) throws Exception {
+	public static final Var fileOpenToRead(Var url) throws Exception {
 		FileInputStream in = new FileInputStream(new File(url.getObjectAsString()));
 		return new Var(in);
 	}
@@ -218,7 +216,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{addContentToFile}}", nameTags = {
 			"fileAppend" }, description = "{{functionToAddContentToFile}}", params = { "{{streamOfFileToWrite}}",
 					"{{contentOfFile}}" }, paramsType = { ObjectType.OBJECT, ObjectType.OBJECT })
-	protected static final void fileAppend(Var outPut, Var content) throws Exception {
+	public static final void fileAppend(Var outPut, Var content) throws Exception {
 		FileOutputStream out = (FileOutputStream) outPut.getObject();
 		if (content.getObject() instanceof byte[])
 			out.write((byte[]) content.getObject());
@@ -233,7 +231,7 @@ public class Operations {
 			"fileRead" }, description = "{{functionToReadContentOfFile}}", params = { "{{streamOfFileToRead}}",
 					"{{size}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.LONG }, returnType = ObjectType.STRING)
-	protected static final Var fileRead(Var input, Var size) throws Exception {
+	public static final Var fileRead(Var input, Var size) throws Exception {
 		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
 		int bytes = in.read(byteSizeToRead);
@@ -246,7 +244,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{readAllContentOfFile}}", nameTags = {
 			"fileReadAll" }, description = "{{functionToReadAllContentOfFile}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
-	protected static final Var fileReadAll(Var input) throws Exception {
+	public static final Var fileReadAll(Var input) throws Exception {
 		FileInputStream in = (FileInputStream) input.getObject();
 		return new Var(Utils.getFileContent(in).toString());
 	}
@@ -257,7 +255,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{readLineOfFile}}", nameTags = {
 			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
-	protected static final Var fileReadLine(Var input) throws Exception {
+	public static final Var fileReadLine(Var input) throws Exception {
 		BufferedReader reader = new BufferedReader(new InputStreamReader((FileInputStream) input.getObject()));
 		String line = reader.readLine();
 		if (line != null)
@@ -271,7 +269,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{clearFile}}", nameTags = {
 			"fileFlush" }, description = "{{functionToClearFile}}", params = {
 					"{{streamOfFileToWrite}}" }, paramsType = { ObjectType.OBJECT })
-	protected static final void fileFlush(Var input) throws Exception {
+	public static final void fileFlush(Var input) throws Exception {
 		FileOutputStream fos = (FileOutputStream) input.getObject();
 		fos.flush();
 	}
@@ -282,7 +280,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{closeFile}}", nameTags = {
 			"fileClose" }, description = "{{functionToCloseFile}}", params = {
 					"{{streamOfFile}}" }, paramsType = { ObjectType.OBJECT })
-	protected static final void fileClose(Var input) throws Exception {
+	public static final void fileClose(Var input) throws Exception {
 		if (input.getObject() instanceof FileOutputStream) {
 			FileOutputStream fos = (FileOutputStream) input.getObject();
 			fos.flush();
@@ -298,7 +296,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{applicationTemporaryFolder}}", nameTags = {
 			"fileTempDir" }, description = "{{functionToReturnApplicationTemporaryFolder}}", params = {}, returnType = ObjectType.STRING)
-	protected static final Var fileTempDir() throws Exception {
+	public static final Var fileTempDir() throws Exception {
 		URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
 		File tempDirectory = new File(location.getFile() + "/tmp");
 		if (!tempDirectory.exists())
@@ -312,7 +310,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{readAllContentFileInBytes}}", nameTags = {
 			"fileReadAllToBytes" }, description = "{{functionToReadAllContentFileInBytes}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
-	protected static final Var fileReadAllToBytes(Var input) throws Exception {
+	public static final Var fileReadAllToBytes(Var input) throws Exception {
 		FileInputStream fin = (FileInputStream) input.getObject();
 		long length = fin.getChannel().size();
 		byte fileContent[] = new byte[(int) length];
@@ -327,7 +325,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{isEndOfFile}}", nameTags = {
 			"isFileEoF" }, description = "{{functionToCheckIsEndOfFile}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.BOOLEAN)
-	protected static final Var isFileEoF(Var input) throws Exception {
+	public static final Var isFileEoF(Var input) throws Exception {
 		FileInputStream fis = (FileInputStream) input.getObject();
 		return new Var(fis.getChannel().position() == fis.getChannel().size());
 	}
@@ -337,7 +335,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{sizeOfFile}}", nameTags = {
 			"fileGetSize" }, description = "{{functionToGetSizeOfFile}}", params = { "{{streamOfFileToRead}}" })
-	protected static final Var fileGetSize(Var input) throws Exception {
+	public static final Var fileGetSize(Var input) throws Exception {
 		FileInputStream fis = (FileInputStream) input.getObject();
 		return new Var(fis.getChannel().size());
 	}
@@ -348,7 +346,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{contentOfFolder}}", nameTags = { "contentOfDirectory",
 			"contentOfFolder" }, description = "{{functionToGetContentOfFolder}}", params = {
 					"{{pathOfFolder}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LIST)
-	protected static final Var contentOfDirectory(Var input) throws Exception {
+	public static final Var contentOfDirectory(Var input) throws Exception {
 		File dir = new File(input.getObjectAsString());
 		List<String> filesList = new ArrayList<String>();
 		String[] files = dir.list();
@@ -366,7 +364,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{isFile}}", nameTags = {
 			"isFile" }, description = "{{functionToCheckIsFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var isFile(Var path) {
+	public static final Var isFile(Var path) {
 		File file = new File(path.getObjectAsString());
 		return new Var(file.isFile());
 	}
@@ -377,7 +375,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{isFolder}}", nameTags = { "isDirectory",
 			"isFolder" }, description = "{{functionToCheckIsFolder}}", params = {
 					"{{pathOfFolder}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	protected static final Var isDirectory(Var path) {
+	public static final Var isDirectory(Var path) {
 		File dir = new File(path.getObjectAsString());
 		return new Var(dir.isDirectory());
 	}
@@ -388,7 +386,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{totalLinesFile}}", nameTags = {
 			"fileGetNumberOfLines" }, description = "{{functionToGetTotalLinesFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LONG)
-	protected static final Var fileGetNumberOfLines(Var path) throws Exception {
+	public static final Var fileGetNumberOfLines(Var path) throws Exception {
 		Path p = Paths.get(path.getObjectAsString());
     long lineCount = Files.lines(p).count();
     return new Var(lineCount);
@@ -432,7 +430,7 @@ public class Operations {
 			"fileReadContentWithCharset" }, description = "{{functionToReadAllFileWithCharset}}", params = {
 					"{{streamOfFileToRead}}", "{{charset}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.STRING }, returnType = ObjectType.STRING)
-	protected static final Var fileReadContentWithCharset(Var finp, Var charsetSelected) throws Exception {
+	public static final Var fileReadContentWithCharset(Var finp, Var charsetSelected) throws Exception {
     String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream)finp.getObject(), charsetSelected.getObjectAsString());
     return new Var(result);
 	}
@@ -444,7 +442,7 @@ public class Operations {
 			"unZip" }, description = "{{functionToUnZipFile}}", params = {
 					"{{streamOfFileToRead}}",
 					"{{destinationFolder}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
-	protected static void unZip(Var zippedFile, Var destFolder) throws Exception {
+	public static void unZip(Var zippedFile, Var destFolder) throws Exception {
 		FileInputStream zipFile = (FileInputStream) zippedFile.getObject();
 		String outputFolder = destFolder.getObjectAsString();
 		if (!outputFolder.endsWith("/")) {
