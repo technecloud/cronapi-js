@@ -47,7 +47,9 @@ public class Var implements Comparable {
 	 * @param var var to construct this one from
 	 */
 	public Var(Var var) {
-		setObject(var.getObject());
+		_type = Type.UNKNOWN;
+	  if (var!=null)
+	    setObject(var.getObject());
 	} // end var
 
 	/**
@@ -174,7 +176,7 @@ public class Var implements Comparable {
 		}
 		return 0.0;
 	} // end get object as double
-	
+
 	/**
 	 * Get object as a long. Does not make sense for a "LIST" type object.
 	 *
@@ -540,6 +542,8 @@ public class Var implements Comparable {
 		case NULL:
 			return null;
 		default:
+		  if (getObject() == null)
+		    return "";
 			return getObject().toString();
 		}// end switch
 	} // end toString
