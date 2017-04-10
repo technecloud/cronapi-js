@@ -69,6 +69,42 @@ public class Operations {
 		return getFromCalendar(value, Calendar.DAY_OF_MONTH);
 	}
 
+	@CronapiMetaData(type = "function", name = "{{getDayOfWeek}}", nameTags = {
+			"getDayOfWeek" }, description = "{{functionToGetDayOfWeek}}", params = {
+					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
+	public static final Var getDayOfWeek(Var value) throws Exception {
+		return getFromCalendar(value, Calendar.DAY_OF_WEEK);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{getLastDayFromMonth}}", nameTags = {
+			"getLastDayFromMonth" }, description = "{{functionToGetLastDayFromMonth}}", params = { "{{month}}",
+					"{{year}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.LONG)
+	public static final Var getLastDayFromMonth(Var month, Var year) throws Exception {
+		Calendar c = java.util.Calendar.getInstance();
+		c.set(Calendar.DAY_OF_MONTH, 1);
+		c.set(Calendar.MONTH, month.getObjectAsInt() - 1);
+		c.set(Calendar.YEAR, year.getObjectAsInt());
+		int actualMaximum = c.getActualMaximum(Calendar.DAY_OF_MONTH);
+		return new Var(actualMaximum);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{newDate}}", nameTags = { "newDate",
+			"createDate" }, description = "{{functionToNewDate}}", params = { "{{year}}", "{{month}}", "{{day}}",
+					"{{hour}}", "{{minute}}", "{{second}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG,
+							ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
+	public static final Var newDate(Var year, Var month, Var day, Var hour, Var minute, Var second) throws Exception {
+		int y = year.getObjectAsInt();
+		int m = month.getObjectAsInt() - 1;
+		int d = day.getObjectAsInt();
+		int h = hour.getObjectAsInt();
+		int min = minute.getObjectAsInt();
+		int s = second.getObjectAsInt();
+		Calendar date = Calendar.getInstance();
+		date.set(y, m, d, h, min, s);
+		return new Var(date.getTime());
+	}
+
 	@CronapiMetaData(type = "function", name = "{{getDaysBetweenDates}}", nameTags = { "getDaysBetweenDates",
 			"getDaysDiffDate", "diffDatesDays" }, description = "{{functionToGetDaysBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
