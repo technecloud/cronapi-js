@@ -56,5 +56,14 @@
 	"formatDateTime": "Formatar data",
 	"functionToFormatDateTime": "Função para formatar data",
 	"getValueIsNotNumber": "Obter valor que não é numero",
-	"functionToGetValueIsNotNumber": "Função para obter valor que não é numero"
+	"functionToGetValueIsNotNumber": "Função para obter valor que não é numero",
+	"format": "Formato",
+	"newDate": "Nova data",
+  "functionToNewDate": "Função para criar nova data",
+  "month": "Mês",
+  "year": "Ano",
+  "day": "Dia",
+  "hour": "Hora",
+  "minute": "Minuto",
+  "second": "Segundo"
 }
