@@ -52,5 +52,9 @@
 	"getNow": "Obter data e hora atual",
 	"functionToGetNow": "Função para obter data e hora atual",
 	"getDaysBetweenDates": "Obter total de dias entre datas",
-	"functionToGetDaysBetweenDates": "Função para obter total de dias entre datas"
+	"functionToGetDaysBetweenDates": "Função para obter total de dias entre datas",
+	"formatDateTime": "Formatar data",
+	"functionToFormatDateTime": "Função para formatar data",
+	"getValueIsNotNumber": "Obter valor que não é numero",
+	"functionToGetValueIsNotNumber": "Função para obter valor que não é numero"
 }
