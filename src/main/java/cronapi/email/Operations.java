@@ -59,12 +59,28 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{sendEmailSmtp}}", nameTags = {
 			"sendEmailSmtp" }, description = "{{functionToSendEmailSmtp}}", params = { "{{hostAddress}}",
 					"{{hostPort}}", "{{protocolToSendEmail}}", "{{login}}", "{{password}}", "{{senderMail}}",
-					"{{toRecipientMail}}", "{{subject}}", "{{content}}", "{{isHtml}}", "{{attachments}}" }, paramsType = {
-							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.OBJECT, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.BOOLEAN, ObjectType.OBJECT }, returnType = ObjectType.BOOLEAN)
+					"{{toRecipientMail}}", "{{subject}}", "{{content}}", "{{isHtml}}",
+					"{{attachments}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING, ObjectType.OBJECT,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.BOOLEAN,
+							ObjectType.OBJECT }, returnType = ObjectType.BOOLEAN)
 	public static final Var sendEmailSmtp(Var hostAddress, Var hostPort, Var protocolType, Var login, Var password,
 			Var from, Var to, Var subject, Var content, Var isHtml, Var attachments) throws Exception {
+		return sendEmailSmtpWithDigitalCertificate(hostAddress, hostPort, protocolType, login, password, from, to,
+				subject, content, isHtml, attachments, new Var(), new Var());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{sendEmailSmtpWithDigitalCertificate}}", nameTags = {
+			"sendEmailSmtp" }, description = "{{functionToSendEmailSmtpWithDigitalCertificate}}", params = { "{{hostAddress}}",
+					"{{hostPort}}", "{{protocolToSendEmail}}", "{{login}}", "{{password}}", "{{senderMail}}",
+					"{{toRecipientMail}}", "{{subject}}", "{{content}}", "{{isHtml}}", "{{attachments}}", "{{keyJks}}",
+					"{{keyJksPassword}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING, ObjectType.OBJECT,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.BOOLEAN, ObjectType.OBJECT,
+							ObjectType.STRING, ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
+	public static final Var sendEmailSmtpWithDigitalCertificate(Var hostAddress, Var hostPort, Var protocolType,
+			Var login, Var password, Var from, Var to, Var subject, Var content, Var isHtml, Var attachments,
+			Var keyJks, Var keyJksPassword) throws Exception {
 
 		String host = hostAddress.getObjectAsString().trim();
 		final String user = login.getObjectAsString().trim();
@@ -87,7 +103,14 @@ public class Operations {
 		}
 
 		System.setProperty("line.separator", "\r\n");
-		Properties props = new Properties();
+		Properties props = System.getProperties();
+
+		if (keyJks.getObject() != null && keyJksPassword.getObject() != null) {
+			props.put("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
+			props.put("javax.net.ssl.trustStoreType", "JKS");
+			props.put("javax.net.ssl.trustStore", keyJks.getObjectAsString());
+			props.put("javax.net.ssl.trustStorePassword", keyJksPassword.getObjectAsString());
+		}
 		props.put("mail.debug", "false");
 		props.put("mail.smtp.host", host);
 		props.put("mail.transport.protocol", "smtp");
@@ -134,7 +157,7 @@ public class Operations {
 			}
 		}
 		message.setSubject(subject.getObjectAsString());
-		
+
 		javax.mail.Multipart messageBody = new javax.mail.internet.MimeMultipart();
 		javax.mail.internet.MimeBodyPart bodyPart = new javax.mail.internet.MimeBodyPart();
 		bodyPart.setContent(content.getObjectAsString(), (isHtml.getObjectAsBoolean() ? "text/html" : "text/plain"));
@@ -147,7 +170,8 @@ public class Operations {
 				List<Var> attachs = (List<Var>) attachments.getObject();
 				for (Var pathAttachment : attachs) {
 					if (!pathAttachment.getObjectAsString().isEmpty()) {
-						javax.activation.FileDataSource fds = new javax.activation.FileDataSource(pathAttachment.getObjectAsString().trim());
+						javax.activation.FileDataSource fds = new javax.activation.FileDataSource(
+								pathAttachment.getObjectAsString().trim());
 						attachBodyPart = new javax.mail.internet.MimeBodyPart();
 						attachBodyPart.setDataHandler(new javax.activation.DataHandler(fds));
 						attachBodyPart.setFileName(fds.getName());

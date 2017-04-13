@@ -87,5 +87,23 @@ public class Operations {
 		input.close();
 		return new Var(out.toByteArray());
 	}
+	
+	@CronapiMetaData(type = "function", name = "{{sleep}}", nameTags = {
+			"sleep" }, description = "{{functionToSleep}}", params = {
+					"{{timeSleepInSecond}}" }, paramsType = {ObjectType.LONG }, returnType = ObjectType.VOID)
+	public static final void sleep(Var time) throws Exception {
+	  long sleepTime = (time.getObjectAsLong() * 1000);
+	  Thread.sleep(sleepTime);
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{throwException}}", nameTags = {
+			"throwException" }, description = "{{functionToThrowException}}", params = {
+					"{{exceptionToBeThrow}}" }, paramsType = {ObjectType.OBJECT }, returnType = ObjectType.VOID)
+	public static final void throwException(Var exception) throws Exception { 
+    if (exception.getObject() instanceof Exception)
+      throw Exception.class.cast(exception.getObject());
+    else if (exception.getObject() instanceof String) 
+      throw new Exception(exception.getObjectAsString());
+  }
 
 }
