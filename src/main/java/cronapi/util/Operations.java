@@ -25,7 +25,6 @@ public class Operations {
 	public Operations() {
 	}
 
-	// Copiar para área de transferência	
 	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = "copyTextToTransferArea", description = "{{copyTextToTransferAreaDescription}}", params = {
 			"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
 	public static final void copyTextToTransferArea(Var strVar) throws Exception {
