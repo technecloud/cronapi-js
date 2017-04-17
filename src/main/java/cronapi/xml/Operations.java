@@ -23,14 +23,14 @@ import cronapi.CronapiMetaData.ObjectType;
 @CronapiMetaData(category = CategoryType.XML, categoryTags = { "XML" })
 public class Operations {
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetElementValueName}}", nameTags = "XMLGetElementValue", description = "{{XMLGetElementValueDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetElementValueName}}", nameTags = {"XMLGetElementValue"}, description = "{{XMLGetElementValueDescription}}", params = {
 			"{{XMLGetElementValueParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public static final Var XMLGetElementValue(Var element) throws Exception {
 		Element elementCasted = (Element) element.getObject();
 		return new Var(elementCasted.getValue());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetChildElementName}}", nameTags = "XMLGetChildElement", description = "{{XMLGetChildElementDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetChildElementName}}", nameTags = {"XMLGetChildElement"}, description = "{{XMLGetChildElementDescription}}", params = {
 			"{{XMLGetChildElementParam0}}", "{{XMLGetChildElementParam1}}" }, paramsType = { ObjectType.OBJECT,
 					ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var XMLGetChildElement(Var element, Var child) throws Exception {
@@ -39,14 +39,14 @@ public class Operations {
 		return new Var(elementCasted.getChild(childCasted.getName(), elementCasted.getNamespace()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetRootName}}", nameTags = "XMLGetRoot", description = "{{XMLGetRootDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetRootName}}", nameTags = {"XMLGetRoot"}, description = "{{XMLGetRootDescription}}", params = {
 			"{{XMLGetRootParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var XMLGetRoot(Var element) throws Exception {
 		Element elementCasted = (Element) element.getObject();
 		return new Var(elementCasted.getDocument().getRootElement());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetAttributeName}}", nameTags = "XMLGetAttribute", description = "{{XMLGetAttributeDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetAttributeName}}", nameTags = {"XMLGetAttribute"}, description = "{{XMLGetAttributeDescription}}", params = {
 			"{{XMLGetAttributeParam0}}", "{{XMLGetAttributeParam1}}" }, paramsType = { ObjectType.OBJECT,
 					ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public static final Var XMLGetAttribute(Var element, Var attribute) throws Exception {
@@ -55,7 +55,7 @@ public class Operations {
 		return new Var(elementCasted.getAttributeValue(attributeCasted.getName()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLOpenName}}", nameTags = "XMLOpen", description = "{{XMLOpenDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLOpenName}}", nameTags = {"XMLOpen"}, description = "{{XMLOpenDescription}}", params = {
 			"{{XMLOpenParam0}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
 	public static final Var XMLOpen(Var xml) throws Exception {
 		try {
@@ -67,7 +67,7 @@ public class Operations {
 		}
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetChildrenElementName}}", nameTags = "XMLGetChildrenElement", description = "{{XMLGetChildrenElementDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetChildrenElementName}}", nameTags = {"XMLGetChildrenElement"}, description = "{{XMLGetChildrenElementDescription}}", params = {
 			"{{XMLGetChildrenElementParam0}}", "{{XMLGetChildrenElementParam1}}" }, paramsType = { ObjectType.OBJECT,
 					ObjectType.OBJECT }, returnType = ObjectType.LIST)
 	public static final Var XMLGetChildrenElement(Var element, Var node) throws Exception {
@@ -80,14 +80,14 @@ public class Operations {
 		return new Var(elementCasted.getChildren(nodeCasted.getName()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetParentElementName}}", nameTags = "XMLGetParentElement", description = "{{XMLGetParentElementDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetParentElementName}}", nameTags = {"XMLGetParentElement"}, description = "{{XMLGetParentElementDescription}}", params = {
 			"{{XMLGetParentElementParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var XMLGetParentElement(Var element) throws Exception {
 		Element elementCasted = (Element) element.getObject();
 		return new Var(elementCasted.getParentElement());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetElementTagNameName}}", nameTags = "XMLGetElementTagName", description = "{{XMLGetElementTagNameDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetElementTagNameName}}", nameTags = {"XMLGetElementTagName"}, description = "{{XMLGetElementTagNameDescription}}", params = {
 			"{{XMLGetElementTagNameParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public static final Var XMLGetElementTagName(Var element) throws Exception {
 		Element elementCasted = (Element) element.getObject();
@@ -96,7 +96,7 @@ public class Operations {
 
 	//PAREI AQUI
 	//Alterar o valor de um Elemento XML
-	@CronapiMetaData(type = "function", name = "{{XMLSetElementValueName}}", nameTags = "XMLSetElementValue", description = "{{XMLSetElementValueDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLSetElementValueName}}", nameTags = {"XMLSetElementValue"}, description = "{{XMLSetElementValueDescription}}", params = {
 			"{{XMLSetElementValueParam0}}",
 			"{{XMLSetElementValueParam1}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
 	public static final void XMLSetElementValue(Var element, Var value) throws Exception {
@@ -105,7 +105,7 @@ public class Operations {
 	}
 
 	// Alterar o valor de um Atributo XML
-	@CronapiMetaData(type = "function", name = "{{XMLSetElementAttributeValueName}}", nameTags = "XMLSetElementAttributeValue", description = "{{XMLSetElementValueDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLSetElementAttributeValueName}}", nameTags = {"XMLSetElementAttributeValue"}, description = "{{XMLSetElementValueDescription}}", params = {
 			"{{XMLSetElementAttributeValueParam0}}",
 			"{{XMLSetElementAttributeValueParam1}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
 	public static final void XMLSetElementAttributeValue(Var attribute, Var value) throws Exception {
@@ -114,7 +114,7 @@ public class Operations {
 	}
 
 	// 	Elemento para XML
-	@CronapiMetaData(type = "function", name = "{{XMLGetElementAsXMLName}}", nameTags = "XMLGetElementAsXMLName", description = "{{XMLGetElementAsXMLNameDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLGetElementAsXMLName}}", nameTags = {"XMLGetElementAsXMLName"}, description = "{{XMLGetElementAsXMLNameDescription}}", params = {
 			"{{XMLGetElementAsXMLParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public static final Var XMLGetElementAsXML(Var element) throws Exception {
 		Element elementCasted = (Element) element.getObject();
@@ -123,7 +123,7 @@ public class Operations {
 	}
 
 	// 	Abrir XML de um arquivo
-	@CronapiMetaData(type = "function", name = "{{XMLOpenFromFileName}}", nameTags = "XMLOpenFromFile", description = "{{XMLOpenFromFileDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XMLOpenFromFileName}}", nameTags = {"XMLOpenFromFile"}, description = "{{XMLOpenFromFileDescription}}", params = {
 			"{{XMLOpenFromFileParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var XMLOpenFromFile(Var file) throws Exception {
 		File fileCasted = (File) file.getObject();
@@ -132,7 +132,7 @@ public class Operations {
 	}
 
 	// 	Obter Nós	
-	@CronapiMetaData(type = "function", name = "{{XpathCompileName}}", nameTags = "XpathCompile", description = "{{XpathCompileDescription}}", params = {
+	@CronapiMetaData(type = "function", name = "{{XpathCompileName}}", nameTags = {"XpathCompile"}, description = "{{XpathCompileDescription}}", params = {
 			"{{XpathCompileParam0}}", "{{XpathCompileParam1}}" }, paramsType = { ObjectType.OBJECT,
 					ObjectType.OBJECT }, returnType = ObjectType.LIST)
 	public final static Var XpathCompile(Var xml, Var path) {
