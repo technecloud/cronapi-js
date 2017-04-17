@@ -20,15 +20,8 @@ import cronapi.CronapiMetaData.ObjectType;
  * @since 2017-03-29
  *
  */
-
+@CronapiMetaData(category = CategoryType.XML, categoryTags = { "XML" })
 public class Operations {
-
-	/**
-	 * Construtor
-	 **/
-	@CronapiMetaData(category = CategoryType.XML, categoryTags = { "XML" })
-	public Operations() {
-	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLGetElementValueName}}", nameTags = "XMLGetElementValue", description = "{{XMLGetElementValueDescription}}", params = {
 			"{{XMLGetElementValueParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
