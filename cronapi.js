@@ -57,7 +57,7 @@
 	/**
 	 * @type function
 	 * @name {{convertToAscii}}
-	 * @nameTags chrToAscii, convertToAscii
+	 * @nameTags chrToAscii|convertToAscii
 	 * @description {{functionToConvertToAscii}}
 	 * @param {string} value {{content}}
 	 * @returns {string}
