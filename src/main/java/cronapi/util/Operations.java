@@ -2,6 +2,7 @@ package cronapi.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 
 import cronapi.CronapiMetaData;
 import cronapi.Var;
@@ -109,6 +110,71 @@ public class Operations {
 			throw Exception.class.cast(exception.getObject());
 		else if (exception.getObject() instanceof String)
 			throw new Exception(exception.getObjectAsString());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
+			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
+					"{{params}}" }, paramsType = { ObjectType.OBJECT,
+							ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true)
+	public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
+		try {
+
+			String className = classNameWithMethod.getObjectAsString();
+			String method = "";
+			if (className.indexOf(":") > -1) {
+				method = className.substring(className.indexOf(":") + 1);
+				className = className.substring(0, className.indexOf(":"));
+			}
+
+			Class[] arrayClass = null;
+			if (params != null && params.length > 0) {
+				arrayClass = new Class[params.length];
+				for (int i = 0; i < params.length; i++)
+					arrayClass[i] = Var.class;
+			}
+
+			Class clazz = Class.forName(className);
+			Method methodToCall = null;
+			if (method.isEmpty())
+				methodToCall = clazz.getDeclaredMethods()[0];
+			else
+				methodToCall = clazz.getDeclaredMethod(method, arrayClass);
+
+			Object obj = clazz.newInstance();
+			Object o = methodToCall.invoke(obj, params);
+			return new Var(o);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+	public static final Var callBlockly(Object classNameWithMethod, Object... params) throws Exception {
+		try {
+			Var classNameWithMethodVar = null;
+			Var[] vars = null;
+
+			if (classNameWithMethod instanceof Var)
+				classNameWithMethodVar = (Var) classNameWithMethod;
+			else
+				classNameWithMethodVar = new Var(classNameWithMethod);
+
+			if (params != null && params.length > 0) {
+				vars = new Var[params.length];
+				int i = 0;
+				for (Object value : params) {
+					if (value instanceof Var)
+						vars[i++] = (Var) value;
+					else
+						vars[i++] = new Var(value);
+				}
+			}
+			return callBlockly(classNameWithMethodVar, vars);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
