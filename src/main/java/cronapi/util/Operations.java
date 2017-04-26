@@ -149,32 +149,4 @@ public class Operations {
 		return null;
 	}
 
-
-	public static final Var callBlockly(Object classNameWithMethod, Object... params) throws Exception {
-		try {
-			Var classNameWithMethodVar = null;
-			Var[] vars = null;
-
-			if (classNameWithMethod instanceof Var)
-				classNameWithMethodVar = (Var) classNameWithMethod;
-			else
-				classNameWithMethodVar = new Var(classNameWithMethod);
-
-			if (params != null && params.length > 0) {
-				vars = new Var[params.length];
-				int i = 0;
-				for (Object value : params) {
-					if (value instanceof Var)
-						vars[i++] = (Var) value;
-					else
-						vars[i++] = new Var(value);
-				}
-			}
-			return callBlockly(classNameWithMethodVar, vars);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 }
