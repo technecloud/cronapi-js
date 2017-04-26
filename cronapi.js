@@ -211,15 +211,22 @@
     for (var i = 1; i<arguments.length; i++)
       request.params.push(arguments[i]);  
     
-    var response = http({
-      method : 'POST',
-      url: request.serverUrl,
-      data : JSON.stringify(request),
-      async: false,
-      headers : {
-        'Content-Type' : 'application/json'
-      },
-    });
+    var token = "";
+    if (window.uToken)
+      token = window.uToken;
+      
+    var result = $.ajax({
+        type: 'POST',
+        url: request.serverUrl,
+        data : JSON.stringify(request),
+        async: false,
+        headers : {
+          'Content-Type' : 'application/json',
+          'X-AUTH-TOKEN' : token
+        }
+    }).responseText;
+    
+    return result;
   };
 
 	/**
