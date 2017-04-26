@@ -66,10 +66,12 @@
   "hour": "Hora",
   "minute": "Minuto",
   "second": "Segundo",
-  "callServerBlockly": "Chamar blockly servidor",
-  "functionToCallServerBlockly": "Função para chamar blockly do servidor",
+  "callServerBlocklyAsync": "Chamar blockly servidor assíncrono",
+  "functionToCallServerBlocklyAsync": "Função para chamar blockly do servidor assíncrono",
   "classNameWithMethod": "Nome do blockly",
   "callbackSuccess": "Callback sucesso: função para callback quando for sucesso",
   "callbackError": "Callback erro: função para callback quando ocorrer erro",
-  "params": "Parâmetros"
+  "params": "Parâmetros",
+  "callServerBlockly": "Chamar blockly servidor",
+  "functionToCallServerBlockly": "Função para chamar blockly do servidor"
 }

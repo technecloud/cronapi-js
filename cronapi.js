@@ -40,7 +40,7 @@
 	 */
 	this.cronapi.conversion.toBoolean = function(value) {
 		return parseBoolean(value);
-	}
+	};
 
 	/**
 	 * @type function
@@ -52,7 +52,7 @@
 	 */
 	this.cronapi.conversion.toBytes = function(obj) {
 		return obj ? obj.toString() : "";
-	}
+	};
 
 	/**
 	 * @type function
@@ -68,7 +68,7 @@
 		} else {
 			return (value.charCodeAt(0));
 		}
-	}
+	};
 
 	/**
 	 * @type function
@@ -80,7 +80,7 @@
 	 */
 	this.cronapi.conversion.stringToJs = function(value) {
 		return stringToJs(value);
-	}
+	};
 
 	/**
 	 * @type function
@@ -109,7 +109,7 @@
 				return new Date(value);
 		}
 		return null;
-	}
+	};
 
 	/**
 	 * @type function
@@ -121,7 +121,7 @@
 	 */
 	this.cronapi.conversion.intToHex = function(value) {
 		return Number(value).toString(16).toUpperCase();
-	}
+	};
 
 	/**
 	 * @type function
@@ -133,7 +133,7 @@
 	 */
 	this.cronapi.conversion.toLong = function(value) {
 		return parseInt(value);
-	}
+	};
 
 	/**
 	 * @type function
@@ -147,7 +147,7 @@
 		if (value)
 			return new String(value)
 		return "";
-	}
+	};
 	
 	/**
 	 * @category UTIL
@@ -157,36 +157,70 @@
 	
 	/**
 	 * @type function
-	 * @name {{callServerBlockly}}
-	 * @nameTags callServerBlockly
-	 * @description {{functionToCallServerBlockly}}
+	 * @name {{callServerBlocklyAsync}}
+	 * @nameTags callServerBlocklyAsync
+	 * @description {{functionToCallServerBlocklyAsync}}
 	 * @param {string} classNameWithMethod {{classNameWithMethod}}
 	 * @param {string} callbackSuccess {{callbackSuccess}}
 	 * @param {string} callbackError {{callbackError}}
 	 * @param {object} params {{params}}
+	 * @arbitraryParams true
 	 */
-	this.cronapi.util.callServerBlockly = function(classNameWithMethod, callbackSuccess, callbackError) {
+	this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
     var request = {
       echoServer : 'OK',
-      serverUrl: '/api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
+      serverUrl: 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
       params: []
     };
     
-    var scope = angular.element($0).scope(); 
+    var scope = angular.element($('body')).scope(); 
     var http = scope.http;
     
-    for (var i = 1; i<arguments.length; i++)
-      request.put(arguments[i]);  
+    for (var i = 3; i<arguments.length; i++)
+      request.params.push(arguments[i]);  
     
     http({
-      method : 'GET',
+      method : 'POST',
       url: request.serverUrl,
       data : JSON.stringify(request),
       headers : {
         'Content-Type' : 'application/json'
       },
     }).success(callbackSuccess).error(callbackError);
-  }
+  };
+  
+  /**
+	 * @type function
+	 * @name {{callServerBlockly}}
+	 * @nameTags callServerBlockly
+	 * @description {{functionToCallServerBlockly}}
+	 * @param {string} classNameWithMethod {{classNameWithMethod}}
+	 * @param {object} params {{params}}
+	 * @arbitraryParams true
+	 */
+	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
+    var request = {
+      echoServer : 'OK',
+      serverUrl: 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
+      params: []
+    };
+    
+    var scope = angular.element($('body')).scope(); 
+    var http = scope.http;
+    
+    for (var i = 1; i<arguments.length; i++)
+      request.params.push(arguments[i]);  
+    
+    var response = http({
+      method : 'POST',
+      url: request.serverUrl,
+      data : JSON.stringify(request),
+      async: false,
+      headers : {
+        'Content-Type' : 'application/json'
+      },
+    });
+  };
 
 	/**
 	 * @category DATETIME
@@ -207,7 +241,7 @@
 		if (date)
 			return date.getSeconds();
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -222,7 +256,7 @@
 		if (date)
 			return date.getMinutes();
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -237,7 +271,7 @@
 		if (date)
 			return date.getHours();
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -252,7 +286,7 @@
 		if (date)
 			return date.getFullYear();
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -267,7 +301,7 @@
 		if (date)
 			return date.getMonth() + 1;
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -282,7 +316,7 @@
 		if (date)
 			return date.getDate();
 		return 0;
-	}
+	};
 
 	/**
 	 * @type function
@@ -300,7 +334,7 @@
 		var daysBetween = Math.round((dateVar.getTime() - date2Var.getTime())
 				/ DAY_IN_MILLIS);
 		return daysBetween;
-	}
+	};
 
 	/**
 	 * @type function
@@ -327,7 +361,7 @@
 				monthBetween++;
 		}
 		return monthBetween;
-	}
+	};
 
 	/**
 	 * @type function
@@ -354,7 +388,7 @@
 				yearBetween++;
 		}
 		return yearBetween;
-	}
+	};
 
 	/**
 	 * @type function
@@ -369,7 +403,7 @@
 		var dateVar = cronapi.conversion.stringToDate(date);
 		dateVar.setDate(dateVar.getDate() + day);
 		return dateVar;
-	}
+	};
 
 	/**
 	 * @type function
@@ -384,7 +418,7 @@
 		var dateVar = cronapi.conversion.stringToDate(date);
 		dateVar.setMonth(dateVar.getMonth() + month);
 		return dateVar;
-	}
+	};
 
 	/**
 	 * @type function
@@ -399,7 +433,7 @@
 		var dateVar = cronapi.conversion.stringToDate(date);
 		dateVar.setFullYear(dateVar.getFullYear() + year);
 		return dateVar;
-	}
+	};
 
 	/**
 	 * @type function
@@ -410,7 +444,7 @@
 	 */
 	this.cronapi.dateTime.getNow = function() {
 		return new Date();
-	}
+	};
 
 	/**
 	 * @type function
@@ -436,7 +470,7 @@
 		  }
 		}
 		return '';
-	}
+	};
 	
 	/**
 	 * @type function
@@ -459,7 +493,7 @@
     date.setMinutes(minute);
     date.setSeconds(second);
     return date;
-	}
+	};
 	
 	/**
 	 * @type function
@@ -475,7 +509,7 @@
 			if (!numbers.includes(str.charAt(i)))
 				return str.charAt(i);
 		return '';
-	}
+	};
 
 	/**
 	 * @category XML
@@ -537,7 +571,7 @@
 	 */
 	this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
 		return node.getAttribute(attribute);
-	}
+	};
 
 	/**
 	 * @type function
@@ -559,7 +593,7 @@
 			doc.loadXML(XMLText);
 		}
 		return doc;
-	}
+	};
 
 	/**
 	 * @type function
@@ -576,7 +610,7 @@
 		} else {
 			return node.childNodes;
 		}
-	}
+	};
 
 	/**
 	 * @type function
@@ -616,7 +650,7 @@
 		else
 			date = new Date(year, month - 1, day, 0, 0, 0);
 		return date;
-	}
+	};
 
 	var enDate = function(varray) {
 		var date;
@@ -631,7 +665,7 @@
 		else
 			date = new Date(year, month - 1, day, 0, 0, 0);
 		return date;
-	}
+	};
 
 	var parseBoolean = function(value) {
 		if (!value)
@@ -655,30 +689,30 @@
 			}
 		}
 		return newValue;
-	}
+	};
 
 	var arrayRemove = function(array, value) {
 		var i = arrayIndexOf(array, value);
 		if (i != -1) {
 			array.splice(i, 1);
 		}
-	}
+	};
 
 	var arrayIndexOf = function(array, value) {
 	  return array.findIndex(x => x==value);
-	}
+	};
 
 	var replaceAll = function(str, value, newValue) {
 		return str.toString().split(value).join(newValue);
-	}
+	};
 
 	var getWindowHeight = function() {
 		$(window).height();
-	}
+	};
 
 	var getWindowWidth = function() {
 		$(window).width();
-	}
+	};
 
 	/**
   *
@@ -742,10 +776,10 @@
           }
           return string;
       }
-  }
+  };
 
 	var stringToJs = function(str) {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-	}
+	};
 
 }).bind(window)();
