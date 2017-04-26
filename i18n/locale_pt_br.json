@@ -65,5 +65,11 @@
   "day": "Dia",
   "hour": "Hora",
   "minute": "Minuto",
-  "second": "Segundo"
+  "second": "Segundo",
+  "callServerBlockly": "Chamar blockly servidor",
+  "functionToCallServerBlockly": "Função para chamar blockly do servidor",
+  "classNameWithMethod": "Nome do blockly",
+  "callbackSuccess": "Callback sucesso: função para callback quando for sucesso",
+  "callbackError": "Callback erro: função para callback quando ocorrer erro",
+  "params": "Parâmetros"
 }

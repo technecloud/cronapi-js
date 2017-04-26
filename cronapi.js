@@ -148,6 +148,45 @@
 			return new String(value)
 		return "";
 	}
+	
+	/**
+	 * @category UTIL
+	 * @categoryTags Util
+	 */
+	this.cronapi.util = {};
+	
+	/**
+	 * @type function
+	 * @name {{callServerBlockly}}
+	 * @nameTags callServerBlockly
+	 * @description {{functionToCallServerBlockly}}
+	 * @param {string} classNameWithMethod {{classNameWithMethod}}
+	 * @param {string} callbackSuccess {{callbackSuccess}}
+	 * @param {string} callbackError {{callbackError}}
+	 * @param {object} params {{params}}
+	 */
+	this.cronapi.util.callServerBlockly = function(classNameWithMethod, callbackSuccess, callbackError) {
+    var request = {
+      echoServer : 'OK',
+      serverUrl: '/api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
+      params: []
+    };
+    
+    var scope = angular.element($0).scope(); 
+    var http = scope.http;
+    
+    for (var i = 1; i<arguments.length; i++)
+      request.put(arguments[i]);  
+    
+    http({
+      method : 'GET',
+      url: request.serverUrl,
+      data : JSON.stringify(request),
+      headers : {
+        'Content-Type' : 'application/json'
+      },
+    }).success(callbackSuccess).error(callbackError);
+  }
 
 	/**
 	 * @category DATETIME
