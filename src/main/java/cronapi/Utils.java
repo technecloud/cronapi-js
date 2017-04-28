@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,11 +99,37 @@ public class Utils {
 	public static String stringToJs(String string) {
 		return StringEscapeUtils.escapeJavaScript(string);
 	}
-	
+
 	public static int getFromCalendar(Date date, int field) {
-	  Calendar c = Calendar.getInstance();
-	  c.setTime(date);
-	  return c.get(field);
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		return c.get(field);
 	}
-	
+
+	public static Method findMethod(Object obj, String method) {
+		Method[] methods = obj.getClass().getMethods();
+		for (Method m : methods) {
+			if (m.getName().equalsIgnoreCase(method)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	public static Object clearObject(Object obj)  throws IllegalArgumentException, IllegalAccessException {
+		Field[] fields = obj.getClass().getFields();
+    for (Field f : fields) {
+			Class<?> type = f.getType();
+			if (type.isPrimitive()) {
+				f.set(obj, 0);
+			} else if (type.isArray()) {
+				Object temp;
+				temp = Array.newInstance(type.getComponentType(), Array.getLength(f.get(obj)));
+				f.set(obj, temp);
+			} else
+				f.set(obj, null);
+		}
+		return obj;
+	}
+
 }
