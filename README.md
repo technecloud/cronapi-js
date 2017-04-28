@@ -15,12 +15,12 @@ Java library for CronApp's users
     <repository>
         <id>central</id>
         <name>artifactory.cronapp.io-releases</name>
-        <url>https://artifactory.cronapp.io/libs-release</url>
+        <url>https://artifactory.cronapp.io/public-release</url>
     </repository>
     <repository>
         <id>snapshots</id>
         <name>artifactory.cronapp.io-snapshots</name>
-        <url>https://artifactory.cronapp.io/libs-snapshot</url>
+        <url>https://artifactory.cronapp.io/public-snapshot</url>
     </repository>
 </repositories>
 
