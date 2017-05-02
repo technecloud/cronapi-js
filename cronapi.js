@@ -167,22 +167,19 @@
 	 * @arbitraryParams true
 	 */
 	this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
-    var request = {
-      echoServer : 'OK',
-      serverUrl: 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
-      params: []
-    };
+    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod); 
+    var params = [];
     
     var scope = angular.element($('body')).scope(); 
     var http = scope.http;
     
     for (var i = 3; i<arguments.length; i++)
-      request.params.push(arguments[i]);  
+      params.push(arguments[i]); 
     
     http({
       method : 'POST',
-      url: request.serverUrl,
-      data : JSON.stringify(request),
+      url: serverUrl,
+      data : JSON.stringify(params),
       headers : {
         'Content-Type' : 'application/json'
       },
@@ -199,17 +196,11 @@
 	 * @arbitraryParams true
 	 */
 	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
-    var request = {
-      echoServer : 'OK',
-      serverUrl: 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod),
-      params: []
-    };
-    
-    var scope = angular.element($('body')).scope(); 
-    var http = scope.http;
+    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
+    var params = [];
     
     for (var i = 1; i<arguments.length; i++)
-      request.params.push(arguments[i]);  
+      params.push(arguments[i]);  
     
     var token = "";
     if (window.uToken)
@@ -217,8 +208,8 @@
       
     var result = $.ajax({
         type: 'POST',
-        url: request.serverUrl,
-        data : JSON.stringify(request),
+        url: serverUrl,
+        data : JSON.stringify(params),
         async: false,
         headers : {
           'Content-Type' : 'application/json',
