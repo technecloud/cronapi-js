@@ -116,20 +116,4 @@ public class Utils {
 		return null;
 	}
 
-	public static Object clearObject(Object obj)  throws IllegalArgumentException, IllegalAccessException {
-		Field[] fields = obj.getClass().getFields();
-    for (Field f : fields) {
-			Class<?> type = f.getType();
-			if (type.isPrimitive()) {
-				f.set(obj, 0);
-			} else if (type.isArray()) {
-				Object temp;
-				temp = Array.newInstance(type.getComponentType(), Array.getLength(f.get(obj)));
-				f.set(obj, temp);
-			} else
-				f.set(obj, null);
-		}
-		return obj;
-	}
-
 }
