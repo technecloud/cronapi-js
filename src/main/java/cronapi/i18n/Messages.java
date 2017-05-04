@@ -1,5 +1,6 @@
 package cronapi.i18n;
-import java.util.Locale; 
+import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -22,6 +23,12 @@ public class Messages {
     catch(MissingResourceException e) {
       return '!' + key + '!';
     }
+  }
+  
+  public static String format(String pattern, Object ... arguments) {
+    // MessageFormat não aceita apostrofo simples diretamente.
+    String fixedPattern = pattern.replace("'", "''");
+    return MessageFormat.format(fixedPattern, arguments);
   }
   
   public static void set(Locale locale) {
