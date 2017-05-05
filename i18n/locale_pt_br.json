@@ -73,5 +73,10 @@
   "callbackError": "Callback erro: função para callback quando ocorrer erro",
   "params": "Parâmetros",
   "callServerBlockly": "Chamar blockly servidor",
-  "functionToCallServerBlockly": "Função para chamar blockly do servidor"
+  "functionToCallServerBlockly": "Função para chamar blockly do servidor",
+  "makeCallServerBlocklyAsync": "Chamar blockly servidor assíncrono - callback com blockly",
+  "functionToMakeCallServerBlocklyAsync": "Função para chamar blockly do servidor assíncrono e com possibilidade de setar os callback como string (nome do blockly completo)",
+  "blocklyWithFunction": "Nome do blockly",
+  "callbackBlocklySuccess": "Callback sucesso: nome do blockly (completo) para ser chamado quando obter a resposta do servidor com sucesso",
+  "callbackBlocklyError": "Callback erro: nome do blockly (completo) para ser chamado quando obter a resposta do servidor com erro"
 }

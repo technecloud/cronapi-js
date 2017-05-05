@@ -161,8 +161,8 @@
 	 * @nameTags callServerBlocklyAsync
 	 * @description {{functionToCallServerBlocklyAsync}}
 	 * @param {string} classNameWithMethod {{classNameWithMethod}}
-	 * @param {string} callbackSuccess {{callbackSuccess}}
-	 * @param {string} callbackError {{callbackError}}
+	 * @param {object} callbackSuccess {{callbackSuccess}}
+	 * @param {object} callbackError {{callbackError}}
 	 * @param {object} params {{params}}
 	 * @arbitraryParams true
 	 */
@@ -185,6 +185,34 @@
       },
     }).success(callbackSuccess).error(callbackError);
   };
+  
+  /**
+	 * @type function
+	 * @name {{makeCallServerBlocklyAsync}}
+	 * @nameTags makeCallServerBlocklyAsync
+	 * @description {{functionToMakeCallServerBlocklyAsync}}
+	 * @param {string} blocklyWithFunction {{blocklyWithFunction}}
+	 * @param {string} callbackBlocklySuccess {{callbackBlocklySuccess}}
+	 * @param {string} callbackBlocklyError {{callbackBlocklyError}}
+	 * @param {object} params {{params}}
+	 * @arbitraryParams true
+	 */
+  this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
+    var params = '';
+    var callFunc = 'cronapi.util.callServerBlocklyAsync(blocklyWithFunction, function(data) { if (callbackSuccess) { if (typeof callbackSuccess == "string") eval(callbackSuccess+"(data)"); else callbackSuccess(data); }  }, function(data) {  if (callbackError) { if (typeof callbackError == "string") eval(callbackError+"(data)"); else callbackError(data); } }';
+    if (arguments.length > 3) {
+      for (var i=3; i<arguments.length; i++) {
+        params+='arguments['+i+'],';  
+      }
+      params = params.substring(0, params.length -1);
+    }
+    
+    if (params.length > 0)
+      callFunc += ',' + params + ')';
+    else
+      callFunc += ')';
+    eval(callFunc);
+  }
   
   /**
 	 * @type function
