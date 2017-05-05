@@ -22,6 +22,8 @@ public @interface CronapiMetaData {
 
 	String[] params() default "";
 	
+	String[] wizard() default "";
+	
 	boolean arbitraryParams()  default false;
 
 	ObjectType[] paramsType() default { ObjectType.UNKNOWN };
@@ -29,7 +31,7 @@ public @interface CronapiMetaData {
 	ObjectType returnType() default ObjectType.VOID;
 
 	public enum CategoryType {
-		CONVERSION, IO, UTIL, XML, DATETIME, EMAIL, FTP, OTHER
+    CONVERSION, IO, UTIL, XML, DATETIME, DATABASE, EMAIL, FTP, OTHER
 	}
 
 	public enum ObjectType {

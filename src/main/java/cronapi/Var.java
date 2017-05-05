@@ -9,28 +9,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
-*
-* @author bmoon
-*/
 public class Var implements Comparable {
 
 	public enum Type {
-
 		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, LONG
 	};
 
+	private String id;
 	private Type _type;
 	private Object _object;
 	private static final NumberFormat _formatter = new DecimalFormat("#.#####");
 
+	public static final Var VAR_NULL = new Var(null);
+	public static final Var VAR_TRUE = new Var(true);
+	public static final Var VAR_FALSE = new Var(false);
+	public static final Var VAR_ZERO = new Var(0);
+	public static final Var VAR_NEGATIVE_ONE = new Var(-1);
+
 	/**
-	 * Construct a Var with an UNKNOWN type
+	 * Construct a Var with an NULL type
 	 *
 	 */
 	public Var() {
-		_type = Type.UNKNOWN;
-	} // end var
+		_type = Type.NULL;
+	}
+
+	/**
+	 * Construct a Var and assign its contained object to that specified.
+	 *
+	 * @param object The value to set this object to
+	 */
+	public Var(String id, Object object) {
+		this.id = id;
+		setObject(object);
+	}
 
 	/**
 	 * Construct a Var and assign its contained object to that specified.
@@ -39,7 +51,7 @@ public class Var implements Comparable {
 	 */
 	public Var(Object object) {
 		setObject(object);
-	} // end var
+	}
 
 	/**
 	 * Construct a Var from a given Var
@@ -48,9 +60,28 @@ public class Var implements Comparable {
 	 */
 	public Var(Var var) {
 		_type = Type.UNKNOWN;
-	  if (var!=null)
-	    setObject(var.getObject());
-	} // end var
+		if (var!=null)
+			setObject(var.getObject());
+	}
+
+	/**
+	 * Set the value of the underlying object. Note that the type of Var will be
+	 * determined when setObject is called.
+	 *
+	 * @param val the value to set this Var to
+	 */
+	private void setObject(Object val) {
+		this._object = val;
+		inferType();
+		// make sure each element of List is Var if type is list
+		if (_type.equals(Var.Type.LIST)) {
+			LinkedList<Var> myList = new LinkedList<>();
+			for (Object obj : this.getObjectAsList()) {
+				myList.add(new Var(obj));
+			}
+			this._object = myList;
+		}
+	}
 
 	/**
 	 * Static constructor to make a var from some value.
@@ -59,8 +90,25 @@ public class Var implements Comparable {
 	 * @return the Var object
 	 */
 	public static Var valueOf(Object val) {
+		if (val instanceof  Var)
+			return (Var) val;
+
+		if (val instanceof Boolean) {
+			if (((Boolean) val)) {
+				return VAR_TRUE;
+			} else {
+				return VAR_FALSE;
+			}
+		}
 		return new Var(val);
-	} // end valueOf
+	}
+
+	public static Var valueOf(String id, Object val) {
+		if (val instanceof  Var && Objects.equals(((Var) val).getId(), id))
+			return (Var) val;
+		return new Var(id, val);
+	}
+
 
 	/**
 	 * Get the type of the underlying object
@@ -69,7 +117,11 @@ public class Var implements Comparable {
 	 */
 	public Type getType() {
 		return _type;
-	} // end getType
+	}
+
+	public String getId() {
+		return this.id;
+	}
 
 	/**
 	 * Get the contained object
@@ -78,7 +130,7 @@ public class Var implements Comparable {
 	 */
 	public Object getObject() {
 		return _object;
-	} // end getObject
+	}
 
 	/**
 	 * Clone Object
@@ -88,7 +140,7 @@ public class Var implements Comparable {
 	public Object cloneObject() {
 		Var tempVar = new Var(this);
 		return tempVar.getObject();
-	} // end cloneObject
+	}
 
 	/**
 	 * Get object as an int. Does not make sense for a "LIST" type object
@@ -97,58 +149,58 @@ public class Var implements Comparable {
 	 */
 	public int getObjectAsInt() {
 		switch (getType()) {
-		case STRING:
-			return Integer.parseInt((String) getObject());
-		case INT:
-			return (int) getObject();
-		case BOOLEAN:
-			return ((boolean) getObject()) ? 1 : 0;
-		case DOUBLE:
-			return new Double((double) getObject()).intValue();
-		case LONG:
-			return new Long((long) getObject()).intValue();
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
+			case STRING:
+				return Integer.parseInt((String) getObject());
+			case INT:
+				return (int) getObject();
+			case BOOLEAN:
+				return ((boolean) getObject()) ? 1 : 0;
+			case DOUBLE:
+				return new Double((double) getObject()).intValue();
+			case LONG:
+				return new Long((long) getObject()).intValue();
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
 		}
 		return 0;
-	} // end getObjectAsInt
+	}
 
 	/**
-	 * Get object as an boolean. 
+	 * Get object as an boolean.
 	 *
 	 * @return an bool whose value equals this object
 	 */
 	public boolean getObjectAsBoolean() {
 		switch (getType()) {
-		case STRING:
-			String s = (String) getObject();
-			if (s.equals("1") || s.equalsIgnoreCase("true")) {
-				s = "TRUE";
-			} else {
-				s = "FALSE";
-			}
-			return Boolean.valueOf(s);
-		case INT:
-			return (int) getObject() > 0;
-		case BOOLEAN:
-			return (boolean) getObject();
-		case DOUBLE:
-			return new Double((double) getObject()).intValue() > 0;
-		case LONG:
-			return new Long((long) getObject()).intValue() > 0;
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
+			case STRING:
+				String s = (String) getObject();
+				if (s.equals("1") || s.equalsIgnoreCase("true")) {
+					s = "true";
+				} else {
+					s = "false";
+				}
+				return Boolean.valueOf(s);
+			case INT:
+				return (int) getObject() > 0;
+			case BOOLEAN:
+				return (boolean) getObject();
+			case DOUBLE:
+				return new Double((double) getObject()).intValue() > 0;
+			case LONG:
+				return new Long((long) getObject()).intValue() > 0;
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
 		}
 		return false;
-	} // end getObjectAsBoolean
+	}
 
 	/**
 	 * Get object as a double. Does not make sense for a "LIST" type object.
@@ -157,25 +209,25 @@ public class Var implements Comparable {
 	 */
 	public double getObjectAsDouble() {
 		switch (getType()) {
-		case STRING:
-			return Double.parseDouble((String) getObject());
-		case INT:
-			return new Integer((int) getObject()).doubleValue();
-		case BOOLEAN:
-			return ((boolean) getObject()) ? 1.0 : 0.0;
-		case DOUBLE:
-			return (double) getObject();
-		case LONG:
-			return new Long((long) getObject()).doubleValue();
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
+			case STRING:
+				return Double.parseDouble((String) getObject());
+			case INT:
+				return new Integer((int) getObject()).doubleValue();
+			case BOOLEAN:
+				return ((boolean) getObject()) ? 1.0 : 0.0;
+			case DOUBLE:
+				return (double) getObject();
+			case LONG:
+				return new Long((long) getObject()).doubleValue();
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
 		}
 		return 0.0;
-	} // end get object as double
+	}
 
 	/**
 	 * Get object as a long. Does not make sense for a "LIST" type object.
@@ -184,25 +236,25 @@ public class Var implements Comparable {
 	 */
 	public long getObjectAsLong() {
 		switch (getType()) {
-		case STRING:
-			return Long.parseLong((String) getObject());
-		case INT:
-			return new Integer((int) getObject()).longValue();
-		case BOOLEAN:
-			return ((boolean) getObject()) ? 1 : 0;
-		case DOUBLE:
-			return new Double((double) getObject()).longValue();
-		case LONG:
-			return (long) getObject();
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
+			case STRING:
+				return Long.parseLong((String) getObject());
+			case INT:
+				return new Integer((int) getObject()).longValue();
+			case BOOLEAN:
+				return ((boolean) getObject()) ? 1 : 0;
+			case DOUBLE:
+				return new Double((double) getObject()).longValue();
+			case LONG:
+				return (long) getObject();
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
 		}
 		return 0;
-	} // end get object as double
+	}
 
 	/**
 	 * Get object as a string.
@@ -212,7 +264,7 @@ public class Var implements Comparable {
 	 */
 	public String getObjectAsString() {
 		return this.toString();
-	} // end gotObjectAsString
+	}
 
 	/**
 	 * Get the object as a list.
@@ -221,7 +273,7 @@ public class Var implements Comparable {
 	 */
 	public LinkedList<Var> getObjectAsList() {
 		return (LinkedList<Var>) getObject();
-	} // end getObjectAsList
+	}
 
 	/**
 	 * If this object is a linked list, then calling this method will return the
@@ -232,7 +284,7 @@ public class Var implements Comparable {
 	 */
 	public Var get(int index) {
 		return ((LinkedList<Var>) getObject()).get(index);
-	} // end get
+	}
 
 	/**
 	 * If this object is a linked list, then calling this method will return the
@@ -242,7 +294,7 @@ public class Var implements Comparable {
 	 */
 	public int size() {
 		return ((LinkedList<Var>) getObject()).size();
-	} // end size
+	}
 
 	/**
 	 * Set the value of of a list at the index specified. Note that this is only
@@ -254,7 +306,7 @@ public class Var implements Comparable {
 	 */
 	public void set(int index, Var var) {
 		((LinkedList<Var>) getObject()).add(index, var);
-	} // end set
+	}
 
 	/**
 	 * Add all values from one List to another. Both lists are Var objects that
@@ -264,100 +316,7 @@ public class Var implements Comparable {
 	 */
 	public void addAll(Var var) {
 		((LinkedList<Var>) getObject()).addAll(var.getObjectAsList());
-	} // end addAll
-
-	/**
-	 * Set the value of the underlying object. Note that the type of Var will be
-	 * determined when setObject is called.
-	 *
-	 * @param val the value to set this Var to
-	 */
-	public void setObject(Object val) {
-		this._object = val;
-		inferType();
-		// make sure each element of List is Var if type is list
-		if (_type.equals(Var.Type.LIST)) {
-			LinkedList<Var> myList = new LinkedList<>();
-			for (Object obj : this.getObjectAsList()) {
-				myList.add(new Var(obj));
-			}
-			this._object = myList;
-		}
-	} // end setObject
-
-	/**
-	 * Add a new member to a Var that contains a list. If the Var current is not
-	 * of type "LIST", then this Var will be converted to a list, its current
-	 * value will then be stored as the first member and this new member added
-	 * to it.
-	 *
-	 * @param member The new member to add to the list
-	 */
-	public void add(Var member) {
-		if (_type.equals(Var.Type.LIST)) {
-			// already a list
-			((LinkedList<Var>) _object).add(member);
-		} else {
-			// not current a list, change it
-			LinkedList<Var> temp = new LinkedList<>();
-			temp.add(new Var(member));
-			setObject(temp);
-		}
-	} // end add
-
-	/**
-	 * Increment Object by some value.
-	 *
-	 * @param inc The value to increment by
-	 */
-	public void incrementObject(double inc) {
-		switch (getType()) {
-		case STRING:
-			// has no meaning
-			break;
-		case INT:
-			this.setObject((double) (this.getObjectAsInt() + inc));
-			break;
-		case DOUBLE:
-			this.setObject((double) (this.getObjectAsDouble() + inc));
-			break;
-		case LIST:
-			for (Var myVar : this.getObjectAsList()) {
-				myVar.incrementObject(inc);
-			}
-			break;
-		default:
-			// has no meaning
-			break;
-		} // end switch
-	} // end incrementObject
-
-	/**
-	 * Increment Object by some value
-	 *
-	 * @param inc The value to increment by
-	 */
-	public void incrementObject(int inc) {
-		switch (getType()) {
-		case STRING:
-			// has no meaning
-			break;
-		case INT:
-			this.setObject((int) (this.getObjectAsInt() + inc));
-			break;
-		case DOUBLE:
-			this.setObject((double) (this.getObjectAsDouble() + inc));
-			break;
-		case LIST:
-			for (Var myVar : this.getObjectAsList()) {
-				myVar.incrementObject(inc);
-			}
-			break;
-		default:
-			// has no meaning
-			break;
-		}// end switch
-	} // end incrementObject
+	}
 
 	@Override
 	public int hashCode() {
@@ -381,7 +340,7 @@ public class Var implements Comparable {
 			return getType().equals(other.getType());
 		}
 		return this.toString().equals(other.toString());
-	} // end equals
+	}
 
 	/**
 	 * Check to see if this Var is less than some other var.
@@ -391,30 +350,30 @@ public class Var implements Comparable {
 	 */
 	public boolean lessThan(Var var) {
 		switch (getType()) {
-		case STRING:
-			return this.getObjectAsString().compareTo(var.getObjectAsString()) < 0;
-		case INT:
-			return this.getObjectAsInt() < var.getObjectAsDouble();
-		case DOUBLE:
-			return this.getObjectAsDouble() < var.getObjectAsDouble();
-		case LIST:
-			if (size() != var.size()) {
-				return false;
-			}
-			if (!var.getType().equals(Var.Type.LIST)) {
-				return false;
-			}
-			int index = 0;
-			for (Var myVar : this.getObjectAsList()) {
-				if (!myVar.lessThan(var.get(index))) {
+			case STRING:
+				return this.getObjectAsString().compareTo(var.getObjectAsString()) < 0;
+			case INT:
+				return this.getObjectAsInt() < var.getObjectAsDouble();
+			case DOUBLE:
+				return this.getObjectAsDouble() < var.getObjectAsDouble();
+			case LIST:
+				if (size() != var.size()) {
 					return false;
 				}
-			}
-			return true;
-		default:
-			return false;
-		}// end switch
-	} // end less than
+				if (!var.getType().equals(Var.Type.LIST)) {
+					return false;
+				}
+				int index = 0;
+				for (Var myVar : this.getObjectAsList()) {
+					if (!myVar.lessThan(var.get(index))) {
+						return false;
+					}
+				}
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Check to see if this var is less than or equal to some other var
@@ -424,32 +383,32 @@ public class Var implements Comparable {
 	 */
 	public boolean lessThanOrEqual(Var var) {
 		switch (getType()) {
-		case STRING:
-			return this.getObjectAsString().compareTo(var.getObjectAsString()) <= 0;
-		case INT:
-			return this.getObjectAsInt() <= var.getObjectAsDouble();
-		case DOUBLE:
-			return this.getObjectAsDouble() <= var.getObjectAsDouble();
-		case LIST:
-			if (size() != var.size()) {
-				return false;
-			}
-			if (!var.getType().equals(Var.Type.LIST)) {
-				return false;
-			}
-			int index = 0;
-			for (Var myVar : this.getObjectAsList()) {
-				if (!myVar.lessThanOrEqual(var.get(index))) {
+			case STRING:
+				return this.getObjectAsString().compareTo(var.getObjectAsString()) <= 0;
+			case INT:
+				return this.getObjectAsInt() <= var.getObjectAsDouble();
+			case DOUBLE:
+				return this.getObjectAsDouble() <= var.getObjectAsDouble();
+			case LIST:
+				if (size() != var.size()) {
 					return false;
 				}
-			}
-			return true;
-		case NULL:
-			return (var.getType() == Var.Type.NULL);
-		default:
-			return false;
-		}// end switch
-	} // end lessThanOrEqual
+				if (!var.getType().equals(Var.Type.LIST)) {
+					return false;
+				}
+				int index = 0;
+				for (Var myVar : this.getObjectAsList()) {
+					if (!myVar.lessThanOrEqual(var.get(index))) {
+						return false;
+					}
+				}
+				return true;
+			case NULL:
+				return (var.getType() == Var.Type.NULL);
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Check to see if this var is greater than a given var.
@@ -459,7 +418,7 @@ public class Var implements Comparable {
 	 */
 	public boolean greaterThan(Var var) {
 		return var.lessThan(this);
-	} // end greaterThan
+	}
 
 	/**
 	 * Check to see if this var is greater than or equal to a given var
@@ -469,7 +428,7 @@ public class Var implements Comparable {
 	 */
 	public boolean greaterThanOrEqual(Var var) {
 		return var.lessThanOrEqual(this);
-	} // end greaterThanOrEqual
+	}
 
 	/**
 	 * Compare this object's value to another
@@ -489,24 +448,24 @@ public class Var implements Comparable {
 			var = new Var(val);
 		}
 		switch (getType()) {
-		case STRING:
-			return this.getObjectAsString().compareTo(var.getObjectAsString());
-		case INT:
-			if (var.getType().equals(Var.Type.INT)) {
-				return ((Integer) this.getObjectAsInt()).compareTo(var.getObjectAsInt());
-			} else {
+			case STRING:
+				return this.getObjectAsString().compareTo(var.getObjectAsString());
+			case INT:
+				if (var.getType().equals(Var.Type.INT)) {
+					return ((Integer) this.getObjectAsInt()).compareTo(var.getObjectAsInt());
+				} else {
+					return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
+				}
+			case DOUBLE:
 				return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-			}
-		case DOUBLE:
-			return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-		case LIST:
-			// doesn't make sense
-			return Integer.MAX_VALUE;
-		default:
-			// doesn't make sense
-			return Integer.MAX_VALUE;
-		}// end switch
-	} // end compareTo
+			case LIST:
+				// doesn't make sense
+				return Integer.MAX_VALUE;
+			default:
+				// doesn't make sense
+				return Integer.MAX_VALUE;
+		}
+	}
 
 	/**
 	 * Convert this Var to a string format.
@@ -516,37 +475,37 @@ public class Var implements Comparable {
 	@Override
 	public String toString() {
 		switch (getType()) {
-		case STRING:
-			return getObject().toString();
-		case INT:
-			Integer i = (int) getObject();
-			return i.toString();
-		case DOUBLE:
-			Double d = (double) _object;
-			return _formatter.format(d);
-		case LIST:
-			LinkedList<Var> ll = (LinkedList) getObject();
-			StringBuilder sb = new StringBuilder();
-			boolean first = true;
-			for (Var v : ll) {
-				if (first) {
-					first = false;
-					sb.append("{");
-				} else {
-					sb.append(", ");
+			case STRING:
+				return getObject().toString();
+			case INT:
+				Integer i = (int) getObject();
+				return i.toString();
+			case DOUBLE:
+				Double d = (double) _object;
+				return _formatter.format(d);
+			case LIST:
+				LinkedList<Var> ll = (LinkedList) getObject();
+				StringBuilder sb = new StringBuilder();
+				boolean first = true;
+				for (Var v : ll) {
+					if (first) {
+						first = false;
+						sb.append("{");
+					} else {
+						sb.append(", ");
+					}
+					sb.append(v.toString());
 				}
-				sb.append(v.toString());
-			} // end for each Var
-			sb.append("}");
-			return sb.toString();
-		case NULL:
-			return null;
-		default:
-		  if (getObject() == null)
-		    return "";
-			return getObject().toString();
-		}// end switch
-	} // end toString
+				sb.append("}");
+				return sb.toString();
+			case NULL:
+				return null;
+			default:
+				if (getObject() == null)
+					return "";
+				return getObject().toString();
+		}
+	}
 
 	/**
 	 * Internal method for inferring the "object type" of this object. When it
@@ -593,105 +552,11 @@ public class Var implements Comparable {
 							} else {
 								_type = Type.UNKNOWN;
 							}
-						} // end not an integer
+						}
 					}
 
-				} // end not a double  
-			}
-		} // end else not a string
-	} // end inferType
-
-	static double math_sum(Var myList) {
-		double sum = 0;
-		LinkedList<Var> ll = myList.getObjectAsList();
-		for (Var var : ll) {
-			sum += var.getObjectAsDouble();
-		}
-		return sum;
-	}
-
-	static double math_min(Var myList) {
-		double min = Double.MAX_VALUE;
-		double d;
-		LinkedList<Var> ll = myList.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
-			if (d < min) {
-				min = d;
+				}
 			}
 		}
-		return min;
-	}
-
-	static double math_max(Var myList) {
-		double max = Double.MIN_VALUE;
-		double d;
-		LinkedList<Var> ll = myList.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
-			if (d > max) {
-				max = d;
-			}
-		}
-		return max;
-	}
-
-	static double math_mean(Var myList) {
-		return Var.math_sum(myList) / myList.size();
-	}
-
-	static double math_median(Var myList) {
-		LinkedList<Var> ll = myList.getObjectAsList();
-		Collections.sort(ll);
-		int length = myList.size();
-		int middle = length / 2;
-		if (length % 2 == 1) {
-			return ll.get(middle).getObjectAsDouble();
-		} else {
-			double d1 = ll.get(middle - 1).getObjectAsDouble();
-			double d2 = ll.get(middle).getObjectAsDouble();
-			return (d1 + d2) / 2.0;
-		}
-	}
-
-	static Var math_modes(Var myList) {
-		final Var modes = new Var();
-		final Map<Double, Double> countMap = new HashMap<Double, Double>();
-		double max = -1;
-		double d;
-		LinkedList<Var> ll = myList.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
-			double count = 0;
-			if (countMap.containsKey(d)) {
-				count = countMap.get(d) + 1;
-			} else {
-				count = 1;
-			}
-			countMap.put(d, count);
-			if (count > max) {
-				max = count;
-			}
-		}
-		for (final Map.Entry<Double, Double> tuple : countMap.entrySet()) {
-			if (tuple.getValue() == max) {
-				modes.add(Var.valueOf(tuple.getKey().doubleValue()));
-			}
-		}
-		return modes;
-	}
-
-	static double math_standard_deviation(Var myList) {
-		double mean = math_mean(myList);
-		double size = myList.size();
-		double temp = 0;
-		double d;
-		LinkedList<Var> ll = myList.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
-			temp += (mean - d) * (mean - d);
-		}
-		double variance = temp / size;
-		return Math.sqrt(variance);
 	}
 }
