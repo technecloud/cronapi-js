@@ -31,7 +31,7 @@ public @interface CronapiMetaData {
 	ObjectType returnType() default ObjectType.VOID;
 
 	public enum CategoryType {
-		CONVERSION, IO, UTIL, XML, DATETIME, EMAIL, FTP, OTHER
+    CONVERSION, IO, UTIL, XML, DATETIME, DATABASE, EMAIL, FTP, OTHER
 	}
 
 	public enum ObjectType {
