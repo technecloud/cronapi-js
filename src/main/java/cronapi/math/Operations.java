@@ -222,7 +222,7 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{log10FunctionName}}", nameTags = {
 			"log10Function" }, description = "{{log10FunctionDescription}}", params = {
 					"{{log10FunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
@@ -243,7 +243,7 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{expFunctionName}}", nameTags = {
 			"expFunction" }, description = "{{expFunctionDescription}}", params = {
 					"{{expFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
@@ -264,28 +264,29 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{powFunctionName}}", nameTags = {
-			"powFunction" }, description = "{{powFunctionDescription}}", params = {
-					"{{expFunctionParam0}}","{{expFunctionParam1}}" }, paramsType = { ObjectType.OBJECT ,  ObjectType.OBJECT}, returnType = ObjectType.OBJECT)
-	public static final Var pow(Var value1,Var value2) throws Exception {
+			"powFunction" }, description = "{{powFunctionDescription}}", params = { "{{expFunctionParam0}}",
+					"{{expFunctionParam1}}" }, paramsType = { ObjectType.OBJECT,
+							ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var pow(Var value1, Var value2) throws Exception {
 		Var result;
 		switch (value1.getType()) {
 		case DOUBLE: {
-			result = new Var(Math.pow(value1.getObjectAsDouble(),value2.getObjectAsDouble()));
+			result = new Var(Math.pow(value1.getObjectAsDouble(), value2.getObjectAsDouble()));
 			break;
 		}
 		case LONG: {
-			result = new Var(Math.pow(value1.getObjectAsLong(),value2.getObjectAsLong()));
+			result = new Var(Math.pow(value1.getObjectAsLong(), value2.getObjectAsLong()));
 			break;
 		}
 		default: {
-			result = new Var(Math.pow(value1.getObjectAsInt(),value2.getObjectAsInt()));
+			result = new Var(Math.pow(value1.getObjectAsInt(), value2.getObjectAsInt()));
 		}
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{roundFunctionName}}", nameTags = {
 			"roundFunction" }, description = "{{roundFunctionDescription}}", params = {
 					"{{roundFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
@@ -306,9 +307,132 @@ public class Operations {
 		}
 		return result;
 	}
+
+	@CronapiMetaData(type = "function", name = "{{ceilFunctionName}}", nameTags = {
+			"ceilFunction" }, description = "{{ceilFunctionDescription}}", params = {
+					"{{ceilFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var ceil(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.ceil(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.ceil(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.ceil(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{floorFunctionName}}", nameTags = {
+			"floorFunction" }, description = "{{floorFunctionDescription}}", params = {
+					"{{floorFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var floor(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.floor(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.floor(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.floor(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{sinFunctionName}}", nameTags = {
+			"sinFunction" }, description = "{{sinFunctionDescription}}", params = {
+					"{{sinFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var sin(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.sin(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.sin(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.sin(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{cosFunctionName}}", nameTags = {
+			"cosFunction" }, description = "{{cosFunctionDescription}}", params = {
+					"{{cosFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var cos(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.cos(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.cos(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.cos(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
 	
+	@CronapiMetaData(type = "function", name = "{{tanFunctionName}}", nameTags = {
+			"tanFunction" }, description = "{{tanFunctionDescription}}", params = {
+					"{{tanFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var tan(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.tan(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.tan(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.tan(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
 	
-	
+	@CronapiMetaData(type = "function", name = "{{asinFunctionName}}", nameTags = {
+			"asinFunction" }, description = "{{asinFunctionDescription}}", params = {
+					"{{asinFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var asin(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.asin(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.asin(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.asin(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
 	
 
 }
