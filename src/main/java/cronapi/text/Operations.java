@@ -12,7 +12,7 @@ import cronapi.Var;
  *
  */
 //@CronapiMetaData(category = "Text", categorySynonymous = { "Text", "Operations" })
-//public class Operations {
+public class Operations {
 //
 //	/**
 //	 * Construtor
