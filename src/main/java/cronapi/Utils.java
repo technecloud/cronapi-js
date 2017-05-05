@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -24,6 +26,7 @@ import javax.xml.bind.DatatypeConverter;
 import cronapi.i18n.Messages;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.math.NumberUtils;
 
 /**
  * Classe que representa ...
@@ -117,31 +120,84 @@ public class Utils {
 		return null;
 	}
 
-	public static Calendar toCalendar(String value, String mask) {
-		if (value == null) {
-			return null;
+	public static Calendar toGenericCalendar(String value) {
+		Date date = null;
+		try {
+			if (NumberUtils.isNumber(value)) {
+				Double d = Double.valueOf(value);
+				date = new Date(d.longValue());
+			}
+		} catch (Exception e) {
+			//
 		}
-		String datePattern = Messages.getString("ParseDateFormat");
 
-		final String[] formats = { "", (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s",
-				"yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
-
-		formats[0] = mask;
-
-		for (int i = 0; i < formats.length; i++) {
-			if (formats[i] != null && !formats[i].isEmpty()) {
+		if (date == null) {
+			for (DateFormat format : genericParseDateFormat.get()) {
 				try {
-					java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(formats[i]);
-					Date date = format.parse(value);
-					Calendar c = Calendar.getInstance();
-					c.setTime(date);
-					return c;
-				} catch (Exception e) {
+					date = format.parse(value);
+				} catch (Exception e2) {
+					//Abafa
 				}
 			}
 		}
 
+		if (date != null) {
+			Calendar c = Calendar.getInstance();
+			c.setTime(date);
+			return c;
+		}
+
 		return null;
 	}
+
+	public static Calendar toCalendar(String value, String mask) {
+		if (value == null) {
+			return null;
+		}
+
+		try {
+			if (mask != null && !mask.isEmpty()) {
+				SimpleDateFormat format = new SimpleDateFormat(mask);
+				Date date = format.parse(value);
+				Calendar c = Calendar.getInstance();
+				c.setTime(date);
+				return c;
+			}
+		} catch (Exception e) {
+			//
+		}
+
+		return toGenericCalendar(value);
+	}
+
+	public static final ThreadLocal<DateFormat> dateTimeFormat = new ThreadLocal<DateFormat>() {
+		@Override
+		protected DateFormat initialValue() {
+			return new SimpleDateFormat(Messages.getString("DateTimeFormat"));
+		}
+	};
+
+	public static final ThreadLocal<DateFormat> parseDateFormat = new ThreadLocal<DateFormat>() {
+		@Override
+		protected DateFormat initialValue() {
+			return new SimpleDateFormat(Messages.getString("ParseDateFormat"));
+		}
+	};
+
+	public static final ThreadLocal<DateFormat[]> genericParseDateFormat = new ThreadLocal<DateFormat[]>() {
+		@Override
+		protected DateFormat[] initialValue() {
+			String datePattern = Messages.getString("ParseDateFormat");
+
+			final String[] formats = { (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s",
+					"yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
+
+			DateFormat[] dateFormats = new DateFormat[formats.length];
+			for (int i=0;i<formats.length;i++) {
+				dateFormats[i] = new SimpleDateFormat(formats[i]);
+			}
+			return dateFormats;
+		}
+	};
 
 }

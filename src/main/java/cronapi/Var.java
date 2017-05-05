@@ -1,9 +1,12 @@
 package cronapi;
 
+import cronapi.i18n.Messages;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Var implements Comparable {
@@ -519,6 +522,8 @@ public class Var implements Comparable {
 			case DOUBLE:
 				Double d = (double) _object;
 				return _formatter.format(d);
+			case DATETIME:
+				return Utils.dateTimeFormat.get().format(((Calendar)getObject()).getTime());
 			case LIST:
 				LinkedList<Var> ll = (LinkedList) getObject();
 				StringBuilder sb = new StringBuilder();

@@ -6,7 +6,7 @@ import java.util.ResourceBundle;
 
 public class Messages { 
   
-  private static final String BUNDLE_NAME = "i18n.Messages";
+  private static final String BUNDLE_NAME = "cronapi.i18n.Messages";
   
   private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("pt", "BR"));
 
