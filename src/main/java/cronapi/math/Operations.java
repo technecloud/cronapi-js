@@ -68,7 +68,7 @@ public class Operations {
 			"addFunction" }, description = "{{addFunctionDescription}}", params = {
 					"{{addFunctionParam0}}" }, paramsType = {
 							ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
-	public static final Var add(Var... values) throws Exception {
+	public static final Var sum(Var... values) throws Exception {
 		Var result = new Var();
 
 		switch (values[0].getType()) {
