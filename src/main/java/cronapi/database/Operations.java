@@ -37,7 +37,7 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceHasData}}", nameTags = { "hasData", "hasElements",
-			"existeElemento", "proximo", "avancar" }, description = "{{functionToMoveCursorToNextPosition}}", params = {
+			"existeRegistro", "proximo", "avancar" }, description = "{{functionToMoveCursorToNextPosition}}", params = {
 					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
 	public static void hasData(Var ds) {
 		((DataSource) ds.getObject()).next();
@@ -102,6 +102,30 @@ public class Operations {
 					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
 	public static void remove(Var ds) {
 		((DataSource) ds.getObject()).delete();
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{datasourceRemoveConditionally}}", nameTags = { "remove", "delete", "apagar",
+			"remover" }, description = "{{functionToRemoveConditionallyObjectInDatasource}}", params = {
+					"{{datasource}}", "{{removeQuery}}", "{{paramsRemoveTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
+	public static void remove(Var ds, Var removeQuery, Var...params) {
+	  Object[][] paramsObject = new Object[params.length][2];
+		for (int i = 0; i < params.length; i++) {
+			paramsObject[i][0] = params[i].getId();
+			paramsObject[i][1] = params[i].getObject();
+		}
+		((DataSource) ds.getObject()).delete(removeQuery.getObjectAsString(), paramsObject);
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{datasourceUpdateConditionally}}", nameTags = { "remove", "delete", "apagar",
+			"remover" }, description = "{{functionToUpdateConditionallyObjectInDatasource}}", params = {
+					"{{datasource}}", "{{updateQuery}}", "{{paramsUpdateTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
+	public static void update(Var ds, Var updateQuery, Var...params) {
+	  Object[][] paramsObject = new Object[params.length][2];
+		for (int i = 0; i < params.length; i++) {
+			paramsObject[i][0] = params[i].getId();
+			paramsObject[i][1] = params[i].getObject();
+		}
+		((DataSource) ds.getObject()).updateFields(updateQuery.getObjectAsString(), paramsObject);
 	}
 
 }
