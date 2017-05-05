@@ -22,6 +22,8 @@ public @interface CronapiMetaData {
 
 	String[] params() default "";
 	
+	String[] wizard() default "";
+	
 	boolean arbitraryParams()  default false;
 
 	ObjectType[] paramsType() default { ObjectType.UNKNOWN };
