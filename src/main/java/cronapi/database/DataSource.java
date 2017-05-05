@@ -1,11 +1,10 @@
 package cronapi.database;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -34,8 +33,7 @@ public class DataSource {
 	private String entity;
 	private Class domainClass;
 	private String filter;
-	private Object[] params;
-	private List<Object> results;
+	private Object[][] params;
 	private int pageSize;
 	private Page page;
 	private int index;
@@ -65,7 +63,6 @@ public class DataSource {
 		this.pageRequest = new PageRequest(0, pageSize);
 
 		//initialize dependencies and necessaries objects
-		this.results = new ArrayList<Object>();
 		this.instantiateRepository();
 	}
 
@@ -118,11 +115,9 @@ public class DataSource {
 				} else
 					queryCount = query;
 
-				int i = 0;
-				for (Object p : query.getParameters().toArray()) {
-					query.setParameter(((Parameter) p).getName(), this.params[i]);
-					queryCount.setParameter(((Parameter) p).getName(), this.params[i]);
-					i++;
+				for (Object[] p : this.params) {
+					query.setParameter(p[0].toString(), p[1]);
+					queryCount.setParameter(p[0].toString(), p[1]);
 				}
 
 				long totalResults = 0;
@@ -144,8 +139,10 @@ public class DataSource {
 		} else
 			this.page = this.repository.findAll(this.pageRequest);
     
-		this.results.clear();
-		this.results.addAll(this.page.getContent());
+		//has data, moves cursor to first position
+		if(this.page.getNumberOfElements() > 0)
+		  this.current = 0;
+		  
 		return this.page.getContent().toArray();
 	}
 
@@ -230,7 +227,7 @@ public class DataSource {
 	  if(this.insertedElement != null)
 	    return this.insertedElement;
 	  
-		return this.results.get(this.current);
+		return this.page.getContent().get(this.current);
 	}
 
 	/** 
@@ -253,11 +250,9 @@ public class DataSource {
 	/**
 	 * Moves the index for next position, in pageable case, 
 	 * looking for next page and so on 
-	 * 
-	 * @return boolean true if has next, false else
 	 */
-	public boolean next() {
-		if (this.results.size() > (this.current + 1))
+	public void next() {
+		if (this.page.getNumberOfElements() > (this.current + 1))
 			this.current++;
 		else {
 			if (this.page.hasNext()) {
@@ -265,10 +260,26 @@ public class DataSource {
 				this.fetch();
 				this.current=0;
 			} else {
+			}
+		}
+	}
+	
+	/**
+	 * Verify if can moves the index for next position, 
+	 * in pageable case, looking for next page and so on 
+	 * 
+	 * @return boolean true if has next, false else
+	 */
+	public boolean hasNext() {
+		if (this.page.getNumberOfElements() > (this.current + 1))
+			return true;
+		else {
+			if (this.page.hasNext()) {
+				return true;
+			} else {
 				return false;
 			}
 		}
-		return true;
 	}
 
 	/**
@@ -318,7 +329,7 @@ public class DataSource {
 	 * @param filter jpql instruction like a namedQuery
 	 * @param params parameters used in jpql instruction
 	 */
-	public void filter(String filter, Object... params) {
+	public void filter(String filter, Object[]... params) {
 		this.filter = filter;
 		this.params = params;
 		this.pageRequest = new PageRequest(0, pageSize);
@@ -326,5 +337,13 @@ public class DataSource {
 		this.fetch();
 	}
 	
+	/**
+	 * Clean Datasource and to free up allocated memory
+	 */
+	public void clear() {
+		this.pageRequest = new PageRequest(0, 100);
+		this.current = -1;
+		this.page = null;
+	}
 	
 }
