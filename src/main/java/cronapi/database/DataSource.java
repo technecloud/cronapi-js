@@ -100,7 +100,7 @@ public class DataSource {
 			try {
 				RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
 				EntityManager em = ru.getEntityManager(domainClass);
-				TypedQuery<?> queryCount;
+				TypedQuery<Long> queryCount = null;
 				TypedQuery<?> query = em.createQuery(filter, domainClass);
 
 				String selectCount = "Select COUNT( %s ) from ";
@@ -111,12 +111,12 @@ public class DataSource {
 
 				if (filterCount != null) {
 					queryCount = em.createQuery(filterCount, Long.class);
-				} else
-					queryCount = query;
+				}
 
 				for (Object[] p : this.params) {
 					query.setParameter(p[0].toString(), p[1]);
-					queryCount.setParameter(p[0].toString(), p[1]);
+					if (queryCount != null)
+					  queryCount.setParameter(p[0].toString(), p[1]);
 				}
 
 				long totalResults = 0;
@@ -124,7 +124,7 @@ public class DataSource {
 				if (filterCount != null)
 					totalResults = (long) queryCount.getSingleResult();
 				else
-					totalResults = queryCount.getResultList().size();
+					totalResults = query.getResultList().size();
 
 				query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
 				query.setMaxResults(this.pageRequest.getPageSize());

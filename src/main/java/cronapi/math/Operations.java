@@ -52,7 +52,7 @@ public class Operations {
 			result = subtractDouble(values);
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = subtractLong(values);
 			break;
 		}
@@ -76,7 +76,7 @@ public class Operations {
 			result = addDouble(values);
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = addLong(values);
 			break;
 		}
@@ -170,7 +170,7 @@ public class Operations {
 			result = new Var(Math.abs(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.abs(value.getObjectAsLong()));
 			break;
 		}
@@ -191,7 +191,7 @@ public class Operations {
 			result = new Var(Math.sqrt(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.sqrt(value.getObjectAsLong()));
 			break;
 		}
@@ -212,7 +212,7 @@ public class Operations {
 			result = new Var(Math.log(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.log(value.getObjectAsLong()));
 			break;
 		}
@@ -233,7 +233,7 @@ public class Operations {
 			result = new Var(Math.log10(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.log10(value.getObjectAsLong()));
 			break;
 		}
@@ -254,7 +254,7 @@ public class Operations {
 			result = new Var(Math.exp(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.exp(value.getObjectAsLong()));
 			break;
 		}
@@ -276,7 +276,7 @@ public class Operations {
 			result = new Var(Math.pow(value1.getObjectAsDouble(), value2.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.pow(value1.getObjectAsLong(), value2.getObjectAsLong()));
 			break;
 		}
@@ -297,7 +297,7 @@ public class Operations {
 			result = new Var(Math.round(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.round(value.getObjectAsLong()));
 			break;
 		}
@@ -318,7 +318,7 @@ public class Operations {
 			result = new Var(Math.ceil(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.ceil(value.getObjectAsLong()));
 			break;
 		}
@@ -339,7 +339,7 @@ public class Operations {
 			result = new Var(Math.floor(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.floor(value.getObjectAsLong()));
 			break;
 		}
@@ -360,7 +360,7 @@ public class Operations {
 			result = new Var(Math.sin(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.sin(value.getObjectAsLong()));
 			break;
 		}
@@ -381,7 +381,7 @@ public class Operations {
 			result = new Var(Math.cos(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.cos(value.getObjectAsLong()));
 			break;
 		}
@@ -402,7 +402,7 @@ public class Operations {
 			result = new Var(Math.tan(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.tan(value.getObjectAsLong()));
 			break;
 		}
@@ -423,7 +423,7 @@ public class Operations {
 			result = new Var(Math.asin(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.asin(value.getObjectAsLong()));
 			break;
 		}
@@ -444,7 +444,7 @@ public class Operations {
 			result = new Var(Math.acos(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.acos(value.getObjectAsLong()));
 			break;
 		}
@@ -465,7 +465,7 @@ public class Operations {
 			result = new Var(Math.atan(value.getObjectAsDouble()));
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = new Var(Math.atan(value.getObjectAsLong()));
 			break;
 		}
