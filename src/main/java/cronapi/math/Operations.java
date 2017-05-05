@@ -159,4 +159,156 @@ public class Operations {
 		}
 		return new Var(returnValue);
 	}
+
+	@CronapiMetaData(type = "function", name = "{{absFunctionName}}", nameTags = {
+			"absFunction" }, description = "{{absFunctionDescription}}", params = {
+					"{{absFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var abs(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.abs(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.abs(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.abs(value.getObjectAsDouble()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{rootFunctionName}}", nameTags = {
+			"rootFunction" }, description = "{{rootFunctionDescription}}", params = {
+					"{{rootFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var root(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.sqrt(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.sqrt(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.sqrt(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{logFunctionName}}", nameTags = {
+			"logFunction" }, description = "{{logFunctionDescription}}", params = {
+					"{{logFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var log(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.log(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.log(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.log(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{log10FunctionName}}", nameTags = {
+			"log10Function" }, description = "{{log10FunctionDescription}}", params = {
+					"{{log10FunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var log10(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.log10(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.log10(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.log10(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{expFunctionName}}", nameTags = {
+			"expFunction" }, description = "{{expFunctionDescription}}", params = {
+					"{{expFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var exp(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.exp(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.exp(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.exp(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{powFunctionName}}", nameTags = {
+			"powFunction" }, description = "{{powFunctionDescription}}", params = {
+					"{{expFunctionParam0}}","{{expFunctionParam1}}" }, paramsType = { ObjectType.OBJECT ,  ObjectType.OBJECT}, returnType = ObjectType.OBJECT)
+	public static final Var pow(Var value1,Var value2) throws Exception {
+		Var result;
+		switch (value1.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.pow(value1.getObjectAsDouble(),value2.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.pow(value1.getObjectAsLong(),value2.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.pow(value1.getObjectAsInt(),value2.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{roundFunctionName}}", nameTags = {
+			"roundFunction" }, description = "{{roundFunctionDescription}}", params = {
+					"{{roundFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var round(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.round(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.round(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.round(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+	
+	
+	
+	
+
 }
