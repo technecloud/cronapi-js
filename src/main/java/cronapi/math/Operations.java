@@ -391,7 +391,7 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{tanFunctionName}}", nameTags = {
 			"tanFunction" }, description = "{{tanFunctionDescription}}", params = {
 					"{{tanFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
@@ -412,7 +412,7 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{asinFunctionName}}", nameTags = {
 			"asinFunction" }, description = "{{asinFunctionDescription}}", params = {
 					"{{asinFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
@@ -433,6 +433,47 @@ public class Operations {
 		}
 		return result;
 	}
-	
+
+	@CronapiMetaData(type = "function", name = "{{acosFunctionName}}", nameTags = {
+			"acosFunction" }, description = "{{acosFunctionDescription}}", params = {
+					"{{acosFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var acos(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.acos(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.acos(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.acos(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{atanFunctionName}}", nameTags = {
+			"atanFunction" }, description = "{{atanFunctionDescription}}", params = {
+					"{{atanFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var atan(Var value) throws Exception {
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.atan(value.getObjectAsDouble()));
+			break;
+		}
+		case LONG: {
+			result = new Var(Math.atan(value.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.atan(value.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
 
 }
