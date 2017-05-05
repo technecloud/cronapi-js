@@ -98,7 +98,7 @@ public class Operations {
 			"sleep" }, description = "{{functionToSleep}}", params = {
 			"{{timeSleepInSecond}}" }, paramsType = { ObjectType.LONG }, returnType = ObjectType.VOID)
 	public static final void sleep(Var time) throws Exception {
-		long sleepTime = (time.getObjectAsLong() * 1000);
+		long sleepTime = (time.getObjectAsInt() * 1000);
 		Thread.sleep(sleepTime);
 	}
 

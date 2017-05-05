@@ -28,7 +28,7 @@ public class Operations {
 			result = multiplyDouble(values);
 			break;
 		}
-		case LONG: {
+		case INT: {
 			result = multiplyLong(values);
 			break;
 		}

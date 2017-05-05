@@ -127,12 +127,7 @@ public class Operations {
 					"{{content}}", "{{mask}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.DATETIME)
 	public static final Var stringToDate(Var val, Var mask) throws Exception {
-		String defaultMask = "dd/MM/yyyy";
-		String maskToUse = (mask.getObjectAsString() != null && !mask.getObjectAsString().isEmpty())
-				? mask.getObjectAsString() : defaultMask;
-		SimpleDateFormat formato = new SimpleDateFormat(maskToUse);
-		Date data = formato.parse(val.getObjectAsString());
-		return new Var(data);
+		return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString()));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {

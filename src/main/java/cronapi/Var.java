@@ -1,18 +1,15 @@
 package cronapi;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Var implements Comparable {
 
 	public enum Type {
-		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, LONG
+		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, DATETIME
 	};
 
 	private String id;
@@ -25,6 +22,14 @@ public class Var implements Comparable {
 	public static final Var VAR_FALSE = new Var(false);
 	public static final Var VAR_ZERO = new Var(0);
 	public static final Var VAR_NEGATIVE_ONE = new Var(-1);
+	public static final Var VAR_EMPTY = new Var("");
+	public static final Var VAR_DATE_ZERO;
+
+	static {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(1980, 1, 1, 0, 0, 0);
+		VAR_DATE_ZERO = new Var(calendar);
+	}
 
 	/**
 	 * Construct a Var with an NULL type
@@ -90,7 +95,7 @@ public class Var implements Comparable {
 	 * @return the Var object
 	 */
 	public static Var valueOf(Object val) {
-		if (val instanceof  Var)
+		if (val instanceof Var)
 			return (Var) val;
 
 		if (val instanceof Boolean) {
@@ -104,7 +109,7 @@ public class Var implements Comparable {
 	}
 
 	public static Var valueOf(String id, Object val) {
-		if (val instanceof  Var && Objects.equals(((Var) val).getId(), id))
+		if (val instanceof Var && Objects.equals(((Var) val).getId(), id))
 			return (Var) val;
 		return new Var(id, val);
 	}
@@ -147,18 +152,18 @@ public class Var implements Comparable {
 	 *
 	 * @return an integer whose value equals this object
 	 */
-	public int getObjectAsInt() {
+	public Integer getObjectAsInt() {
 		switch (getType()) {
 			case STRING:
 				return Integer.parseInt((String) getObject());
 			case INT:
-				return (int) getObject();
+				return ((Long) getObject()).intValue();
 			case BOOLEAN:
-				return ((boolean) getObject()) ? 1 : 0;
+				return ((Boolean) getObject()) ? 1 : 0;
 			case DOUBLE:
 				return new Double((double) getObject()).intValue();
-			case LONG:
-				return new Long((long) getObject()).intValue();
+			case DATETIME:
+				return (int)(((Calendar) getObject()).getTimeInMillis());
 			case LIST:
 				// has no meaning
 				break;
@@ -170,11 +175,68 @@ public class Var implements Comparable {
 	}
 
 	/**
+	 * Get object as an int. Does not make sense for a "LIST" type object
+	 *
+	 * @return an integer whose value equals this object
+	 */
+	public Long getObjectAsLong() {
+		switch (getType()) {
+			case STRING:
+				return Long.parseLong((String) getObject());
+			case INT:
+				return (Long) getObject();
+			case BOOLEAN:
+				return ((Boolean) getObject()) ? 1L : 0L;
+			case DOUBLE:
+				return new Double((double) getObject()).longValue();
+			case DATETIME:
+				return (Long)((Calendar) getObject()).getTimeInMillis();
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
+		}
+		return 0L;
+	}
+
+	/**
 	 * Get object as an boolean.
 	 *
 	 * @return an bool whose value equals this object
 	 */
-	public boolean getObjectAsBoolean() {
+	public Calendar getObjectAsDateTime() {
+		switch (getType()) {
+			case STRING:
+				String s = (String) getObject();
+				return Utils.toCalendar(s, null);
+			case INT:
+				Calendar c = Calendar.getInstance();
+				c.setTimeInMillis(getObjectAsInt());
+				return c;
+			case DOUBLE:
+				Calendar cd = Calendar.getInstance();
+				cd.setTimeInMillis(getObjectAsInt());
+				return cd;
+			case DATETIME:
+				return (Calendar) getObject();
+			case LIST:
+				// has no meaning
+				break;
+			default:
+				// has no meaning
+				break;
+		}
+		return null;
+	}
+
+	/**
+	 * Get object as an boolean.
+	 *
+	 * @return an bool whose value equals this object
+	 */
+	public Boolean getObjectAsBoolean() {
 		switch (getType()) {
 			case STRING:
 				String s = (String) getObject();
@@ -190,8 +252,9 @@ public class Var implements Comparable {
 				return (boolean) getObject();
 			case DOUBLE:
 				return new Double((double) getObject()).intValue() > 0;
-			case LONG:
-				return new Long((long) getObject()).intValue() > 0;
+			case DATETIME:
+				//has no meaning
+				break;
 			case LIST:
 				// has no meaning
 				break;
@@ -207,7 +270,7 @@ public class Var implements Comparable {
 	 *
 	 * @return a double whose value equals this object
 	 */
-	public double getObjectAsDouble() {
+	public Double getObjectAsDouble() {
 		switch (getType()) {
 			case STRING:
 				return Double.parseDouble((String) getObject());
@@ -217,8 +280,8 @@ public class Var implements Comparable {
 				return ((boolean) getObject()) ? 1.0 : 0.0;
 			case DOUBLE:
 				return (double) getObject();
-			case LONG:
-				return new Long((long) getObject()).doubleValue();
+			case DATETIME:
+				return (double)((Calendar) getObject()).getTimeInMillis();
 			case LIST:
 				// has no meaning
 				break;
@@ -227,33 +290,6 @@ public class Var implements Comparable {
 				break;
 		}
 		return 0.0;
-	}
-
-	/**
-	 * Get object as a long. Does not make sense for a "LIST" type object.
-	 *
-	 * @return a long whose value equals this object
-	 */
-	public long getObjectAsLong() {
-		switch (getType()) {
-			case STRING:
-				return Long.parseLong((String) getObject());
-			case INT:
-				return new Integer((int) getObject()).longValue();
-			case BOOLEAN:
-				return ((boolean) getObject()) ? 1 : 0;
-			case DOUBLE:
-				return new Double((double) getObject()).longValue();
-			case LONG:
-				return (long) getObject();
-			case LIST:
-				// has no meaning
-				break;
-			default:
-				// has no meaning
-				break;
-		}
-		return 0;
 	}
 
 	/**
@@ -452,7 +488,7 @@ public class Var implements Comparable {
 				return this.getObjectAsString().compareTo(var.getObjectAsString());
 			case INT:
 				if (var.getType().equals(Var.Type.INT)) {
-					return ((Integer) this.getObjectAsInt()).compareTo(var.getObjectAsInt());
+					return ((Long) this.getObjectAsLong()).compareTo(var.getObjectAsLong());
 				} else {
 					return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
 				}
@@ -519,44 +555,47 @@ public class Var implements Comparable {
 			Var oldObj = (Var) _object;
 			_type = oldObj.getType();
 			_object = oldObj.getObject();
-		} else if (_object instanceof String) {
+		} else if (_object instanceof String || _object instanceof StringBuilder || _object instanceof StringBuffer
+				|| _object instanceof Character) {
 			_type = Type.STRING;
-		} else {
-			try {
-				Boolean b = (boolean) _object;
-				_type = Type.BOOLEAN;
-			} catch (Exception nBo) {
-				// must be a number or a list
-				// try to see if its a double
-				try {
-					Double d = (double) _object;
-					// it was a double, so keep going
-					_type = Type.DOUBLE;
-				} catch (Exception ex) {
-					try {
-						Long d = (long) _object;
-						_type = Type.LONG;
-					} catch (Exception exL) {
-						// not a double, see if it is an integer
-						try {
-							Integer i = (int) _object;
-							// it was an integer
-							_type = Type.INT;
-						} catch (Exception ex2) {
-							// not a double or integer, might be an array
-							if (_object instanceof LinkedList) {
-								_type = Type.LIST;
-							} else if (_object instanceof List) {
-								_type = Type.LIST;
-								_object = new LinkedList<>((List) _object);
-							} else {
-								_type = Type.UNKNOWN;
-							}
-						}
-					}
-
-				}
+			_object = _object.toString();
+		} else if (_object instanceof Boolean) {
+			_type = Type.BOOLEAN;
+		} else if (_object instanceof Date) {
+			Date date = (Date) _object;
+			_type = Type.DATETIME;
+			_object = Calendar.getInstance();
+			((Calendar) _object).setTime(date);
+		} else if (_object instanceof Calendar) {
+			_type = Type.DATETIME;
+		} else if (_object instanceof Long) {
+			_type = Type.INT;
+		} else if (_object instanceof Integer) {
+			_type = Type.INT;
+			_object = Long.valueOf((Integer)_object);
+		} else if (_object instanceof Double) {
+			_type = Type.DOUBLE;
+		} else if (_object instanceof Float) {
+			_type = Type.DOUBLE;
+			_object = Double.valueOf((Float)_object);
+		} else if (_object instanceof BigDecimal) {
+			if (((BigDecimal) _object).scale() == 0) {
+				_type = Type.INT;
+				_object = ((BigDecimal) _object).longValue();
+			} else {
+				_type = Type.DOUBLE;
+				_object = ((BigDecimal) _object).doubleValue();
 			}
+		} else if (_object instanceof BigInteger) {
+			_type = Type.INT;
+			_object = ((BigInteger) _object).longValue();
+		} else if (_object instanceof LinkedList) {
+			_type = Type.LIST;
+		} else if (_object instanceof List) {
+			_type = Type.LIST;
+			_object = new LinkedList<>((List) _object);
+		} else {
+			_type = Type.UNKNOWN;
 		}
 	}
 }

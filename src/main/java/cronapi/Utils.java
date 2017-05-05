@@ -21,6 +21,7 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
+import cronapi.i18n.Messages;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -113,6 +114,33 @@ public class Utils {
 				return m;
 			}
 		}
+		return null;
+	}
+
+	public static Calendar toCalendar(String value, String mask) {
+		if (value == null) {
+			return null;
+		}
+		String datePattern = Messages.getString("ParseDateFormat");
+
+		final String[] formats = { "", (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s",
+				"yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
+
+		formats[0] = mask;
+
+		for (int i = 0; i < formats.length; i++) {
+			if (formats[i] != null && !formats[i].isEmpty()) {
+				try {
+					java.text.SimpleDateFormat format = new java.text.SimpleDateFormat(formats[i]);
+					Date date = format.parse(value);
+					Calendar c = Calendar.getInstance();
+					c.setTime(date);
+					return c;
+				} catch (Exception e) {
+				}
+			}
+		}
+
 		return null;
 	}
 
