@@ -16,17 +16,16 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
+import java.util.*;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import cronapi.i18n.Messages;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * Classe que representa ...
@@ -39,10 +38,21 @@ import org.apache.commons.lang.math.NumberUtils;
 
 public class Utils {
 
-	/**
-	 * Construtor
-	 **/
-	public Utils() {
+	private static final Map<String, DateFormat[]> DATE_FORMATS = new HashMap<>();
+
+	private static final Map<String, DateFormat> DATETIME_FORMAT = new HashMap<>();
+
+	private static final Map<String, DateFormat> PARSE_DATETIME_FORMAT = new HashMap<>();
+
+	static {
+		DATE_FORMATS.put("pt", getGenericParseDateFormat(new Locale("pt", "BR")));
+		DATE_FORMATS.put("en", getGenericParseDateFormat(new Locale("en", "US")));
+
+		PARSE_DATETIME_FORMAT.put("pt", new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("ParseDateFormat")));
+		PARSE_DATETIME_FORMAT.put("en", new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("ParseDateFormat")));
+
+		DATETIME_FORMAT.put("pt", new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("DateTimeFormat")));
+		DATETIME_FORMAT.put("en", new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("DateTimeFormat")));
 	}
 
 	public static boolean deleteFolder(File dir) throws Exception {
@@ -132,9 +142,14 @@ public class Utils {
 		}
 
 		if (date == null) {
-			for (DateFormat format : genericParseDateFormat.get()) {
+			DateFormat[] formats = DATE_FORMATS.get(Messages.getLocale().getLanguage());
+			if (formats == null) {
+				formats = DATE_FORMATS.get("pt");
+			}
+			for (DateFormat format : formats) {
 				try {
 					date = format.parse(value);
+					break;
 				} catch (Exception e2) {
 					//Abafa
 				}
@@ -170,34 +185,38 @@ public class Utils {
 		return toGenericCalendar(value);
 	}
 
-	public static final ThreadLocal<DateFormat> dateTimeFormat = new ThreadLocal<DateFormat>() {
-		@Override
-		protected DateFormat initialValue() {
-			return new SimpleDateFormat(Messages.getString("DateTimeFormat"));
+	public static final DateFormat getParseDateFormat () {
+		DateFormat format = PARSE_DATETIME_FORMAT.get(Messages.getLocale().getLanguage());
+		if (format == null) {
+			format = PARSE_DATETIME_FORMAT.get("pt");
 		}
-	};
 
-	public static final ThreadLocal<DateFormat> parseDateFormat = new ThreadLocal<DateFormat>() {
-		@Override
-		protected DateFormat initialValue() {
-			return new SimpleDateFormat(Messages.getString("ParseDateFormat"));
+		return format;
+	}
+
+	public static final DateFormat getDateFormat () {
+		DateFormat format = DATETIME_FORMAT.get(Messages.getLocale().getLanguage());
+		if (format == null) {
+			format = DATETIME_FORMAT.get("pt");
 		}
-	};
 
-	public static final ThreadLocal<DateFormat[]> genericParseDateFormat = new ThreadLocal<DateFormat[]>() {
-		@Override
-		protected DateFormat[] initialValue() {
-			String datePattern = Messages.getString("ParseDateFormat");
+		return format;
+	}
 
-			final String[] formats = { (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s",
-					"yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
+	private static DateFormat[] getGenericParseDateFormat(Locale locale) {
+		String datePattern = Messages.getBundle(locale).getString("ParseDateFormat");
 
-			DateFormat[] dateFormats = new DateFormat[formats.length];
-			for (int i=0;i<formats.length;i++) {
-				dateFormats[i] = new SimpleDateFormat(formats[i]);
-			}
-			return dateFormats;
+		final String[] formats = { (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s",
+				"yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
+
+		DateFormat[] dateFormats = new DateFormat[formats.length + 1];
+		dateFormats[0] = new ISO8601DateFormat();
+
+		for (int i=0;i<formats.length;i++) {
+			dateFormats[i+1] = new SimpleDateFormat(formats[i]);
 		}
-	};
+
+		return dateFormats;
+	}
 
 }

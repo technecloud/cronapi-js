@@ -34,4 +34,16 @@ public class Messages {
   public static void set(Locale locale) {
     RESOURCE_BUNDLE.set(ResourceBundle.getBundle(BUNDLE_NAME, locale));
   }
+
+  public static ResourceBundle getBundle(Locale locale) {
+    return ResourceBundle.getBundle(BUNDLE_NAME, locale);
+  }
+
+  public static Locale getLocale() {
+      ResourceBundle bundle = RESOURCE_BUNDLE.get();
+      if (bundle == null)
+        bundle = DEFAULT_BUNDLE;
+
+      return bundle.getLocale();
+  }
 }

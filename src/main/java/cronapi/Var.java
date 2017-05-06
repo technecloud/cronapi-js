@@ -523,7 +523,7 @@ public class Var implements Comparable {
 				Double d = (double) _object;
 				return _formatter.format(d);
 			case DATETIME:
-				return Utils.dateTimeFormat.get().format(((Calendar)getObject()).getTime());
+				return Utils.getDateFormat().format(((Calendar)getObject()).getTime());
 			case LIST:
 				LinkedList<Var> ll = (LinkedList) getObject();
 				StringBuilder sb = new StringBuilder();
