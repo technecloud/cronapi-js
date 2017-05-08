@@ -415,9 +415,12 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{asinFunctionName}}", nameTags = {
 			"asinFunction" }, description = "{{asinFunctionDescription}}", params = {
-					"{{asinFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+					"{{asinFunctionParam0}}" }, paramsType = { ObjectType.DOUBLE }, returnType = ObjectType.DOUBLE)
 	public static final Var asin(Var value) throws Exception {
 		Var result;
+		if (value.getObjectAsDouble() > 1.0)
+			return new Var(Math.acos(1));
+
 		switch (value.getType()) {
 		case DOUBLE: {
 			result = new Var(Math.asin(value.getObjectAsDouble()));
@@ -439,6 +442,9 @@ public class Operations {
 					"{{acosFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var acos(Var value) throws Exception {
 		Var result;
+		if (value.getObjectAsDouble() > 1.0)
+			return new Var(Math.acos(1));
+
 		switch (value.getType()) {
 		case DOUBLE: {
 			result = new Var(Math.acos(value.getObjectAsDouble()));
@@ -457,8 +463,9 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{atanFunctionName}}", nameTags = {
 			"atanFunction" }, description = "{{atanFunctionDescription}}", params = {
-					"{{atanFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+					"{{atanFunctionParam0}}" }, paramsType = { ObjectType.DOUBLE }, returnType = ObjectType.DOUBLE)
 	public static final Var atan(Var value) throws Exception {
+
 		Var result;
 		switch (value.getType()) {
 		case DOUBLE: {
@@ -476,4 +483,10 @@ public class Operations {
 		return result;
 	}
 
+	@CronapiMetaData(type = "function", name = "{{PIFunctionName}}", nameTags = {
+			"PIFunction" }, description = "{{PIFunctionDescription}}", params = {
+					"{{PIFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var PI() throws Exception {
+		return new Var(Math.PI);
+	}
 }
