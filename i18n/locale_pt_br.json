@@ -78,5 +78,9 @@
   "functionToMakeCallServerBlocklyAsync": "Função para chamar blockly do servidor assíncrono e com possibilidade de setar os callback como string (nome do blockly completo)",
   "blocklyWithFunction": "Nome do blockly",
   "callbackBlocklySuccess": "Callback sucesso: nome do blockly (completo) para ser chamado quando obter a resposta do servidor com sucesso",
-  "callbackBlocklyError": "Callback erro: nome do blockly (completo) para ser chamado quando obter a resposta do servidor com erro"
+  "callbackBlocklyError": "Callback erro: nome do blockly (completo) para ser chamado quando obter a resposta do servidor com erro",
+  "changeValueOfField":"Alterar valor do campo",
+  "functionToChangeValueOfField": "Função para alterar valor do campo",
+  "field": "Campo",
+  "value": "Valor"
 }

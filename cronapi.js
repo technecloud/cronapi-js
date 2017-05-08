@@ -247,7 +247,30 @@
     
     return result;
   };
-
+  
+  /**
+	 * @category SCREEN
+	 * @categoryTags Screen|Tela
+	 */
+	this.cronapi.screen = {};
+	
+	/**
+	 * @type function
+	 * @name {{changeValueOfField}}
+	 * @nameTags changeValueOfField|changeFieldValue
+	 * @description {{functionToChangeValueOfField}}
+	 * @param {string} field {{field}}
+	 * @param {string} value {{value}}
+	 */
+	this.cronapi.screen.changeValueOfField = function(field, value) {
+	  try {
+	    eval(field + ' = "' + value + '"');
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
+  
 	/**
 	 * @category DATETIME
 	 * @categoryTags Date|Datetime|Data|Hora
