@@ -370,7 +370,7 @@ public class Var implements Comparable {
 	 * both objects to strings and then doing a string compare.
 	 *
 	 * @param obj
-	 * @return
+	 * @return true if equals
 	 */
 	@Override
 	public boolean equals(Object obj) {
