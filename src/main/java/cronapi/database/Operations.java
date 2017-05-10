@@ -22,7 +22,7 @@ public class Operations {
 							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callreturn")
 	public static Var query(Var entity, Var query, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
-		if (query == null)
+		if (query == Var.VAR_NULL)
 			ds.fetch();
 		else {
 			Object[][] paramsObject = new Object[params.length][2];
@@ -104,8 +104,8 @@ public class Operations {
 		((DataSource) ds.getObject()).delete();
 	}
 	
-	@CronapiMetaData(type = "function", name = "{{datasourceRemoveConditionally}}", nameTags = { "remove", "delete", "apagar",
-			"remover" }, description = "{{functionToRemoveConditionallyObjectInDatasource}}", params = {
+	@CronapiMetaData(type = "function", name = "{{datasourceRemoveConditionally}}", nameTags = { "remove", "delete", "apagar", "custom",
+			"remover", "condicionalmente" }, description = "{{functionToRemoveConditionallyObjectInDatasource}}", params = {
 					"{{datasource}}", "{{removeQuery}}", "{{paramsRemoveTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
 	public static void remove(Var ds, Var removeQuery, Var...params) {
 	  Object[][] paramsObject = new Object[params.length][2];
@@ -116,8 +116,8 @@ public class Operations {
 		((DataSource) ds.getObject()).delete(removeQuery.getObjectAsString(), paramsObject);
 	}
 	
-	@CronapiMetaData(type = "function", name = "{{datasourceUpdateConditionally}}", nameTags = { "remove", "delete", "apagar",
-			"remover" }, description = "{{functionToUpdateConditionallyObjectInDatasource}}", params = {
+	@CronapiMetaData(type = "function", name = "{{datasourceUpdateConditionally}}", nameTags = { "update", "set", "atualizar",
+			"edit", "condicionamente", "custom" }, description = "{{functionToUpdateConditionallyObjectInDatasource}}", params = {
 					"{{datasource}}", "{{updateQuery}}", "{{paramsUpdateTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
 	public static void update(Var ds, Var updateQuery, Var...params) {
 	  Object[][] paramsObject = new Object[params.length][2];
