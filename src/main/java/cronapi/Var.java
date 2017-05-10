@@ -18,20 +18,23 @@ public class Var implements Comparable {
 	private String id;
 	private Type _type;
 	private Object _object;
+	private boolean modifiable = true;
+	private boolean created = false;
 	private static final NumberFormat _formatter = new DecimalFormat("#.#####");
 
-	public static final Var VAR_NULL = new Var(null);
-	public static final Var VAR_TRUE = new Var(true);
-	public static final Var VAR_FALSE = new Var(false);
-	public static final Var VAR_ZERO = new Var(0);
-	public static final Var VAR_NEGATIVE_ONE = new Var(-1);
-	public static final Var VAR_EMPTY = new Var("");
+	public static final Var VAR_NULL = new Var(null, false);
+	public static final Var VAR_TRUE = new Var(true, false);
+	public static final Var VAR_FALSE = new Var(false, false);
+	public static final Var VAR_ZERO = new Var(0, false);
+	public static final Var VAR_ONE = new Var(1, false);
+	public static final Var VAR_NEGATIVE_ONE = new Var(-1, false);
+	public static final Var VAR_EMPTY = new Var("", false);
 	public static final Var VAR_DATE_ZERO;
 
 	static {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1980, 1, 1, 0, 0, 0);
-		VAR_DATE_ZERO = new Var(calendar);
+		VAR_DATE_ZERO = new Var(calendar, false);
 	}
 
 	/**
@@ -40,6 +43,7 @@ public class Var implements Comparable {
 	 */
 	public Var() {
 		_type = Type.NULL;
+		created = true;
 	}
 
 	/**
@@ -61,6 +65,11 @@ public class Var implements Comparable {
 		setObject(object);
 	}
 
+	public Var(Object object, boolean modifiable) {
+		setObject(object);
+		this.modifiable = modifiable;
+	}
+
 	/**
 	 * Construct a Var from a given Var
 	 *
@@ -78,7 +87,10 @@ public class Var implements Comparable {
 	 *
 	 * @param val the value to set this Var to
 	 */
-	private void setObject(Object val) {
+	public void setObject(Object val) {
+		if (created && !modifiable) {
+			throw new RuntimeException(Messages.getString("NotModifiable"));
+		}
 		this._object = val;
 		inferType();
 		// make sure each element of List is Var if type is list
@@ -89,6 +101,8 @@ public class Var implements Comparable {
 			}
 			this._object = myList;
 		}
+
+		created = true;
 	}
 
 	/**
@@ -108,15 +122,20 @@ public class Var implements Comparable {
 				return VAR_FALSE;
 			}
 		}
+
+		if (val == null) {
+			return VAR_NULL;
+		}
+
 		return new Var(val);
 	}
 
 	public static Var valueOf(String id, Object val) {
 		if (val instanceof Var && Objects.equals(((Var) val).getId(), id))
 			return (Var) val;
+
 		return new Var(id, val);
 	}
-
 
 	/**
 	 * Get the type of the underlying object
@@ -314,6 +333,10 @@ public class Var implements Comparable {
 		return (LinkedList<Var>) getObject();
 	}
 
+	public Iterator<Var> iterator() {
+		return getObjectAsList().iterator();
+	}
+
 	/**
 	 * If this object is a linked list, then calling this method will return the
 	 * Var at the index indicated
@@ -381,6 +404,46 @@ public class Var implements Comparable {
 		return this.toString().equals(other.toString());
 	}
 
+	public void inc(Object value) {
+		Object result = null;
+
+		switch (getType()) {
+			case DATETIME: {
+				getObjectAsDateTime().add(Calendar.DAY_OF_MONTH,  Var.valueOf(value).getObjectAsInt());
+				break;
+			}
+			case INT: {
+				result = getObjectAsLong() + Var.valueOf(value).getObjectAsLong();
+				break;
+			}
+			default: {
+				result = getObjectAsDouble() + Var.valueOf(value).getObjectAsDouble();
+			}
+
+		}
+
+		if (result != null)
+			setObject(result);
+	}
+
+	public void multiply(Object value) {
+		Object result = null;
+
+		switch (getType()) {
+			case INT: {
+				result = getObjectAsLong() * Var.valueOf(value).getObjectAsLong();
+				break;
+			}
+			default: {
+				result = getObjectAsDouble() * Var.valueOf(value).getObjectAsDouble();
+			}
+
+		}
+
+		if (result != null)
+			setObject(result);
+	}
+
 	/**
 	 * Check to see if this Var is less than some other var.
 	 *
@@ -388,30 +451,7 @@ public class Var implements Comparable {
 	 * @return true if it is less than
 	 */
 	public boolean lessThan(Var var) {
-		switch (getType()) {
-			case STRING:
-				return this.getObjectAsString().compareTo(var.getObjectAsString()) < 0;
-			case INT:
-				return this.getObjectAsInt() < var.getObjectAsDouble();
-			case DOUBLE:
-				return this.getObjectAsDouble() < var.getObjectAsDouble();
-			case LIST:
-				if (size() != var.size()) {
-					return false;
-				}
-				if (!var.getType().equals(Var.Type.LIST)) {
-					return false;
-				}
-				int index = 0;
-				for (Var myVar : this.getObjectAsList()) {
-					if (!myVar.lessThan(var.get(index))) {
-						return false;
-					}
-				}
-				return true;
-			default:
-				return false;
-		}
+		return this.compareTo(var) < 0;
 	}
 
 	/**
@@ -421,32 +461,7 @@ public class Var implements Comparable {
 	 * @return true if this is less than or equal to var
 	 */
 	public boolean lessThanOrEqual(Var var) {
-		switch (getType()) {
-			case STRING:
-				return this.getObjectAsString().compareTo(var.getObjectAsString()) <= 0;
-			case INT:
-				return this.getObjectAsInt() <= var.getObjectAsDouble();
-			case DOUBLE:
-				return this.getObjectAsDouble() <= var.getObjectAsDouble();
-			case LIST:
-				if (size() != var.size()) {
-					return false;
-				}
-				if (!var.getType().equals(Var.Type.LIST)) {
-					return false;
-				}
-				int index = 0;
-				for (Var myVar : this.getObjectAsList()) {
-					if (!myVar.lessThanOrEqual(var.get(index))) {
-						return false;
-					}
-				}
-				return true;
-			case NULL:
-				return (var.getType() == Var.Type.NULL);
-			default:
-				return false;
-		}
+		return this.compareTo(var) <= 0;
 	}
 
 	/**
@@ -456,7 +471,7 @@ public class Var implements Comparable {
 	 * @return true if this object is grater than the given var
 	 */
 	public boolean greaterThan(Var var) {
-		return var.lessThan(this);
+		return this.compareTo(var) > 0;
 	}
 
 	/**
@@ -466,7 +481,7 @@ public class Var implements Comparable {
 	 * @return true if this var is greater than or equal to the given var
 	 */
 	public boolean greaterThanOrEqual(Var var) {
-		return var.lessThanOrEqual(this);
+		return this.compareTo(var) >= 0;
 	}
 
 	/**
@@ -497,6 +512,10 @@ public class Var implements Comparable {
 				}
 			case DOUBLE:
 				return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
+			case BOOLEAN:
+				return this.getObjectAsBoolean().compareTo(var.getObjectAsBoolean());
+			case DATETIME:
+				return this.getObjectAsDateTime().compareTo(var.getObjectAsDateTime());
 			case LIST:
 				// doesn't make sense
 				return Integer.MAX_VALUE;
