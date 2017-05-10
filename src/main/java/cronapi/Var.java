@@ -358,6 +358,18 @@ public class Var implements Comparable {
 		return ((LinkedList<Var>) getObject()).size();
 	}
 
+	public int length() {
+		return getObjectAsString().length();
+	}
+
+	public void trim() {
+		setObject(getObjectAsString().trim());
+	}
+
+	public static Var newList() {
+		return new Var(new LinkedList<>());
+	}
+
 	/**
 	 * Set the value of of a list at the index specified. Note that this is only
 	 * value if this object is a list and also note that index must be in
@@ -442,6 +454,12 @@ public class Var implements Comparable {
 
 		if (result != null)
 			setObject(result);
+	}
+
+	public Var append(Object value) {
+		Object result = getObjectAsString() + (value!= null?value.toString():"");
+		setObject(result);
+		return this;
 	}
 
 	/**
