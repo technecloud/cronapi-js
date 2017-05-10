@@ -1,5 +1,7 @@
 package cronapi.math;
 
+import java.util.ArrayList;
+
 import cronapi.CronapiMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
@@ -105,7 +107,10 @@ public class Operations {
 	public static final Var addDouble(Var... values) throws Exception {
 		Double addedValue = 0.0;
 		for (Var value : values) {
-			addedValue += value.getObjectAsDouble();
+			if (value.getType() == Var.Type.LIST) {
+				addedValue += addDouble(value).getObjectAsDouble();
+			} else
+				addedValue += value.getObjectAsDouble();
 		}
 		return new Var(addedValue);
 	}
@@ -266,8 +271,8 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{powFunctionName}}", nameTags = {
-			"powFunction" }, description = "{{powFunctionDescription}}", params = { "{{expFunctionParam0}}",
-					"{{expFunctionParam1}}" }, paramsType = { ObjectType.OBJECT,
+			"powFunction" }, description = "{{powFunctionDescription}}", params = { "{{powFunctionParam0}}",
+					"{{powFunctionParam1}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var pow(Var value1, Var value2) throws Exception {
 		Var result;
@@ -282,6 +287,27 @@ public class Operations {
 		}
 		default: {
 			result = new Var(Math.pow(value1.getObjectAsInt(), value2.getObjectAsInt()));
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{pow10FunctionName}}", nameTags = {
+			"pow10Function" }, description = "{{pow10FunctionDescription}}", params = {
+					"{{pow10FunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var pow10(Var value1) throws Exception {
+		Var result;
+		switch (value1.getType()) {
+		case DOUBLE: {
+			result = new Var(Math.pow(10, value1.getObjectAsDouble()));
+			break;
+		}
+		case INT: {
+			result = new Var(Math.pow(10, value1.getObjectAsLong()));
+			break;
+		}
+		default: {
+			result = new Var(Math.pow(10, value1.getObjectAsDouble()));
 		}
 		}
 		return result;
@@ -486,7 +512,122 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{PIFunctionName}}", nameTags = {
 			"PIFunction" }, description = "{{PIFunctionDescription}}", params = {
 					"{{PIFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
-	public static final Var PI() throws Exception {
+	public static final Var pi() throws Exception {
 		return new Var(Math.PI);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{negFunctionName}}", nameTags = {
+			"negFunction" }, description = "{{negFunctionDescription}}", params = {
+					"{{negFunctionParam0}}" }, paramsType = { ObjectType.DOUBLE }, returnType = ObjectType.DOUBLE)
+	public static final Var neg(Var value) throws Exception {
+
+		Var result;
+		switch (value.getType()) {
+		case DOUBLE: {
+			result = new Var(value.getObjectAsDouble() * -1);
+			break;
+		}
+		case INT: {
+			result = new Var(value.getObjectAsLong() * -1);
+			break;
+		}
+		default: {
+			result = new Var(value.getObjectAsLong() * -1);
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{infinityFunctionName}}", nameTags = {
+			"infinityFunction" }, description = "{{infinityFunctionDescription}}", returnType = ObjectType.DOUBLE)
+	public static final Var infinity() throws Exception {
+		return new Var(Double.POSITIVE_INFINITY);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{MathEFunctionName}}", nameTags = {
+			"MathEFunction" }, description = "{{MathEFunctionDescription}}", returnType = ObjectType.DOUBLE)
+	public static final Var e() throws Exception {
+		return new Var(Math.E);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{goldenRatioFunctionName}}", nameTags = {
+			"goldenRatioFunction" }, description = "{{goldenRatioFunctionDescription}}", returnType = ObjectType.DOUBLE)
+	public static final Var goldenRatio() throws Exception {
+		return new Var((1 + Math.sqrt(5)) / 2);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isEvenFunctionName}}", nameTags = {
+			"isEvenRatioFunction" }, description = "{{isEvenRatioFunctionDescription}}", params = {
+					"{{isEvenFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isEven(Var value) throws Exception {
+		if (value.getObjectAsInt() % 2 == 0)
+			return new Var(true);
+		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isOddFunctionName}}", nameTags = {
+			"isOddRatioFunction" }, description = "{{isOddRatioFunctionDescription}}", params = {
+					"{{isOddFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isOdd(Var value) throws Exception {
+		if (value.getObjectAsInt() % 2 == 1)
+			return new Var(true);
+		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isPrimeFunctionName}}", nameTags = {
+			"isPrimeRatioFunction" }, description = "{{isPrimeRatioFunctionDescription}}", params = {
+					"{{isPrimeFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isPrime(Var value) throws Exception {
+
+		if (value.getObjectAsLong() < 2)
+			return new Var(false);
+		if (value.getObjectAsLong() == 2)
+			return new Var(true);
+		if (value.getObjectAsLong() % 2 == 0)
+			return new Var(false);
+		for (int i = 3; i * i <= value.getObjectAsLong(); i += 2)
+			if (value.getObjectAsLong() % i == 0)
+				return new Var(false);
+		return new Var(true);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isIntFunctionName}}", nameTags = {
+			"isIntRatioFunction" }, description = "{{isIntFunctionDescription}}", params = {
+					"{{isIntFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isInt(Var value) throws Exception {
+		if (value.getType() == Var.Type.INT)
+			return new Var(true);
+		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isPositiveFunctionName}}", nameTags = {
+			"isPositiveRatioFunction" }, description = "{{isPositiveFunctionDescription}}", params = {
+					"{{isPositiveFunctionParam0}}" }, paramsType = {
+							ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isPositive(Var value) throws Exception {
+		if (value.getObjectAsLong() >= 0)
+			return new Var(true);
+		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isNegativeFunctionName}}", nameTags = {
+			"isNegativeRatioFunction" }, description = "{{isNegativeRatioFunctionDescription}}", params = {
+					"{{isNegativeFunctionParam0}}" }, paramsType = {
+							ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isNegative(Var value) throws Exception {
+		if (value.getObjectAsLong() < 0)
+			return new Var(true);
+		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var isDivisibleBy(Var value1, Var value2) throws Exception {
+
+		if ((value1.getObjectAsDouble() % value2.getObjectAsDouble()) == 0)
+			return new Var(true);
+		return new Var(false);
 	}
 }

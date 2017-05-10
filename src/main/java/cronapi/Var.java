@@ -158,9 +158,9 @@ public class Var implements Comparable {
 	public Integer getObjectAsInt() {
 		switch (getType()) {
 			case STRING:
-				return Integer.parseInt((String) getObject());
+				return Integer.parseInt(((String) getObject()));
 			case INT:
-				return ((Long) getObject()).intValue();
+				return (Integer) getObject();
 			case BOOLEAN:
 				return ((Boolean) getObject()) ? 1 : 0;
 			case DOUBLE:
@@ -250,7 +250,7 @@ public class Var implements Comparable {
 				}
 				return Boolean.valueOf(s);
 			case INT:
-				return (int) getObject() > 0;
+				return (Long) getObject() > 0;
 			case BOOLEAN:
 				return (boolean) getObject();
 			case DOUBLE:
@@ -278,7 +278,7 @@ public class Var implements Comparable {
 			case STRING:
 				return Double.parseDouble((String) getObject());
 			case INT:
-				return new Integer((int) getObject()).doubleValue();
+				return new Long((Long) getObject()).doubleValue();
 			case BOOLEAN:
 				return ((boolean) getObject()) ? 1.0 : 0.0;
 			case DOUBLE:
@@ -517,7 +517,7 @@ public class Var implements Comparable {
 			case STRING:
 				return getObject().toString();
 			case INT:
-				Integer i = (int) getObject();
+				Long i = (Long) getObject();
 				return i.toString();
 			case DOUBLE:
 				Double d = (double) _object;
