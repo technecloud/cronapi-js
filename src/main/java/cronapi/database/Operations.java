@@ -22,7 +22,7 @@ public class Operations {
 							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callreturn")
 	public static Var query(Var entity, Var query, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
-		if (query == null)
+		if (query == Var.VAR_NULL)
 			ds.fetch();
 		else {
 			Object[][] paramsObject = new Object[params.length][2];
