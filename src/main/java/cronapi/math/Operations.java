@@ -1,6 +1,12 @@
 package cronapi.math;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import cronapi.CronapiMetaData;
 import cronapi.Var;
@@ -90,13 +96,26 @@ public class Operations {
 		return result;
 	}
 
+	@CronapiMetaData(type = "function", name = "{{addFunctionName}}", nameTags = {
+			"addFunction" }, description = "{{addFunctionDescription}}", params = {
+					"{{addFunctionParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var listSum(Var values) throws Exception {
+		return new Var(sum(values));
+	}
+
 	@CronapiMetaData(type = "function", name = "{{addLongName}}", nameTags = {
 			"addLong" }, description = "{{addLongDescription}}", params = { "{{addLongParam0}}" }, paramsType = {
 					ObjectType.OBJECT }, returnType = ObjectType.LONG, arbitraryParams = true)
 	public static final Var addLong(Var... values) throws Exception {
 		Long addedValue = 0L;
 		for (Var value : values) {
-			addedValue += value.getObjectAsLong();
+			if (value.getType() == Var.Type.LIST) {
+
+				for (Var v : value.getObjectAsList()) {
+					addedValue += v.getObjectAsLong();
+				}
+			} else
+				addedValue += value.getObjectAsLong();
 		}
 		return new Var(addedValue);
 	}
@@ -107,8 +126,12 @@ public class Operations {
 	public static final Var addDouble(Var... values) throws Exception {
 		Double addedValue = 0.0;
 		for (Var value : values) {
+
 			if (value.getType() == Var.Type.LIST) {
-				addedValue += addDouble(value).getObjectAsDouble();
+
+				for (Var v : value.getObjectAsList()) {
+					addedValue += v.getObjectAsDouble();
+				}
 			} else
 				addedValue += value.getObjectAsDouble();
 		}
@@ -629,5 +652,353 @@ public class Operations {
 		if ((value1.getObjectAsDouble() % value2.getObjectAsDouble()) == 0)
 			return new Var(true);
 		return new Var(false);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = { ObjectType.LONG,
+							ObjectType.LONG }, returnType = ObjectType.LONG)
+	public static final Var randomInt(Var min, Var max) throws Exception {
+		Var result;
+		Random random = new Random();
+		switch (min.getType()) {
+		case DOUBLE: {
+			int resultado = random.nextInt(max.getObjectAsInt());
+			while ((resultado < min.getObjectAsLong()) || (resultado > max.getObjectAsLong())) {
+				resultado = random.nextInt();
+			}
+			result = new Var(resultado);
+			break;
+		}
+		case INT: {
+			int resultado = random.nextInt();
+			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
+				resultado = random.nextInt();
+			}
+			result = new Var(resultado);
+			break;
+		}
+		default: {
+			int resultado = random.nextInt();
+			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
+				resultado = random.nextInt();
+			}
+			result = new Var(resultado);
+		}
+		}
+		return result;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
+	public static final Var randomFloat() throws Exception {
+		Random random = new Random();
+		double result = random.nextGaussian();
+		while (result < 0.0 || result > 1.0)
+			result = random.nextGaussian();
+		return new Var(result);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listSmaller(Var value) throws Exception {
+
+		Var result;
+		switch (value.getObjectAsList().getFirst().getType()) {
+		case DOUBLE: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsDouble());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsDouble() < result.getObjectAsDouble())
+					result = v;
+			}
+			break;
+		}
+		case INT: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsLong() < result.getObjectAsLong())
+					result = v;
+			}
+			break;
+		}
+		default: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsLong() < result.getObjectAsLong())
+					result = v;
+			}
+			break;
+		}
+		}
+		return result;
+
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listLarger(Var value) throws Exception {
+
+		Var result;
+		switch (value.getObjectAsList().getFirst().getType()) {
+		case DOUBLE: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsDouble());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsDouble() > result.getObjectAsDouble())
+					result = v;
+			}
+			break;
+		}
+		case INT: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsLong() > result.getObjectAsLong())
+					result = v;
+			}
+			break;
+		}
+		default: {
+			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
+			for (Var v : value.getObjectAsList()) {
+				if (v.getObjectAsLong() > result.getObjectAsLong())
+					result = v;
+			}
+			break;
+		}
+		}
+		return result;
+
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listAverage(Var value) throws Exception {
+
+		Var result;
+		switch (value.getObjectAsList().getFirst().getType()) {
+		case DOUBLE: {
+			Double sum = 0.0;
+			for (Var v : value.getObjectAsList()) {
+				sum += v.getObjectAsDouble();
+			}
+			result = new Var(sum / value.size());
+			break;
+		}
+		case INT: {
+			Long sum = 0L;
+			for (Var v : value.getObjectAsList()) {
+				sum += v.getObjectAsLong();
+			}
+			result = new Var(sum / value.size());
+			break;
+		}
+		default: {
+			Long sum = 0L;
+			for (Var v : value.getObjectAsList()) {
+				sum += v.getObjectAsLong();
+			}
+			result = new Var(sum / value.size());
+			break;
+		}
+		}
+		return result;
+
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listMedium(Var value) throws Exception {
+
+		switch (value.getObjectAsList().getFirst().getType()) {
+		case DOUBLE: {
+
+			LinkedList<Var> lklist = value.getObjectAsList();
+			Collections.sort(lklist, new Comparator<Var>() {
+				@Override
+				public int compare(Var o1, Var o2) {
+					if (o1.getObjectAsDouble() > o2.getObjectAsDouble())
+						return 1;
+					if (o1.getObjectAsDouble() == o2.getObjectAsDouble())
+						return 0;
+					if (o1.getObjectAsDouble() < o2.getObjectAsDouble())
+						return -1;
+					return 0;
+				}
+			});
+
+			if (lklist.size() % 2 == 1)
+				return new Var(lklist.get(lklist.size() / 2));
+			else {
+				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
+				result = new Var(
+						(result.getObjectAsDouble() + lklist.get(lklist.size() / 2 + 1).getObjectAsDouble()) / 2);
+				return result;
+			}
+
+		}
+		case INT: {
+
+			LinkedList<Var> lklist = value.getObjectAsList();
+			Collections.sort(lklist, new Comparator<Var>() {
+
+	@Override
+				public int compare(Var o1, Var o2) {
+					if (o1.getObjectAsLong() > o2.getObjectAsLong())
+						return 1;
+					if (o1.getObjectAsLong() == o2.getObjectAsLong())
+						return 0;
+					if (o1.getObjectAsLong() < o2.getObjectAsLong())
+						return -1;
+					return 0;
+				}
+			});
+
+			if (lklist.size() % 2 == 1)
+				return new Var(lklist.get(lklist.size() / 2));
+			else {
+				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
+				result = new Var((result.getObjectAsLong() + lklist.get(lklist.size() / 2 + 1).getObjectAsLong()) / 2);
+				return result;
+			}
+
+		}
+		default: {
+			LinkedList<Var> lklist = value.getObjectAsList();
+			Collections.sort(lklist, new Comparator<Var>() {
+				@Override
+				public int compare(Var o1, Var o2) {
+					if (o1.getObjectAsLong() > o2.getObjectAsLong())
+						return 1;
+					if (o1.getObjectAsLong() == o2.getObjectAsLong())
+						return 0;
+					if (o1.getObjectAsLong() < o2.getObjectAsLong())
+						return -1;
+					return 0;
+				}
+			});
+
+			if (lklist.size() % 2 == 1)
+				return new Var(lklist.get(lklist.size() / 2));
+			else {
+				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
+				result = new Var((result.getObjectAsLong() + lklist.get(lklist.size() / 2 + 1).getObjectAsLong()) / 2);
+				return result;
+			}
+
+		}
+	}}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listModes(Var value) throws Exception {
+		Var modes = new Var();
+		Map<Double, Double> countMap = new HashMap<Double, Double>();
+		double max = -1;
+		double d;
+		LinkedList<Var> ll = value.getObjectAsList();
+		for (Var var : ll) {
+			d = var.getObjectAsDouble();
+			double count = 0;
+			if (countMap.containsKey(d)) {
+				count = countMap.get(d) + 1;
+			} else {
+				count = 1;
+			}
+			countMap.put(d, count);
+			if (count > max) {
+				max = count;
+			}
+		}
+		for (Map.Entry<Double, Double> tuple : countMap.entrySet()) {
+			if (tuple.getValue() == max) {
+				modes = new Var(Var.valueOf(tuple.getKey().doubleValue()));
+			}
+		}
+		return modes;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listRandomItem(Var value) throws Exception {
+		return new Var(
+				value.get(Integer.parseInt("" + randomInt(new Var(0), new Var(value.size())).getObjectAsLong())));
+
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var listStandardDeviation(Var value) throws Exception {
+		double mean = listMedium(value).getObjectAsDouble();
+		double size = value.size();
+		double temp = 0;
+		double d;
+		LinkedList<Var> ll = value.getObjectAsList();
+		for (Var var : ll) {
+			d = var.getObjectAsDouble();
+			temp += (mean - d) * (mean - d);
+		}
+		double variance = temp / size;
+		return new Var(Math.sqrt(variance));
+
+	}
+
+	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
+			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
+					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
+							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
+	public static final Var mod(Var value1, Var value2) throws Exception {
+		Var result;
+		switch (value1.getType()) {
+		case DOUBLE: {
+			Double resultado = value1.getObjectAsDouble() % value2.getObjectAsDouble();
+			return new Var(resultado);
+		}
+		case INT: {
+			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
+			return new Var(resultado);
+		}
+		default: {
+		  Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
+			return new Var(resultado);
+		}
+
+	}
+	}
+
+	public static void main(String[] args) {
+		Var min = new Var(13);
+		Var max = new Var(100);
+		List<Var> array = new LinkedList<Var>();
+		array.add(new Var(50L));
+		array.add(new Var(10L));
+		array.add(new Var(30L));
+		array.add(new Var(60L));
+		array.add(new Var(40L));
+		array.add(new Var(40L));
+
+		Var arrayList = new Var(array);
+		try {
+			System.out.println("teste:" + Operations.mod(max,min).getObjectAsLong());
+			//	System.out.println("teste:" + Operations.randomInt(min, max));
+
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		System.out.println("FIM");
 	}
 }
