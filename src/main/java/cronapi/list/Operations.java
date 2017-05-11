@@ -56,7 +56,7 @@ public class Operations {
 			if (list.getObjectAsList().contains(item))
 				return new Var(list.getObjectAsList().get(list.getObjectAsList().indexOf(item)));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var findLast(Var list, Var item) throws Exception {
@@ -64,7 +64,7 @@ public class Operations {
 			if (list.getObjectAsList().contains(item))
 				return new Var(list.getObjectAsList().get(list.getObjectAsList().lastIndexOf(item)));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var get(Var list, Var index) throws Exception {
@@ -72,7 +72,7 @@ public class Operations {
 			if (list.getObjectAsList().get(index.getObjectAsInt() - 1) != Var.VAR_NULL)
 				return new Var(list.getObjectAsList().get(index.getObjectAsInt() - 1));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getFromEnd(Var list, Var index) throws Exception {
@@ -80,28 +80,28 @@ public class Operations {
 			if (list.getObjectAsList().get(list.getObjectAsList().size() - index.getObjectAsInt()) != Var.VAR_NULL)
 				return new Var(list.getObjectAsList().get(list.getObjectAsList().size() - index.getObjectAsInt()));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getFirst(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return new Var(list.getObjectAsList().getFirst());
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getLast(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return new Var(list.getObjectAsList().getLast());
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getRandom(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return cronapi.math.Operations.listRandomItem(list);
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getAndRemove(Var list, Var index) throws Exception {
@@ -112,7 +112,7 @@ public class Operations {
 				return v;
 			}
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getAndRemoveFromEnd(Var list, Var index) throws Exception {
@@ -123,7 +123,7 @@ public class Operations {
 				return v;
 			}
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getAndRemoveFirst(Var list) throws Exception {
@@ -132,7 +132,7 @@ public class Operations {
 			list.getObjectAsList().removeFirst();
 			return v;
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getAndRemoveLast(Var list) throws Exception {
@@ -141,7 +141,7 @@ public class Operations {
 			list.getObjectAsList().removeLast();
 			return v;
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var getAndRemoveRandom(Var list) throws Exception {
@@ -150,7 +150,7 @@ public class Operations {
 			list.getObjectAsList().remove(v);
 			return v;
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var remove(Var list, Var index) throws Exception {
@@ -158,7 +158,7 @@ public class Operations {
 			if (list.getObjectAsList().get(index.getObjectAsInt() - 1) != Var.VAR_NULL)
 				return new Var(list.getObjectAsList().remove(index.getObjectAsInt() - 1));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var removeFromEnd(Var list, Var index) throws Exception {
@@ -166,29 +166,116 @@ public class Operations {
 			if (list.getObjectAsList().get(list.getObjectAsList().size() - index.getObjectAsInt()) != Var.VAR_NULL)
 				return new Var(list.getObjectAsList().remove(list.getObjectAsList().size() - index.getObjectAsInt()));
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var removeFirst(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return new Var(list.getObjectAsList().removeFirst());
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var removeLast(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return new Var(list.getObjectAsList().removeLast());
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
 	}
 
 	public static final Var removeRandom(Var list) throws Exception {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      int index = cronapi.math.Operations.randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size()-1)).getObjectAsInt();
+			int index = cronapi.math.Operations.randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+					.getObjectAsInt();
 			list.getObjectAsList().remove(index);
 			return new Var(true);
 		}
-		return Var.VAR_NULL;
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var set(Var list, Var index, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= index.getObjectAsInt())) {
+			list.getObjectAsList().set(index.getObjectAsInt() - 1, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var setFromEnd(Var list, Var index, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= index.getObjectAsInt())
+				&& (list.getObjectAsList().size() - index.getObjectAsInt()) >= 0 && index.getObjectAsInt() > 0) {
+			list.getObjectAsList().set(list.getObjectAsList().size() - index.getObjectAsInt(), element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var setFirst(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			list.getObjectAsList().set(0, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var setLast(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			list.getObjectAsList().set(list.getObjectAsList().size() - 1, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var setRandom(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			int index = cronapi.math.Operations.randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+					.getObjectAsInt();
+			list.getObjectAsList().set(index, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var add(Var list, Var index, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= index.getObjectAsInt())) {
+			list.getObjectAsList().add(index.getObjectAsInt() - 1, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var addFromEnd(Var list, Var index, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= index.getObjectAsInt())
+				&& (list.getObjectAsList().size() - index.getObjectAsInt()) >= 0 && index.getObjectAsInt() > 0) {
+			list.getObjectAsList().add(list.getObjectAsList().size() - index.getObjectAsInt(), element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var addFirst(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			list.getObjectAsList().add(0, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var addLast(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			list.getObjectAsList().add(element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
+	}
+
+	public static final Var addRandom(Var list, Var element) throws Exception {
+		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
+			int index = cronapi.math.Operations.randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+					.getObjectAsInt();
+			list.getObjectAsList().add(index, element);
+			return new Var(true);
+		}
+		return Var.VAR_FALSE;
 	}
 }
