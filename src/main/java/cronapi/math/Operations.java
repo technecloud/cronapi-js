@@ -665,7 +665,7 @@ public class Operations {
 		case DOUBLE: {
 			int resultado = random.nextInt(max.getObjectAsInt());
 			while ((resultado < min.getObjectAsLong()) || (resultado > max.getObjectAsLong())) {
-				resultado = random.nextInt();
+				resultado = random.nextInt(max.getObjectAsInt());
 			}
 			result = new Var(resultado);
 			break;
@@ -673,7 +673,7 @@ public class Operations {
 		case INT: {
 			int resultado = random.nextInt();
 			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
-				resultado = random.nextInt();
+				resultado = random.nextInt(max.getObjectAsInt());
 			}
 			result = new Var(resultado);
 			break;
@@ -681,7 +681,7 @@ public class Operations {
 		default: {
 			int resultado = random.nextInt();
 			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
-				resultado = random.nextInt();
+				resultado = random.nextInt(max.getObjectAsInt());
 			}
 			result = new Var(resultado);
 		}
@@ -934,8 +934,7 @@ public class Operations {
 					"{{isDivisibleByFunctionParam0}}" }, paramsType = {
 							ObjectType.LIST }, returnType = ObjectType.DOUBLE)
 	public static final Var listRandomItem(Var value) throws Exception {
-		return new Var(
-				value.get(Integer.parseInt("" + randomInt(new Var(0), new Var(value.size())).getObjectAsLong())));
+		return new Var(value.get(randomInt(new Var(0), new Var(value.size()-1)).getObjectAsInt()));
 
 	}
 

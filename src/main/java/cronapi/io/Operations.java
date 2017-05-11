@@ -229,8 +229,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{readContentOfFile}}", nameTags = {
 			"fileRead" }, description = "{{functionToReadContentOfFile}}", params = { "{{streamOfFileToRead}}",
-					"{{size}}" }, paramsType = { ObjectType.OBJECT,
-							ObjectType.LONG }, returnType = ObjectType.STRING)
+					"{{size}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG }, returnType = ObjectType.STRING)
 	public static final Var fileRead(Var input, Var size) throws Exception {
 		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
@@ -334,7 +333,8 @@ public class Operations {
 	 * Obter o tamanho do arquivo
 	 */
 	@CronapiMetaData(type = "function", name = "{{sizeOfFile}}", nameTags = {
-			"fileGetSize" }, description = "{{functionToGetSizeOfFile}}", params = { "{{streamOfFileToRead}}" })
+			"fileGetSize" }, description = "{{functionToGetSizeOfFile}}", params = {
+					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.LONG)
 	public static final Var fileGetSize(Var input) throws Exception {
 		FileInputStream fis = (FileInputStream) input.getObject();
 		return new Var(fis.getChannel().size());
@@ -388,8 +388,8 @@ public class Operations {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LONG)
 	public static final Var fileGetNumberOfLines(Var path) throws Exception {
 		Path p = Paths.get(path.getObjectAsString());
-    long lineCount = Files.lines(p).count();
-    return new Var(lineCount);
+		long lineCount = Files.lines(p).count();
+		return new Var(lineCount);
 	}
 
 	/**
@@ -431,16 +431,16 @@ public class Operations {
 					"{{streamOfFileToRead}}", "{{charset}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var fileReadContentWithCharset(Var finp, Var charsetSelected) throws Exception {
-    String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream)finp.getObject(), charsetSelected.getObjectAsString());
-    return new Var(result);
+		String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream) finp.getObject(),
+				charsetSelected.getObjectAsString());
+		return new Var(result);
 	}
 
 	/**
 	 *  Descompactar arquivo zip	
 	 */
 	@CronapiMetaData(type = "function", name = "{{unZipFile}}", nameTags = {
-			"unZip" }, description = "{{functionToUnZipFile}}", params = {
-					"{{streamOfFileToRead}}",
+			"unZip" }, description = "{{functionToUnZipFile}}", params = { "{{streamOfFileToRead}}",
 					"{{destinationFolder}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
 	public static void unZip(Var zippedFile, Var destFolder) throws Exception {
 		FileInputStream zipFile = (FileInputStream) zippedFile.getObject();
