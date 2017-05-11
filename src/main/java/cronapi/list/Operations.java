@@ -191,21 +191,4 @@ public class Operations {
 		}
 		return Var.VAR_NULL;
 	}
-
-	public static void main(String[] args) {
-		LinkedList<Var> linked = new LinkedList<Var>();
-		linked.add(new Var(1));
-		linked.add(new Var(10));
-		linked.add(new Var(11));
-		Var list = new Var(linked);
-		try {
-
-			System.out.println("Função:" + Operations.removeRandom(list));
-			System.out.println(list);
-
-		} catch (Exception e) {
-			System.out.println("Erro" + e);
-		}
-	}
-
 }

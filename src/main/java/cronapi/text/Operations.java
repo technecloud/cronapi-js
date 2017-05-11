@@ -13,6 +13,16 @@ import cronapi.Var;
  */
 public class Operations {
 
+	public static final Var newText(Var text) throws Exception {
+		return new Var(text);
+	}
 
-	
+	public static final Var newText(Var... text) throws Exception {
+		Var result = new Var();
+		for (Var t : text) {
+			result.append(t.getObjectAsString());
+		}
+		return result;
+	}
+
 }
