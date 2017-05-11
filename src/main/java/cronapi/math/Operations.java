@@ -850,7 +850,7 @@ public class Operations {
 			LinkedList<Var> lklist = value.getObjectAsList();
 			Collections.sort(lklist, new Comparator<Var>() {
 
-	@Override
+				@Override
 				public int compare(Var o1, Var o2) {
 					if (o1.getObjectAsLong() > o2.getObjectAsLong())
 						return 1;
@@ -895,7 +895,8 @@ public class Operations {
 			}
 
 		}
-	}}
+		}
+	}
 
 	@CronapiMetaData(type = "function", name = "{{isDivisibleByFunctionName}}", nameTags = {
 			"isDivisibleByFunction" }, description = "{{isDivisibleByFunctionDescription}}", params = {
@@ -973,32 +974,10 @@ public class Operations {
 			return new Var(resultado);
 		}
 		default: {
-		  Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
+			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
 			return new Var(resultado);
 		}
 
-	}
-	}
-
-	public static void main(String[] args) {
-		Var min = new Var(13);
-		Var max = new Var(100);
-		List<Var> array = new LinkedList<Var>();
-		array.add(new Var(50L));
-		array.add(new Var(10L));
-		array.add(new Var(30L));
-		array.add(new Var(60L));
-		array.add(new Var(40L));
-		array.add(new Var(40L));
-
-		Var arrayList = new Var(array);
-		try {
-			System.out.println("teste:" + Operations.mod(max,min).getObjectAsLong());
-			//	System.out.println("teste:" + Operations.randomInt(min, max));
-
-		} catch (Exception e) {
-			System.out.println(e);
 		}
-		System.out.println("FIM");
 	}
 }

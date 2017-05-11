@@ -179,7 +179,7 @@ public class Var implements Comparable {
 			case STRING:
 				return Integer.parseInt(((String) getObject()));
 			case INT:
-				return (Integer) getObject();
+				return ((Long) getObject()).intValue();
 			case BOOLEAN:
 				return ((Boolean) getObject()) ? 1 : 0;
 			case DOUBLE:
