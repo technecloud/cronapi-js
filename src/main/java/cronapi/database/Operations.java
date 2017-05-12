@@ -92,7 +92,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
-							ObjectType.STRING }, returnType = ObjectType.OBJECT)
+							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
 	public static Var getField(Var ds, Var fieldName) {
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
