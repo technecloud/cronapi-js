@@ -270,6 +270,9 @@ public class DataSource {
 		if (this.insertedElement != null)
 			return this.insertedElement;
 
+    if(this.current < 0)
+      return null;
+
 		return this.page.getContent().get(this.current);
 	}
 
@@ -302,7 +305,8 @@ public class DataSource {
 				this.pageRequest = this.page.nextPageable();
 				this.fetch();
 				this.current = 0;
-			} else {
+			}else{
+			  this.current = -1;
 			}
 		}
 	}

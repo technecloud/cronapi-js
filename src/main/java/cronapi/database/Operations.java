@@ -36,18 +36,18 @@ public class Operations {
 		return varDs;
 	}
 
-	@CronapiMetaData(type = "function", name = "{{datasourceHasData}}", nameTags = { "hasData", "hasElements",
-			"existeRegistro", "proximo", "avancar" }, description = "{{functionToMoveCursorToNextPosition}}", params = {
+	@CronapiMetaData(type = "function", name = "{{datasourceNext}}", nameTags = { "next", "avançar",
+			"proximo"}, description = "{{functionToMoveCursorToNextPosition}}", params = {
 					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
-	public static void hasData(Var ds) {
+	public static void next(Var ds) {
 		((DataSource) ds.getObject()).next();
 	}
 
-	@CronapiMetaData(type = "function", name = "{{datasourceHasNext}}", nameTags = { "hasNext", "existeProximo",
-			"temProximo" }, description = "{{functionToVerifyHasNextPosition}}", params = {
+	@CronapiMetaData(type = "function", name = "{{datasourceHasData}}", nameTags = { "hasElement", "existeRegistro",
+			"temRegistro" }, description = "{{functionToVerifyDataInCurrentPosition}}", params = {
 					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.BOOLEAN)
-	public static Var hasNext(Var ds) {
-		return new Var(((DataSource) ds.getObject()).hasNext());
+	public static Var hasElement(Var ds) {
+		return new Var(((DataSource) ds.getObject()).getObject() != null);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceClose}}", nameTags = { "close", "fechar", "limpar",

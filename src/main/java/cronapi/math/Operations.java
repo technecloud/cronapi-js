@@ -21,7 +21,6 @@ import cronapi.CronapiMetaData.ObjectType;
  * @since 2017-05-04
  *
  */
- @CronapiMetaData(category = CategoryType.MATH, categoryTags = { "Matemática", "Math" })
 public class Operations {
 
 	public static final Var multiply(Var... values) throws Exception {
