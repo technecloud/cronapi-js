@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -16,16 +14,23 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import cronapi.i18n.Messages;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+
+import cronapi.i18n.Messages;
 
 /**
  * Classe que representa ...
@@ -111,7 +116,7 @@ public class Utils {
 	}
 
 	public static String stringToJs(String string) {
-		return StringEscapeUtils.escapeJavaScript(string);
+		return StringEscapeUtils.escapeEcmaScript(string);
 	}
 
 	public static int getFromCalendar(Date date, int field) {
