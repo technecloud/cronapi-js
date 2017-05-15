@@ -1,9 +1,10 @@
 package cronapi.list;
 
 import java.util.LinkedList;
-import java.util.stream.Collectors;
 
+import cronapi.CronapiMetaData;
 import cronapi.Var;
+import cronapi.CronapiMetaData.CategoryType;
 
 /**
  * Classe que representa ...
@@ -14,6 +15,8 @@ import cronapi.Var;
  *
  */
 
+
+@CronapiMetaData(category = CategoryType.LIST, categoryTags = { "Lista", "List" })
 public class Operations {
 
 	/**
@@ -101,7 +104,7 @@ public class Operations {
 		if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
 			return new Var(list.getObjectAsList().getFirst());
 		}
-		return Var.VAR_FALSE;
+		return Var.VAR_NULL;
 	}
 
 	public static final Var getLast(Var list) throws Exception {
