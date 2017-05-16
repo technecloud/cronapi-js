@@ -82,5 +82,10 @@
   "changeValueOfField":"Alterar valor do campo",
   "functionToChangeValueOfField": "Função para alterar valor do campo",
   "field": "Campo",
-  "value": "Valor"
+  "value": "Valor",
+  "CategoryType.CONVERSION": "Conversão",
+  "CategoryType.UTIL": "Util",
+  "CategoryType.SCREEN": "Tela",
+  "CategoryType.DATETIME": "Data e hora",
+  "CategoryType.XML": "Xml"
 }

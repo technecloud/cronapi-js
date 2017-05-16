@@ -82,5 +82,10 @@
 	"changeValueOfField": "Change field value",
 	"functionToChangeValueOfField": "Function to change field value",
 	"field": "Field",
-	"Value": "Value"
+	"Value": "Value",
+	"CategoryType.CONVERSION": "Conversion",
+  "CategoryType.UTIL": "Util",
+  "CategoryType.SCREEN": "Screen",
+  "CategoryType.DATETIME": "Date and time",
+  "CategoryType.XML": "Xml"
 }

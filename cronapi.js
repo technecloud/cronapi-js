@@ -4,7 +4,7 @@
 	this.cronapi = {};
 
 	/**
-	 * @category CONVERSION
+	 * @category CategoryType.CONVERSION
 	 * @categoryTags Conversão|Convert
 	 */
 	this.cronapi.conversion = {};
@@ -150,7 +150,7 @@
 	};
 	
 	/**
-	 * @category UTIL
+	 * @category CategoryType.UTIL
 	 * @categoryTags Util
 	 */
 	this.cronapi.util = {};
@@ -250,7 +250,7 @@
   };
   
   /**
-	 * @category SCREEN
+	 * @category CategoryType.SCREEN
 	 * @categoryTags Screen|Tela
 	 */
 	this.cronapi.screen = {};
@@ -273,7 +273,7 @@
 	};
   
 	/**
-	 * @category DATETIME
+	 * @category CategoryType.DATETIME
 	 * @categoryTags Date|Datetime|Data|Hora
 	 */
 	this.cronapi.dateTime = {};
@@ -562,7 +562,7 @@
 	};
 
 	/**
-	 * @category XML
+	 * @category CategoryType.XML
 	 * @categoryTags XML|xml
 	 */
 	this.cronapi.xml = {};
