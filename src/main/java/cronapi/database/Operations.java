@@ -1,6 +1,7 @@
 package cronapi.database;
 
 import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
