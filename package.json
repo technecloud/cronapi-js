@@ -1,6 +1,6 @@
 {
   "name": "cronapi-js",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Public library for CronApp's users",
   "main": "cronapi.js",
   "scripts": {
