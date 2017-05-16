@@ -147,8 +147,7 @@ public class Operations {
 			}
 		}
 
-		Object obj = clazz.newInstance();
-		Object o = methodToCall.invoke(obj, callParams);
+		Object o = methodToCall.invoke(clazz, callParams);
 
 		return new Var(o);
 	}
