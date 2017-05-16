@@ -22,7 +22,7 @@ import java.util.Date;
 public class CronapiConfigurator {
 
   public static String ENCODING = "UTF-8";
-  
+
   @Autowired
   private HttpServletRequest request;
 
