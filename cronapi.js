@@ -263,7 +263,7 @@
 	 * @param {ObjectType.STRING} field {{field}}
 	 * @param {ObjectType.STRING} value {{value}}
 	 */
-	this.cronapi.screen.changeValueOfField = function(field, value) {
+	this.cronapi.screen.changeValueOfField = function(/** @type {ObjectType.BLOCK} @blockType field_from_screen*/ field, /** @type {ObjectType.STRING} */value) {
 	  try {
 	    eval(field + ' = "' + value + '"');
 	  }
