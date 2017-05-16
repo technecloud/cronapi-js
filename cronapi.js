@@ -3,6 +3,14 @@
 
 	this.cronapi = {};
 
+    this.doEval = function(arg) {
+        return arg;
+    }
+
+    this.evalInContext = function(js) {
+        return eval('doEval('+js+')');
+    }
+
 	/**
 	 * @category CategoryType.CONVERSION
 	 * @categoryTags Conversão|Convert
@@ -156,7 +164,7 @@
 	this.cronapi.util = {};
 	
 	/**
-	 * @type function
+	 * @type internal
 	 * @name {{callServerBlocklyAsync}}
 	 * @nameTags callServerBlocklyAsync
 	 * @description {{functionToCallServerBlocklyAsync}}
@@ -187,7 +195,7 @@
   };
   
   /**
-	 * @type function
+	 * @type internal
 	 * @name {{makeCallServerBlocklyAsync}}
 	 * @nameTags makeCallServerBlocklyAsync
 	 * @description {{functionToMakeCallServerBlocklyAsync}}
@@ -213,6 +221,20 @@
       callFunc += ')';
     eval(callFunc);
   }
+
+  /**
+   * @type function
+   * @name {{callServerBlockly}}
+   * @nameTags callServerBlockly
+   * @description {{functionToCallServerBlockly}}
+   * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
+   * @param {ObjectType.OBJECT} params {{params}}
+   * @arbitraryParams true
+   * @wizard procedures_callblockly_callnoreturn
+   */
+  this.cronapi.util.callServerBlocklyNoReturn = function() {
+    cronapi.util.callServerBlockly.apply(this, arguments);
+  }
   
   /**
 	 * @type function
@@ -223,6 +245,7 @@
 	 * @param {ObjectType.OBJECT} params {{params}}
 	 * @arbitraryParams true
 	 * @wizard procedures_callblockly_callreturn
+     * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
@@ -242,11 +265,12 @@
         async: false,
         headers : {
           'Content-Type' : 'application/json',
-          'X-AUTH-TOKEN' : token
+          'X-AUTH-TOKEN' : token,
+		  'toJS' : true
         }
     }).responseText;
     
-    return result;
+    return evalInContext(result);
   };
   
   /**
