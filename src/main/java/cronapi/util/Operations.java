@@ -114,8 +114,16 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
 			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
-			"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
+			"{{params}}" }, wizard = "procedures_callblockly_callnoreturn", paramsType = { ObjectType.OBJECT,
 			ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true)
+	public static final void callBlocklyNoReturn(Var classNameWithMethod, Var... params) throws Exception {
+		callBlockly(classNameWithMethod, params);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
+			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
+			"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
+			ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
 	public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
 
 		String className = classNameWithMethod.getObjectAsString();
