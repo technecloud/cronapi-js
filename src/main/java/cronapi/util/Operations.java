@@ -114,7 +114,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
 			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
-			"{{params}}" }, paramsType = { ObjectType.OBJECT,
+			"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
 			ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true)
 	public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
 
@@ -125,22 +125,30 @@ public class Operations {
 			className = className.substring(0, className.indexOf(":"));
 		}
 
-		Class[] arrayClass = null;
-		if (params != null && params.length > 0) {
-			arrayClass = new Class[params.length];
-			for (int i = 0; i < params.length; i++)
-				arrayClass[i] = Var.class;
+		Class clazz = Class.forName(className);
+
+		Method methodToCall = clazz.getMethods()[0];
+		for (Method m: clazz.getMethods()) {
+			if (m.getName().equalsIgnoreCase(method)) {
+				methodToCall = m;
+				break;
+			}
 		}
 
-		Class clazz = Class.forName(className);
-		Method methodToCall = null;
-		if (method == null)
-			methodToCall = clazz.getDeclaredMethods()[0];
-		else
-			methodToCall = clazz.getDeclaredMethod(method, arrayClass);
+		Var[] callParams = params;
+
+		if (methodToCall.getParameterCount() != callParams.length) {
+			callParams = new Var[methodToCall.getParameterCount()];
+			for (int i = 0; i < methodToCall.getParameterCount(); i++) {
+				if (i < params.length)
+					callParams[i] = params[i];
+				else
+					callParams[i] = Var.VAR_NULL;
+			}
+		}
 
 		Object obj = clazz.newInstance();
-		Object o = methodToCall.invoke(obj, params);
+		Object o = methodToCall.invoke(obj, callParams);
 
 		return new Var(o);
 	}
