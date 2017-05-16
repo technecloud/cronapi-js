@@ -222,6 +222,7 @@
 	 * @param {string} classNameWithMethod {{classNameWithMethod}}
 	 * @param {object} params {{params}}
 	 * @arbitraryParams true
+	 * @wizard procedures_callblockly_callreturn
 	 */
 	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
