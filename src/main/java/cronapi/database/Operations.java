@@ -1,6 +1,7 @@
 package cronapi.database;
 
 import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
@@ -93,7 +94,8 @@ public class Operations {
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
-	public static Var getField(Var ds, Var fieldName) {
+	public static Var getField(@ParamMetaData(blockType="procedures_sql_callreturn", type = ObjectType.BLOCK) Var ds, 
+	@ParamMetaData(type = ObjectType.STRING) Var fieldName) {
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
 
