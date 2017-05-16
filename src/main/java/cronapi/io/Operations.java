@@ -74,7 +74,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{canReadyFile}}", nameTags = {
 			"fileCanRead" }, description = "{{functionToCheckIfCanReadFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public final Var fileCanRead(Var path) throws Exception {
+	public static final Var fileCanRead(Var path) throws Exception {
 		File file = new File(path.getObjectAsString().trim());
 		return new Var(file.canRead());
 	}
@@ -85,7 +85,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{canWriteFile}}", nameTags = {
 			"fileCanWrite" }, description = "{{functionToCheckIfCanWriteFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public final Var fileCanWrite(Var path) throws Exception {
+	public static final Var fileCanWrite(Var path) throws Exception {
 		File file = new File(path.getObjectAsString().trim());
 		return new Var(file.canWrite());
 	}
@@ -195,8 +195,14 @@ public class Operations {
 					"{{addContent}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.BOOLEAN }, returnType = ObjectType.OBJECT)
 	public static final Var fileOpenToWrite(Var url, Var append) throws Exception {
-		FileOutputStream out = new FileOutputStream(new File(url.getObjectAsString()), append.getObjectAsBoolean());
-		return new Var(out);
+		if (!append.equals(Var.VAR_NULL)) {
+			FileOutputStream out = new FileOutputStream(new File(url.getObjectAsString()));
+			out.write(append.getObjectAsString().getBytes());
+			return new Var(out);
+		} else {
+			FileOutputStream out = new FileOutputStream(new File(url.getObjectAsString()));
+			return new Var(out);
+		}
 	}
 
 	/**
@@ -402,24 +408,39 @@ public class Operations {
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public static final Var downloadFileFromUrl(Var urlAddress, Var path, Var name, Var extension) {
 		try {
-			String pathLocal = path.getObjectAsString();
-			java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
-			if (!pathLocal.endsWith(File.separator))
-				pathLocal += pathLocal + File.separator;
+			if (path.equals(Var.VAR_NULL) && !name.equals(Var.VAR_NULL)) {
+				java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
+				java.io.InputStream is = url.openStream();
+				java.io.FileOutputStream fos = new java.io.FileOutputStream(
+						name.getObjectAsString() + extension.getObjectAsString());
+				int umByte = 0;
+				while ((umByte = is.read()) != -1) {
+					fos.write(umByte);
+				}
+				is.close();
+				fos.close();
+				return new Var(true);
+			} else if (!name.equals(Var.VAR_NULL)) {
+				String pathLocal = path.getObjectAsString();
+				java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
+				if (!pathLocal.endsWith(File.separator))
+					pathLocal += pathLocal + File.separator;
 
-			java.io.InputStream is = url.openStream();
-			java.io.FileOutputStream fos = new java.io.FileOutputStream(
-					pathLocal + name.getObjectAsString() + extension.getObjectAsString());
-			int umByte = 0;
-			while ((umByte = is.read()) != -1) {
-				fos.write(umByte);
+				java.io.InputStream is = url.openStream();
+				java.io.FileOutputStream fos = new java.io.FileOutputStream(
+						pathLocal + name.getObjectAsString() + extension.getObjectAsString());
+				int umByte = 0;
+				while ((umByte = is.read()) != -1) {
+					fos.write(umByte);
+				}
+				is.close();
+				fos.close();
+				return new Var(true);
 			}
-			is.close();
-			fos.close();
-			return new Var(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return new Var(false);
 	}
 
