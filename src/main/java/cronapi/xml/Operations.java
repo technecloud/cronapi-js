@@ -125,8 +125,8 @@ public class Operations {
 	// 	Abrir XML de um arquivo
 	@CronapiMetaData(type = "function", name = "{{XMLOpenFromFileName}}", nameTags = {"XMLOpenFromFile"}, description = "{{XMLOpenFromFileDescription}}", params = {
 			"{{XMLOpenFromFileParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
-	public static final Var XMLOpenFromFile(Var file) throws Exception {
-		File fileCasted = (File) file.getObject();
+	public static final Var XMLOpenFromFile(Var absPath) throws Exception {
+	  File fileCasted = new File(absPath.getObjectAsString());
 		SAXBuilder builder = new SAXBuilder();
 		return new Var(builder.build(fileCasted));
 	}

@@ -55,20 +55,8 @@ public class Operations {
 			"binaryToAscii" }, description = "{{functionToConvertTextBinaryToText}}", params = {
 					"{{contentInTextBinary}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var binaryToAscii(Var binaryVar) throws Exception {
-		StringBuilder sb = new StringBuilder();
-		char[] chars = binaryVar.getObjectAsString().replaceAll("\\s", "").toCharArray();
-		for (int j = 0; j < chars.length; j += 8) {
-			int idx = 0;
-			int sum = 0;
-			for (int i = 7; i >= 0; i--) {
-				if (chars[i + j] == '1') {
-					sum += 1 << idx;
-				}
-				idx++;
-			}
-			sb.append(Character.toChars(sum));
-		}
-		return new Var(sb.toString());
+		String msgDecode = new String((byte[]) binaryVar.getObject(), cronapi.CronapiConfigurator.ENCODING);
+		return new Var(msgDecode);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameTags = {
@@ -123,17 +111,16 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertStringToDate}}", nameTags = {
-			"stringToDate" }, description = "{{functionToConvertStringToDate}}", params = {
-					"{{content}}", "{{mask}}" }, paramsType = { ObjectType.STRING,
+			"stringToDate" }, description = "{{functionToConvertStringToDate}}", params = { "{{content}}",
+					"{{mask}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.DATETIME)
 	public static final Var stringToDate(Var val, Var mask) throws Exception {
 		return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString()));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {
-			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = {
-					"{{content}}", "{{minSize}}" }, paramsType = { ObjectType.LONG,
-							ObjectType.LONG }, returnType = ObjectType.STRING)
+			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = { "{{content}}",
+					"{{minSize}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.STRING)
 	public static final Var intToHex(Var value, Var minSize) throws Exception {
 		String hex = Long.toHexString(value.getObjectAsInt());
 		while (hex.length() < minSize.getObjectAsInt())
@@ -147,22 +134,22 @@ public class Operations {
 	public static final Var toLong(Var value) throws Exception {
 		return new Var(value.getObjectAsLong());
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{convertToString}}", nameTags = {
 			"toString" }, description = "{{functionToConvertToString}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public static final Var toString(Var value) throws Exception {
-    return new Var(value.getObjectAsString());
-  }
-  
-  @CronapiMetaData(type = "function", name = "{{convertToDouble}}", nameTags = {
+		return new Var(value.getObjectAsString());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{convertToDouble}}", nameTags = {
 			"toDouble" }, description = "{{functionToConvertToDouble}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
 	public final Var toDouble(Var value) throws Exception {
-    return new Var(value.getObjectAsDouble());
-  }
-  
-  @CronapiMetaData(type = "function", name = "{{toLogic}}", nameTags = {
+		return new Var(value.getObjectAsDouble());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{toLogic}}", nameTags = {
 			"toBoolean" }, description = "{{functionConvertToLogic}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public static final Var toBoolean(Var var) throws Exception {
