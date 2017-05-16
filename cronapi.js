@@ -14,8 +14,8 @@
 	 * @name {{textToTextBinary}}
 	 * @nameTags asciiToBinary
 	 * @description {{functionToConvertTextInTextBinary}}
-	 * @param {string} astring {{contentInAscii}}
-	 * @returns {string}
+	 * @param {ObjectType.STRING} astring {{contentInAscii}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.asciiToBinary = function(astring) {
 		var binary = "";
@@ -35,8 +35,8 @@
 	 * @name {{toLogic}}
 	 * @nameTags toBoolean
 	 * @description {{functionConvertToLogic}}
-	 * @param {string} value {{content}}
-	 * @returns {Boolean}
+	 * @param {ObjectType.STRING} value {{content}}
+	 * @returns {ObjectType.BOOLEAN}
 	 */
 	this.cronapi.conversion.toBoolean = function(value) {
 		return parseBoolean(value);
@@ -47,8 +47,8 @@
 	 * @name {{convertToBytes}}
 	 * @nameTags toBytes
 	 * @description {{functionToConvertTextBinaryToText}}
-	 * @param {Object} obj {{contentInTextBinary}}
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} obj {{contentInTextBinary}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.toBytes = function(obj) {
 		return obj ? obj.toString() : "";
@@ -59,8 +59,8 @@
 	 * @name {{convertToAscii}}
 	 * @nameTags chrToAscii|convertToAscii
 	 * @description {{functionToConvertToAscii}}
-	 * @param {string} value {{content}}
-	 * @returns {string}
+	 * @param {ObjectType.STRING} value {{content}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.chrToAscii = function(value) {
 		if (!value) {
@@ -75,8 +75,8 @@
 	 * @name {{convertStringToJs}}
 	 * @nameTags stringToJs
 	 * @description {{functionToConvertStringToJs}}
-	 * @param {string} value {{content}}
-	 * @returns {string}
+	 * @param {ObjectType.STRING} value {{content}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.stringToJs = function(value) {
 		return stringToJs(value);
@@ -87,8 +87,8 @@
 	 * @name {{convertStringToDate}}
 	 * @nameTags stringToDate
 	 * @description {{functionToConvertStringToDate}}
-	 * @param {string} value {{content}}
-	 * @returns {Date}
+	 * @param {ObjectType.STRING} value {{content}}
+	 * @returns {ObjectType.DATETIME}
 	 */
 	this.cronapi.conversion.stringToDate = function(value) {
 		var pattern = /^\s*(\d+)[\/\.-](\d+)[\/\.-](\d+)(\s(\d+):(\d+):(\d+))?\s*$/;
@@ -116,8 +116,8 @@
 	 * @name {{convertIntToHex}}
 	 * @nameTags intToHex
 	 * @description {{functionToConvertIntToHex}}
-	 * @param {string} value {{content}}
-	 * @returns {string}
+	 * @param {ObjectType.STRING} value {{content}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.intToHex = function(value) {
 		return Number(value).toString(16).toUpperCase();
@@ -128,8 +128,8 @@
 	 * @name {{convertToLong}}
 	 * @nameTags toLong
 	 * @description {{functionToConvertToLong}}
-	 * @param {Object} value {{content}}
-	 * @returns {Long}
+	 * @param {ObjectType.OBJECT} value {{content}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.conversion.toLong = function(value) {
 		return parseInt(value);
@@ -140,8 +140,8 @@
 	 * @name {{convertToString}}
 	 * @nameTags toString
 	 * @description {{functionToConvertToString}}
-	 * @param {Object} value {{content}}
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} value {{content}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.conversion.toString = function(value) {
 		if (value)
@@ -160,10 +160,10 @@
 	 * @name {{callServerBlocklyAsync}}
 	 * @nameTags callServerBlocklyAsync
 	 * @description {{functionToCallServerBlocklyAsync}}
-	 * @param {string} classNameWithMethod {{classNameWithMethod}}
-	 * @param {object} callbackSuccess {{callbackSuccess}}
-	 * @param {object} callbackError {{callbackError}}
-	 * @param {object} params {{params}}
+	 * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
+	 * @param {ObjectType.OBJECT} callbackSuccess {{callbackSuccess}}
+	 * @param {ObjectType.OBJECT} callbackError {{callbackError}}
+	 * @param {ObjectType.OBJECT} params {{params}}
 	 * @arbitraryParams true
 	 */
 	this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
@@ -191,10 +191,10 @@
 	 * @name {{makeCallServerBlocklyAsync}}
 	 * @nameTags makeCallServerBlocklyAsync
 	 * @description {{functionToMakeCallServerBlocklyAsync}}
-	 * @param {string} blocklyWithFunction {{blocklyWithFunction}}
-	 * @param {string} callbackBlocklySuccess {{callbackBlocklySuccess}}
-	 * @param {string} callbackBlocklyError {{callbackBlocklyError}}
-	 * @param {object} params {{params}}
+	 * @param {ObjectType.STRING} blocklyWithFunction {{blocklyWithFunction}}
+	 * @param {ObjectType.STRING} callbackBlocklySuccess {{callbackBlocklySuccess}}
+	 * @param {ObjectType.STRING} callbackBlocklyError {{callbackBlocklyError}}
+	 * @param {ObjectType.OBJECT} params {{params}}
 	 * @arbitraryParams true
 	 */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
@@ -219,8 +219,8 @@
 	 * @name {{callServerBlockly}}
 	 * @nameTags callServerBlockly
 	 * @description {{functionToCallServerBlockly}}
-	 * @param {string} classNameWithMethod {{classNameWithMethod}}
-	 * @param {object} params {{params}}
+	 * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
+	 * @param {ObjectType.OBJECT} params {{params}}
 	 * @arbitraryParams true
 	 * @wizard procedures_callblockly_callreturn
 	 */
@@ -260,8 +260,8 @@
 	 * @name {{changeValueOfField}}
 	 * @nameTags changeValueOfField|changeFieldValue
 	 * @description {{functionToChangeValueOfField}}
-	 * @param {string} field {{field}}
-	 * @param {string} value {{value}}
+	 * @param {ObjectType.STRING} field {{field}}
+	 * @param {ObjectType.STRING} value {{value}}
 	 */
 	this.cronapi.screen.changeValueOfField = function(field, value) {
 	  try {
@@ -283,8 +283,8 @@
 	 * @name {{getSecondFromDate}}
 	 * @nameTags getSecond
 	 * @description {{functionToGetSecondFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getSecond = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -298,8 +298,8 @@
 	 * @name {{getMinuteFromDate}}
 	 * @nameTags getMinute
 	 * @description {{functionToGetMinuteFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getMinute = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -313,8 +313,8 @@
 	 * @name {{getHourFromDate}}
 	 * @nameTags getHour
 	 * @description {{functionToGetHourFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getHour = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -328,8 +328,8 @@
 	 * @name {{getYearFromDate}}
 	 * @nameTags getYear
 	 * @description {{functionToGetYearFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getYear = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -343,8 +343,8 @@
 	 * @name {{getMonthFromDate}}
 	 * @nameTags getMonth
 	 * @description {{functionToGetMonthFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getMonth = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -358,8 +358,8 @@
 	 * @name {{getDayFromDate}}
 	 * @nameTags getDay
 	 * @description {{functionToGetDayFromDate}}
-	 * @param {Date} value {{date}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getDay = function(value) {
 		var date = cronapi.conversion.stringToDate(value);
@@ -373,9 +373,9 @@
 	 * @name {{getDaysBetweenDates}}
 	 * @nameTags getDaysBetweenDates|getDaysDiffDate|diffDatesDays
 	 * @description {{functionToGetDaysBetweenDates}}
-	 * @param {Date} date {{largerDateToBeSubtracted}}
-	 * @param {Date} date2 {{smallerDateToBeSubtracted}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} date {{largerDateToBeSubtracted}}
+	 * @param {ObjectType.DATETIME} date2 {{smallerDateToBeSubtracted}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getDaysBetweenDates = function(date, date2) {
 		var DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
@@ -391,9 +391,9 @@
 	 * @name {{getMonthsBetweenDates}}
 	 * @nameTags getMonthsBetweenDates|getMonthsDiffDate|diffDatesMonths
 	 * @description {{functionToGetMonthsBetweenDates}}
-	 * @param {Date} date {{largerDateToBeSubtracted}}
-	 * @param {Date} date2 {{smallerDateToBeSubtracted}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} date {{largerDateToBeSubtracted}}
+	 * @param {ObjectType.DATETIME} date2 {{smallerDateToBeSubtracted}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getMonthsBetweenDates = function(date, date2) {
 		var monthBetween = 0;
@@ -418,9 +418,9 @@
 	 * @name {{getYearsBetweenDates}}
 	 * @nameTags getYearsBetweenDates|getYearsDiffDate|diffDatesYears
 	 * @description {{functionToGetYearsBetweenDates}}
-	 * @param {Date} date {{largerDateToBeSubtracted}}
-	 * @param {Date} date2 {{smallerDateToBeSubtracted}}
-	 * @returns {int}
+	 * @param {ObjectType.DATETIME} date {{largerDateToBeSubtracted}}
+	 * @param {ObjectType.DATETIME} date2 {{smallerDateToBeSubtracted}}
+	 * @returns {ObjectType.LONG}
 	 */
 	this.cronapi.dateTime.getYearsBetweenDates = function(date, date2) {
 		var yearBetween = 0;
@@ -445,9 +445,9 @@
 	 * @name {{incDay}}
 	 * @nameTags incDay|increaseDay
 	 * @description {{functionToIncDay}}
-	 * @param {Date} date {{date}}
-	 * @param {int} day {{daysToIncrement}}
-	 * @returns {Date}
+	 * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+	 * @param {ObjectType.LONG} day {{daysToIncrement}}
+	 * @returns {ObjectType.DATETIME}
 	 */
 	this.cronapi.dateTime.incDay = function(date, day) {
 		var dateVar = cronapi.conversion.stringToDate(date);
@@ -460,9 +460,9 @@
 	 * @name {{incMonth}}
 	 * @nameTags incMonth|increaseMonth
 	 * @description {{functionToIncMonth}}
-	 * @param {Date} date {{date}}
-	 * @param {int} month {{monthsToIncrement}}
-	 * @returns {Date}
+	 * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+	 * @param {ObjectType.LONG} month {{monthsToIncrement}}
+	 * @returns {ObjectType.DATETIME}
 	 */
 	this.cronapi.dateTime.incMonth = function(date, month) {
 		var dateVar = cronapi.conversion.stringToDate(date);
@@ -475,9 +475,9 @@
 	 * @name {{incYear}}
 	 * @nameTags incYear|increaseYear
 	 * @description {{functionToIncYear}}
-	 * @param {Date} date {{date}}
-	 * @param {int} year {{yearsToIncrement}}
-	 * @returns {Date}
+	 * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+	 * @param {ObjectType.LONG} year {{yearsToIncrement}}
+	 * @returns {ObjectType.DATETIME}
 	 */
 	this.cronapi.dateTime.incYear = function(date, year) {
 		var dateVar = cronapi.conversion.stringToDate(date);
@@ -490,7 +490,7 @@
 	 * @name {{getNow}}
 	 * @nameTags getNow|now|getDate
 	 * @description {{functionToGetNow}}
-	 * @returns {Date}
+	 * @returns {ObjectType.DATETIME}
 	 */
 	this.cronapi.dateTime.getNow = function() {
 		return new Date();
@@ -501,9 +501,9 @@
 	 * @name {{formatDateTime}}
 	 * @nameTags formatDateTime
 	 * @description {{functionToFormatDateTime}}
-	 * @param {Date} date {{date}}
-	 * @param {string} format {{format}}
-	 * @returns {string}
+	 * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+	 * @param {ObjectType.STRING} format {{format}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.dateTime.formatDateTime = function(date, format) {
 		var dateVar = cronapi.conversion.stringToDate(date);
@@ -527,12 +527,12 @@
 	 * @name {{newDate}}
 	 * @nameTags newDate|createDate
 	 * @description {{functionToNewDate}}
-	 * @param {int} year {{year}}
-	 * @param {int} month {{month}}
-	 * @param {int} hour {{hour}}
-	 * @param {int} minute {{minute}}
-	 * @param {int} second {{second}}
-	 * @returns {string}
+	 * @param {ObjectType.LONG} year {{year}}
+	 * @param {ObjectType.LONG} month {{month}}
+	 * @param {ObjectType.LONG} hour {{hour}}
+	 * @param {ObjectType.LONG} minute {{minute}}
+	 * @param {ObjectType.LONG} second {{second}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.dateTime.newDate = function(year, month, day, hour, minute, second) {
 	  var date = new Date();
@@ -550,8 +550,8 @@
 	 * @name {{getValueIsNotNumber}}
 	 * @nameTags getValueIsNotNumber
 	 * @description {{functionToGetValueIsNotNumber}}
-	 * @param {string} str {{content}}
-	 * @returns {string}
+	 * @param {ObjectType.STRING} str {{content}}
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.dateTime.getValueIsNotNumber = function(str) {
 		var numbers = '0123456789';
@@ -572,8 +572,8 @@
 	 * @name Obtém valor do elemento
 	 * @nameTags XMLGetElementValue
 	 * @description Função que retorna o valor de um elemento
-	 * @param {Object} node Elemento passado para obter-se o valor;
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} node Elemento passado para obter-se o valor;
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.xml.XMLGetElementValue = function(node) {
 		if (node.firstChild)
@@ -587,9 +587,9 @@
 	 * @name Obtém o primeiro filho do elemento
 	 * @nameTags XMLGetChildElement
 	 * @description Função para retornar o nó
-	 * @param {Object} node Elemento passado para obter-se o valor;
-	 * @param {string} childName Filho a ser obtido do elemento;
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} node Elemento passado para obter-se o valor;
+	 * @param {ObjectType.STRING} childName Filho a ser obtido do elemento;
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.xml.XMLGetChildElement = function(node, childName) {
 		var c = node.getElementsByTagName(childName);
@@ -602,8 +602,8 @@
 	 * @name Obtém a raiz do elemento
 	 * @nameTags XMLGetRoot
 	 * @description Função que retorna o elemento raiz a partir de um elemento
-	 * @param {Object} element Elemento passado para obter-se a raiz
-	 * @returns {Object}
+	 * @param {ObjectType.OBJECT} element Elemento passado para obter-se a raiz
+	 * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.xml.XMLGetRoot = function(element) {
 		if (element)
@@ -615,9 +615,9 @@
 	 * @name Obtém o atributo do elemento
 	 * @nameTags XMLGetAttribute
 	 * @description Função que retorna o elemento raiz a partir de um elemento
-	 * @param {Object} element - Elemento passado para obter-se a raiz
-	 * @param {Object} attribute - Atributo a ser obtido
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} element - Elemento passado para obter-se a raiz
+	 * @param {ObjectType.OBJECT} attribute - Atributo a ser obtido
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
 		return node.getAttribute(attribute);
@@ -628,8 +628,8 @@
 	 * @name Cria Document
 	 * @nameTags XMLOpen
 	 * @description Função que cria um objeto Document a partir de uma String
-	 * @param {Object} XMLText - Elemento passado para obter-se a raiz
-	 * @returns {Object}
+	 * @param {ObjectType.OBJECT} XMLText - Elemento passado para obter-se a raiz
+	 * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.xml.XMLOpen = function(XMLText) {
 		var doc = null;
@@ -650,9 +650,9 @@
 	 * @name Busca filhos do elemento
 	 * @nameTags XMLGetChildrenElement
 	 * @description Função que retorna os filhos do tipo de um determinado elemento
-	 * @param {Object} node - Elemento passado para buscar os filhos
-	 * @param {Object} childName - Elemento do tipo a ser buscado
-	 * @returns {Object}
+	 * @param {ObjectType.OBJECT} node - Elemento passado para buscar os filhos
+	 * @param {ObjectType.OBJECT} childName - Elemento do tipo a ser buscado
+	 * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.xml.XMLGetChildrenElement = function(node, childName) {
 		if (childName) {
@@ -667,8 +667,8 @@
 	 * @name Retorna o elemento pai
 	 * @nameTags XMLGetParentElement
 	 * @description Função que retorna o pai de um elemento
-	 * @param {Object} node - Elemento a ser buscado o pai
-	 * @returns {Object}
+	 * @param {ObjectType.OBJECT} node - Elemento a ser buscado o pai
+	 * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.xml.XMLGetParentElement = function XMLGetParentElement(node) {
 		return node.parentNode;
@@ -679,8 +679,8 @@
 	 * @name Retorna a tag do elemento
 	 * @nameTags XMLGetElementTagName
 	 * @description Função que retorna o nome da tag do elemento
-	 * @param {Object} node - Elemento a ser buscado a tag
-	 * @returns {string}
+	 * @param {ObjectType.OBJECT} node - Elemento a ser buscado a tag
+	 * @returns {ObjectType.STRING}
 	 */
 	this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
 		return node.tagName;
