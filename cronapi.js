@@ -289,7 +289,9 @@
 	 */
 	this.cronapi.screen.changeValueOfField = function(/** @type {ObjectType.BLOCK} @blockType field_from_screen*/ field, /** @type {ObjectType.STRING} */value) {
 	  try {
-	    eval(field + ' = "' + value + '"');
+	    cronapi.$scope.__tempValue = value;
+	    var func = new Function('cronapi.$scope.' + field + ' = cronapi.$scope.__tempValue;');
+	    cronapi.$scope.safeApply(func.bind(cronapi.$scope));
 	  }
 	  catch (e) {
 	    alert(e);
