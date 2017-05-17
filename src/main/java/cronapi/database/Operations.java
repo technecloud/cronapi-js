@@ -39,21 +39,21 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{datasourceNext}}", nameTags = { "next", "avançar",
 			"proximo"}, description = "{{functionToMoveCursorToNextPosition}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
+					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void next(Var ds) {
 		((DataSource) ds.getObject()).next();
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceHasData}}", nameTags = { "hasElement", "existeRegistro",
 			"temRegistro" }, description = "{{functionToVerifyDataInCurrentPosition}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.BOOLEAN)
+					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.BOOLEAN, displayInline = true)
 	public static Var hasElement(Var ds) {
 		return new Var(((DataSource) ds.getObject()).getObject() != null);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceClose}}", nameTags = { "close", "fechar", "limpar",
 			"clear" }, description = "{{functionToCloseAndCleanDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
+					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void close(Var ds) {
 		((DataSource) ds.getObject()).clear();
 	}
@@ -69,7 +69,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{datasourceSave}}", nameTags = { "save", "flush", "salvar", "persist",
 			"gravar" }, description = "{{functionToSaveCurrentObjectInDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
+					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void save(Var ds) {
 		((DataSource) ds.getObject()).save();
 	}
@@ -94,14 +94,14 @@ public class Operations {
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
-	public static Var getField(@ParamMetaData(blockType="procedures_sql_callreturn", type = ObjectType.BLOCK) Var ds, 
+	public static Var getField(@ParamMetaData(blockType="variables_get", type = ObjectType.BLOCK) Var ds, 
 	@ParamMetaData(type = ObjectType.STRING) Var fieldName) {
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceRemove}}", nameTags = { "remove", "delete", "apagar",
 			"remover" }, description = "{{functionToRemoveObjectInDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID)
+					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void remove(Var ds) {
 		((DataSource) ds.getObject()).delete();
 	}
