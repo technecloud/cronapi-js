@@ -145,5 +145,4 @@ public class Operations {
 		}
 		return new Var(elements);
 	}
-
 }
