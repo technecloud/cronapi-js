@@ -176,17 +176,16 @@
 	 */
 	this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod); 
-    var params = [];
-    
     var http = cronapi.$scope.http;
-    
-    for (var i = 3; i<arguments.length; i++)
-      params.push(arguments[i]); 
+    var params = [];
+    $(arguments).each(function() {
+      params.push(this);
+    });
     
     http({
       method : 'POST',
       url: serverUrl,
-      data : JSON.stringify(params),
+      data : JSON.stringify(params.slice(3)),
       headers : {
         'Content-Type' : 'application/json'
       },
@@ -205,21 +204,35 @@
 	 * @arbitraryParams true
 	 */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
-    var params = '';
-    var callFunc = 'cronapi.util.callServerBlocklyAsync(blocklyWithFunction, function(data) { if (callbackSuccess) { if (typeof callbackSuccess == "string") eval(callbackSuccess+"(data)"); else callbackSuccess(data); }  }, function(data) {  if (callbackError) { if (typeof callbackError == "string") eval(callbackError+"(data)"); else callbackError(data); } }';
-    if (arguments.length > 3) {
-      for (var i=3; i<arguments.length; i++) {
-        params+='arguments['+i+'],';  
+    var paramsApply = [];
+    paramsApply.push(blocklyWithFunction);
+    paramsApply.push(function(data) {
+      if (typeof callbackSuccess == "string") {
+        eval(callbackSuccess)(evalInContext(data));
+      } else if (callbackSuccess) {
+        callbackSuccess(evalInContext(data));
       }
-      params = params.substring(0, params.length -1);
-    }
-    
-    if (params.length > 0)
-      callFunc += ',' + params + ')';
-    else
-      callFunc += ')';
-    eval(callFunc);
-  }
+    });
+    paramsApply.push(function(data) {
+      if (typeof callbackError == "string") {
+        eval(callbackError)(evalInContext(data));
+      }
+      else if (callbackError) {
+        callbackError(evalInContext(data));
+      }
+      else {
+        var message = 'Unknown error';
+        if (data && data.message)
+          message = data.message;
+        cronapi.$scope.Notification.error(message);
+      }
+    });
+    $(arguments).each(function(idx) {
+      if (idx >= 3)
+        paramsApply.push(this);
+    });
+    cronapi.util.callServerBlocklyAsync.apply(this, paramsApply);
+  };
 
   /**
    * @type function
