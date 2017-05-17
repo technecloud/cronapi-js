@@ -178,8 +178,7 @@
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod); 
     var params = [];
     
-    var scope = angular.element($('body')).scope(); 
-    var http = scope.http;
+    var http = cronapi.$scope.http;
     
     for (var i = 3; i<arguments.length; i++)
       params.push(arguments[i]); 
@@ -245,7 +244,7 @@
 	 * @param {ObjectType.OBJECT} params {{params}}
 	 * @arbitraryParams true
 	 * @wizard procedures_callblockly_callreturn
-     * @returns {ObjectType.OBJECT}
+   * @returns {ObjectType.OBJECT}
 	 */
 	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
@@ -258,7 +257,7 @@
     if (window.uToken)
       token = window.uToken;
       
-    var result = $.ajax({
+    var resultData = $.ajax({
         type: 'POST',
         url: serverUrl,
         data : JSON.stringify(params),
@@ -266,11 +265,21 @@
         headers : {
           'Content-Type' : 'application/json',
           'X-AUTH-TOKEN' : token,
-		  'toJS' : true
+		      'toJS' : true
         }
-    }).responseText;
-    
-    return evalInContext(result);
+    });
+      
+    var result;
+    if (resultData.status == 200) {
+      if (resultData.responseJSON)
+        result = resultData.responseJSON;
+      else 
+        result = evalInContext(resultData.responseText);
+    }
+    else {
+      cronapi.$scope.Notification.error(resultData.responseJSON.message);
+    }
+    return result;
   };
   
   /**
