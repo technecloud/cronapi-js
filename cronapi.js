@@ -775,7 +775,13 @@
 	};
 
 	var arrayIndexOf = function(array, value) {
-	  return array.findIndex(x => x==value);
+	  var index = -1;
+	  $(array).each(function(idx) {
+	    if (value == this) {
+	      index = idx;
+	    }
+	  });
+	  return index;
 	};
 
 	var replaceAll = function(str, value, newValue) {
