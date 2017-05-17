@@ -297,6 +297,30 @@
 	    alert(e);
 	  }
 	};
+	
+	/**
+	 * @type function
+	 * @name {{getValueOfField}}
+	 * @nameTags getValueOfField|getFieldValue
+	 * @description {{functionToGetValueOfField}}
+	 * @param {ObjectType.STRING} field {{field}}
+	 * @returns {ObjectType.OBJECT}
+	 * @displayInline true
+	 */
+	this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.BLOCK} @blockType field_from_screen*/ field) {
+	  try {
+	    if (field && field.length > 0) {
+	      if (field.indexOf('vars.') > -1)
+	        return eval('cronapi.$scope.'+field);
+	      else
+	       return eval(field);
+	    }
+	    return '';
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
   
 	/**
 	 * @category CategoryType.DATETIME

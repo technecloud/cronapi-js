@@ -87,5 +87,7 @@
   "CategoryType.UTIL": "Util",
   "CategoryType.SCREEN": "Screen",
   "CategoryType.DATETIME": "Date and time",
-  "CategoryType.XML": "Xml"
+  "CategoryType.XML": "Xml",
+  "getValueOfField": "Get value of field",
+  "functionToGetValueOfField": "Function to get value of field"
 }

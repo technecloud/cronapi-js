@@ -87,5 +87,7 @@
   "CategoryType.UTIL": "Util",
   "CategoryType.SCREEN": "Tela",
   "CategoryType.DATETIME": "Data e hora",
-  "CategoryType.XML": "Xml"
+  "CategoryType.XML": "Xml",
+  "getValueOfField": "Obter valor do campo",
+  "functionToGetValueOfField": "Função para obter valor do campo"
 }
