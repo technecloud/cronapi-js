@@ -129,5 +129,21 @@ public class Operations {
 		}
 		((DataSource) ds.getObject()).updateFields(updateQuery.getObjectAsString(), paramsObject);
 	}
+	
+  @CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceExecuteQuery", "executeCommand",
+  "executarComando" }, description = "{{functionToExecuteQuery}}", params = { "{{entity}}", "{{query}}",
+      "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
+          ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
+public static void execute(Var entity, Var query, Var... params) {
+DataSource ds = new DataSource(entity.getObjectAsString());
+
+Object[][] paramsObject = new Object[params.length][2];
+for (int i = 0; i < params.length; i++) {
+  paramsObject[i][0] = params[i].getId();
+  paramsObject[i][1] = params[i].getObject();
+}
+
+ds.execute(query.getObjectAsString(), paramsObject);
+}
 
 }
