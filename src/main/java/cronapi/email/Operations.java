@@ -94,29 +94,4 @@ public class Operations {
 		}
 
 	}
-
-	public static void main(String[] args) {
-
-		Operations t = new Operations();
-		try {
-			LinkedList<Var> linked = new LinkedList<Var>();
-			linked.add(new Var("rodrigo.reis@techne.com.br"));
-
-			LinkedList<Var> linked2 = new LinkedList<Var>();
-			linked2.add(new Var("digo.santos.reis@gmail.com"));
-
-			LinkedList<Var> linked3 = new LinkedList<Var>();
-			linked3.add(new Var("tiago.romano@techne.com.br"));
-
-			t.sendEmail(new Var("digo.santos.reis@gmail.com"), new Var(linked), new Var(linked3), new Var(linked2),
-					new Var("Assunto do E-mail teste envio"), new Var("Texto sem formatação Teste envio"),
-					Var.VAR_NULL, new Var("teste.xml"), new Var("smtp.gmail.com"), new Var("465"),
-					new Var("digo.santos.reis"), new Var("rodrigoreis2307"));
-			System.out.println("WORKS");
-
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-	}
-
 }
