@@ -301,7 +301,7 @@
         result = evalInContext(resultData.responseText);
     }
     else {
-      cronapi.$scope.Notification.error(resultData.responseJSON.message);
+      cronapi.$scope.Notification.error(resultData.statusText);
     }
     return result;
   };
