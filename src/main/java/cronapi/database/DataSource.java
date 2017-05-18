@@ -41,7 +41,7 @@ public class DataSource {
 	private Object insertedElement = null;
 
 	/** 
-	 * Init a datasource with a page size equals 50
+	 * Init a datasource with a page size equals 100
 	 * 
 	 * @param entity - full name of entitiy class like String  
 	 */
