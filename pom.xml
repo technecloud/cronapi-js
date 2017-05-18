@@ -5,7 +5,7 @@
     <artifactId>cronapi-java</artifactId>
     <packaging>jar</packaging>
     <name>cronapi-java</name>
-    <version>${project.version}</version>
+    <version>0.0.3</version>
     <description>Public Java library for CronApp's users</description>
     <url>https://github.com/technecloud/cronapi-java</url>
     <build>
@@ -62,37 +62,13 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>development</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>snapshots</id>
-                    <name>artifactory.cronapp.io-snapshots</name>
-                    <url>https://artifactory.cronapp.io/public-snapshot</url>
-                </snapshotRepository>
-            </distributionManagement>
-            <properties>
-                <project.version>0.0.7-SNAPSHOT</project.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>production</id>
-            <distributionManagement>
-                <repository>
-                    <id>central</id>
-                    <name>artifactory.cronapp.io-releases</name>
-                    <url>https://artifactory.cronapp.io/public-release</url>
-                </repository>
-            </distributionManagement>
-            <properties>
-                <project.version>0.0.1</project.version>
-            </properties>
-        </profile>
-    </profiles>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>artifactory.cronapp.io-releases</name>
+            <url>https://artifactory.cronapp.io/public-release</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
