@@ -2,6 +2,7 @@ package cronapi.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import cronapi.CronapiMetaData;
@@ -154,6 +155,11 @@ public class Operations {
 					callParams[i] = Var.VAR_NULL;
 			}
 		}
+
+    CronapiMetaData annotation = (CronapiMetaData) clazz.getAnnotation(CronapiMetaData.class);
+		if (annotation == null || (annotation != null && !"blockly".equals(annotation.type()))) {
+      throw new Exception("Acesso negado");
+    }
 
 		Object o = methodToCall.invoke(clazz, callParams);
 
