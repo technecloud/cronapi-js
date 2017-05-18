@@ -26,12 +26,7 @@ public class Operations {
 		if (query == Var.VAR_NULL)
 			ds.fetch();
 		else {
-			Object[][] paramsObject = new Object[params.length][2];
-			for (int i = 0; i < params.length; i++) {
-				paramsObject[i][0] = params[i].getId();
-				paramsObject[i][1] = params[i].getObject();
-			}
-			ds.filter(query.getObjectAsString(), paramsObject);
+			ds.filter(query.getObjectAsString(), params);
 		}
 		Var varDs = new Var(ds);
 		return varDs;
@@ -70,27 +65,14 @@ public class Operations {
 		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{datasourceSave}}", nameTags = { "save", "flush", "salvar", "persist",
-			"gravar" }, description = "{{functionToSaveCurrentObjectInDatasource}}", params = {
-					"{{datasource}}" }, paramsType = {
-							ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
-	public static void save(Var ds) {
-		((DataSource) ds.getObject()).save();
-	}
-
-	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "prepare", "create",
+	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create",
 			"novo", "inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = {
 					"{{datasource}}", "{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.LIST }, returnType = ObjectType.VOID)
-	public static void save(Var varDs, Var... params) {
-		DataSource ds = (DataSource) varDs.getObject();
+	public static void insert(Var entity, Var... params) {
+		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.insert();
-		Object[][] paramsObject = new Object[params.length][2];
-		for (int i = 0; i < params.length; i++) {
-			paramsObject[i][0] = params[i].getId();
-			paramsObject[i][1] = params[i].getObject();
-		}
-		ds.updateFields(paramsObject);
+		ds.updateFields(params);
 		ds.save();
 	}
 
@@ -117,14 +99,7 @@ public class Operations {
 							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
 	public static void execute(Var entity, Var query, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
-
-		Object[][] paramsObject = new Object[params.length][2];
-		for (int i = 0; i < params.length; i++) {
-			paramsObject[i][0] = params[i].getId();
-			paramsObject[i][1] = params[i].getObject();
-		}
-
-		ds.execute(query.getObjectAsString(), paramsObject);
+		ds.execute(query.getObjectAsString(), params);
 	}
 
 }

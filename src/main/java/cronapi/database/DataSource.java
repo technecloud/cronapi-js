@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import cronapi.Utils;
+import cronapi.Var;
 import cronapi.i18n.Messages;
 
 /**
@@ -30,7 +31,7 @@ public class DataSource {
 	private String entity;
 	private Class domainClass;
 	private String filter;
-	private Object[][] params;
+	private Var[] params;
 	private int pageSize;
 	private Page page;
 	private int index;
@@ -101,10 +102,10 @@ public class DataSource {
 					queryCount = em.createQuery(filterCount, Long.class);
 				}
 
-				for (Object[] p : this.params) {
-					query.setParameter(p[0].toString(), p[1]);
+				for (Var p : this.params) {
+					query.setParameter(p.getId(), p.getObject());
 					if (queryCount != null)
-						queryCount.setParameter(p[0].toString(), p[1]);
+						queryCount.setParameter(p.getId(), p.getObject());
 				}
 
 				long totalResults = 0;
@@ -179,6 +180,8 @@ public class DataSource {
 			if (!em.getTransaction().isActive()) {
 				em.getTransaction().begin();
 			}
+			//returns managed instance
+			toRemove = em.merge(toRemove);
 			em.remove(toRemove);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -210,12 +213,12 @@ public class DataSource {
 	 * 
 	 * @thows RuntimeException if a field is not accessible through a set method
 	 */
-	public void updateFields(Object[][] fields) {
+	public void updateFields(Var... fields) {
 		try {
-			for (Object[] oArray : fields) {
-				Method setMethod = Utils.findMethod(getObject(), "set" + oArray[0]);
+			for (Var field : fields) {
+				Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
 				if (setMethod != null) {
-					setMethod.invoke(getObject(), oArray[1]);
+					setMethod.invoke(getObject(), field.getObject());
 				}
 			}
 		} catch (Exception ex) {
@@ -339,7 +342,7 @@ public class DataSource {
 	 * @param filter jpql instruction like a namedQuery
 	 * @param params parameters used in jpql instruction
 	 */
-	public void filter(String filter, Object[][] params) {
+	public void filter(String filter, Var... params) {
 		this.filter = filter;
 		this.params = params;
 		this.pageRequest = new PageRequest(0, pageSize);
@@ -362,14 +365,14 @@ public class DataSource {
 	 * @param query - JPQL instruction for filter objects to remove
 	 * @param params - Bidimentional array with params name and params value
 	 */
-	public void execute(String query, Object[][] params) {
+	public void execute(String query, Var... params) {
 		try {
 
 			EntityManager em = TransactionManager.getEntityManager(domainClass);
 			TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
-			for (Object[] p : params) {
-				strQuery.setParameter(p[0].toString(), p[1]);
+			for (Var p : params) {
+				strQuery.setParameter(p.getId(), p.getObject());
 			}
 
 			try {
