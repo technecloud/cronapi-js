@@ -1,18 +1,11 @@
 package cronapi.email;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.LinkedList;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.Message.RecipientType;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import org.apache.commons.mail.DefaultAuthenticator;
+import org.apache.commons.mail.EmailAttachment;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
 
 import cronapi.CronapiMetaData;
 import cronapi.Var;
@@ -31,167 +24,99 @@ import cronapi.CronapiMetaData.ObjectType;
 @CronapiMetaData(category = CategoryType.EMAIL, categoryTags = { "Email" })
 public class Operations {
 
-	private static final List<Recipient> transformToRecipient(Var dest, Recipient.Type rec) {
-		List<Recipient> recipients = new ArrayList<Recipient>();
-		if (!dest.getObjectAsString().isEmpty()) {
-			String[] array = dest.getObjectAsString().trim().split(",");
-			for (String obj : array)
-				recipients.add(new Recipient(obj.trim(), rec));
-		}
-		return recipients;
-	}
+	@CronapiMetaData(type = "function", name = "{{sendEmailName}}", nameTags = {
+			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}",
+					"{{sendEmailParam1}}", "{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}",
+					"{{sendEmailParam5}}", "{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}",
+					"{{sendEmailParam9}}", "{{sendEmailParam10}}", "{{sendEmailParam11}}", }, paramsType = {
+							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING })
+	public static final void sendEmail(Var from, Var to, Var Cc, Var Bcc, Var subject, Var msg, Var html,
+			Var attachments, Var smtpHost, Var smtpPort, Var login, Var password) throws Exception {
+		try {
+			HtmlEmail email = new HtmlEmail();
+			email.setCharset(cronapi.CronapiConfigurator.ENCODING);
+			email.setSSLOnConnect(true);
+			email.setHostName(smtpHost.getObjectAsString());
+			email.setSslSmtpPort(smtpPort.getObjectAsString());
+			email.setAuthenticator(new DefaultAuthenticator(login.getObjectAsString(), password.getObjectAsString()));
+			email.setFrom(from.getObjectAsString());
+			email.setDebug(false);
+			email.setSubject(subject.getObjectAsString());
+			email.setMsg(msg.getObjectAsString());
 
-	@CronapiMetaData(type = "function", name = "{{createRecipientsAddress}}", nameTags = {
-			"createRecipientsAddress" }, description = "{{functionToCreateRecipientsAddress}}", params = {
-					"{{forRecipient}}", "{{copyToRecipient}}", "{{hiddenCopyToRecipient}}" }, paramsType = {
-							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING }, returnType = ObjectType.OBJECT)
-	public static final Var createRecipientsAddress(Var to, Var cc, Var bcc) throws Exception {
-		List<Recipient> recipients = new ArrayList<Recipient>();
-		List<Recipient> recipientTo = transformToRecipient(to, Recipient.Type.TO);
-		List<Recipient> recipientCC = transformToRecipient(cc, Recipient.Type.CC);
-		List<Recipient> recipientBCC = transformToRecipient(bcc, Recipient.Type.BCC);
-		recipients.addAll(recipientTo);
-		recipients.addAll(recipientCC);
-		recipients.addAll(recipientBCC);
-		return new Var(recipients);
-	}
-
-	@CronapiMetaData(type = "function", name = "{{sendEmailSmtp}}", nameTags = {
-			"sendEmailSmtp" }, description = "{{functionToSendEmailSmtp}}", params = { "{{hostAddress}}",
-					"{{hostPort}}", "{{protocolToSendEmail}}", "{{login}}", "{{password}}", "{{senderMail}}",
-					"{{toRecipientMail}}", "{{subject}}", "{{content}}", "{{isHtml}}",
-					"{{attachments}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING, ObjectType.OBJECT,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.BOOLEAN,
-							ObjectType.OBJECT }, returnType = ObjectType.BOOLEAN)
-	public static final Var sendEmailSmtp(Var hostAddress, Var hostPort, Var protocolType, Var login, Var password,
-			Var from, Var to, Var subject, Var content, Var isHtml, Var attachments) throws Exception {
-		return sendEmailSmtpWithDigitalCertificate(hostAddress, hostPort, protocolType, login, password, from, to,
-				subject, content, isHtml, attachments, new Var(), new Var());
-	}
-
-	@CronapiMetaData(type = "function", name = "{{sendEmailSmtpWithDigitalCertificate}}", nameTags = {
-			"sendEmailSmtp" }, description = "{{functionToSendEmailSmtpWithDigitalCertificate}}", params = { "{{hostAddress}}",
-					"{{hostPort}}", "{{protocolToSendEmail}}", "{{login}}", "{{password}}", "{{senderMail}}",
-					"{{toRecipientMail}}", "{{subject}}", "{{content}}", "{{isHtml}}", "{{attachments}}", "{{keyJks}}",
-					"{{keyJksPassword}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING, ObjectType.OBJECT,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.BOOLEAN, ObjectType.OBJECT,
-							ObjectType.STRING, ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public static final Var sendEmailSmtpWithDigitalCertificate(Var hostAddress, Var hostPort, Var protocolType,
-			Var login, Var password, Var from, Var to, Var subject, Var content, Var isHtml, Var attachments,
-			Var keyJks, Var keyJksPassword) throws Exception {
-
-		String host = hostAddress.getObjectAsString().trim();
-		final String user = login.getObjectAsString().trim();
-		final String pass = password.getObjectAsString().trim();
-		Authenticator auth = new Authenticator() {
-			public PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(user, pass);
+			if (Cc.getType() == Var.Type.LIST) {
+				for (Var v : Cc.getObjectAsList()) {
+					email.addCc(v.getObjectAsString());
+				}
+			} else if (!Cc.equals(Var.VAR_NULL)) {
+				email.addCc(Cc.getObjectAsString());
 			}
-		};
 
-		String port = hostPort.getObjectAsString().trim();
-		String protocol = protocolType.getObjectAsString().trim().toUpperCase();
-		if (port.isEmpty()) {
-			if ("TLS".equals(protocol))
-				port = "587";
-			else if ("SSL".equals(protocol))
-				port = "465";
-			else
-				port = "25";
-		}
-
-		System.setProperty("line.separator", "\r\n");
-		Properties props = System.getProperties();
-
-		if (keyJks.getObject() != null && keyJksPassword.getObject() != null) {
-			props.put("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
-			props.put("javax.net.ssl.trustStoreType", "JKS");
-			props.put("javax.net.ssl.trustStore", keyJks.getObjectAsString());
-			props.put("javax.net.ssl.trustStorePassword", keyJksPassword.getObjectAsString());
-		}
-		props.put("mail.debug", "false");
-		props.put("mail.smtp.host", host);
-		props.put("mail.transport.protocol", "smtp");
-		props.put("mail.smtp.port", port);
-		if ("TLS".equals(protocol))
-			props.put("mail.smtp.starttls.enable", "true");
-		else if ("SSL".equals(protocol))
-			props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.user", user);
-		props.put("mail.smtp.password", pass);
-
-		String fromMail = from.getObjectAsString().trim();
-		Pattern pattern = Pattern.compile("(.+)?<(.+?)>");
-		Matcher matcher = pattern.matcher(fromMail);
-		InternetAddress fromAddress;
-		if (matcher.find())
-			fromAddress = new InternetAddress(matcher.group(2), matcher.group(1));
-		else
-			fromAddress = new InternetAddress(fromMail);
-		Session session = Session.getInstance(props, auth);
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(fromAddress);
-		if (to.getObject() instanceof List) {
-			@SuppressWarnings("unchecked")
-			List<Var> recipients = (List<Var>) to.getObject();
-			for (Var rec : recipients) {
-				Recipient recipient = (Recipient) rec.getObject();
-				if (recipient.type == Recipient.Type.TO)
-					message.addRecipient(RecipientType.TO, new InternetAddress(recipient.to));
-				else if (recipient.type == Recipient.Type.CC)
-					message.addRecipient(RecipientType.CC, new InternetAddress(recipient.to));
-				else
-					message.addRecipient(RecipientType.BCC, new InternetAddress(recipient.to));
+			if (Bcc.getType() == Var.Type.LIST) {
+				for (Var v : Bcc.getObjectAsList()) {
+					email.addBcc(v.getObjectAsString());
+				}
+			} else if (!Bcc.equals(Var.VAR_NULL)) {
+				email.addBcc(Bcc.getObjectAsString());
 			}
-		} else if (to.getObject() instanceof String) {
-			String mail = to.getObjectAsString().trim();
-			if (!mail.contains(","))
-				message.addRecipient(RecipientType.TO, new InternetAddress(mail));
-			else {
-				String[] splited = mail.split(",");
-				for (String recipient : splited)
-					message.addRecipient(RecipientType.TO, new InternetAddress(recipient.trim()));
+
+			if (!html.equals(Var.VAR_NULL)) {
+				email.setHtmlMsg(html.getObjectAsString());
 			}
-		}
-		message.setSubject(subject.getObjectAsString());
 
-		javax.mail.Multipart messageBody = new javax.mail.internet.MimeMultipart();
-		javax.mail.internet.MimeBodyPart bodyPart = new javax.mail.internet.MimeBodyPart();
-		bodyPart.setContent(content.getObjectAsString(), (isHtml.getObjectAsBoolean() ? "text/html" : "text/plain"));
-		messageBody.addBodyPart(bodyPart);
-
-		if (attachments.getObject() != null) {
-			javax.mail.internet.MimeBodyPart attachBodyPart = null;
-			if (attachments.getObject() instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<Var> attachs = (List<Var>) attachments.getObject();
-				for (Var pathAttachment : attachs) {
-					if (!pathAttachment.getObjectAsString().isEmpty()) {
-						javax.activation.FileDataSource fds = new javax.activation.FileDataSource(
-								pathAttachment.getObjectAsString().trim());
-						attachBodyPart = new javax.mail.internet.MimeBodyPart();
-						attachBodyPart.setDataHandler(new javax.activation.DataHandler(fds));
-						attachBodyPart.setFileName(fds.getName());
-						messageBody.addBodyPart(attachBodyPart);
+			if (!attachments.equals(Var.VAR_NULL)) {
+				if (attachments.getType() == Var.Type.LIST) {
+					for (Var v : attachments.getObjectAsList()) {
+						EmailAttachment anexo = new EmailAttachment();
+						anexo.setPath(v.getObjectAsString());
+						anexo.setDisposition(EmailAttachment.ATTACHMENT);
+						anexo.setName(v.getObjectAsString());
+						email.attach(anexo);
 					}
-				}
-			} else if (attachments.getObject() instanceof String) {
-				String pathAttachment = attachments.getObjectAsString().trim();
-				if (!pathAttachment.isEmpty()) {
-					javax.activation.FileDataSource fds = new javax.activation.FileDataSource(pathAttachment);
-					attachBodyPart = new javax.mail.internet.MimeBodyPart();
-					attachBodyPart.setDataHandler(new javax.activation.DataHandler(fds));
-					attachBodyPart.setFileName(fds.getName());
-					messageBody.addBodyPart(attachBodyPart);
+				} else if (attachments.getType() == Var.Type.STRING) {
+					EmailAttachment anexo = new EmailAttachment();
+					anexo.setPath(attachments.getObjectAsString());
+					anexo.setDisposition(EmailAttachment.ATTACHMENT);
+					anexo.setName(attachments.getObjectAsString());
+					email.attach(anexo);
 				}
 			}
+
+			for (Var v : to.getObjectAsList()) {
+				email.addTo(v.getObjectAsString());//por favor trocar antes de testar!!!!
+			}
+
+			email.send();
+		} catch (EmailException e) {
+			throw new RuntimeException(e);
 		}
-		message.setContent(messageBody);
-		Transport.send(message);
-		return new Var(true);
+
+	}
+
+	public static void main(String[] args) {
+
+		Operations t = new Operations();
+		try {
+			LinkedList<Var> linked = new LinkedList<Var>();
+			linked.add(new Var("rodrigo.reis@techne.com.br"));
+
+			LinkedList<Var> linked2 = new LinkedList<Var>();
+			linked2.add(new Var("digo.santos.reis@gmail.com"));
+
+			LinkedList<Var> linked3 = new LinkedList<Var>();
+			linked3.add(new Var("tiago.romano@techne.com.br"));
+
+			t.sendEmail(new Var("digo.santos.reis@gmail.com"), new Var(linked), new Var(linked3), new Var(linked2),
+					new Var("Assunto do E-mail teste envio"), new Var("Texto sem formatação Teste envio"),
+					Var.VAR_NULL, new Var("teste.xml"), new Var("smtp.gmail.com"), new Var("465"),
+					new Var("digo.santos.reis"), new Var("rodrigoreis2307"));
+			System.out.println("WORKS");
+
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 
 }
