@@ -303,6 +303,19 @@
 	
 	/**
 	 * @type function
+	 * @name {{fieldNameFromScreen}}
+	 * @nameTags fieldNameFromScreen
+	 * @description {{functionToGetFieldNameFromScreen}}
+	 * @param {ObjectType.STRING} field {{field}}
+	 * @returns {ObjectType.OBJECT}
+	 * @wizard field_from_screen
+	 */
+	this.cronapi.screen.fieldFromScreen = function(field) {
+	  return field;
+	};
+	
+	/**
+	 * @type function
 	 * @name {{changeValueOfField}}
 	 * @nameTags changeValueOfField|changeFieldValue
 	 * @description {{functionToChangeValueOfField}}

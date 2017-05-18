@@ -89,5 +89,7 @@
   "CategoryType.DATETIME": "Date and time",
   "CategoryType.XML": "Xml",
   "getValueOfField": "Get value of field",
-  "functionToGetValueOfField": "Function to get value of field"
+  "functionToGetValueOfField": "Function to get value of field",
+  "fieldNameFromScreen": "Get field name",
+  "functionToGetFieldNameFromScreen": "Function to get field name (You need to associate the blockly with the screen)"
 }
