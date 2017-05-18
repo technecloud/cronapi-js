@@ -68,7 +68,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create",
 			"novo", "inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = {
 					"{{datasource}}", "{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
-							ObjectType.LIST }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
+							ObjectType.LIST }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_insert_callnoreturn")
 	public static void insert(Var entity, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.insert();
