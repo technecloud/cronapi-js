@@ -9,6 +9,7 @@ import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.Var;
+import cronapi.i18n.Messages;
 
 /**
  * Classe que representa ...
@@ -158,7 +159,7 @@ public class Operations {
 
     CronapiMetaData annotation = (CronapiMetaData) clazz.getAnnotation(CronapiMetaData.class);
 		if (annotation == null || (annotation != null && !"blockly".equals(annotation.type()))) {
-      throw new Exception("Acesso negado");
+      throw new Exception(Messages.getString("accessDenied"));
     }
 
 		Object o = methodToCall.invoke(clazz, callParams);
