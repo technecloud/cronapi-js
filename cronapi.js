@@ -162,47 +162,57 @@
 	 * @categoryTags Util
 	 */
 	this.cronapi.util = {};
-	
-	/**
-	 * @type internal
-	 * @name {{callServerBlocklyAsync}}
-	 * @nameTags callServerBlocklyAsync
-	 * @description {{functionToCallServerBlocklyAsync}}
-	 * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
-	 * @param {ObjectType.OBJECT} callbackSuccess {{callbackSuccess}}
-	 * @param {ObjectType.OBJECT} callbackError {{callbackError}}
-	 * @param {ObjectType.OBJECT} params {{params}}
-	 * @arbitraryParams true
-	 */
-	this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
-    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod); 
+
+  /**
+   * @type internal
+   * @name {{callServerBlocklyAsync}}
+   * @nameTags callServerBlocklyAsync
+   * @description {{functionToCallServerBlocklyAsync}}
+   * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
+   * @param {ObjectType.OBJECT} callbackSuccess {{callbackSuccess}}
+   * @param {ObjectType.OBJECT} callbackError {{callbackError}}
+   * @param {ObjectType.OBJECT} params {{params}}
+   * @arbitraryParams true
+   */
+  this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
+    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = cronapi.$scope.http;
     var params = [];
     $(arguments).each(function() {
       params.push(this);
     });
-    
-    http({
-      method : 'POST',
+
+    var token = "";
+    if (window.uToken)
+      token = window.uToken;
+
+    var resultData = $.ajax({
+      type: 'POST',
       url: serverUrl,
+      dataType: 'html',
       data : JSON.stringify(params.slice(3)),
       headers : {
-        'Content-Type' : 'application/json'
+        'Content-Type' : 'application/json',
+        'X-AUTH-TOKEN' : token,
+        'toJS' : true
       },
-    }).success(callbackSuccess).error(callbackError);
+      success : callbackSuccess,
+      error : callbackError
+    });
+
   };
-  
+
   /**
-	 * @type internal
-	 * @name {{makeCallServerBlocklyAsync}}
-	 * @nameTags makeCallServerBlocklyAsync
-	 * @description {{functionToMakeCallServerBlocklyAsync}}
-	 * @param {ObjectType.STRING} blocklyWithFunction {{blocklyWithFunction}}
-	 * @param {ObjectType.STRING} callbackBlocklySuccess {{callbackBlocklySuccess}}
-	 * @param {ObjectType.STRING} callbackBlocklyError {{callbackBlocklyError}}
-	 * @param {ObjectType.OBJECT} params {{params}}
-	 * @arbitraryParams true
-	 */
+   * @type internal
+   * @name {{makeCallServerBlocklyAsync}}
+   * @nameTags makeCallServerBlocklyAsync
+   * @description {{functionToMakeCallServerBlocklyAsync}}
+   * @param {ObjectType.STRING} blocklyWithFunction {{blocklyWithFunction}}
+   * @param {ObjectType.STRING} callbackBlocklySuccess {{callbackBlocklySuccess}}
+   * @param {ObjectType.STRING} callbackBlocklyError {{callbackBlocklyError}}
+   * @param {ObjectType.OBJECT} params {{params}}
+   * @arbitraryParams true
+   */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
     var paramsApply = [];
     paramsApply.push(blocklyWithFunction);
@@ -213,17 +223,17 @@
         callbackSuccess(evalInContext(data));
       }
     });
-    paramsApply.push(function(data) {
+    paramsApply.push(function(data, status, errorThrown) {
       if (typeof callbackError == "string") {
-        eval(callbackError)(evalInContext(data));
+        eval(callbackError)(errorThrown);
       }
       else if (callbackError) {
-        callbackError(evalInContext(data));
+        callbackError(errorThrown);
       }
       else {
         var message = 'Unknown error';
-        if (data && data.message)
-          message = data.message;
+        if (errorThrown)
+          message = errorThrown;
         cronapi.$scope.Notification.error(message);
       }
     });
@@ -247,46 +257,47 @@
   this.cronapi.util.callServerBlocklyNoReturn = function() {
     cronapi.util.callServerBlockly.apply(this, arguments);
   }
-  
+
   /**
-	 * @type function
-	 * @name {{callServerBlockly}}
-	 * @nameTags callServerBlockly
-	 * @description {{functionToCallServerBlockly}}
-	 * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
-	 * @param {ObjectType.OBJECT} params {{params}}
-	 * @arbitraryParams true
-	 * @wizard procedures_callblockly_callreturn
+   * @type function
+   * @name {{callServerBlockly}}
+   * @nameTags callServerBlockly
+   * @description {{functionToCallServerBlockly}}
+   * @param {ObjectType.STRING} classNameWithMethod {{classNameWithMethod}}
+   * @param {ObjectType.OBJECT} params {{params}}
+   * @arbitraryParams true
+   * @wizard procedures_callblockly_callreturn
    * @returns {ObjectType.OBJECT}
-	 */
-	this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
+   */
+  this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
     var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
-    
+
     for (var i = 1; i<arguments.length; i++)
-      params.push(arguments[i]);  
-    
+      params.push(arguments[i]);
+
     var token = "";
     if (window.uToken)
       token = window.uToken;
-      
+
     var resultData = $.ajax({
-        type: 'POST',
-        url: serverUrl,
-        data : JSON.stringify(params),
-        async: false,
-        headers : {
-          'Content-Type' : 'application/json',
-          'X-AUTH-TOKEN' : token,
-		      'toJS' : true
-        }
+      type: 'POST',
+      url: serverUrl,
+      dataType: 'html',
+      data : JSON.stringify(params),
+      async: false,
+      headers : {
+        'Content-Type' : 'application/json',
+        'X-AUTH-TOKEN' : token,
+        'toJS' : true
+      }
     });
-      
+
     var result;
     if (resultData.status == 200) {
       if (resultData.responseJSON)
         result = resultData.responseJSON;
-      else 
+      else
         result = evalInContext(resultData.responseText);
     }
     else {
