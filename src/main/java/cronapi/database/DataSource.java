@@ -6,13 +6,11 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.support.Repositories;
 
 import cronapi.Utils;
 import cronapi.i18n.Messages;
@@ -72,19 +70,10 @@ public class DataSource {
 	 */
 	private void instantiateRepository() {
 		try {
-			ListableBeanFactory factory = (ListableBeanFactory) ApplicationContextHolder.getContext();
-			Repositories repositories = new Repositories(factory);
 			domainClass = Class.forName(this.entity);
-			if (repositories.hasRepositoryFor(domainClass)) {
-				this.repository = (JpaRepository) repositories.getRepositoryFor(domainClass);
-			} else {
-				throw new RuntimeException(new ClassNotFoundException(
-						Messages.format(Messages.getString("REPOSITORY_NOT_FOUND"), this.entity)));
-			}
+      this.repository = TransactionManager.findRepository(domainClass);
 		} catch (ClassNotFoundException cnfex) {
 			throw new RuntimeException(cnfex);
-		} catch (ClassCastException ccex) {
-			throw new RuntimeException(ccex);
 		}
 	}
 
@@ -98,8 +87,7 @@ public class DataSource {
 	public Object[] fetch() {
 		if (this.filter != null && !"".equals(this.filter)) {
 			try {
-				RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
-				EntityManager em = ru.getEntityManager(domainClass);
+				EntityManager em = TransactionManager.getEntityManager(domainClass);
 				TypedQuery<Long> queryCount = null;
 				TypedQuery<?> query = em.createQuery(filter, domainClass);
 
@@ -133,7 +121,7 @@ public class DataSource {
 
 				this.page = new PageImpl(resultsInPage, this.pageRequest, totalResults);
 			} catch (Exception ex) {
-				throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter));
+				throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter), ex);
 			}
 		} else
 			this.page = this.repository.findAll(this.pageRequest);
@@ -186,8 +174,7 @@ public class DataSource {
 	 */
 	public void delete(String query, Object[][] params) {
 		try {
-			RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
-			EntityManager em = ru.getEntityManager(domainClass);
+			EntityManager em = TransactionManager.getEntityManager(domainClass);
 			TypedQuery<?> deleteQuery = em.createQuery(filter, domainClass);
 
 			for (Object[] p : this.params) {
@@ -248,15 +235,14 @@ public class DataSource {
 	 */
 	public void updateFields(String query, Object[][] fields) {
 		try {
-			RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
-			EntityManager em = ru.getEntityManager(domainClass);
+			EntityManager em = TransactionManager.getEntityManager(domainClass);
 			TypedQuery<?> updateQuery = em.createQuery(filter, domainClass);
 			for (Object[] p : this.params) {
 				updateQuery.setParameter(p[0].toString(), p[1]);
 			}
 			updateQuery.executeUpdate();
 		} catch (Exception ex) {
-			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter));
+			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter), ex);
 		}
 	}
 
@@ -392,5 +378,35 @@ public class DataSource {
 		this.current = -1;
 		this.page = null;
 	}
+
+  /**
+   * Execute Query
+   *
+   * @param query - JPQL instruction for filter objects to remove
+   * @param params - Bidimentional array with params name and params value
+   */
+  public void execute(String query, Object[][] params) {
+    try {
+
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      TypedQuery<?> strQuery = em.createQuery(query, domainClass);
+
+      for (Object[] p : params) {
+        strQuery.setParameter(p[0].toString(), p[1]);
+      }
+
+      try {
+        if (!em.getTransaction().isActive()) {
+          em.getTransaction().begin();
+        }
+        strQuery.executeUpdate();
+      } catch(Exception e) {
+        throw new RuntimeException(e);
+      }
+
+    } catch (Exception ex) {
+      throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), query), ex);
+    }
+  }
 
 }
