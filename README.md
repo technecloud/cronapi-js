@@ -17,18 +17,13 @@ Java library for CronApp's users
         <name>artifactory.cronapp.io-releases</name>
         <url>https://artifactory.cronapp.io/public-release</url>
     </repository>
-    <repository>
-        <id>snapshots</id>
-        <name>artifactory.cronapp.io-snapshots</name>
-        <url>https://artifactory.cronapp.io/public-snapshot</url>
-    </repository>
 </repositories>
 
 <dependencies>
     <dependency>
         <groupId>io.cronapp</groupId>
         <artifactId>cronapi-java</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3</version>
     </dependency>
 </dependencies>
 ```
