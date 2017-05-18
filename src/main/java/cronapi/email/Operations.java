@@ -84,10 +84,13 @@ public class Operations {
 				}
 			}
 
-			for (Var v : to.getObjectAsList()) {
-				email.addTo(v.getObjectAsString());//por favor trocar antes de testar!!!!
+			if (to.getType() == Var.Type.LIST) {
+				for (Var v : to.getObjectAsList()) {
+					email.addTo(v.getObjectAsString());
+				}
+			} else if (to.getType() == Var.Type.STRING) {
+				email.addTo(to.getObjectAsString());
 			}
-
 			email.send();
 		} catch (EmailException e) {
 			throw new RuntimeException(e);
