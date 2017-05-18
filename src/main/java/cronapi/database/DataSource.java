@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import cronapi.Utils;
+import cronapi.Var;
 import cronapi.i18n.Messages;
 
 /**
@@ -30,7 +31,7 @@ public class DataSource {
 	private String entity;
 	private Class domainClass;
 	private String filter;
-	private Object[][] params;
+	private Var[] params;
 	private int pageSize;
 	private Page page;
 	private int index;
@@ -40,7 +41,7 @@ public class DataSource {
 	private Object insertedElement = null;
 
 	/** 
-	 * Init a datasource with a page size equals 50
+	 * Init a datasource with a page size equals 100
 	 * 
 	 * @param entity - full name of entitiy class like String  
 	 */
@@ -71,7 +72,7 @@ public class DataSource {
 	private void instantiateRepository() {
 		try {
 			domainClass = Class.forName(this.entity);
-      this.repository = TransactionManager.findRepository(domainClass);
+			this.repository = TransactionManager.findRepository(domainClass);
 		} catch (ClassNotFoundException cnfex) {
 			throw new RuntimeException(cnfex);
 		}
@@ -101,10 +102,10 @@ public class DataSource {
 					queryCount = em.createQuery(filterCount, Long.class);
 				}
 
-				for (Object[] p : this.params) {
-					query.setParameter(p[0].toString(), p[1]);
+				for (Var p : this.params) {
+					query.setParameter(p.getId(), p.getObject());
 					if (queryCount != null)
-					  queryCount.setParameter(p[0].toString(), p[1]);
+						queryCount.setParameter(p.getId(), p.getObject());
 				}
 
 				long totalResults = 0;
@@ -146,43 +147,44 @@ public class DataSource {
 	}
 
 	/** 
-	 * Saves the object in the current index
+	 * Saves the object in the current index or a new object when has insertedElement
 	 */
 	public void save() {
-		Object toSave;
-		if (this.insertedElement != null) {
-			toSave = this.insertedElement;
-			this.insertedElement = null;
-		} else
-			toSave = this.getObject();
-		this.repository.save(toSave);
+		try {
+			Object toSave;
+			EntityManager em = TransactionManager.getEntityManager(domainClass);
+
+			if (this.insertedElement != null) {
+				toSave = this.insertedElement;
+				this.insertedElement = null;
+				em.persist(toSave);
+			} else
+				toSave = this.getObject();
+
+			if (!em.getTransaction().isActive()) {
+				em.getTransaction().begin();
+			}
+			em.merge(toSave);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/** 
 	 * Removes the object in the current index
 	 */
 	public void delete() {
-		Object toRemove = this.getObject();
-		this.repository.delete(toRemove);
-	}
-
-	/** 
-	 * Removes objects by query
-	 * 
-	 * @param query - JPQL instruction for filter objects to remove
-	 * @param params - Bidimentional array with params name and params value
-	 */
-	public void delete(String query, Object[][] params) {
 		try {
+			Object toRemove = this.getObject();
 			EntityManager em = TransactionManager.getEntityManager(domainClass);
-			TypedQuery<?> deleteQuery = em.createQuery(filter, domainClass);
-
-			for (Object[] p : this.params) {
-				deleteQuery.setParameter(p[0].toString(), p[1]);
+			if (!em.getTransaction().isActive()) {
+				em.getTransaction().begin();
 			}
-			deleteQuery.executeUpdate();
-		} catch (Exception ex) {
-			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter));
+			//returns managed instance
+			toRemove = em.merge(toRemove);
+			em.remove(toRemove);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -211,38 +213,16 @@ public class DataSource {
 	 * 
 	 * @thows RuntimeException if a field is not accessible through a set method
 	 */
-	public void updateFields(Object[][] fields) {
+	public void updateFields(Var... fields) {
 		try {
-			for (Object[] oArray : fields) {
-				Method setMethod = Utils.findMethod(getObject(), "set" + oArray[0]);
+			for (Var field : fields) {
+				Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
 				if (setMethod != null) {
-					setMethod.invoke(getObject(), oArray[1]);
+					setMethod.invoke(getObject(), field.getObject());
 				}
 			}
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
-		}
-	}
-
-	/** 
-	 * Update fields from object in the current index
-	 * 
-	 * @param query - JPQL instruction for filter objects to update
-	 * @param fields - bidimensional array like fields
-	 * sample: { {"name", "Paul"}, {"age", "21"} }
-	 * 
-	 * @thows RuntimeException if a field is not accessible through a set method
-	 */
-	public void updateFields(String query, Object[][] fields) {
-		try {
-			EntityManager em = TransactionManager.getEntityManager(domainClass);
-			TypedQuery<?> updateQuery = em.createQuery(filter, domainClass);
-			for (Object[] p : this.params) {
-				updateQuery.setParameter(p[0].toString(), p[1]);
-			}
-			updateQuery.executeUpdate();
-		} catch (Exception ex) {
-			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter), ex);
 		}
 	}
 
@@ -256,8 +236,8 @@ public class DataSource {
 		if (this.insertedElement != null)
 			return this.insertedElement;
 
-    if(this.current < 0)
-      return null;
+		if (this.current < 0)
+			return null;
 
 		return this.page.getContent().get(this.current);
 	}
@@ -291,8 +271,8 @@ public class DataSource {
 				this.pageRequest = this.page.nextPageable();
 				this.fetch();
 				this.current = 0;
-			}else{
-			  this.current = -1;
+			} else {
+				this.current = -1;
 			}
 		}
 	}
@@ -362,7 +342,7 @@ public class DataSource {
 	 * @param filter jpql instruction like a namedQuery
 	 * @param params parameters used in jpql instruction
 	 */
-	public void filter(String filter, Object[][] params) {
+	public void filter(String filter, Var... params) {
 		this.filter = filter;
 		this.params = params;
 		this.pageRequest = new PageRequest(0, pageSize);
@@ -379,34 +359,34 @@ public class DataSource {
 		this.page = null;
 	}
 
-  /**
-   * Execute Query
-   *
-   * @param query - JPQL instruction for filter objects to remove
-   * @param params - Bidimentional array with params name and params value
-   */
-  public void execute(String query, Object[][] params) {
-    try {
+	/**
+	 * Execute Query
+	 *
+	 * @param query - JPQL instruction for filter objects to remove
+	 * @param params - Bidimentional array with params name and params value
+	 */
+	public void execute(String query, Var... params) {
+		try {
 
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
-      TypedQuery<?> strQuery = em.createQuery(query, domainClass);
+			EntityManager em = TransactionManager.getEntityManager(domainClass);
+			TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
-      for (Object[] p : params) {
-        strQuery.setParameter(p[0].toString(), p[1]);
-      }
+			for (Var p : params) {
+				strQuery.setParameter(p.getId(), p.getObject());
+			}
 
-      try {
-        if (!em.getTransaction().isActive()) {
-          em.getTransaction().begin();
-        }
-        strQuery.executeUpdate();
-      } catch(Exception e) {
-        throw new RuntimeException(e);
-      }
+			try {
+				if (!em.getTransaction().isActive()) {
+					em.getTransaction().begin();
+				}
+				strQuery.executeUpdate();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 
-    } catch (Exception ex) {
-      throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), query), ex);
-    }
-  }
+		} catch (Exception ex) {
+			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), query), ex);
+		}
+	}
 
 }
