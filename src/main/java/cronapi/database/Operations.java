@@ -26,34 +26,32 @@ public class Operations {
 		if (query == Var.VAR_NULL)
 			ds.fetch();
 		else {
-			Object[][] paramsObject = new Object[params.length][2];
-			for (int i = 0; i < params.length; i++) {
-				paramsObject[i][0] = params[i].getId();
-				paramsObject[i][1] = params[i].getObject();
-			}
-			ds.filter(query.getObjectAsString(), paramsObject);
+			ds.filter(query.getObjectAsString(), params);
 		}
 		Var varDs = new Var(ds);
 		return varDs;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceNext}}", nameTags = { "next", "avançar",
-			"proximo"}, description = "{{functionToMoveCursorToNextPosition}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
+			"proximo" }, description = "{{functionToMoveCursorToNextPosition}}", params = {
+					"{{datasource}}" }, paramsType = {
+							ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void next(Var ds) {
 		((DataSource) ds.getObject()).next();
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceHasData}}", nameTags = { "hasElement", "existeRegistro",
 			"temRegistro" }, description = "{{functionToVerifyDataInCurrentPosition}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.BOOLEAN, displayInline = true)
+					"{{datasource}}" }, paramsType = {
+							ObjectType.DATASET }, returnType = ObjectType.BOOLEAN, displayInline = true)
 	public static Var hasElement(Var ds) {
 		return new Var(((DataSource) ds.getObject()).getObject() != null);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceClose}}", nameTags = { "close", "fechar", "limpar",
 			"clear" }, description = "{{functionToCloseAndCleanDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
+					"{{datasource}}" }, paramsType = {
+							ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void close(Var ds) {
 		((DataSource) ds.getObject()).clear();
 	}
@@ -67,26 +65,14 @@ public class Operations {
 		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{datasourceSave}}", nameTags = { "save", "flush", "salvar", "persist",
-			"gravar" }, description = "{{functionToSaveCurrentObjectInDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
-	public static void save(Var ds) {
-		((DataSource) ds.getObject()).save();
-	}
-
-	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "prepare", "create",
+	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create",
 			"novo", "inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = {
 					"{{datasource}}", "{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
-							ObjectType.LIST }, returnType = ObjectType.VOID , arbitraryParams = true, wizard = "procedures_sql_insert_callnoreturn")
-	public static void save(Var varDs, Var... params) {
-		DataSource ds = (DataSource) varDs.getObject();
+							ObjectType.LIST }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
+	public static void insert(Var entity, Var... params) {
+		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.insert();
-		Object[][] paramsObject = new Object[params.length][2];
-		for (int i = 0; i < params.length; i++) {
-			paramsObject[i][0] = params[i].getId();
-			paramsObject[i][1] = params[i].getObject();
-		}
-		ds.updateFields(paramsObject);
+		ds.updateFields(params);
 		ds.save();
 	}
 
@@ -94,56 +80,26 @@ public class Operations {
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
-	public static Var getField(@ParamMetaData(blockType="variables_get", type = ObjectType.BLOCK) Var ds, 
-	@ParamMetaData(type = ObjectType.STRING) Var fieldName) {
+	public static Var getField(@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK) Var ds,
+			@ParamMetaData(type = ObjectType.STRING) Var fieldName) {
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceRemove}}", nameTags = { "remove", "delete", "apagar",
 			"remover" }, description = "{{functionToRemoveObjectInDatasource}}", params = {
-					"{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
+					"{{datasource}}" }, paramsType = {
+							ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
 	public static void remove(Var ds) {
 		((DataSource) ds.getObject()).delete();
 	}
-	
-	@CronapiMetaData(type = "function", name = "{{datasourceRemoveConditionally}}", nameTags = { "remove", "delete", "apagar", "custom",
-			"remover", "condicionalmente" }, description = "{{functionToRemoveConditionallyObjectInDatasource}}", params = {
-					"{{datasource}}", "{{removeQuery}}", "{{paramsRemoveTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
-	public static void remove(Var ds, Var removeQuery, Var...params) {
-	  Object[][] paramsObject = new Object[params.length][2];
-		for (int i = 0; i < params.length; i++) {
-			paramsObject[i][0] = params[i].getId();
-			paramsObject[i][1] = params[i].getObject();
-		}
-		((DataSource) ds.getObject()).delete(removeQuery.getObjectAsString(), paramsObject);
-	}
-	
-	@CronapiMetaData(type = "function", name = "{{datasourceUpdateConditionally}}", nameTags = { "update", "set", "atualizar",
-			"edit", "condicionamente", "custom" }, description = "{{functionToUpdateConditionallyObjectInDatasource}}", params = {
-					"{{datasource}}", "{{updateQuery}}", "{{paramsUpdateTuples}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING, ObjectType.LIST }, returnType = ObjectType.VOID)
-	public static void update(Var ds, Var updateQuery, Var...params) {
-	  Object[][] paramsObject = new Object[params.length][2];
-		for (int i = 0; i < params.length; i++) {
-			paramsObject[i][0] = params[i].getId();
-			paramsObject[i][1] = params[i].getObject();
-		}
-		((DataSource) ds.getObject()).updateFields(updateQuery.getObjectAsString(), paramsObject);
-	}
-	
-  @CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceExecuteQuery", "executeCommand",
-  "executarComando" }, description = "{{functionToExecuteQuery}}", params = { "{{entity}}", "{{query}}",
-      "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
-          ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
-public static void execute(Var entity, Var query, Var... params) {
-DataSource ds = new DataSource(entity.getObjectAsString());
 
-Object[][] paramsObject = new Object[params.length][2];
-for (int i = 0; i < params.length; i++) {
-  paramsObject[i][0] = params[i].getId();
-  paramsObject[i][1] = params[i].getObject();
-}
-
-ds.execute(query.getObjectAsString(), paramsObject);
-}
+	@CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceExecuteQuery",
+			"executeCommand", "executarComando" }, description = "{{functionToExecuteQuery}}", params = { "{{entity}}",
+					"{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
+							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
+	public static void execute(Var entity, Var query, Var... params) {
+		DataSource ds = new DataSource(entity.getObjectAsString());
+		ds.execute(query.getObjectAsString(), params);
+	}
 
 }
