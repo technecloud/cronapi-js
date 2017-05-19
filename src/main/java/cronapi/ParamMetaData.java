@@ -15,4 +15,6 @@ public @interface ParamMetaData {
   
   String blockType() default "";
   
+  String description() default "";
+  
 }
