@@ -3,32 +3,37 @@ package cronapi.util;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 
 import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.Var;
+import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 
-/**
- * Classe que representa ...
- *
- * @author Rodrigo Reis
- * @version 1.0
- * @since 2017-03-31
- *
- */
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
 
-	/**
-	 * Construtor
-	 **/
-	public Operations() {
-	}
+  public static boolean IS_DEBUG;
 
-	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
+  public static boolean IS_WINDOWS;
+  public static boolean IS_LINUX;
+
+  static {
+      String SO = System.getProperty("os.name");
+      if (SO.indexOf(' ') > -1)
+        SO = SO.substring(0, SO.indexOf(' '));
+
+      IS_WINDOWS = SO.equalsIgnoreCase("Windows");
+      IS_LINUX = SO.equalsIgnoreCase("Linux");
+
+      IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
+  }
+
+
+  @CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
 			"copyTextToTransferArea" }, description = "{{copyTextToTransferAreaDescription}}", params = {
 			"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
 	public static final void copyTextToTransferArea(Var strVar) throws Exception {
@@ -135,7 +140,14 @@ public class Operations {
 			className = className.substring(0, className.indexOf(":"));
 		}
 
-		Class clazz = Class.forName(className);
+		final Class clazz;
+
+		if (IS_DEBUG) {
+      CronapiClassLoader loader = new CronapiClassLoader();
+      clazz = loader.findClass(className);
+    } else {
+      clazz = Class.forName(className);
+    }
 
 		Method methodToCall = clazz.getMethods()[0];
 		for (Method m: clazz.getMethods()) {
@@ -157,8 +169,19 @@ public class Operations {
 			}
 		}
 
-    CronapiMetaData annotation = (CronapiMetaData) clazz.getAnnotation(CronapiMetaData.class);
-		if (annotation == null || (annotation != null && !"blockly".equals(annotation.type()))) {
+		boolean isBlockly = false;
+		for (Annotation annotation : clazz.getAnnotations()) {
+		  if (annotation.annotationType().getName().equals("cronapi.CronapiMetaData")) {
+        Method type = annotation.annotationType().getMethod("type");
+        if (type != null) {
+          String value = (String) type.invoke(annotation);
+          if (value != null && value.equals("blockly")) {
+            isBlockly = true;
+          }
+        }
+      }
+    }
+		if (!isBlockly) {
       throw new Exception(Messages.getString("accessDenied"));
     }
 
@@ -166,5 +189,4 @@ public class Operations {
 
 		return new Var(o);
 	}
-
 }
