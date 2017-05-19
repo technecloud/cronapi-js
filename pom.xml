@@ -62,13 +62,6 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <name>artifactory.cronapp.io-releases</name>
-            <url>https://artifactory.cronapp.io/public-release</url>
-        </repository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -135,6 +128,13 @@
             <version>1.4</version>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>artifactory.cronapp.io-releases</name>
+            <url>https://artifactory.cronapp.io/public-release</url>
+        </repository>
+    </distributionManagement>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

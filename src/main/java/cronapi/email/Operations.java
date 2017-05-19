@@ -1,13 +1,12 @@
 package cronapi.email;
 
-import java.util.LinkedList;
-
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 
 import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
@@ -28,12 +27,19 @@ public class Operations {
 			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}",
 					"{{sendEmailParam1}}", "{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}",
 					"{{sendEmailParam5}}", "{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}",
-					"{{sendEmailParam9}}", "{{sendEmailParam10}}", "{{sendEmailParam11}}", }, paramsType = {
+					"{{sendEmailParam9}}", "{{sendEmailParam10}}", "{{sendEmailParam11}}" }, paramsType = {
 							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING,
 							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
 							ObjectType.STRING, ObjectType.STRING })
-	public static final void sendEmail(Var from, Var to, Var Cc, Var Bcc, Var subject, Var msg, Var html,
-			Var attachments, Var smtpHost, Var smtpPort, Var login, Var password) throws Exception {
+	public static final void sendEmail(@ParamMetaData(type = ObjectType.STRING) Var from,
+			@ParamMetaData(type = ObjectType.STRING) Var to, @ParamMetaData(type = ObjectType.STRING) Var Cc,
+			@ParamMetaData(type = ObjectType.STRING) Var Bcc, @ParamMetaData(type = ObjectType.STRING) Var subject,
+			@ParamMetaData(type = ObjectType.STRING) Var msg, @ParamMetaData(type = ObjectType.STRING) Var html,
+			@ParamMetaData(type = ObjectType.STRING) Var attachments,
+			@ParamMetaData(defaultValue = "smtp.gmail.com", type = ObjectType.STRING) Var smtpHost,
+			@ParamMetaData(defaultValue = "465", type = ObjectType.STRING) Var smtpPort,
+			@ParamMetaData(type = ObjectType.STRING) Var login, @ParamMetaData(type = ObjectType.STRING) Var password)
+			throws Exception {
 		try {
 			HtmlEmail email = new HtmlEmail();
 			email.setCharset(cronapi.CronapiConfigurator.ENCODING);
