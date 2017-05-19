@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImportBlocklyREST {
 
   private static List<String> imports;
-  private boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
           .indexOf("-agentlib:jdwp") > 0;
 
   private void fill(String base, File folder, List<String> imports) {
