@@ -59,13 +59,11 @@ public class CronapiClassLoader extends ClassLoader {
     String classFolder = "";
     
     try {
-      Class<CronapiClassLoader> thisClass = CronapiClassLoader.class;
       if(clazz.getProtectionDomain() != null && clazz.getProtectionDomain().getCodeSource() != null) {
         classFolder = new File(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
         
         String windowsSlash = (Operations.IS_WINDOWS ? "/?" : "");
-        classFolder = classFolder.replaceAll("file:" + windowsSlash + "|vfs:" + windowsSlash +
-                "|[/\\\\]wfr[/\\\\]util[/\\\\]" + thisClass.getSimpleName() + ".class", "");
+        classFolder = classFolder.replaceAll("file:" + windowsSlash + "|vfs:" + windowsSlash, "");
         
         String path = clazz.getCanonicalName().replace(".", File.separator) + ".class";
         if(classFolder.endsWith(path)) {
