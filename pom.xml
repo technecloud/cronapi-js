@@ -8,18 +8,7 @@
     <version>1.0-SNAPSHOT</version>
     <url>http://www.mycompany.com</url>
     <build>
-        <sourceDirectory>src</sourceDirectory>
-        <resources>
-            <resource>
-                <directory>src</directory>
-                <includes>
-                    <include>**</include>
-                </includes>
-                <excludes>
-                    <exclude>**/*.java</exclude>
-                </excludes>
-            </resource>
-        </resources>
+        <resources/>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -52,8 +41,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.cronospass.resource mimetype="folder/libs">lib</project.cronospass.resource>
-        <project.cronospass.resource mimetype="folder/src">src</project.cronospass.resource>
         <project.cronospass.resource mimetype="folder/web">webapp</project.cronospass.resource>
     </properties>
 </project>

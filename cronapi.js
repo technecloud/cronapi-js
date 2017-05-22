@@ -257,6 +257,31 @@
   this.cronapi.util.callServerBlocklyNoReturn = function() {
     cronapi.util.callServerBlockly.apply(this, arguments);
   }
+  
+  /**
+	 * @type function
+	 * @name {{throwExceptionName}}
+	 * @nameTags throwException
+	 * @description {{throwExceptionDescription}}
+	 * @param {ObjectType.OBJECT} value {{throwExceptionParam0}}
+	 */
+	this.cronapi.util.throwException = function(value) {
+	 throw value;
+	};
+	
+	
+	
+	/**
+	 * @type function
+	 * @name {{createExceptionName}}
+	 * @nameTags createException
+	 * @description {{createExceptionDescription}}
+	 * @param {ObjectType.STRING} value {{createExceptionParam0}}
+	 * @returns {ObjectType.STRING}
+	 */
+	this.cronapi.util.createException = function(value) {
+	  return value;
+	};
 
   /**
    * @type function
