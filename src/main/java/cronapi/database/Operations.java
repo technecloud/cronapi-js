@@ -102,5 +102,14 @@ public class Operations {
 		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.execute(query.getObjectAsString(), params);
 	}
-
+	
+	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
+			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
+					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
+							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
+	public static Var getTotalElements(
+			@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK, description = "{{datasource}}") Var ds) {
+			 DataSource datasource = (DataSource) ds.getObject(); 
+		  return new Var(datasource.getTotalElements());
+	}
 }
