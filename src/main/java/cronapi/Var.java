@@ -1,7 +1,13 @@
 package cronapi;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import cronapi.i18n.Messages;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -9,9 +15,9 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Var implements Comparable {
+public class Var implements Comparable, JsonSerializable {
 
-	public enum Type {
+  public enum Type {
 		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, DATETIME
 	};
 
@@ -640,4 +646,20 @@ public class Var implements Comparable {
 			_type = Type.UNKNOWN;
 		}
 	}
+
+  @Override
+  public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    if(_object != null)
+      gen.writeObject(_object);
+    else
+      gen.writeObject(null);
+  }
+
+  @Override
+  public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+    if(_object != null)
+      gen.writeObject(_object);
+    else
+      gen.writeObject(null);
+  }
 }

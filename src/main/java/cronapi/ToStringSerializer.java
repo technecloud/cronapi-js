@@ -7,20 +7,18 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.gson.JsonElement;
 
-public class VarSerializer extends StdSerializer<Var> {
-  
-  public VarSerializer() {
-    super(Var.class);
+import cronapi.database.DataSource;
+
+public class ToStringSerializer extends StdSerializer<Object> {
+
+  public ToStringSerializer() {
+    super(Object.class);
   }
   
   @Override
-  public void serialize(Var value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Object value, JsonGenerator gen, SerializerProvider provider) throws IOException {
     if(value != null) {
-      if (value.getObject() instanceof JsonElement) {
         gen.writeRawValue(value.toString());
-      } else {
-        gen.writeObject(value.getObject());
-      }
     } else
       gen.writeObject(null);
   }

@@ -1,5 +1,6 @@
 package cronapi.database;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -7,6 +8,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +33,7 @@ import cronapi.i18n.Messages;
  * @since 2017-04-26
  *
  */
-public class DataSource {
+public class DataSource implements JsonSerializable {
 
 	private String entity;
 	private Class domainClass;
@@ -394,4 +400,22 @@ public class DataSource {
 	  return new Var(this.page.getTotalElements());
 	}
 
+  @Override
+  public String toString() {
+	  if (this.page != null) {
+	    return this.page.getContent().toString();
+    } else {
+	    return "[]";
+    }
+  }
+
+  @Override
+  public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    gen.writeObject(this.page.getContent());
+  }
+
+  @Override
+  public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+    gen.writeObject(this.page.getContent());
+  }
 }
