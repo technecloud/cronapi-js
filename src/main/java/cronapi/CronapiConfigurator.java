@@ -3,8 +3,11 @@ package cronapi;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
+import com.google.gson.JsonElement;
+import cronapi.database.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +34,8 @@ public class CronapiConfigurator {
     Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
     builder.serializationInclusion(JsonInclude.Include.NON_NULL);
     builder.deserializerByType(Var.class, new VarDeserializer());
-    builder.serializerByType(Var.class, new VarSerializer());
+    builder.serializerByType(JsonElement.class, new ToStringSerializer());
+
     builder.serializerByType(Calendar.class, new CalendarSerializer() {
 
       @Override
