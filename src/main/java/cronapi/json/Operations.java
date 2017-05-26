@@ -96,9 +96,17 @@ public class Operations {
     return Var.valueOf(json);
   }
   
-  @CronapiMetaData(type = "function", name = "{{toMapOrList}}", nameTags = {
-			"toJson" }, description = "{{functionToMapOrList}}", returnType = ObjectType.JSON)
-	public static final Var toMapOrList(
+  @CronapiMetaData(type = "function", name = "{{toList}}", nameTags = {
+			"toList", "Para Lista" }, description = "{{functionToList}}", returnType = ObjectType.LIST)
+	public static final Var toList(
+	        @ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead
+	        ) throws Exception {
+    return toMap(valueToBeRead);
+  }
+  
+  @CronapiMetaData(type = "function", name = "{{toMap}}", nameTags = {
+			"toMap", "Para Mapa" }, description = "{{functionToMap}}", returnType = ObjectType.MAP)
+	public static final Var toMap(
 	        @ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead
 	        ) throws Exception {
     Object obj = null;   
