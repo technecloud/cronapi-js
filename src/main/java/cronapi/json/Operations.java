@@ -1,7 +1,12 @@
 package cronapi.json;
 
+import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cronapi.CronapiMetaData;
@@ -74,6 +79,42 @@ public class Operations {
         }           
       }
     }
+  }
+  
+  @CronapiMetaData(type = "function", name = "{{toJson}}", nameTags = {
+			"toJson" }, description = "{{functionToJson}}", returnType = ObjectType.JSON)
+	public static final Var toJson(
+	        @ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead
+	        ) throws Exception {
+    Object obj = valueToBeRead.getObject();   
+    Gson c = new Gson();
+    JsonElement json = null;
+    if (obj instanceof String) 
+      json = c.fromJson(valueToBeRead.getObjectAsString(), JsonElement.class);
+    else if (obj instanceof FileInputStream) 
+      json = c.fromJson(cronapi.io.Operations.fileReadAll(valueToBeRead).getObjectAsString(), JsonElement.class);
+    return Var.valueOf(json);
+  }
+  
+  @CronapiMetaData(type = "function", name = "{{toMapOrList}}", nameTags = {
+			"toJson" }, description = "{{functionToMapOrList}}", returnType = ObjectType.JSON)
+	public static final Var toMapOrList(
+	        @ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead
+	        ) throws Exception {
+    Object obj = null;   
+    String content = "";
+    Gson c = new Gson();
+    if (valueToBeRead.getObject() instanceof String) 
+      content = valueToBeRead.getObjectAsString();
+    else if (valueToBeRead.getObject() instanceof FileInputStream) 
+      content = cronapi.io.Operations.fileReadAll(valueToBeRead).getObjectAsString();
+      
+    if (content.startsWith("["))  
+      obj = c.fromJson(content, List.class);
+    else 
+      obj = c.fromJson(content, Map.class);
+    
+    return Var.valueOf(obj);
   }
 	
 }
