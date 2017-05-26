@@ -192,8 +192,8 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{openFileToWrite}}", nameTags = {
 			"fileOpenToWrite" }, description = "{{functionToOpenFileToWrite}}", params = { "{{pathOfFile}}",
-					"{{addContent}}" }, paramsType = { ObjectType.STRING,
-							ObjectType.BOOLEAN }, returnType = ObjectType.OBJECT)
+					"{{addText}}" }, paramsType = { ObjectType.STRING,
+							ObjectType.STRING }, returnType = ObjectType.OBJECT)
 	public static final Var fileOpenToWrite(Var url, Var append) throws Exception {
 		if (!append.equals(Var.VAR_NULL)) {
 			FileOutputStream out = new FileOutputStream(new File(url.getObjectAsString()));
