@@ -14,11 +14,13 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -29,6 +31,11 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import cronapi.i18n.Messages;
 
@@ -223,5 +230,252 @@ public class Utils {
 
 		return dateFormats;
 	}
+	
+	private static String fillIndexesIfExists(List<String> indexes, String key) {
+	  String index = null;
+	  if (key.contains("[") && key.endsWith("]")) {
+      String searchBrackets = key;
+      while (searchBrackets.indexOf("[") > -1) {
+        index = searchBrackets.substring(searchBrackets.indexOf("[")+1, searchBrackets.indexOf("]"));
+        indexes.add(index);
+        if (searchBrackets.indexOf("]") < (searchBrackets.length() - 1))
+          searchBrackets = searchBrackets.substring(searchBrackets.indexOf("]") + 1);
+        else
+          searchBrackets = searchBrackets.substring(searchBrackets.indexOf("]"));
+      }
+      key = key.substring(0, key.indexOf("["));
+    }
+    return key;
+	}
+	
+	private static final Object getValueByKey(Object obj, String key) {
+	  if (obj instanceof JsonObject)
+      return ((JsonObject) obj).get(key);
+    else
+      return ((Map) obj).get(key);
+	}
+	
+	private static final Object getValueByIndex(Object obj, int idx) {
+	  try {
+  	  if (obj instanceof JsonArray)
+        return ((JsonArray)obj).get(idx);
+      else
+        return ((List) obj).get(idx);  
+	  }
+	  catch(Exception e) {
+	    //Dont has index, return null
+	    return null;
+	  }
+	}
+	
+	private static final void setValueByIndex(Object list, Object valueToSet, int idx) {
+	  
+  	Object val = valueToSet;
+  	if (val instanceof Var)
+  	  val = ((Var)val).getObject();
+	  
+    if (list instanceof JsonArray) {
+      
+      if (idx <= (((JsonArray)list).size() -1) ) {
+        if (val instanceof JsonElement)
+          ((JsonArray) list).set(idx, (JsonElement)val);
+        else if (val instanceof Character)
+          ((JsonArray) list).set(idx, new JsonPrimitive((Character)val));
+        else if (val instanceof Number)
+          ((JsonArray) list).set(idx, new JsonPrimitive((Number)val));
+        else if (val instanceof Boolean)
+          ((JsonArray) list).set(idx, new JsonPrimitive((Boolean)val));
+        else if (val instanceof String)
+          ((JsonArray) list).set(idx, new JsonPrimitive((String)val));
+      }
+      else {
+        for (int i = 0; i < idx; i++) {
+          if ( i >= ((JsonArray)list).size())
+            ((JsonArray)list).add((JsonObject)null);
+        }
+        if (val instanceof JsonElement)
+          ((JsonArray) list).add((JsonElement)val);
+        else if (val instanceof Character)
+          ((JsonArray) list).add((Character)val);
+        else if (val instanceof Number)
+          ((JsonArray) list).add((Number)val);
+        else if (val instanceof Boolean)
+          ((JsonArray) list).add((Boolean)val);
+        else if (val instanceof String)
+          ((JsonArray) list).add((String)val);
+      }
+    }
+    else {
+      if (idx <= (((ArrayList)list).size() -1) ) 
+        ((ArrayList) list).set(idx, val);
+      else {
+        for (int i = 0; i < idx; i++) {
+          if ( i >= ((ArrayList)list).size())
+            ((ArrayList)list).add(null);
+        }
+        ((ArrayList)list).add(val);
+      }
+    }
+	}
+	
+	private static final void setValueInObj(Object obj, String key, Object valueToSet ) {
+    if (obj instanceof Var) {
+      obj = ((Var)obj).getObject();
+    }
+    
+    if (valueToSet instanceof Var) {
+      valueToSet = ((Var)valueToSet).getObject();
+    }
+    
+    if (obj instanceof JsonObject) {
+      if (valueToSet instanceof JsonElement)
+        ((JsonObject) obj).add(key, (JsonElement)valueToSet);
+      else if (valueToSet instanceof Character)
+        ((JsonObject) obj).addProperty(key, (Character)valueToSet);
+      else if (valueToSet instanceof Number)
+        ((JsonObject) obj).addProperty(key, (Number)valueToSet);
+      else if (valueToSet instanceof Boolean)
+        ((JsonObject) obj).addProperty(key, (Boolean)valueToSet);
+      else if (valueToSet instanceof String)
+        ((JsonObject) obj).addProperty(key, (String)valueToSet);
+    }
+    else
+      ((Map) obj).put(key, valueToSet);
+  }
+	
+	private static final Object addEmptyDefaultValueByKey(Object obj, String key) {
+	  Object value = null;
+	  if (obj instanceof JsonObject) {
+	    value = new JsonObject();
+	    ((JsonObject) obj).add(key, (JsonObject)value);
+	  }
+    else {
+      value = new HashMap<>();
+      ((Map) obj).put(key, value);
+    }
+    return value;
+	}
+	
+	private static Object addOrSetEmptyValueOnArray(Object obj, String keyOrPreviusIdx, int idx) {
+	  Object value = getPreviousListFromArray(obj, keyOrPreviusIdx);
+	  if (obj instanceof JsonElement) {
+	    if (value == null || !(value instanceof JsonArray))
+	      value = new JsonArray();
+      setValueByIndex(value, new JsonObject(), idx);
+	  }
+	  else {
+	    if (value == null || !(value instanceof ArrayList))
+	      value = new ArrayList();
+      setValueByIndex(value, new HashMap(), idx);
+	  }
+	  
+	  if (obj instanceof JsonObject || obj instanceof Map) 
+      setValueInObj(obj, keyOrPreviusIdx, value);
+    else if (obj instanceof JsonArray || obj instanceof ArrayList) 
+      setValueByIndex(obj, value, Integer.parseInt(keyOrPreviusIdx));
+	  return value;
+	}
+	
+	private static Object getPreviousListFromArray(Object obj, String keyOrPreviusIdx) {
+	  try {
+  	  if (obj instanceof JsonElement) {
+  	    if (obj instanceof JsonObject) 
+  	      return ((JsonObject)obj).get(keyOrPreviusIdx);
+  	    else if (obj instanceof JsonArray) 
+          return ((JsonArray)obj).get(Integer.parseInt(keyOrPreviusIdx));
+  	  }
+  	  else {
+  	    if (obj instanceof Map) 
+  	      return ((Map)obj).get(keyOrPreviusIdx);
+  	    else if (obj instanceof ArrayList) 
+          return ((ArrayList)obj).get(Integer.parseInt(keyOrPreviusIdx));
+  	  }
+	  }
+	  catch (Exception e) {
+	  }
+	  return null;
+	}
+	
+	private static Object addEmptyDefaultValuesByIndexes(Object obj, String key, List<String> indexes) {
+	  Object value = obj;
+	  for (int i = 0; i < indexes.size(); i++) {
+	    String idx = indexes.get(i);
+	    if (i == 0) 
+	      value = addOrSetEmptyValueOnArray(value, key, Integer.parseInt(idx));
+	    else
+	      value = addOrSetEmptyValueOnArray(value, String.valueOf(indexes.get(i-1)), Integer.parseInt(idx));
+	  }
+	  return getValueByKey(obj, key);
+	}
+	
+	private static Object createObjectPath(Object obj, String key, List<String> indexes) {
+    Object value = null;
+    if (indexes.size() == 0) 
+      value = addEmptyDefaultValueByKey(obj, key);
+    else 
+      value = addEmptyDefaultValuesByIndexes(obj, key, indexes);
+    return value;
+  }
+	
+	public static final Object mapGetObjectPathExtractElement(Object obj, String key, boolean createIfNotExist) throws Exception {
+    if (obj instanceof Var) 
+      obj = ((Var)obj).getObject();
+    
+    List<String> indexes = new ArrayList<String>();
+    key = fillIndexesIfExists(indexes, key);
+    Object value = getValueByKey(obj, key);
+    if ((value == null || value instanceof JsonNull) && createIfNotExist) 
+      value = createObjectPath(obj, key, indexes);
+    
+    if (indexes.size() > 0) {
+      for (String idx: indexes ) {
+        Object o = value;
+        if (value instanceof Var) 
+          o = ((Var)value).getObject();
+        value = getValueByIndex(o, Integer.parseInt(idx));
+        if ((value == null || value instanceof JsonNull) && createIfNotExist) {
+          createObjectPath(obj, key, indexes);
+          value = getValueByIndex(o, Integer.parseInt(idx));
+        }
+      }
+    }
+    return value;
+  }
+  
+  private static final void setValueInArray(Object obj, String key, Object valueToSet ) {
+    if (obj instanceof Var) {
+      obj = ((Var)obj).getObject();
+    }
+    
+    if (valueToSet instanceof Var) {
+      valueToSet = ((Var)valueToSet).getObject();
+    }
+    
+    List<String> indexes = new ArrayList<String>();
+    key = fillIndexesIfExists(indexes, key);
+    Object value = getValueByKey(obj, key);
+    
+    if (indexes.size() > 0) {
+      for (int i=0; i< indexes.size(); i++ ) {
+        String idx = indexes.get(i);
+        Object o = value;
+        if (value instanceof Var) 
+          o = ((Var)value).getObject();
+        if (i == indexes.size() - 1)
+          setValueByIndex(o, valueToSet, Integer.parseInt(idx));
+        else
+          value = getValueByIndex(o, Integer.parseInt(idx));
+      }
+    }
+  }
+  
+  public static final void mapSetObject(Object obj, String key, Object valueToSet) throws Exception {
+    if (key.endsWith("]")) {
+      mapGetObjectPathExtractElement(obj, key, true);
+      setValueInArray(obj, key, valueToSet);
+    }
+    else
+      setValueInObj(obj, key, valueToSet);
+  }
 
 }
