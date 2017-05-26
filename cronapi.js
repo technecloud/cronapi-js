@@ -392,6 +392,88 @@
 	    alert(e);
 	  }
 	};
+	
+	/**
+	 * @type function
+	 * @name {{createScopeVariableName}}
+	 * @nameTags createScopeVariable
+	 * @description {{createScopeVariableDescription}}
+	 * @param {ObjectType.STRING} name {{createScopeVariableParam0}}
+	 * @param {ObjectType.STRING} value {{createScopeVariableParam1}}
+	 */
+	this.cronapi.screen.createScopeVariable = function(name,value) {
+	  cronapi.$scope[name] = value;
+	};
+	
+	/**
+	 * @type function
+	 * @name {{datasourceFromScreenName}}
+	 * @nameTags datasourceFromScreen
+	 * @description {{datasourceFromScreenDescription}}
+	 * @param {ObjectType.STRING} datasource {{datasourceFromScreenParam0}}
+	 * @returns {ObjectType.STRING}
+	 * @wizard datasource_from_screen
+	 */
+	this.cronapi.screen.datasourceFromScreen = function(datasource) {
+	  return datasource;
+	};
+	
+	/**
+	 * @type function
+	 * @name {{startInsertingModeName}}
+	 * @nameTags startInsertingMode
+	 * @description {{startInsertingModeDescription}}
+	 * @param {ObjectType.STRING} datasource {{startInsertingModeParam0}}
+	 */
+	this.cronapi.screen.startInsertingMode = function(datasource) {
+	  window[datasource].startInserting();
+	  window[datasource].$apply();
+	};
+	
+	/**
+	 * @type function
+	 * @name {{startEditingModeName}}
+	 * @nameTags startEditingMode
+	 * @description {{startEditingModeDescription}}
+	 * @param {ObjectType.STRING} datasource {{startEditingModeParam0}}
+	 */
+	this.cronapi.screen.startEditingMode = function(datasource) {
+	  window[datasource].$apply( new function(){window[datasource].startEditing();} );
+	};
+	
+	/**
+	 * @type function
+	 * @name {{previusRecordName}}
+	 * @nameTags previusRecord
+	 * @description {{previusRecordDescription}}
+	 * @param {ObjectType.STRING} datasource {{previusRecordParam0}}
+	 */
+	this.cronapi.screen.previusRecord = function(datasource) {
+	  window[datasource].$apply( new function(){window[datasource].previous();} );
+	};
+	
+	 /**
+	 * @type function
+	 * @name {{nextRecordName}}
+	 * @nameTags nextRecord
+	 * @description {{nextRecordDescription}}
+	 * @param {ObjectType.STRING} datasource {{nextRecordParam0}}
+	 */
+	this.cronapi.screen.nextRecord = function(datasource) {
+	  window[datasource].$apply( new function(){window[datasource].next();} );
+	};
+	
+	/**
+	 * @type function
+	 * @name {{removeRecordName}}
+	 * @nameTags removeRecord
+	 * @description {{removeRecordDescription}}
+	 * @param {ObjectType.STRING} datasource {{removeRecordParam0}}
+	 */
+	this.cronapi.screen.removeRecord = function(datasource) {
+	  window[datasource].$apply( new function(){window[datasource].remove();} );
+	};
+
   
 	/**
 	 * @category CategoryType.DATETIME
