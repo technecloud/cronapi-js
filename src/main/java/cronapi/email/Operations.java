@@ -24,21 +24,26 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{sendEmailName}}", nameTags = {
-			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}",
-					"{{sendEmailParam1}}", "{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}",
-					"{{sendEmailParam5}}", "{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}",
-					"{{sendEmailParam9}}", "{{sendEmailParam10}}", "{{sendEmailParam11}}" }, paramsType = {
-							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.STRING })
-	public static final void sendEmail(@ParamMetaData(type = ObjectType.STRING) Var from,
-			@ParamMetaData(type = ObjectType.STRING) Var to, @ParamMetaData(type = ObjectType.STRING) Var Cc,
-			@ParamMetaData(type = ObjectType.STRING) Var Bcc, @ParamMetaData(type = ObjectType.STRING) Var subject,
-			@ParamMetaData(type = ObjectType.STRING) Var msg, @ParamMetaData(type = ObjectType.STRING) Var html,
-			@ParamMetaData(type = ObjectType.STRING) Var attachments,
-			@ParamMetaData(defaultValue = "smtp.gmail.com", type = ObjectType.STRING) Var smtpHost,
-			@ParamMetaData(defaultValue = "465", type = ObjectType.STRING) Var smtpPort,
-			@ParamMetaData(type = ObjectType.STRING) Var login, @ParamMetaData(type = ObjectType.STRING) Var password)
+			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}","{{sendEmailParam1}}",
+					"{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}", "{{sendEmailParam5}}",
+					"{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}", "{{sendEmailParam9}}",
+					"{{sendEmailParam10}}", "{{sendEmailParam11}}" }, paramsType = { ObjectType.STRING,
+							ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING })
+	public static final void sendEmail(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam0}}") Var from,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam1}}") Var to,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam2}}") Var Cc,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam3}}") Var Bcc,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam4}}") Var subject,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam5}}") Var msg,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam6}}") Var html,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam7}}") Var attachments,
+			@ParamMetaData(defaultValue = "smtp.gmail.com", type = ObjectType.STRING, description = "{{sendEmailParam8}}") Var smtpHost,
+			@ParamMetaData(defaultValue = "465", type = ObjectType.STRING, description = "{{sendEmailParam9}}") Var smtpPort,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam10}}") Var login,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam11}}") Var password)
 			throws Exception {
 		try {
 			HtmlEmail email = new HtmlEmail();

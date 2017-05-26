@@ -65,9 +65,9 @@ public class Operations {
 		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create",
-			"novo", "inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = {
-					"{{datasource}}", "{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
+	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create", "novo",
+			"inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = { "{{datasource}}",
+					"{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.LIST }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_insert_callnoreturn")
 	public static void insert(Var entity, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
@@ -80,8 +80,9 @@ public class Operations {
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
-	public static Var getField(@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK) Var ds,
-			@ParamMetaData(type = ObjectType.STRING) Var fieldName) {
+	public static Var getField(
+			@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK, description = "{{datasource}}") Var ds,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) {
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
 
@@ -101,5 +102,14 @@ public class Operations {
 		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.execute(query.getObjectAsString(), params);
 	}
-
+	
+	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
+			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
+					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
+							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
+	public static Var getTotalElements(
+			@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK, description = "{{datasource}}") Var ds) {
+			 DataSource datasource = (DataSource) ds.getObject(); 
+		  return new Var(datasource.getTotalElements());
+	}
 }

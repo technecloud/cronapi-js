@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.springframework.data.domain.Page;
@@ -387,6 +388,10 @@ public class DataSource {
 		} catch (Exception ex) {
 			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), query), ex);
 		}
+	}
+
+	public Var getTotalElements() {
+	  return new Var(this.page.getTotalElements());
 	}
 
 }
