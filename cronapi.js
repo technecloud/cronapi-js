@@ -1097,11 +1097,15 @@
   var Url = {
       // public method for url encoding
       encode : function (string) {
-          return escape(this._utf8_encode(string));
+          if (string)
+            return escape(this._utf8_encode(string));
+          return '';
       },
       // public method for url decoding
       decode : function (string) {
-          return this._utf8_decode(unescape(string));
+          if (string)
+            return this._utf8_decode(unescape(string));
+          return '';
       },
       // private method for UTF-8 encoding
       _utf8_encode : function (string) {
