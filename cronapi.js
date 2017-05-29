@@ -473,9 +473,60 @@
 	this.cronapi.screen.removeRecord = function(datasource) {
 	  window[datasource].$apply( new function(){window[datasource].remove();} );
 	};
-	
+  
+  /**
+	 * @type function
+	 * @name {{changeView}}
+	 * @nameTags changeView|Mudar tela|Change form|Change screen|Mudar formulário
+	 * @description {{functionToChangeView}}
+	 * @param {ObjectType.STRING} view {{view}}
+	 * @param {ObjectType.LIST} params {{params}}
+	 * @wizard procedures_open_form_callnoreturn
+	 */
+	this.cronapi.screen.changeView = function(view, params) {
+	  try {
+	    var queryString = '?';
+	    var template = '#key#=#value#&';
+	    $(params).each(function(idx) {
+        for (var key in this) 
+          queryString += template.replace('#key#', Url.encode(key)).replace('#value#', Url.encode(this[key]));
+	    });
+	    window.location.hash = view + queryString;
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
 	
 	/**
+	 * @type function
+	 * @name {{openUrl}}
+	 * @nameTags openUrl|Abrir url
+	 * @description {{functionToOpenUrl}}
+	 * @param {ObjectType.STRING} url {{url}}
+	 * @param {ObjectType.BOOLEAN} newTab {{newTab}}
+	 * @param {ObjectType.LONG} width {{width}}
+	 * @param {ObjectType.LONG} height {{height}}
+	 */
+	this.cronapi.screen.openUrl = function(url, newTab, width, height) {
+	  try {
+	    var target = '_self';
+	    var params = '';
+	    if (newTab && newTab.toString().toLowerCase() == 'true')
+	      target = '_blank';
+	    if (width)
+	      params += 'width=' + width + ',';
+      if (height)
+	      params += 'height=' + height+ ',';
+	    window.open(url, target, params);
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
+  
+  
+  /**
 	 * @type function
 	 * @name {{hasNextRecordName}}
 	 * @nameTags hasNextRecord
@@ -521,8 +572,6 @@
 	this.cronapi.screen.filter = function(datasource,path) {
 	  window[datasource].filter("/"+path);
 	};
-
-  
 	/**
 	 * @category CategoryType.DATETIME
 	 * @categoryTags Date|Datetime|Data|Hora
