@@ -135,5 +135,14 @@
 	"datasourceFilterParam1": "Caminho",
 	"getParam": "Obter parâmetro",
 	"functionToGetParam": "Função para obter parâmetro da query string",
-	"paramName": "Nome do parâmetro"
+	"paramName": "Nome do parâmetro",
+	"changeView": "Mudar view",
+  "functionToChangeView": "Função para mudar a view corrente",
+  "view": "View de destino",
+  "openUrl": "Abrir url",
+  "functionToOpenUrl": "Função para abrir url",
+  "url": "Url de destino",
+  "newTab": "Nova aba?",
+  "width": "Largura",
+  "height": "Altura"
 }
