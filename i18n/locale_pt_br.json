@@ -119,5 +119,14 @@
 	"nextRecordParam0": "Datasource",
 	"removeRecordName": "Remove registro",
 	"removeRecordDescription": "Função que entra em modo de remoção do datasource",
-	"removeRecordParam0": "Datasource"
+	"removeRecordParam0": "Datasource",
+	"changeView": "Mudar view",
+	"functionToChangeView": "Função para mudar a view corrente",
+	"view": "View de destino",
+	"openUrl": "Abrir url",
+	"functionToOpenUrl": "Função para abrir url",
+	"url": "Url de destino",
+	"newTab": "Nova aba?",
+	"width": "Largura",
+	"height": "Altura"
 }
