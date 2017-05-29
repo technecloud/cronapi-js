@@ -572,6 +572,23 @@
 	this.cronapi.screen.filter = function(datasource,path) {
 	  window[datasource].filter("/"+path);
 	};
+	
+	/**
+	 * @type function
+	 * @name {{getParam}}
+	 * @nameTags getParam|Obter paramêtro
+	 * @description {{functionToGetParam}}
+	 * @param {ObjectType.STRING} paramName {{paramName}}
+	 */
+	this.cronapi.screen.getParam = function(paramName) {
+	  try {
+	    return cronapi.$scope.params[paramName];
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
+	
 	/**
 	 * @category CategoryType.DATETIME
 	 * @categoryTags Date|Datetime|Data|Hora
