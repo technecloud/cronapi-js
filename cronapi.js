@@ -572,6 +572,23 @@
 	this.cronapi.screen.filter = function(datasource,path) {
 	  window[datasource].filter("/"+path);
 	};
+	
+	/**
+	 * @type function
+	 * @name {{getParam}}
+	 * @nameTags getParam|Obter paramêtro
+	 * @description {{functionToGetParam}}
+	 * @param {ObjectType.STRING} paramName {{paramName}}
+	 */
+	this.cronapi.screen.getParam = function(paramName) {
+	  try {
+	    return cronapi.$scope.params[paramName];
+	  }
+	  catch (e) {
+	    alert(e);
+	  }
+	};
+	
 	/**
 	 * @category CategoryType.DATETIME
 	 * @categoryTags Date|Datetime|Data|Hora
@@ -1080,11 +1097,15 @@
   var Url = {
       // public method for url encoding
       encode : function (string) {
-          return escape(this._utf8_encode(string));
+          if (string)
+            return escape(this._utf8_encode(string));
+          return '';
       },
       // public method for url decoding
       decode : function (string) {
-          return this._utf8_decode(unescape(string));
+          if (string)
+            return this._utf8_decode(unescape(string));
+          return '';
       },
       // private method for UTF-8 encoding
       _utf8_encode : function (string) {
