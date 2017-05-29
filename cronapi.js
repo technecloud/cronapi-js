@@ -473,6 +473,54 @@
 	this.cronapi.screen.removeRecord = function(datasource) {
 	  window[datasource].$apply( new function(){window[datasource].remove();} );
 	};
+	
+	
+	/**
+	 * @type function
+	 * @name {{hasNextRecordName}}
+	 * @nameTags hasNextRecord
+	 * @description {{hasNextRecordDescription}}
+	 * @param {ObjectType.STRING} datasource {{hasNextRecordParam0}}
+	 * @returns {ObjectType.BOOLEAN}
+	 */
+	this.cronapi.screen.hasNextRecord = function(datasource) {
+	  return window[datasource].hasNext();
+	};
+	
+	/**
+	 * @type function
+	 * @name {{quantityRecordsName}}
+	 * @nameTags quantityRecords
+	 * @description {{quantityRecordsDescription}}
+	 * @param {ObjectType.STRING} datasource {{quantityRecordsParam0}}
+	 * @returns {ObjectType.LONG}
+	 */
+	this.cronapi.screen.quantityRecords = function(datasource) {
+	  return window[datasource].data.length;
+	};
+	
+	/**
+	 * @type function
+	 * @name {{datasourcePostName}}
+	 * @nameTags post|datasource
+	 * @description {{datasourcePostDescription}}
+	 * @param {ObjectType.STRING} datasource {{datasourcePostParam0}}
+	 */
+	this.cronapi.screen.post = function(datasource) {
+	  return window[datasource].post();
+	};
+	
+	/**
+	 * @type function
+	 * @name {{datasourceFilterName}}
+	 * @nameTags filter|datasource
+	 * @description {{datasourceFilterDescription}}
+	 * @param {ObjectType.STRING} datasource {{datasourceFilterParam0}}
+	 * @param {ObjectType.STRING} datasource {{datasourceFilterParam1}}
+	 */
+	this.cronapi.screen.filter = function(datasource,path) {
+	  window[datasource].filter("/"+path);
+	};
 
   
 	/**

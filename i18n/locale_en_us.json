@@ -119,5 +119,18 @@
 	"nextRecordParam0": "Datasource",
 	"removeRecordName": "Remove record",
 	"removeRecordDescription": "Function that start the datasource remove mode",
-	"removeRecordParam0": "Datasource"
+	"removeRecordParam0": "Datasource",
+	"hasNextRecordName": "Exists next record?",
+	"hasNextRecordDescription": "Function that return if exists a next record",
+	"hasNextRecordParam0": "Datasource",
+	"quantityRecordsName": "Quantity of records",
+	"quantityRecordsDescription": "Function that returns the quantity of all records on datasource",
+	"quantityRecordsParam0": "Datasource",
+	"datasourcePostName": "Post",
+	"datasourcePostDescription": "Function that call the post() method of datasource",
+	"datasourcePostParam0": "Datasouce",
+	"datasourceFilterName": "Filter",
+	"datasourceFilterDescription": "Function that filter a datasource concat '/' and the path on parameter",
+	"datasourceFilterParam0": "Datasource",
+	"datasourceFilterParam1": "Caminho"
 }
