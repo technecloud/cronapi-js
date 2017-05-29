@@ -132,5 +132,15 @@
 	"datasourceFilterName": "Filter",
 	"datasourceFilterDescription": "Function that filter a datasource concat '/' and the path on parameter",
 	"datasourceFilterParam0": "Datasource",
-	"datasourceFilterParam1": "Caminho"
+	"datasourceFilterParam1": "Caminho",
+	"changeView": "Change view",
+  "functionToChangeView": "Function to change the current view",
+  "view": "Destination view",
+  "openUrl": "Open url",
+  "functionToOpenUrl": "Function to open url",
+  "url": "Destination url",
+  "newTab": "New tab?",
+  "width": "Width",
+  "height": "Height" 
+
 }
