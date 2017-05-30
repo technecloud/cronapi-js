@@ -183,8 +183,8 @@
    * @param {ObjectType.OBJECT} params {{params}}
    * @arbitraryParams true
    */
-  this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, callbackSuccess, callbackError) {
-    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
+  this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, fields, callbackSuccess, callbackError) {
+    var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = cronapi.$scope.http;
     var params = [];
     $(arguments).each(function() {
@@ -195,11 +195,16 @@
     if (window.uToken)
       token = window.uToken;
 
+    var dataCall = {
+      "fields": fields,
+      "inputs": params.slice(4)
+    };
+
     var resultData = $.ajax({
       type: 'POST',
       url: serverUrl,
       dataType: 'html',
-      data : JSON.stringify(params.slice(3)),
+      data : JSON.stringify(dataCall),
       headers : {
         'Content-Type' : 'application/json',
         'X-AUTH-TOKEN' : token,
@@ -213,6 +218,40 @@
 
   /**
    * @type internal
+   */
+  this.cronapi.util.getScreenFields = function() {
+    var fields = {};
+
+    for (var key in cronapi.$scope) {
+      if (cronapi.$scope[key] && cronapi.$scope[key].constructor && cronapi.$scope[key].constructor.name=="DataSet") {
+        fields[key] = {};
+        fields[key].active = cronapi.$scope[key].active;
+      }
+    }
+
+    for (var key in cronapi.$scope.vars) {
+      if (cronapi.$scope.vars[key]) {
+        if (!fields.vars) {
+          fields.vars = {};
+        }
+        fields.vars[key] = cronapi.$scope.vars[key];
+      }
+    }
+
+    for (var key in cronapi.$scope.params) {
+      if (cronapi.$scope.params[key]) {
+        if (!fields.params) {
+          fields.params = {};
+        }
+        fields.params[key] = cronapi.$scope.params[key];
+      }
+    }
+
+    return fields;
+  }
+
+  /**
+   * @type internal
    * @name {{makeCallServerBlocklyAsync}}
    * @nameTags makeCallServerBlocklyAsync
    * @description {{functionToMakeCallServerBlocklyAsync}}
@@ -223,8 +262,11 @@
    * @arbitraryParams true
    */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
+    var fields = this.getScreenFields();
+
     var paramsApply = [];
     paramsApply.push(blocklyWithFunction);
+    paramsApply.push(fields);
     paramsApply.push(function(data) {
       var result = evalInContext(data);
       if (typeof callbackSuccess == "string") {
@@ -305,8 +347,15 @@
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
-    var serverUrl = 'api/cronapi/call/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
+    var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
+
+    var fields = this.getScreenFields();
+
+    var dataCall = {
+      "fields": fields,
+      "inputs": params
+    };
 
     for (var i = 1; i<arguments.length; i++)
       params.push(arguments[i]);
@@ -319,7 +368,7 @@
       type: 'POST',
       url: serverUrl,
       dataType: 'html',
-      data : JSON.stringify(params),
+      data : JSON.stringify(dataCall),
       async: false,
       headers : {
         'Content-Type' : 'application/json',
@@ -428,7 +477,7 @@
   this.cronapi.screen.notify = function(type,message) {
     cronapi.$scope.Notification({'message':message },type);
   };
-  
+
   /**
    * @type function
    * @name {{datasourceFromScreenName}}
