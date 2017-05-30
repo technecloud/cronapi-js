@@ -419,6 +419,18 @@
 
   /**
    * @type function
+   * @name {{screenNotifyName}}
+   * @nameTags screenNotify
+   * @description {{screenNotifyDescription}}
+   * @param {ObjectType.STRING} name {{screenNotifyParam0}}
+   * @param {ObjectType.STRING} value {{screenNotifyParam1}}
+   */
+  this.cronapi.screen.notify = function(type,message) {
+    cronapi.$scope.Notification({'message':message },type);
+  };
+  
+  /**
+   * @type function
    * @name {{datasourceFromScreenName}}
    * @nameTags datasourceFromScreen
    * @description {{datasourceFromScreenDescription}}
