@@ -24,7 +24,7 @@ public class CronapiFilter implements Filter {
         try {
           chain.doFilter(req, resp);
         } finally {
-          CallBlocklyREST.CLIENT_COMMANDS.remove();
+          RestClient.removeClient();
         }
     }
 

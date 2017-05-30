@@ -1,12 +1,9 @@
 package cronapi.rest;
 
-import cronapi.ClientCommand;
-import cronapi.RestResult;
+import cronapi.*;
 import cronapi.database.TransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import cronapi.Var;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,15 +12,15 @@ import java.util.concurrent.Callable;
 @RestController
 @RequestMapping(value = "/api/cronapi/call")
 public class CallBlocklyREST {
+
+  @RequestMapping(method = RequestMethod.POST, value = "/body/{class}")
+  public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransaction(() -> {
+      RestClient.getRestClient().setBody(body);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), body.getInputs());
+    });
+  }
   
-  public static ThreadLocal<List<ClientCommand>> CLIENT_COMMANDS = new ThreadLocal<List<ClientCommand>>() {
-    @Override
-    protected List<ClientCommand> initialValue() {
-      return new LinkedList<>();
-    }
-  };
-  
-  @Transactional
   @RequestMapping(method = RequestMethod.GET, value = "/{class}")
   public RestResult getNoParam(@PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
@@ -64,7 +61,7 @@ public class CallBlocklyREST {
       return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
     });
   }
-  
+
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     Var var = Var.VAR_NULL;
     try {
@@ -79,6 +76,6 @@ public class CallBlocklyREST {
       TransactionManager.close();
       TransactionManager.clear();
     }
-    return new RestResult(var, CLIENT_COMMANDS.get());
+    return new RestResult(var, RestClient.getRestClient().getCommands());
   }
 }

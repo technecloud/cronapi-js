@@ -6,10 +6,7 @@ import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 
-import cronapi.ClientCommand;
-import cronapi.CronapiMetaData;
-import cronapi.ParamMetaData;
-import cronapi.Var;
+import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
@@ -144,7 +141,7 @@ public class Operations {
 		for (Var p : params)
 			command.addParam(p);
 
-		CallBlocklyREST.CLIENT_COMMANDS.get().add(command);
+    RestClient.getRestClient().addCommand(command);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{callBlocklyName}}", nameTags = {
