@@ -168,7 +168,7 @@ public class Operations {
 		return result;
 	}
 
-	public static final Var root(Var value) throws Exception {
+	public static final Var sqrt(Var value) throws Exception {
 		Var result;
 		switch (value.getType()) {
 		case DOUBLE: {
