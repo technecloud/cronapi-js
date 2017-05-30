@@ -367,6 +367,7 @@
    * @description {{functionToChangeValueOfField}}
    * @param {ObjectType.STRING} field {{field}}
    * @param {ObjectType.STRING} value {{value}}
+   * @multilayer true
    */
   this.cronapi.screen.changeValueOfField = function(/** @type {ObjectType.BLOCK} @blockType field_from_screen*/ field, /** @type {ObjectType.STRING} */value) {
     try {
@@ -410,6 +411,7 @@
    * @description {{createScopeVariableDescription}}
    * @param {ObjectType.STRING} name {{createScopeVariableParam0}}
    * @param {ObjectType.STRING} value {{createScopeVariableParam1}}
+   * @multilayer true
    */
   this.cronapi.screen.createScopeVariable = function(name,value) {
     cronapi.$scope[name] = value;
@@ -434,6 +436,7 @@
    * @nameTags startInsertingMode
    * @description {{startInsertingModeDescription}}
    * @param {ObjectType.STRING} datasource {{startInsertingModeParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.startInsertingMode = function(datasource) {
     window[datasource].startInserting();
@@ -446,6 +449,7 @@
    * @nameTags startEditingMode
    * @description {{startEditingModeDescription}}
    * @param {ObjectType.STRING} datasource {{startEditingModeParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.startEditingMode = function(datasource) {
     window[datasource].$apply( new function(){window[datasource].startEditing();} );
@@ -457,6 +461,7 @@
    * @nameTags previusRecord
    * @description {{previusRecordDescription}}
    * @param {ObjectType.STRING} datasource {{previusRecordParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.previusRecord = function(datasource) {
     window[datasource].$apply( new function(){window[datasource].previous();} );
@@ -468,6 +473,7 @@
    * @nameTags nextRecord
    * @description {{nextRecordDescription}}
    * @param {ObjectType.STRING} datasource {{nextRecordParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.nextRecord = function(datasource) {
     window[datasource].$apply( new function(){window[datasource].next();} );
@@ -479,6 +485,7 @@
    * @nameTags removeRecord
    * @description {{removeRecordDescription}}
    * @param {ObjectType.STRING} datasource {{removeRecordParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.removeRecord = function(datasource) {
     window[datasource].$apply( new function(){window[datasource].remove();} );
@@ -492,6 +499,7 @@
    * @param {ObjectType.STRING} view {{view}}
    * @param {ObjectType.LIST} params {{params}}
    * @wizard procedures_open_form_callnoreturn
+   * @multilayer true
    */
   this.cronapi.screen.changeView = function(view, params) {
     try {
@@ -517,6 +525,7 @@
    * @param {ObjectType.BOOLEAN} newTab {{newTab}}
    * @param {ObjectType.LONG} width {{width}}
    * @param {ObjectType.LONG} height {{height}}
+   * @multilayer true
    */
   this.cronapi.screen.openUrl = function(url, newTab, width, height) {
     try {
@@ -566,6 +575,7 @@
    * @nameTags post|datasource
    * @description {{datasourcePostDescription}}
    * @param {ObjectType.STRING} datasource {{datasourcePostParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.post = function(datasource) {
     return window[datasource].post();
@@ -578,6 +588,7 @@
    * @description {{datasourceFilterDescription}}
    * @param {ObjectType.STRING} datasource {{datasourceFilterParam0}}
    * @param {ObjectType.STRING} datasource {{datasourceFilterParam1}}
+   * @multilayer true
    */
   this.cronapi.screen.filter = function(datasource,path) {
     window[datasource].filter("/"+path);
@@ -588,6 +599,7 @@
    * @name {{getParam}}
    * @nameTags getParam|Obter paramêtro
    * @description {{functionToGetParam}}
+   * @returns {ObjectType.STRING}
    * @param {ObjectType.STRING} paramName {{paramName}}
    */
   this.cronapi.screen.getParam = function(paramName) {
