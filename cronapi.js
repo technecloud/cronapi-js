@@ -404,6 +404,7 @@
    * @param {ObjectType.STRING} field {{field}}
    * @returns {ObjectType.OBJECT}
    * @wizard field_from_screen
+   * @multilayer true
    */
   this.cronapi.screen.fieldFromScreen = function(field) {
     return field;
