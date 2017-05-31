@@ -4,7 +4,7 @@
 	"contentInAscii": "Ascii content",
 	"toLogic": "For logic",
 	"functionConvertToLogic": "Function to convert to logical",
-	"convertToBytes": "Conversion to bytes",
+	"convertToBytes": "bytes to text",
 	"functionToConvertTextBinaryToText": "Function to convert binary text to text",
 	"contentInTextBinary": "Binary text content",
 	"convertToAscii": "Convert char to ASCII code",
@@ -148,5 +148,9 @@
 	"screenNotifyName": "Show notification",
 	"screenNotifyDescription": "Function that show a notification",
 	"screenNotifyParam0": "Notification type: Can receive values success, error, warning, info or primary",
-	"screenNotifyParam1": "Message"
+	"screenNotifyParam1": "Message",
+	"getScopeVariableName": "Get scope variable",
+	"getScopeVariableDescription": "Function that get the scope variable value",
+	"getScopeVariableParam0": "Variable name",
+	"ObjectType.DATETIME":"Date"
 }

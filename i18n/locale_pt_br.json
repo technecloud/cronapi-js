@@ -4,7 +4,7 @@
 	"contentInAscii": "Conteúdo em ascii",
 	"toLogic": "Para lógico",
 	"functionConvertToLogic": "Função para converter para lógico",
-	"convertToBytes": "Conversão para bytes",
+	"convertToBytes": "Binário para texto",
 	"functionToConvertTextBinaryToText": "Função para converter texto binário para texto",
 	"contentInTextBinary": "Conteúdo em texto binário",
 	"convertToAscii": "Converter char para código ASCII",
@@ -88,7 +88,7 @@
 	"CategoryType.SCREEN": "Tela",
 	"CategoryType.DATETIME": "Data e hora",
 	"CategoryType.XML": "Xml",
-	"getValueOfField": "Obter valor do campo",
+	"getValueOfField": "Obter valor do",
 	"functionToGetValueOfField": "Função para obter valor do campo",
 	"fieldNameFromScreen": "Obter nome do campo",
 	"functionToGetFieldNameFromScreen": "Função para obter nome do campo (É necessário associar o blockly a tela)",
@@ -148,5 +148,9 @@
   "screenNotifyName":"Exibe notificação",
   "screenNotifyDescription":"Função que exibe notificação",
   "screenNotifyParam0":"Tipo da notificação: pode ser success, error, warning, info ou primary",
-  "screenNotifyParam1":"Mensagem"
+  "screenNotifyParam1":"Mensagem",
+  "getScopeVariableName":"Obtém variável de escopo",
+  "getScopeVariableDescription":"Função que obtém o valor da variável de escopo",
+  "getScopeVariableParam0":"Nome da varíavel",
+  "ObjectType.DATETIME":"Data"
 }

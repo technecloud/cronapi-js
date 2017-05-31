@@ -465,6 +465,19 @@
   this.cronapi.screen.createScopeVariable = function(name,value) {
     cronapi.$scope[name] = value;
   };
+  
+    /**
+   * @type function
+   * @name {{getScopeVariableName}}
+   * @nameTags getScopeVariable
+   * @description {{getScopeVariableDescription}}
+   * @param {ObjectType.STRING} name {{getScopeVariableParam0}}
+   * @returns {ObjectType.STRING}
+   * @multilayer true
+   */
+  this.cronapi.screen.getScopeVariable = function(name) {
+    return cronapi.$scope[name];
+  };
 
   /**
    * @type function
@@ -929,6 +942,7 @@
    * @description {{functionToNewDate}}
    * @param {ObjectType.LONG} year {{year}}
    * @param {ObjectType.LONG} month {{month}}
+   * @param {ObjectType.LONG} month {{day}}
    * @param {ObjectType.LONG} hour {{hour}}
    * @param {ObjectType.LONG} minute {{minute}}
    * @param {ObjectType.LONG} second {{second}}
