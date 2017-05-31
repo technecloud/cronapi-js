@@ -153,28 +153,30 @@ public class Operations {
 	public static final Var divisor(Var... values) throws Exception {
 		switch (values[0].getType()) {
 		case DOUBLE: {
-			Double result = 1.0;
+			Double result = values[0].getObjectAsDouble();
+			values[0] = new Var(1);
 			for (Var value : values) {
-				result = value.getObjectAsDouble() / result;
+				result = result / value.getObjectAsDouble();
 			}
 			return new Var(result);
 		}
 		case INT: {
-			Long result = 1L;
+			Long result = values[0].getObjectAsLong();
+			values[0] = new Var(1);
 			for (Var value : values) {
-				result = value.getObjectAsLong() / result;
+				result = result / value.getObjectAsLong();
 			}
 			return new Var(result);
 		}
 		default: {
-			Long result = 1L;
+			Long result = values[0].getObjectAsLong();
+			values[0] = new Var(1);
 			for (Var value : values) {
-				result = value.getObjectAsLong() / result;
+				result = result / value.getObjectAsLong();
 			}
 			return new Var(result);
 		}
 		}
-
 	}
 
 	public static final Var abs(Var value) throws Exception {
