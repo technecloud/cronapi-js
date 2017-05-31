@@ -150,6 +150,33 @@ public class Operations {
 		return new Var(returnValue);
 	}
 
+	public static final Var divisor(Var... values) throws Exception {
+		switch (values[0].getType()) {
+		case DOUBLE: {
+			Double result = 1.0;
+			for (Var value : values) {
+				result = value.getObjectAsDouble() / result;
+			}
+			return new Var(result);
+		}
+		case INT: {
+			Long result = 1L;
+			for (Var value : values) {
+				result = value.getObjectAsLong() / result;
+			}
+			return new Var(result);
+		}
+		default: {
+			Long result = 1L;
+			for (Var value : values) {
+				result = value.getObjectAsLong() / result;
+			}
+			return new Var(result);
+		}
+		}
+
+	}
+
 	public static final Var abs(Var value) throws Exception {
 		Var result;
 		switch (value.getType()) {
@@ -779,7 +806,7 @@ public class Operations {
 	}
 
 	public static final Var listRandomItem(Var value) throws Exception {
-		return new Var(value.get(randomInt(new Var(0), new Var(value.size()-1)).getObjectAsInt()));
+		return new Var(value.get(randomInt(new Var(0), new Var(value.size() - 1)).getObjectAsInt()));
 
 	}
 
