@@ -204,6 +204,6 @@ public class Operations {
 
 		Object o = methodToCall.invoke(clazz, callParams);
 
-		return new Var(o);
+		return Var.valueOf(o);
 	}
 }
