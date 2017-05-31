@@ -657,10 +657,7 @@ public class Var implements Comparable, JsonSerializable {
       gen.writeObjectField(id, _object);
       gen.writeEndObject();
     } else {
-      if(_object != null)
-        gen.writeObject(_object);
-      else
-        gen.writeObject(null);
+      gen.writeObject(_object);
     }
   }
 
