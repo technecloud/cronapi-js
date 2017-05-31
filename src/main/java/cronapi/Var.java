@@ -83,8 +83,10 @@ public class Var implements Comparable, JsonSerializable {
    */
   public Var(Var var) {
     _type = Type.UNKNOWN;
-    if (var!=null)
+    if (var!=null) {
+      this.id = var.id;
       setObject(var.getObject());
+    }
   }
 
   /**
@@ -603,6 +605,7 @@ public class Var implements Comparable, JsonSerializable {
       Var oldObj = (Var) _object;
       _type = oldObj.getType();
       _object = oldObj.getObject();
+      id = oldObj.id;
     } else if (_object instanceof String || _object instanceof StringBuilder || _object instanceof StringBuffer
         || _object instanceof Character) {
       _type = Type.STRING;
@@ -650,14 +653,11 @@ public class Var implements Comparable, JsonSerializable {
   @Override
   public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
     if (id != null) {
-      Map<String, Object> obj = new LinkedHashMap<String, Object>();
-      obj.put(id, _object);
-      gen.writeObject(obj);
+      gen.writeStartObject();
+      gen.writeObjectField(id, _object);
+      gen.writeEndObject();
     } else {
-      if(_object != null)
-        gen.writeObject(_object);
-      else
-        gen.writeObject(null);
+      gen.writeObject(_object);
     }
   }
 
