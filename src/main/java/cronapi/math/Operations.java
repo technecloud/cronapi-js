@@ -25,61 +25,41 @@ public class Operations {
 
 	public static final Var multiply(Var... values) throws Exception {
 		Var result = new Var();
+		boolean isDouble = false;
+		for (Var v : values)
+			if (v.getType() == Var.Type.DOUBLE)
+				isDouble = true;
 
-		switch (values[0].getType()) {
-		case DOUBLE: {
+		if (isDouble)
 			result = multiplyDouble(values);
-			break;
-		}
-		case INT: {
+		else
 			result = multiplyLong(values);
-			break;
-		}
-		default: {
-			result = multiplyDouble(values);
-		}
-
-		}
 		return result;
 	}
 
 	public static final Var subtract(Var... values) throws Exception {
 		Var result = new Var();
-
-		switch (values[0].getType()) {
-		case DOUBLE: {
+		boolean isDouble = false;
+		for (Var v : values)
+			if (v.getType() == Var.Type.DOUBLE)
+				isDouble = true;
+		if (isDouble)
 			result = subtractDouble(values);
-			break;
-		}
-		case INT: {
+		else
 			result = subtractLong(values);
-			break;
-		}
-		default: {
-			result = subtractDouble(values);
-		}
-
-		}
 		return result;
 	}
 
 	public static final Var sum(Var... values) throws Exception {
 		Var result = new Var();
-
-		switch (values[0].getType()) {
-		case DOUBLE: {
+		boolean isDouble = false;
+		for (Var v : values)
+			if (v.getType() == Var.Type.DOUBLE)
+				isDouble = true;
+		if (isDouble)
 			result = addDouble(values);
-			break;
-		}
-		case INT: {
+		else
 			result = addLong(values);
-			break;
-		}
-		default: {
-			result = addDouble(values);
-		}
-
-		}
 		return result;
 	}
 
@@ -151,31 +131,24 @@ public class Operations {
 	}
 
 	public static final Var divisor(Var... values) throws Exception {
-		switch (values[0].getType()) {
-		case DOUBLE: {
+		boolean isDouble = false;
+		for (Var v : values)
+			if (v.getType() == Var.Type.DOUBLE)
+				isDouble = true;
+		if (isDouble) {
 			Double result = values[0].getObjectAsDouble();
 			values[0] = new Var(1);
 			for (Var value : values) {
 				result = result / value.getObjectAsDouble();
 			}
 			return new Var(result);
-		}
-		case INT: {
+		} else {
 			Long result = values[0].getObjectAsLong();
 			values[0] = new Var(1);
 			for (Var value : values) {
 				result = result / value.getObjectAsLong();
 			}
 			return new Var(result);
-		}
-		default: {
-			Long result = values[0].getObjectAsLong();
-			values[0] = new Var(1);
-			for (Var value : values) {
-				result = result / value.getObjectAsLong();
-			}
-			return new Var(result);
-		}
 		}
 	}
 
@@ -270,20 +243,14 @@ public class Operations {
 	}
 
 	public static final Var pow(Var value1, Var value2) throws Exception {
-		Var result;
-		switch (value1.getType()) {
-		case DOUBLE: {
+		Var result = new Var();
+		boolean isDouble = false;
+		if (value1.getType() == Var.Type.DOUBLE || value2.getType() == Var.Type.DOUBLE)
+			isDouble = true;
+		if (isDouble)
 			result = new Var(Math.pow(value1.getObjectAsDouble(), value2.getObjectAsDouble()));
-			break;
-		}
-		case INT: {
+		else
 			result = new Var(Math.pow(value1.getObjectAsLong(), value2.getObjectAsLong()));
-			break;
-		}
-		default: {
-			result = new Var(Math.pow(value1.getObjectAsInt(), value2.getObjectAsInt()));
-		}
-		}
 		return result;
 	}
 
@@ -561,32 +528,26 @@ public class Operations {
 	}
 
 	public static final Var randomInt(Var min, Var max) throws Exception {
-		Var result;
+		Var result = new Var();
 		Random random = new Random();
-		switch (min.getType()) {
-		case DOUBLE: {
+
+		boolean isDouble = false;
+		if (min.getType() == Var.Type.DOUBLE || max.getType() == Var.Type.DOUBLE)
+			isDouble = true;
+
+		if (isDouble) {
 			int resultado = random.nextInt(max.getObjectAsInt());
 			while ((resultado < min.getObjectAsLong()) || (resultado > max.getObjectAsLong())) {
 				resultado = random.nextInt(max.getObjectAsInt());
 			}
 			result = new Var(resultado);
-			break;
-		}
-		case INT: {
+
+		} else {
 			int resultado = random.nextInt();
 			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
 				resultado = random.nextInt(max.getObjectAsInt());
 			}
 			result = new Var(resultado);
-			break;
-		}
-		default: {
-			int resultado = random.nextInt();
-			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
-				resultado = random.nextInt(max.getObjectAsInt());
-			}
-			result = new Var(resultado);
-		}
 		}
 		return result;
 	}
@@ -829,20 +790,17 @@ public class Operations {
 
 	public static final Var mod(Var value1, Var value2) throws Exception {
 		Var result;
-		switch (value1.getType()) {
-		case DOUBLE: {
+		boolean isDouble = false;
+		if (value1.getType() == Var.Type.DOUBLE || value2.getType() == Var.Type.DOUBLE)
+			isDouble = true;
+
+		if (isDouble) {
 			Double resultado = value1.getObjectAsDouble() % value2.getObjectAsDouble();
 			return new Var(resultado);
-		}
-		case INT: {
-			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
-			return new Var(resultado);
-		}
-		default: {
-			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
-			return new Var(resultado);
-		}
 
+		} else {
+			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
+			return new Var(resultado);
 		}
 	}
 }
