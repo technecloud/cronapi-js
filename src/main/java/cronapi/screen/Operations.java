@@ -18,7 +18,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{getValueOfFieldName}}", nameTags = {
 			"getValueOfField" }, description = "{{getValueOfFieldDescription}}", returnType = ObjectType.JSON)
 	public static final Var getValueOfField(
-			@ParamMetaData(blockType = "field_from_screen", type = ObjectType.OBJECT, description="{{getValueOfFieldParam0}") Var field) throws Exception {
+			@ParamMetaData(blockType = "field_from_screen", type = ObjectType.OBJECT, description="{{getValueOfFieldParam0}}") Var field) throws Exception {
 		return cronapi.map.Operations.getJsonOrMapField(Var.valueOf(RestClient.getRestClient().getBody().getFields()),
 				field);
 	}
