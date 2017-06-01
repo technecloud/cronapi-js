@@ -135,16 +135,19 @@ public class Operations {
 		callBlockly(classNameWithMethod, params);
 	}
 
-	@CronapiMetaData(type = "function", arbitraryParams = true)
-	public static final void callClientFunction(Var function, Var... params) throws Exception {
+	@CronapiMetaData(type = "function", name = "{{callClienteFunctionName}}", nameTags = {
+			"callClienteFunction" }, description = "{{callClienteFunctionDescription}}", returnType = ObjectType.VOID, arbitraryParams = true)
+	public static final void callClientFunction(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam0}}") Var function,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam1}}") Var... params) throws Exception {
 		ClientCommand command = new ClientCommand(function.getObjectAsString());
 		for (Var p : params)
 			command.addParam(p);
 
-    RestClient.getRestClient().addCommand(command);
+		RestClient.getRestClient().addCommand(command);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{callBlocklyName}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
 			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
 					"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
 							ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
