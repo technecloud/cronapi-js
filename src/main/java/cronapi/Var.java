@@ -605,7 +605,8 @@ public class Var implements Comparable, JsonSerializable {
       Var oldObj = (Var) _object;
       _type = oldObj.getType();
       _object = oldObj.getObject();
-      id = oldObj.id;
+      if (id == null)
+        id = oldObj.id;
     } else if (_object instanceof String || _object instanceof StringBuilder || _object instanceof StringBuffer
         || _object instanceof Character) {
       _type = Type.STRING;
@@ -663,9 +664,12 @@ public class Var implements Comparable, JsonSerializable {
 
   @Override
   public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
-    if(_object != null)
+    if (id != null) {
+      gen.writeStartObject();
+      gen.writeObjectField(id, _object);
+      gen.writeEndObject();
+    } else {
       gen.writeObject(_object);
-    else
-      gen.writeObject(null);
+    }
   }
 }
