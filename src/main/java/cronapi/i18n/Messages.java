@@ -35,6 +35,10 @@ public class Messages {
     RESOURCE_BUNDLE.set(ResourceBundle.getBundle(BUNDLE_NAME, locale));
   }
 
+  public static void remove() {
+    RESOURCE_BUNDLE.remove();
+  }
+
   public static ResourceBundle getBundle(Locale locale) {
     return ResourceBundle.getBundle(BUNDLE_NAME, locale);
   }
