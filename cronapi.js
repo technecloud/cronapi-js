@@ -685,6 +685,21 @@
       alert(e);
     }
   };
+  
+  
+  /**
+   * @type function
+   * @name {{confirmDialogName}}
+   * @nameTags confirmDialog|Confirmar
+   * @description {{confirmDialogDescription}}
+   * @returns {ObjectType.BOOLEAN}
+   * @param {ObjectType.STRING} msg {{confirmDialogParam0}}
+   */
+  this.cronapi.screen.confimDialog = function(msg) {
+    
+      var value = confirm(msg);
+      return value;
+  };
 
   /**
    * @category CategoryType.DATETIME

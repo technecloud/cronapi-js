@@ -152,5 +152,8 @@
   "getScopeVariableName":"Obtém variável de escopo",
   "getScopeVariableDescription":"Função que obtém o valor da variável de escopo",
   "getScopeVariableParam0":"Nome da varíavel",
-  "ObjectType.DATETIME":"Data"
+  "ObjectType.DATETIME":"Data",
+  "confirmDialogName":"Confirmar ação",
+  "confirmDialogDescription":"Função que exibe uma confirmação da ação e retorna verdadeiro ou falso",
+  "confirmDialogParam0":"Mensagem"
 }

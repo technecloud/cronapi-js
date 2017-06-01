@@ -152,5 +152,8 @@
 	"getScopeVariableName": "Get scope variable",
 	"getScopeVariableDescription": "Function that get the scope variable value",
 	"getScopeVariableParam0": "Variable name",
-	"ObjectType.DATETIME":"Date"
+	"ObjectType.DATETIME": "Date",
+	"confirmDialogName": "Confirm action",
+	"confirmDialogDescription": "Function that shows a confirm action and return true of false",
+	"confirmDialogParam0": "Message"
 }
