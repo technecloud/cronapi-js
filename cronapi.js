@@ -464,7 +464,7 @@
    * @multilayer true
    */
   this.cronapi.screen.createScopeVariable = function(name,value) {
-    cronapi.$scope[name] = value;
+    cronapi.$scope.vars[name] = value;
   };
   
     /**
@@ -477,7 +477,7 @@
    * @multilayer true
    */
   this.cronapi.screen.getScopeVariable = function(name) {
-    return cronapi.$scope[name];
+    return cronapi.$scope.vars[name];
   };
 
   /**
