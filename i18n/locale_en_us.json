@@ -155,5 +155,15 @@
 	"ObjectType.DATETIME": "Date",
 	"confirmDialogName": "Confirm action",
 	"confirmDialogDescription": "Function that shows a confirm action and return true of false",
-	"confirmDialogParam0": "Message"
+	"confirmDialogParam0": "Message",
+	"createDefaultModalDescription": "Function that create a modal",
+	"createDefaultModalName": "Create Modal",
+	"createDefaultModalParam0": "Modal Identifier",
+	"createDefaultModalParam1": "Title",
+	"createDefaultModalParam2": "Message",
+	"createDefaultModalParam3": "Cancel button name",
+	"createDefaultModalParam4": "Confirm button name",
+	"showModalName": "Show modal",
+	"showModalDescription": "Function that shows a modal",
+	"showModalParam0": "Modal"
 }

@@ -700,6 +700,39 @@
       var value = confirm(msg);
       return value;
   };
+  
+  /**
+   * @type function
+   * @name {{createDefaultModalName}}
+   * @nameTags createModal|Criar Modal| Modal
+   * @description {{createDefaultModalDescription}}
+   * @returns {ObjectType.STRING}
+   * @param {ObjectType.STRING} idModal {{createDefaultModalParam0}}
+   * @param {ObjectType.STRING} title {{createDefaultModalParam1}}
+   * @param {ObjectType.STRING} msg {{createDefaultModalParam2}}
+   * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
+   * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * 
+   */
+  this.cronapi.screen.createDefaultModal = function(idModal,title, msg, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT}*/ onSuccess, /** @type {ObjectType.STATEMENT}*/ onError) {
+      var template = '<div class="modal fade" id="'+idModal+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="modalTemplateTitle">'+title+'</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick='+onError+'><span aria-hidden="true">&times;</span></button></div><div class="modal-body">'+msg+'</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal" onclick='+onError+'>'+buttonCancelName+'</button><button type="button" class="btn btn-primary" data-dismiss="modal" onclick='+ onSuccess +'>'+buttonSaveName+'</button></div></div></div></div>'
+      $('body').append(template);
+      return template;
+  };
+  
+  /**
+   * @type function
+   * @name {{showModalName}}
+   * @nameTags showModal|Exibir Modal| Modal
+   * @description {{showModalDescription}}
+   * @param {ObjectType.OBJECT} modal {{showModalParam0}}
+   * 
+   */
+  this.cronapi.screen.showModal = function(modal) {
+      $('#'+$(modal)[0].id).modal('show');
+      return null;
+  };
+  
 
   /**
    * @category CategoryType.DATETIME
