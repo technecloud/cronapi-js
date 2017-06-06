@@ -487,6 +487,7 @@
    * @description {{screenNotifyDescription}}
    * @param {ObjectType.STRING} name {{screenNotifyParam0}}
    * @param {ObjectType.STRING} value {{screenNotifyParam1}}
+   * @multilayer true
    */
   this.cronapi.screen.notify = function(type,message) {
     cronapi.$scope.Notification({'message':message },type);
@@ -500,6 +501,7 @@
    * @param {ObjectType.STRING} datasource {{datasourceFromScreenParam0}}
    * @returns {ObjectType.STRING}
    * @wizard datasource_from_screen
+   * @multilayer true
    */
   this.cronapi.screen.datasourceFromScreen = function(datasource) {
     return datasource;
