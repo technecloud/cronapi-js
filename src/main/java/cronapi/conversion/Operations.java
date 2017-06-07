@@ -1,9 +1,8 @@
 package cronapi.conversion;
 
-import java.text.SimpleDateFormat;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
@@ -30,7 +29,7 @@ public class Operations {
 		Var value = new Var();
 		String base64 = base64Var.getObjectAsString();
 		if (base64.length() > 0) {
-			value = new Var( new String( Base64.getDecoder().decode(base64) , cronapi.CronapiConfigurator.ENCODING));
+			value = new Var(new String(Base64.getDecoder().decode(base64), cronapi.CronapiConfigurator.ENCODING));
 		}
 		return value;
 	}
@@ -55,8 +54,10 @@ public class Operations {
 			"binaryToAscii" }, description = "{{functionToConvertTextBinaryToText}}", params = {
 					"{{contentInTextBinary}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var binaryToAscii(Var binaryVar) throws Exception {
-		String msgDecode = new String((byte[]) binaryVar.getObject(), cronapi.CronapiConfigurator.ENCODING);
-		return new Var(msgDecode);
+
+		BigInteger bg = new BigInteger(binaryVar.getObjectAsString(), 2);
+		byte[] bt = bg.toByteArray();
+		return new Var(new String(bt));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameTags = {
