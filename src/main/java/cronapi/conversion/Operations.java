@@ -30,7 +30,7 @@ public class Operations {
 		Var value = new Var();
 		String base64 = base64Var.getObjectAsString();
 		if (base64.length() > 0) {
-			value = new Var(Base64.getDecoder().decode(base64));
+			value = new Var( new String( Base64.getDecoder().decode(base64) , cronapi.CronapiConfigurator.ENCODING));
 		}
 		return value;
 	}
