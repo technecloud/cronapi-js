@@ -60,8 +60,8 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertToBytes}}", nameTags = {
-			"toBytes" }, description = "{{functionToConvertTextBinaryToText}}", params = {
-					"{{contentInTextBinary}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
+			"toBytes" }, description = "{{convertToBytesDescription}}", params = {
+					"{{convertToBytesParam0}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
 	public static final Var toBytes(Var var) throws Exception {
 		return new Var(var.getObjectAsString().getBytes());
 	}
