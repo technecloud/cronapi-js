@@ -146,7 +146,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{convertToDouble}}", nameTags = {
 			"toDouble" }, description = "{{functionToConvertToDouble}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.DOUBLE)
-	public final Var toDouble(Var value) throws Exception {
+	public static final Var toDouble(Var value) throws Exception {
 		return new Var(value.getObjectAsDouble());
 	}
 
