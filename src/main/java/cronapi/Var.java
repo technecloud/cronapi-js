@@ -593,6 +593,14 @@ public class Var implements Comparable, JsonSerializable {
     }
   }
 
+  public Var negate() {
+    if (getObjectAsBoolean()) {
+      return VAR_FALSE;
+    }
+
+    return VAR_TRUE;
+  }
+
   /**
    * Internal method for inferring the "object type" of this object. When it
    * is done, it sets the private member value of _type. This will be
