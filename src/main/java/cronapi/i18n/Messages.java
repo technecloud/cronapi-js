@@ -1,14 +1,20 @@
 package cronapi.i18n;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 public class Messages { 
   
   private static final String BUNDLE_NAME = "cronapi.i18n.Messages";
   
-  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("pt", "BR"));
+  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("pt", "BR"), new UTF8Control());
 
   public static final ThreadLocal<ResourceBundle> RESOURCE_BUNDLE = new ThreadLocal<>();
 
@@ -32,7 +38,7 @@ public class Messages {
   }
   
   public static void set(Locale locale) {
-    RESOURCE_BUNDLE.set(ResourceBundle.getBundle(BUNDLE_NAME, locale));
+    RESOURCE_BUNDLE.set(ResourceBundle.getBundle(BUNDLE_NAME, locale, new UTF8Control()));
   }
 
   public static void remove() {
@@ -40,7 +46,7 @@ public class Messages {
   }
 
   public static ResourceBundle getBundle(Locale locale) {
-    return ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    return ResourceBundle.getBundle(BUNDLE_NAME, locale, new UTF8Control());
   }
 
   public static Locale getLocale() {
@@ -49,5 +55,37 @@ public class Messages {
         bundle = DEFAULT_BUNDLE;
 
       return bundle.getLocale();
+  }
+
+  public static class UTF8Control extends ResourceBundle.Control {
+    public ResourceBundle newBundle
+        (String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
+        throws IllegalAccessException, InstantiationException, IOException
+    {
+      String bundleName = toBundleName(baseName, locale);
+      String resourceName = toResourceName(bundleName, "properties");
+      ResourceBundle bundle = null;
+      InputStream stream = null;
+      if (reload) {
+        URL url = loader.getResource(resourceName);
+        if (url != null) {
+          URLConnection connection = url.openConnection();
+          if (connection != null) {
+            connection.setUseCaches(false);
+            stream = connection.getInputStream();
+          }
+        }
+      } else {
+        stream = loader.getResourceAsStream(resourceName);
+      }
+      if (stream != null) {
+        try {
+          bundle = new PropertyResourceBundle(new InputStreamReader(stream, "UTF-8"));
+        } finally {
+          stream.close();
+        }
+      }
+      return bundle;
+    }
   }
 }
