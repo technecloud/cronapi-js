@@ -10,7 +10,7 @@
 	"convertToAscii": "Converter char para código ASCII",
 	"functionToConvertToAscii": "Função para converter char para código ASCII",
 	"content": "Conteúdo",
-	"convertStringToJs": "Converter texto para texto escapado javascript",
+	"convertStringToJs": "Texto para texto em javascript",
 	"functionToConvertStringToJs": "Função para converter texto para texto escapado javascript",
 	"convertStringToDate": "Converter texto para data",
 	"functionToConvertStringToDate": "Função para converter texto para data",
