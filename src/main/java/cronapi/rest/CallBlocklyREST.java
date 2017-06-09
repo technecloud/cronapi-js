@@ -1,18 +1,27 @@
 package cronapi.rest;
 
+import java.util.concurrent.Callable;
+
+import javax.servlet.http.HttpServletRequest;
+
 import cronapi.*;
-import cronapi.database.TransactionManager;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
+import cronapi.database.TransactionManager;
 
 @RestController
 @RequestMapping(value = "/api/cronapi/call")
 public class CallBlocklyREST {
-
+  
+  @ExceptionHandler(Throwable.class)
+  @ResponseBody
+  ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
+    ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex);
+    return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+  
   @RequestMapping(method = RequestMethod.POST, value = "/body/{class}")
   public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
@@ -61,7 +70,7 @@ public class CallBlocklyREST {
       return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
     });
   }
-
+  
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     Var var = Var.VAR_NULL;
     try {
