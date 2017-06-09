@@ -489,7 +489,7 @@
    * @param {ObjectType.STRING} value {{screenNotifyParam1}}
    * @multilayer true
    */
-  this.cronapi.screen.notify = function(type,message) {
+  this.cronapi.screen.notify = function( /** @type {ObjectType.BLOCK} @blockType notify_type*/  type, /** @type {ObjectType.STRING} */ message) {
     cronapi.$scope.Notification({'message':message },type);
   };
 
