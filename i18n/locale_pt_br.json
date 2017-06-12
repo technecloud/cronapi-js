@@ -148,7 +148,7 @@
 	"screenNotifyName": "Exibe notificação",
 	"screenNotifyDescription": "Função que exibe notificação",
 	"screenNotifyParam0": "Tipo da notificação: pode ser success, error, warning, info ou primary",
-	"screenNotifyParam1": "Mensagem",
+	"screenNotifyParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
 	"getScopeVariableName": "Obtém variável de escopo",
 	"getScopeVariableDescription": "Função que obtém o valor da variável de escopo",
 	"getScopeVariableParam0": "Nome da varíavel",
