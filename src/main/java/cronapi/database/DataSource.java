@@ -1,23 +1,25 @@
 package cronapi.database;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializable;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 import cronapi.Utils;
 import cronapi.Var;
@@ -92,7 +94,8 @@ public class DataSource implements JsonSerializable {
 	 * 
 	 * @return a array of Object  
 	 */
-	public Object[] fetch() {
+	public Object[]
+  fetch() {
 		if (this.filter != null && !"".equals(this.filter)) {
 			try {
 				EntityManager em = TransactionManager.getEntityManager(domainClass);
@@ -153,13 +156,28 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
+  public void insert(Map<?,?> values) {
+    try {
+      this.insertedElement = this.domainClass.newInstance();
+      for (Object key: values.keySet()) {
+        updateField(key.toString(), values.get(key));
+      }
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
 	/** 
 	 * Saves the object in the current index or a new object when has insertedElement
 	 */
-	public void save() {
+	public Object save() {
 		try {
 			Object toSave;
 			EntityManager em = TransactionManager.getEntityManager(domainClass);
+
+      if (!em.getTransaction().isActive()) {
+        em.getTransaction().begin();
+      }
 
 			if (this.insertedElement != null) {
 				toSave = this.insertedElement;
@@ -168,14 +186,28 @@ public class DataSource implements JsonSerializable {
 			} else
 				toSave = this.getObject();
 
-			if (!em.getTransaction().isActive()) {
-				em.getTransaction().begin();
-			}
-			em.merge(toSave);
+			return em.merge(toSave);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
+
+  public void delete(Var[] primaryKeys) {
+	  insert();
+	  int i = 0;
+	  Var[] params = new Var[primaryKeys.length];
+	  String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
+	  for (Field field: Utils.findIds(getObject())) {
+	    if (i > 0) {
+	      jpql += " AND ";
+      }
+      jpql += ""+field.getName() + " = :p"+i;
+      params[i] = Var.valueOf("p"+i, primaryKeys[i].getObject(field.getType()));
+	    i++;
+    }
+
+    execute(jpql, params);
+  }
 
 	/** 
 	 * Removes the object in the current index
@@ -232,6 +264,39 @@ public class DataSource implements JsonSerializable {
 			throw new RuntimeException(ex);
 		}
 	}
+
+  public void filter(Var data) {
+	  Map<?, ?> primaryKeys = (Map<?,?>) data.getObject();
+
+    int i = 0;
+    String jpql = " select e FROM "+entity.substring(entity.lastIndexOf(".")+1) + " e WHERE ";
+    Vector<Var> params = new Vector<>();
+
+    for (Field field: Utils.findIds(domainClass)) {
+      if (i > 0) {
+        jpql += " AND ";
+      }
+      jpql += "e."+field.getName() + " = :p"+i;
+      params.add(Var.valueOf("p"+i, Var.valueOf(primaryKeys.get(field.getName())).getObject(field.getType())));
+      i++;
+    }
+
+    Var[] arr = params.toArray(new Var[params.size()]);
+
+    filter(jpql, arr);
+  }
+
+  public void update(Var data) {
+    try {
+      Map<?, ?> values = (Map<?,?>) data.getObject();
+
+      for (Object key: values.keySet()) {
+        updateField(key.toString(), values.get(key));
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
 	/** 
 	 * Return object in current index
@@ -344,18 +409,33 @@ public class DataSource implements JsonSerializable {
 	}
 
 	/**
-	 * Fetch objects from database by a filter
-	 * 
-	 * @param filter jpql instruction like a namedQuery
-	 * @param params parameters used in jpql instruction
-	 */
-	public void filter(String filter, Var... params) {
-		this.filter = filter;
-		this.params = params;
-		this.pageRequest = new PageRequest(0, pageSize);
-		this.current = -1;
-		this.fetch();
-	}
+   * Fetch objects from database by a filter
+   *
+   * @param filter jpql instruction like a namedQuery
+   * @param params parameters used in jpql instruction
+   */
+  public void filter(String filter, Var... params) {
+    this.filter = filter;
+    this.params = params;
+    this.pageRequest = new PageRequest(0, pageSize);
+    this.current = -1;
+    this.fetch();
+  }
+
+  /**
+   * Fetch objects from database by a filter
+   *
+   * @param filter jpql instruction like a namedQuery
+   * @param pageRequest Page
+   * @param params parameters used in jpql instruction
+   */
+  public void filter(String filter, PageRequest pageRequest, Var... params) {
+    this.filter = filter;
+    this.params = params;
+    this.pageRequest = pageRequest;
+    this.current = -1;
+    this.fetch();
+  }
 
 	/**
 	 * Clean Datasource and to free up allocated memory

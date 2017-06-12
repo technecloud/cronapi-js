@@ -3,6 +3,7 @@ package cronapi;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import cronapi.i18n.Messages;
@@ -165,6 +166,39 @@ public class Var implements Comparable, JsonSerializable {
    */
   public Object getObject() {
     return _object;
+  }
+
+  public Object getObject(Class type) {
+    if (type == String.class || type == StringBuilder.class || type == StringBuffer.class
+        || type == Character.class) {
+      return getObjectAsString();
+    } else if (type == Boolean.class) {
+      return getObjectAsBoolean();
+    } else if (type == Date.class) {
+      return getObjectAsDateTime().getTime();
+    } else if (type == Calendar.class) {
+      return getObjectAsDateTime();
+    } else if (type == Long.class) {
+      return getObjectAsLong();
+    } else if (type == Integer.class) {
+      return getObjectAsInt();
+    } else if (type == Double.class) {
+      return getObjectAsDouble();
+    } else if (type == Float.class) {
+      return getObjectAsDouble().floatValue();
+    } else if (type == BigDecimal.class) {
+      return new BigDecimal(getObjectAsDouble());
+    } else if (type == BigInteger.class) {
+      return BigInteger.valueOf(getObjectAsLong());
+    } else {
+
+      if (_object instanceof Map && type != Map.class) {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.convertValue(_object, type);
+      }
+
+      return getObject();
+    }
   }
 
   /**

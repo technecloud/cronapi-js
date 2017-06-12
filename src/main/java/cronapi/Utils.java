@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FileUtils;
@@ -131,6 +134,20 @@ public class Utils {
 		c.setTime(date);
 		return c.get(field);
 	}
+
+  public static List<Field> findIds(Object obj) {
+    Field[] fields = obj instanceof Class?((Class) obj).getDeclaredFields():obj.getClass().getDeclaredFields();
+    List<Field> pks = new ArrayList<>();
+    for (Field f : fields) {
+      Annotation[] annotations = f.getDeclaredAnnotations();
+      for (int i = 0; i < annotations.length; i++) {
+        if (annotations[i].annotationType().equals(Id.class)) {
+          pks.add(f);
+        }
+      }
+    }
+    return pks;
+  }
 
 	public static Method findMethod(Object obj, String method) {
 		Method[] methods = obj.getClass().getMethods();

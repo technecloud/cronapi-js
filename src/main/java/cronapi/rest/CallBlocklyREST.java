@@ -1,10 +1,23 @@
 package cronapi.rest;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 
+import app.entity.User;
 import cronapi.*;
+import cronapi.database.DataSource;
+import cronapi.database.Operations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +25,29 @@ import org.springframework.web.bind.annotation.*;
 import cronapi.database.TransactionManager;
 
 @RestController
-@RequestMapping(value = "/api/cronapi/call")
+@RequestMapping(value = "/api/cronapi")
 public class CallBlocklyREST {
+
+  @Autowired
+  private HttpServletRequest request;
+
+  private Var[] translatePathVars(String clazz) {
+    String paths = request.getServletPath().substring(request.getServletPath().indexOf(clazz) + clazz.length());
+    if (paths.startsWith("/")) {
+      paths = paths.substring(1);
+    }
+    if (paths.endsWith("/")) {
+      paths = paths.substring(0, paths.length()-1);
+    }
+
+    String[] strParams = paths.split("/");
+    Var[] vars = new Var[strParams.length];
+    for (int i=0; i<strParams.length;i++) {
+      vars[i] = new Var(strParams[i]);
+    }
+
+    return vars;
+  }
   
   @ExceptionHandler(Throwable.class)
   @ResponseBody
@@ -22,49 +56,75 @@ public class CallBlocklyREST {
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
   
-  @RequestMapping(method = RequestMethod.POST, value = "/body/{class}")
+  @RequestMapping(method = RequestMethod.GET, value = "/query/{entity}/{id}/**")
+  public HttpEntity<List> queryGet(@PathVariable("entity") String entity, @PathVariable("id") String id, Pageable pageable) throws Exception {
+    RestResult data = runIntoTransaction(() -> {
+      Var[] params = translatePathVars(id);
+      String query = null;
+
+      DataSource ds = new DataSource(entity);
+      PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
+      ds.filter(query, page, params);
+
+      return Var.valueOf(ds.getPage());
+    });
+
+    Page page = (Page) data.getValue().getObject();
+
+    return new ResponseEntity<List>(page.getContent(), HttpStatus.OK);
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/query/{entity}/{id}/**")
+  public HttpEntity<Object> queryPost(@PathVariable("entity") String entity, @PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+    RestResult result = runIntoTransaction(() -> {
+      DataSource ds = new DataSource(entity);
+      ds.filter(data);
+      ds.update(data);
+      return Var.valueOf(ds.save());
+    });
+
+    return new ResponseEntity<Object>(result.getValue().getObject(), HttpStatus.OK);
+  }
+
+  @RequestMapping(method = RequestMethod.PUT, value = "/query/{entity}/{id}")
+  public HttpEntity<Object> queryPut(@PathVariable("entity") String entity, @PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+    RestResult result = runIntoTransaction(() -> {
+      DataSource ds = new DataSource(entity);
+      ds.insert((Map<?,?>) data.getObject());
+      return Var.valueOf(ds.save());
+    });
+
+    return new ResponseEntity<Object>(result.getValue().getObject(), HttpStatus.OK);
+  }
+
+  @RequestMapping(method = RequestMethod.DELETE, value = "/query/{entity}/{id}/**")
+  public void queryDelete(@PathVariable("entity") String entity, @PathVariable("id") String id) throws Exception {
+    runIntoTransaction(() -> {
+      Var[] vars = translatePathVars(id);
+      DataSource ds = new DataSource(entity);
+      ds.delete(vars);
+      return null;
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/call/body/{class}")
   public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       RestClient.getRestClient().setBody(body);
       return cronapi.util.Operations.callBlockly(new Var(clazz), body.getInputs());
     });
   }
-  
-  @RequestMapping(method = RequestMethod.GET, value = "/{class}")
-  public RestResult getNoParam(@PathVariable("class") String clazz) throws Exception {
-    return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz));
-    });
-  }
-  
-  @RequestMapping(method = RequestMethod.GET, value = "/{class}/{param1}")
-  public RestResult getOneParam(@PathVariable("class") String clazz, @PathVariable("param1") String param1)
+
+  @RequestMapping(method = RequestMethod.GET, value = "/call/{class}/**")
+  public RestResult getOneParam(@PathVariable("class") String clazz)
           throws Exception {
     return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), new Var(param1));
+      Var[] vars = translatePathVars(clazz);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
     });
   }
-  
-  @RequestMapping(method = RequestMethod.GET, value = "/{class}/{param1}/{param2}")
-  public RestResult getTwoParams(@PathVariable("class") String clazz, @PathVariable("param1") String param1,
-                                 @PathVariable("param2") String param2)
-          throws Exception {
-    
-    return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), new Var(param1), new Var(param2));
-    });
-  }
-  
-  @RequestMapping(method = RequestMethod.GET, value = "/{class}/{param1}/{param2}/{param3}")
-  public RestResult getThreeParams(@PathVariable("class") String clazz, @PathVariable("param1") String param1,
-                                   @PathVariable("param2") String param2, @PathVariable("param3") String param3)
-          throws Exception {
-    return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), new Var(param1), new Var(param2), new Var(param3));
-    });
-  }
-  
-  @RequestMapping(method = RequestMethod.POST, value = "/{class}")
+
+  @RequestMapping(method = RequestMethod.POST, value = "/call/{class}")
   public RestResult postParams(@RequestBody Var[] vars, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
