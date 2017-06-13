@@ -6,7 +6,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import cronapi.rest.CallBlocklyREST;
 import org.springframework.stereotype.Component;
 
 import cronapi.i18n.Messages;

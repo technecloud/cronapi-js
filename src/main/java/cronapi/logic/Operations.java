@@ -1,17 +1,8 @@
 package cronapi.logic;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-
 import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.clazz.CronapiClassLoader;
-import cronapi.i18n.Messages;
-import cronapi.rest.CallBlocklyREST;
 
 @CronapiMetaData(category = CategoryType.LOGIC, categoryTags = { "Lógica", "Logic" })
 public class Operations {
