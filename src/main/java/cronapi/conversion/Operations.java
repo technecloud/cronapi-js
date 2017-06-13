@@ -85,9 +85,9 @@ public class Operations {
 		return new Var(Long.parseLong(value.getObjectAsString(), 16));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
-			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = {
-					"{{content}}" }, paramsType = { ObjectType.LIST }, returnType = ObjectType.LIST)
+// 	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
+// 			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = {
+// 					"{{content}}" }, paramsType = { ObjectType.LIST }, returnType = ObjectType.LIST)
 	public static final Var arrayToList(Var arrayVar) throws Exception {
 		List<?> t = Arrays.asList(arrayVar.getObject());
 		return new Var(t);
