@@ -194,6 +194,7 @@ public class Var implements Comparable, JsonSerializable {
 
       if (_object instanceof Map && type != Map.class) {
         ObjectMapper mapper = new ObjectMapper();
+        ((Map<?,?>) _object).remove("$$hashKey");
         return mapper.convertValue(_object, type);
       }
 
@@ -691,6 +692,10 @@ public class Var implements Comparable, JsonSerializable {
     } else {
       _type = Type.UNKNOWN;
     }
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   @Override
