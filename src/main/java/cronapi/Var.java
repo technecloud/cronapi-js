@@ -620,7 +620,7 @@ public class Var implements Comparable, JsonSerializable {
         sb.append("}");
         return sb.toString();
       case NULL:
-        return "";
+        return null;
       default:
         if (getObject() == null)
           return "";
