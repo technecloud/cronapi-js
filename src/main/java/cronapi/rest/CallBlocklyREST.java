@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import app.entity.User;
 import cronapi.*;
 import cronapi.database.DataSource;
 import cronapi.database.EntityMetadata;
