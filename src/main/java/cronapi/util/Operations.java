@@ -11,7 +11,6 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
-import cronapi.rest.CallBlocklyREST;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
