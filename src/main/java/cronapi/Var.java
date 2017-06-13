@@ -27,7 +27,7 @@ public class Var implements Comparable, JsonSerializable {
   private Object _object;
   private boolean modifiable = true;
   private boolean created = false;
-  private static final NumberFormat _formatter = new DecimalFormat("#.#####");
+  private static final NumberFormat _formatter = new DecimalFormat("0.00000");
 
   public static final Var VAR_NULL = new Var(null, false);
   public static final Var VAR_TRUE = new Var(true, false);
@@ -620,7 +620,7 @@ public class Var implements Comparable, JsonSerializable {
         sb.append("}");
         return sb.toString();
       case NULL:
-        return null;
+        return "";
       default:
         if (getObject() == null)
           return "";

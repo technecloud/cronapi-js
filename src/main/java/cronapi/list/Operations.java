@@ -54,10 +54,8 @@ public class Operations {
 	}
 
 	public static final Var isEmpty(Var list) throws Exception {
-		list = isNull(list);
-		if (list.getType() == Var.Type.LIST && list.size() > 0)
-			return new Var(false);
-		return new Var(true);
+		return (list != Var.VAR_NULL && list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0)
+				? Var.VAR_FALSE : Var.VAR_TRUE;
 	}
 
 	public static final Var findFirst(Var list, Var item) throws Exception {
