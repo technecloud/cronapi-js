@@ -9,6 +9,8 @@ import java.util.Vector;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,10 +28,10 @@ import cronapi.Var;
 import cronapi.i18n.Messages;
 
 /**
- * Class database manipulation, responsible for querying, inserting, 
- * updating and deleting database data procedurally, allowing paged 
+ * Class database manipulation, responsible for querying, inserting,
+ * updating and deleting database data procedurally, allowing paged
  * navigation and setting page size.
- * 
+ *
  * @author robson.ataide
  * @version 1.0
  * @since 2017-04-26
@@ -38,6 +40,7 @@ import cronapi.i18n.Messages;
 public class DataSource implements JsonSerializable {
 
 	private String entity;
+  private String simpleEntity;
 	private Class domainClass;
 	private String filter;
 	private Var[] params;
@@ -49,23 +52,24 @@ public class DataSource implements JsonSerializable {
 	private Pageable pageRequest;
 	private Object insertedElement = null;
 
-	/** 
+	/**
 	 * Init a datasource with a page size equals 100
-	 * 
-	 * @param entity - full name of entitiy class like String  
+	 *
+	 * @param entity - full name of entitiy class like String
 	 */
 	public DataSource(String entity) {
 		this(entity, 100);
 	}
 
-	/** 
+	/**
 	 * Init a datasource setting a page size
-	* 
-	* @param entity - full name of entitiy class like String 
-	* @param pageSize - page size of a Pageable object retrieved from repository  
+	*
+	* @param entity - full name of entitiy class like String
+	* @param pageSize - page size of a Pageable object retrieved from repository
 	*/
 	public DataSource(String entity, int pageSize) {
 		this.entity = entity;
+		this.simpleEntity = entity.substring(entity.lastIndexOf(".")+1);
 		this.pageSize = pageSize;
 		this.pageRequest = new PageRequest(0, pageSize);
 
@@ -73,10 +77,10 @@ public class DataSource implements JsonSerializable {
 		this.instantiateRepository();
 	}
 
-	/** 
+	/**
 	 * Retrieve repository from entity
-	 * 
-	 * @throws RuntimeException when repository not fount, entity passed not found or cast repository 
+	 *
+	 * @throws RuntimeException when repository not fount, entity passed not found or cast repository
 	 */
 	private void instantiateRepository() {
 		try {
@@ -91,8 +95,8 @@ public class DataSource implements JsonSerializable {
 	 * Retrieve objects from database using repository when filter is null or empty,
 	 * if filter not null or is not empty, this method uses entityManager and create a
 	 * jpql instruction.
-	 * 
-	 * @return a array of Object  
+	 *
+	 * @return a array of Object
 	 */
 	public Object[]
   fetch() {
@@ -144,8 +148,12 @@ public class DataSource implements JsonSerializable {
 		return this.page.getContent().toArray();
 	}
 
-	/** 
-	 * Create a new instance of entity and add a 
+	public EntityMetadata getMetadata() {
+	  return new EntityMetadata(domainClass);
+  }
+
+	/**
+	 * Create a new instance of entity and add a
 	 * results and set current (index) for his position
 	 */
 	public void insert() {
@@ -167,13 +175,14 @@ public class DataSource implements JsonSerializable {
     }
   }
 
-	/** 
+	/**
 	 * Saves the object in the current index or a new object when has insertedElement
 	 */
 	public Object save() {
 		try {
 			Object toSave;
 			EntityManager em = TransactionManager.getEntityManager(domainClass);
+      em.getMetamodel().entity(domainClass);
 
       if (!em.getTransaction().isActive()) {
         em.getTransaction().begin();
@@ -196,20 +205,27 @@ public class DataSource implements JsonSerializable {
 	  insert();
 	  int i = 0;
 	  Var[] params = new Var[primaryKeys.length];
+
+	  EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityType type = em.getMetamodel().entity(domainClass);
+
 	  String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
-	  for (Field field: Utils.findIds(getObject())) {
-	    if (i > 0) {
-	      jpql += " AND ";
+	  for (Object obj: type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute) obj;
+      if (field.isId()) {
+        if (i > 0) {
+          jpql += " AND ";
+        }
+        jpql += "" + field.getName() + " = :p" + i;
+        params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(field.getType().getJavaType()));
+        i++;
       }
-      jpql += ""+field.getName() + " = :p"+i;
-      params[i] = Var.valueOf("p"+i, primaryKeys[i].getObject(field.getType()));
-	    i++;
     }
 
     execute(jpql, params);
   }
 
-	/** 
+	/**
 	 * Removes the object in the current index
 	 */
 	public void delete() {
@@ -227,29 +243,33 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
-	/** 
+	/**
 	 * Update a field from object in the current index
-	 *  
+	 *
 	 * @param fieldName - attributte name in entity
 	 * @param fieldValue - value that replaced or inserted in field name passed
 	 */
 	public void updateField(String fieldName, Object fieldValue) {
-		try {
-			Method setMethod = Utils.findMethod(getObject(), "set" + fieldName);
-			if (setMethod != null) {
-				setMethod.invoke(getObject(), fieldValue);
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
+    updateField(getObject(), fieldName, fieldValue);
 	}
 
-	/** 
+  private void updateField(Object obj, String fieldName, Object fieldValue) {
+    try {
+      Method setMethod = Utils.findMethod(obj, "set" + fieldName);
+      if (setMethod != null) {
+        setMethod.invoke(obj, fieldValue);
+      }
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+	/**
 	 * Update fields from object in the current index
-	 *  
+	 *
 	 * @param fields - bidimensional array like fields
 	 * sample: { {"name", "Paul"}, {"age", "21"} }
-	 * 
+	 *
 	 * @thows RuntimeException if a field is not accessible through a set method
 	 */
 	public void updateFields(Var... fields) {
@@ -268,17 +288,22 @@ public class DataSource implements JsonSerializable {
   public void filter(Var data) {
 	  Map<?, ?> primaryKeys = (Map<?,?>) data.getObject();
 
+    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityType type = em.getMetamodel().entity(domainClass);
+
     int i = 0;
     String jpql = " select e FROM "+entity.substring(entity.lastIndexOf(".")+1) + " e WHERE ";
     Vector<Var> params = new Vector<>();
-
-    for (Field field: Utils.findIds(domainClass)) {
-      if (i > 0) {
-        jpql += " AND ";
+    for (Object obj: type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute) obj;
+      if (field.isId()) {
+        if (i > 0) {
+          jpql += " AND ";
+        }
+        jpql += "e." + field.getName() + " = :p" + i;
+        params.add(Var.valueOf("p" + i, Var.valueOf(primaryKeys.get(field.getName())).getObject(field.getType().getJavaType())));
+        i++;
       }
-      jpql += "e."+field.getName() + " = :p"+i;
-      params.add(Var.valueOf("p"+i, Var.valueOf(primaryKeys.get(field.getName())).getObject(field.getType())));
-      i++;
     }
 
     Var[] arr = params.toArray(new Var[params.size()]);
@@ -298,9 +323,9 @@ public class DataSource implements JsonSerializable {
     }
   }
 
-	/** 
+	/**
 	 * Return object in current index
-	 * 
+	 *
 	 * @return Object from database in current position
 	 */
 	public Object getObject() {
@@ -314,9 +339,9 @@ public class DataSource implements JsonSerializable {
 		return this.page.getContent().get(this.current);
 	}
 
-	/** 
+	/**
 	 * Return field passed from object in current index
-	 * 
+	 *
 	 * @return Object value of field passed
 	 * @thows RuntimeException if a field is not accessible through a set method
 	 */
@@ -332,8 +357,8 @@ public class DataSource implements JsonSerializable {
 	}
 
 	/**
-	 * Moves the index for next position, in pageable case, 
-	 * looking for next page and so on 
+	 * Moves the index for next position, in pageable case,
+	 * looking for next page and so on
 	 */
 	public void next() {
 		if (this.page.getNumberOfElements() > (this.current + 1))
@@ -350,9 +375,9 @@ public class DataSource implements JsonSerializable {
 	}
 
 	/**
-	 * Verify if can moves the index for next position, 
-	 * in pageable case, looking for next page and so on 
-	 * 
+	 * Verify if can moves the index for next position,
+	 * in pageable case, looking for next page and so on
+	 *
 	 * @return boolean true if has next, false else
 	 */
 	public boolean hasNext() {
@@ -368,9 +393,9 @@ public class DataSource implements JsonSerializable {
 	}
 
 	/**
-	 * Moves the index for previous position, in pageable case, 
-	 * looking for next page and so on 
-	 * 
+	 * Moves the index for previous position, in pageable case,
+	 * looking for next page and so on
+	 *
 	 * @return boolean true if has previous, false else
 	 */
 	public boolean previous() {
@@ -390,7 +415,7 @@ public class DataSource implements JsonSerializable {
 
 	/**
 	 * Gets a Pageable object retrieved from repository
-	 * 
+	 *
 	 * @return pageable from repository, returns null when fetched by filter
 	 */
 	public Page getPage() {
@@ -399,7 +424,7 @@ public class DataSource implements JsonSerializable {
 
 	/**
 	 * Create a new page request with size passed
-	 * 
+	 *
 	 * @param pageSize size of page request
 	 */
 	public void setPageSize(int pageSize) {
@@ -430,11 +455,176 @@ public class DataSource implements JsonSerializable {
    * @param params parameters used in jpql instruction
    */
   public void filter(String filter, PageRequest pageRequest, Var... params) {
-    this.filter = filter;
+    if (filter == null && params.length > 0) {
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityType type =  em.getMetamodel().entity(domainClass);
+
+      int i = 0;
+      String jpql = "Select e from " + simpleEntity + " e where ";
+      for (Object obj : type.getAttributes()) {
+        SingularAttribute field = (SingularAttribute) obj;
+        if (field.isId()) {
+          if (i > 0) {
+            jpql += " and ";
+          }
+          jpql += "e." + field.getName() + " = :p" + i;
+          params[i].setId("p" + i);
+        }
+      }
+
+      filter = jpql;
+
+    }
+
     this.params = params;
+    this.filter = filter;
     this.pageRequest = pageRequest;
     this.current = -1;
     this.fetch();
+  }
+
+  private Class forName(String name) {
+    try {
+      return Class.forName(name);
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
+  }
+
+  private Object newInstance(String name) {
+    try {
+      return Class.forName(name).newInstance();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  public void deleteRelation(String refId, Var[] primaryKeys, Var[] relationKeys) {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(refId);
+
+    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    int i = 0;
+
+    String jpql = null;
+
+    Var[] params = null;
+    if (relationMetadata.getAssossiationName() != null) {
+      params = new Var[relationKeys.length + primaryKeys.length];
+
+      jpql = " DELETE FROM " + relationMetadata.gettAssossiationSimpleName() + " WHERE ";
+      EntityType type = em.getMetamodel().entity(domainClass);
+      for (Object obj : type.getAttributes()) {
+        SingularAttribute field = (SingularAttribute) obj;
+        if (field.isId()) {
+          if (i > 0) {
+            jpql += " AND ";
+          }
+          jpql += relationMetadata.getAssociationAttribute().getName() + "." + field.getName() + " = :p" + i;
+          params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(field.getType().getJavaType()));
+          i++;
+        }
+      }
+
+      int v = 0;
+      type = em.getMetamodel().entity(forName(relationMetadata.getAssossiationName()));
+      for (Object obj : type.getAttributes()) {
+        SingularAttribute field = (SingularAttribute) obj;
+        if (field.isId()) {
+          if (i > 0) {
+            jpql += " AND ";
+          }
+          jpql += relationMetadata.getAttribute().getName() + "." + field.getName() + " = :p" + i;
+          params[i] = Var.valueOf("p" + i, relationKeys[v].getObject(field.getType().getJavaType()));
+          i++;
+          v++;
+        }
+      }
+
+    } else {
+      params = new Var[relationKeys.length];
+
+      jpql = " DELETE FROM " + relationMetadata.getSimpleName() + " WHERE ";
+      EntityType type = em.getMetamodel().entity(forName(relationMetadata.getName()));
+      for (Object obj : type.getAttributes()) {
+        SingularAttribute field = (SingularAttribute) obj;
+        if (field.isId()) {
+          if (i > 0) {
+            jpql += " AND ";
+          }
+          jpql += "" + field.getName() + " = :p" + i;
+          params[i] = Var.valueOf("p" + i, relationKeys[i].getObject(field.getType().getJavaType()));
+          i++;
+        }
+      }
+    }
+
+    execute(jpql, params);
+  }
+
+  public Object insertRelation(String refId, Map<?, ?> data, Var... primaryKeys) {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(refId);
+
+    EntityManager em = TransactionManager.getEntityManager(domainClass);
+
+    filter(null, new PageRequest(0, 100), primaryKeys);
+    Object insertion = null;
+    Object result = null;
+    if (relationMetadata.getAssossiationName() != null) {
+      insertion = this.newInstance(relationMetadata.getAssossiationName());
+      updateField(insertion, relationMetadata.getAttribute().getName(), Var.valueOf(data).getObject(forName(relationMetadata.getName())));
+      updateField(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
+      result = getObject();
+    } else {
+      insertion = Var.valueOf(data).getObject(forName(relationMetadata.getName()));
+      updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
+      result = insertion;
+    }
+
+    if (!em.getTransaction().isActive()) {
+      em.getTransaction().begin();
+    }
+
+    em.persist(insertion);
+    return result;
+  }
+
+  public void filterByRelation(String refId, PageRequest pageRequest, Var... primaryKeys) {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(refId);
+
+    EntityManager em = TransactionManager.getEntityManager(domainClass);
+
+    EntityType type = null;
+    String name = null;
+    String selectAttr = "";
+    String filterAttr = relationMetadata.getAttribute().getName();
+    type = em.getMetamodel().entity(domainClass);
+
+    if (relationMetadata.getAssossiationName() != null) {
+      name = relationMetadata.getAssossiationName();
+      selectAttr = "."+relationMetadata.getAttribute().getName();
+      filterAttr = relationMetadata.getAssociationAttribute().getName();
+    } else {
+      name = relationMetadata.getName();
+    }
+
+    int i = 0;
+    String jpql = "Select e"+selectAttr+" from "+name+" e where ";
+    for (Object obj: type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute) obj;
+      if (field.isId()) {
+        if (i > 0) {
+          jpql += " and ";
+        }
+        jpql += "e."+filterAttr+"."+field.getName()+" = :p"+i;
+        primaryKeys[i].setId("p"+i);
+      }
+    }
+
+    filter(jpql, pageRequest, primaryKeys);
+
   }
 
 	/**
