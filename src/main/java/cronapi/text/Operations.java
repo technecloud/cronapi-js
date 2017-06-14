@@ -72,7 +72,7 @@ public class Operations {
 		return getLetter(text, Var.valueOf(text.getObjectAsString().length()));
 	}
 
-	public static final Var getRandomLastLetter(Var text) {
+	public static final Var getRandomLetter(Var text) {
 		int i = new java.util.Random().nextInt(text.getObjectAsString().length());
 		if (i == 0)
 			i++;
