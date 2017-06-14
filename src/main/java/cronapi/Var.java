@@ -614,7 +614,7 @@ public class Var implements Comparable, JsonSerializable {
 				sb.append(v.toString());
 				sb.append(", ");
 			}
-			sb.deleteCharAt(sb.length());
+			sb.deleteCharAt(sb.length()-1);
 			sb.append("}");
 			return sb.toString();
 		case NULL:
