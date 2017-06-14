@@ -1038,6 +1038,20 @@
         return str.charAt(i);
     return '';
   };
+  
+  /**
+  * @category CategoryType.TEXT
+  * @categoryTags TEXT|text
+  */
+  this.cronapi.text = {};
+  
+   /**
+  * @type function
+  * @wizard text_prompt_ext
+  */
+  this.cronapi.text.prompt = function(/** @type {ObjectType.STRING} @defaultValue abc*/ value) {
+    return null;
+  }
 
   /**
    * @category CategoryType.XML
