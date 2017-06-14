@@ -11,7 +11,7 @@ public class Operations {
 			"isNullFunction" }, description = "{{isNullDescription}}", returnType = ObjectType.BOOLEAN)
 	public static final Var isNull(@ParamMetaData(type = ObjectType.STRING, description = "{{isNullParam0}}") Var var)
 			throws Exception {
-		return (var == Var.VAR_NULL) ? Var.VAR_TRUE : Var.VAR_FALSE;
+		return (var.equals(Var.VAR_NULL)) ? Var.VAR_TRUE : Var.VAR_FALSE;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{isNullOrEmptyName}}", nameTags = {
@@ -19,13 +19,18 @@ public class Operations {
 	public static final Var isNullOrEmpty(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{isNullOrEmptyParam0}}") Var var)
 			throws Exception {
-		return (var == Var.VAR_NULL || var.getObjectAsString() == "") ? Var.VAR_TRUE : Var.VAR_FALSE;
+		return (var.equals(Var.VAR_NULL) || var.getObjectAsString() == ""
+				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
+						: Var.VAR_FALSE;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{isEmptyName}}", nameTags = {
 			"isEmptyFunction" }, description = "{{isEmptyDescription}}", returnType = ObjectType.BOOLEAN)
 	public static final Var isEmpty(@ParamMetaData(type = ObjectType.STRING, description = "{{isEmptyParam0}}") Var var)
 			throws Exception {
-		return (var != Var.VAR_NULL & var.getObjectAsString() == "") ? Var.VAR_TRUE : Var.VAR_FALSE;
+		return (!var.equals(Var.VAR_NULL) & var.getObjectAsString() == ""
+				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
+						: Var.VAR_FALSE;
 	}
+
 }
