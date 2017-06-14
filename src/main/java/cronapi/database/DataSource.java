@@ -1,13 +1,13 @@
 package cronapi.database;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 import cronapi.Utils;
 import cronapi.Var;
-import cronapi.i18n.Messages;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -98,45 +97,33 @@ public class DataSource implements JsonSerializable {
 	 *
 	 * @return a array of Object
 	 */
-	public Object[]
-  fetch() {
+	public Object[] fetch() {
 		if (this.filter != null && !"".equals(this.filter)) {
 			try {
 				EntityManager em = TransactionManager.getEntityManager(domainClass);
-				TypedQuery<Long> queryCount = null;
 				TypedQuery<?> query = em.createQuery(filter, domainClass);
 
-				String selectCount = "Select COUNT( %s ) from ";
-				String[] parts = filter.split("(?i)from");
-				String[] aliasParts = parts[1].split("(?i)where")[0].split(" ");
-				String alias = aliasParts[aliasParts.length - 1];
-				String filterCount = String.format(selectCount, alias) + parts[1];
-
-				if (filterCount != null) {
-					queryCount = em.createQuery(filterCount, Long.class);
-				}
-
+				int i = 0;
+        Parameter<?>[] queryParams = query.getParameters().toArray(new Parameter<?>[query.getParameters().size()]);
 				for (Var p : this.params) {
-					query.setParameter(p.getId(), p.getObject());
-					if (queryCount != null)
-						queryCount.setParameter(p.getId(), p.getObject());
+				  if (p.getId() != null) {
+            query.setParameter(p.getId(), p.getObject(queryParams[i].getParameterType()));
+          } else {
+				    if (i <= queryParams.length-1) {
+              query.setParameter(queryParams[i].getName(), p.getObject(queryParams[i].getParameterType()));
+            }
+          }
+          i++;
 				}
-
-				long totalResults = 0;
-
-				if (filterCount != null)
-					totalResults = (long) queryCount.getSingleResult();
-				else
-					totalResults = query.getResultList().size();
 
 				query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
 				query.setMaxResults(this.pageRequest.getPageSize());
 
 				List<?> resultsInPage = query.getResultList();
 
-				this.page = new PageImpl(resultsInPage, this.pageRequest, totalResults);
+				this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
 			} catch (Exception ex) {
-				throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), filter), ex);
+				throw new RuntimeException(ex);
 			}
 		} else
 			this.page = this.repository.findAll(this.pageRequest);
@@ -285,7 +272,7 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
-  public void filter(Var data) {
+  public void filter(Var data, Var[] extraParams) {
 	  Map<?, ?> primaryKeys = (Map<?,?>) data.getObject();
 
     EntityManager em = TransactionManager.getEntityManager(domainClass);
@@ -302,6 +289,14 @@ public class DataSource implements JsonSerializable {
         }
         jpql += "e." + field.getName() + " = :p" + i;
         params.add(Var.valueOf("p" + i, Var.valueOf(primaryKeys.get(field.getName())).getObject(field.getType().getJavaType())));
+        i++;
+      }
+    }
+
+    if (extraParams != null) {
+      for (Var p: extraParams) {
+        jpql += "e." + p.getId() + " = :p" + i;
+        params.add(Var.valueOf("p" + i, p.getObject()));
         i++;
       }
     }
@@ -649,7 +644,7 @@ public class DataSource implements JsonSerializable {
 			TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
 			for (Var p : params) {
-				strQuery.setParameter(p.getId(), p.getObject());
+        strQuery.setParameter(p.getId(), p.getObject());
 			}
 
 			try {
@@ -662,7 +657,7 @@ public class DataSource implements JsonSerializable {
 			}
 
 		} catch (Exception ex) {
-			throw new RuntimeException(Messages.format(Messages.getString("DATASOURCE_INVALID_QUERY"), query), ex);
+			throw new RuntimeException(ex);
 		}
 	}
 
