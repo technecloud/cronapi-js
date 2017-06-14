@@ -528,7 +528,7 @@
    * @param {ObjectType.STRING} datasource {{startInsertingModeParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.startInsertingMode = function(datasource) {
+  this.cronapi.screen.startInsertingMode = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
     window[datasource].startInserting();
     window[datasource].$apply();
   };
@@ -541,7 +541,7 @@
    * @param {ObjectType.STRING} datasource {{startEditingModeParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.startEditingMode = function(datasource) {
+  this.cronapi.screen.startEditingMode = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
     window[datasource].$apply( new function(){window[datasource].startEditing();} );
   };
 
@@ -553,7 +553,7 @@
    * @param {ObjectType.STRING} datasource {{previusRecordParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.previusRecord = function(datasource) {
+  this.cronapi.screen.previusRecord = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
     window[datasource].$apply( new function(){window[datasource].previous();} );
   };
 
@@ -565,7 +565,7 @@
    * @param {ObjectType.STRING} datasource {{nextRecordParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.nextRecord = function(datasource) {
+  this.cronapi.screen.nextRecord = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
     window[datasource].$apply( new function(){window[datasource].next();} );
   };
 
@@ -577,11 +577,61 @@
    * @param {ObjectType.STRING} datasource {{removeRecordParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.removeRecord = function(datasource) {
+  this.cronapi.screen.removeRecord = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
     window[datasource].$apply( new function(){window[datasource].remove();} );
   };
 
+
   /**
+   * @type function
+   * @name {{hasNextRecordName}}
+   * @nameTags hasNextRecord
+   * @description {{hasNextRecordDescription}}
+   * @param {ObjectType.STRING} datasource {{hasNextRecordParam0}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.screen.hasNextRecord = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
+    return window[datasource].hasNext();
+  };
+
+  /**
+   * @type function
+   * @name {{quantityRecordsName}}
+   * @nameTags quantityRecords
+   * @description {{quantityRecordsDescription}}
+   * @param {ObjectType.STRING} datasource {{quantityRecordsParam0}}
+   * @returns {ObjectType.LONG}
+   */
+  this.cronapi.screen.quantityRecords = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
+    return window[datasource].data.length;
+  };
+
+  /**
+   * @type function
+   * @name {{datasourcePostName}}
+   * @nameTags post|datasource
+   * @description {{datasourcePostDescription}}
+   * @param {ObjectType.STRING} datasource {{datasourcePostParam0}}
+   * @multilayer true
+   */
+  this.cronapi.screen.post = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource) {
+    return window[datasource].post();
+  };
+
+  /**
+   * @type function
+   * @name {{datasourceFilterName}}
+   * @nameTags filter|datasource
+   * @description {{datasourceFilterDescription}}
+   * @param {ObjectType.STRING} datasource {{datasourceFilterParam0}}
+   * @param {ObjectType.STRING} datasource {{datasourceFilterParam1}}
+   * @multilayer true
+   */
+  this.cronapi.screen.filter = function(/** @type {ObjectType.BLOCK} @blockType datasource_from_screen*/ datasource,/** @type {ObjectType.STRING}*/ path) {
+    window[datasource].filter("/"+path);
+  };
+  
+    /**
    * @type function
    * @name {{changeView}}
    * @nameTags changeView|Mudar tela|Change form|Change screen|Mudar formulário
@@ -632,56 +682,6 @@
     catch (e) {
       alert(e);
     }
-  };
-
-
-  /**
-   * @type function
-   * @name {{hasNextRecordName}}
-   * @nameTags hasNextRecord
-   * @description {{hasNextRecordDescription}}
-   * @param {ObjectType.STRING} datasource {{hasNextRecordParam0}}
-   * @returns {ObjectType.BOOLEAN}
-   */
-  this.cronapi.screen.hasNextRecord = function(datasource) {
-    return window[datasource].hasNext();
-  };
-
-  /**
-   * @type function
-   * @name {{quantityRecordsName}}
-   * @nameTags quantityRecords
-   * @description {{quantityRecordsDescription}}
-   * @param {ObjectType.STRING} datasource {{quantityRecordsParam0}}
-   * @returns {ObjectType.LONG}
-   */
-  this.cronapi.screen.quantityRecords = function(datasource) {
-    return window[datasource].data.length;
-  };
-
-  /**
-   * @type function
-   * @name {{datasourcePostName}}
-   * @nameTags post|datasource
-   * @description {{datasourcePostDescription}}
-   * @param {ObjectType.STRING} datasource {{datasourcePostParam0}}
-   * @multilayer true
-   */
-  this.cronapi.screen.post = function(datasource) {
-    return window[datasource].post();
-  };
-
-  /**
-   * @type function
-   * @name {{datasourceFilterName}}
-   * @nameTags filter|datasource
-   * @description {{datasourceFilterDescription}}
-   * @param {ObjectType.STRING} datasource {{datasourceFilterParam0}}
-   * @param {ObjectType.STRING} datasource {{datasourceFilterParam1}}
-   * @multilayer true
-   */
-  this.cronapi.screen.filter = function(datasource,path) {
-    window[datasource].filter("/"+path);
   };
 
   /**
