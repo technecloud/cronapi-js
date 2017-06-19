@@ -54,17 +54,17 @@ public class Operations {
 	}
 
 	public static final Var isEmpty(Var list) throws Exception {
-    list = isNull(list);
-    if (list.getType() == Var.Type.LIST && list.size() > 0)
-      return new Var(false);
-    return new Var(true);
+		list = isNull(list);
+		if (list.getType() == Var.Type.LIST && list.size() > 0)
+			return new Var(false);
+		return new Var(true);
 	}
 
 	public static final Var findFirst(Var list, Var item) throws Exception {
 		list = isNull(list);
 		if (list.getType() == Var.Type.LIST) {
 			if (list.getObjectAsList().contains(item))
-				return new Var(list.getObjectAsList().get(list.getObjectAsList().indexOf(item)));
+				return new Var(list.getObjectAsList().indexOf(item));
 		}
 		return Var.VAR_FALSE;
 	}
@@ -73,7 +73,7 @@ public class Operations {
 		list = isNull(list);
 		if (list.getType() == Var.Type.LIST) {
 			if (list.getObjectAsList().contains(item))
-				return new Var(list.getObjectAsList().get(list.getObjectAsList().lastIndexOf(item)));
+				return new Var(list.getObjectAsList().lastIndexOf(item));
 		}
 		return Var.VAR_FALSE;
 	}

@@ -473,19 +473,20 @@ public class Operations {
 	}
 
 	public static final Var isEven(Var value) throws Exception {
-		if (value.getObjectAsInt() % 2 == 0)
+		if (Math.abs(value.getObjectAsInt()) % 2 == 0)
 			return new Var(true);
 		return new Var(false);
 	}
 
 	public static final Var isOdd(Var value) throws Exception {
-		if (value.getObjectAsInt() % 2 == 1)
+
+		if (Math.abs(value.getObjectAsInt()) % 2 == 1)
 			return new Var(true);
 		return new Var(false);
 	}
 
 	public static final Var isPrime(Var value) throws Exception {
-
+		value = new Var(Math.abs(value.getObjectAsInt()));
 		if (value.getObjectAsLong() < 2)
 			return new Var(false);
 		if (value.getObjectAsLong() == 2)
@@ -499,7 +500,7 @@ public class Operations {
 	}
 
 	public static final Var isInt(Var value) throws Exception {
-		if (value.getType() == Var.Type.INT)
+		if (value.getType() == Var.Type.INT || value.getType() == Var.Type.NULL)
 			return new Var(true);
 		return new Var(false);
 	}
