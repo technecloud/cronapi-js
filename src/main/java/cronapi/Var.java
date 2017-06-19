@@ -16,7 +16,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Var implements Comparable, JsonSerializable {
+public class Var implements Comparable<Var>, JsonSerializable {
 
 	public enum Type {
 		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, DATETIME
@@ -230,8 +230,7 @@ public class Var implements Comparable, JsonSerializable {
 		case DATETIME:
 			return (int) (((Calendar) getObject()).getTimeInMillis());
 		case LIST:
-			// has no meaning
-			break;
+			return ((List)_object).size();
 		default:
 			// has no meaning
 			break;
@@ -256,9 +255,8 @@ public class Var implements Comparable, JsonSerializable {
 			return new Double((double) getObject()).longValue();
 		case DATETIME:
 			return (Long) ((Calendar) getObject()).getTimeInMillis();
-		case LIST:
-			// has no meaning
-			break;
+    case LIST:
+      return Long.valueOf(((List)_object).size());
 		default:
 			// has no meaning
 			break;
@@ -293,7 +291,7 @@ public class Var implements Comparable, JsonSerializable {
 			// has no meaning
 			break;
 		}
-		return null;
+		return VAR_DATE_ZERO.getObjectAsDateTime();
 	}
 
 	/**
@@ -348,8 +346,7 @@ public class Var implements Comparable, JsonSerializable {
 		case DATETIME:
 			return (double) ((Calendar) getObject()).getTimeInMillis();
 		case LIST:
-			// has no meaning
-			break;
+			return Double.valueOf(((List)_object).size());
 		default:
 			// has no meaning
 			break;
@@ -452,11 +449,7 @@ public class Var implements Comparable, JsonSerializable {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		final Var other = Var.valueOf(obj);
-		if (getType() == Var.Type.NULL || other.getType() == Var.Type.NULL) {
-			return getType().equals(other.getType());
-		}
-		return this.toString().equals(other.toString());
+		return this.compareTo(Var.valueOf(obj)) == 0;
 	}
 
 	public void inc(Object value) {
@@ -548,42 +541,52 @@ public class Var implements Comparable, JsonSerializable {
 	/**
 	 * Compare this object's value to another
 	 *
-	 * @param val the object to compare to
+	 * @param var the object to compare to
 	 * @return the value 0 if this is equal to the argument; a value less than 0
 	 * if this is numerically less than the argument; and a value greater than 0
 	 * if this is numerically greater than the argument (signed comparison).
 	 */
 	@Override
-	public int compareTo(Object val) {
-		// only instantiate if val is not instance of Var
-		Var var;
-		if (val instanceof Var) {
-			var = (Var) val;
-		} else {
-			var = new Var(val);
-		}
-		switch (getType()) {
-		case STRING:
-			return this.getObjectAsString().compareTo(var.getObjectAsString());
-		case INT:
-			if (var.getType().equals(Var.Type.INT)) {
-				return ((Long) this.getObjectAsLong()).compareTo(var.getObjectAsLong());
-			} else {
-				return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-			}
-		case DOUBLE:
-			return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-		case BOOLEAN:
-			return this.getObjectAsBoolean().compareTo(var.getObjectAsBoolean());
-		case DATETIME:
-			return this.getObjectAsDateTime().compareTo(var.getObjectAsDateTime());
-		case LIST:
-			// doesn't make sense
-			return Integer.MAX_VALUE;
-		default:
-			// doesn't make sense
-			return Integer.MAX_VALUE;
-		}
+	public int compareTo(Var var) {
+    var = Var.valueOf(var);
+
+		if (getType() == Type.NULL && var.getType() == Type.NULL) {
+		  return 0;
+    } else if (getType() == Type.NULL && var.getType() != Type.NULL){
+      return -1;
+    } else {
+
+      if (var == this) {
+        return 0;
+      }
+
+      if(this.getObject().equals(var.getObject())) {
+        return 0;
+      }
+
+      switch (getType()) {
+        case STRING:
+          return this.getObjectAsString().compareTo(var.getObjectAsString());
+        case INT:
+          if (var.getType().equals(Var.Type.INT)) {
+            return ((Long) this.getObjectAsLong()).compareTo(var.getObjectAsLong());
+          } else {
+            return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
+          }
+        case DOUBLE:
+          return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
+        case BOOLEAN:
+          return this.getObjectAsBoolean().compareTo(var.getObjectAsBoolean());
+        case DATETIME:
+          return this.getObjectAsDateTime().compareTo(var.getObjectAsDateTime());
+        default:
+          if(this.getObject() instanceof Comparable) {
+            return Comparable.class.cast(this.getObject()).compareTo(var.getObject());
+          }
+      }
+    }
+
+    return -1;
 	}
 
 	/**
@@ -608,17 +611,17 @@ public class Var implements Comparable, JsonSerializable {
 			LinkedList<Var> ll = (LinkedList) getObject();
 			StringBuilder sb = new StringBuilder();
 			if (ll.isEmpty())
-				return "{}";
-			sb.append("{");
+				return "[]";
+			sb.append("[");
 			for (Var v : ll) {
 				sb.append(v.toString());
 				sb.append(", ");
 			}
 			sb.deleteCharAt(sb.length()-1);
-			sb.append("}");
+			sb.append("]");
 			return sb.toString();
 		case NULL:
-			return null;
+			return "";
 		default:
 			if (getObject() == null)
 				return "";
