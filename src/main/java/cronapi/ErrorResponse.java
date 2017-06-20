@@ -46,7 +46,7 @@ public class ErrorResponse {
     this.stackTrace = stackTrace;
   }
 
-  public String getExceptionMessage(Throwable ex) {
+  public static String getExceptionMessage(Throwable ex) {
 
     String message = null;
 

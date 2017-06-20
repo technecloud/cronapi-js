@@ -4,14 +4,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import cronapi.CronapiMetaData;
 import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa operações matemáticas
@@ -477,19 +473,20 @@ public class Operations {
 	}
 
 	public static final Var isEven(Var value) throws Exception {
-		if (value.getObjectAsInt() % 2 == 0)
+		if (Math.abs(value.getObjectAsInt()) % 2 == 0)
 			return new Var(true);
 		return new Var(false);
 	}
 
 	public static final Var isOdd(Var value) throws Exception {
-		if (value.getObjectAsInt() % 2 == 1)
+
+		if (Math.abs(value.getObjectAsInt()) % 2 == 1)
 			return new Var(true);
 		return new Var(false);
 	}
 
 	public static final Var isPrime(Var value) throws Exception {
-
+		value = new Var(Math.abs(value.getObjectAsInt()));
 		if (value.getObjectAsLong() < 2)
 			return new Var(false);
 		if (value.getObjectAsLong() == 2)
@@ -503,7 +500,7 @@ public class Operations {
 	}
 
 	public static final Var isInt(Var value) throws Exception {
-		if (value.getType() == Var.Type.INT)
+		if (value.getType() == Var.Type.INT || value.getType() == Var.Type.NULL)
 			return new Var(true);
 		return new Var(false);
 	}
@@ -774,18 +771,22 @@ public class Operations {
 	}
 
 	public static final Var listStandardDeviation(Var value) throws Exception {
-		double mean = listMedium(value).getObjectAsDouble();
+
+		double mean = listAverage(value).getObjectAsDouble();
 		double size = value.size();
-		double temp = 0;
+		double temp = 0l;
 		double d;
 		LinkedList<Var> ll = value.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
-			temp += (mean - d) * (mean - d);
-		}
-		double variance = temp / size;
-		return new Var(Math.sqrt(variance));
 
+		if (size == 1) {
+			return Var.valueOf(0.0);
+		} else {
+			for (Var var : ll) {
+				d = var.getObjectAsDouble() - mean;
+				temp = temp + d * d;
+			}
+		}
+		return new Var(Math.sqrt(((double) 1 / (size - 1)) * temp));
 	}
 
 	public static final Var mod(Var value1, Var value2) throws Exception {
@@ -802,5 +803,18 @@ public class Operations {
 			Long resultado = value1.getObjectAsLong() % value2.getObjectAsLong();
 			return new Var(resultado);
 		}
+	}
+
+	public static final Var min(Var value1, Var value2) throws Exception {
+		if (value1.getType().equals(Var.Type.DOUBLE) || value2.getType().equals(Var.Type.DOUBLE))
+			return (value1.getObjectAsDouble() <= value2.getObjectAsDouble()) ? value1 : value2;
+		return (value1.getObjectAsInt() <= value2.getObjectAsInt()) ? value1 : value2;
+
+	}
+
+	public static final Var max(Var value1, Var value2) throws Exception {
+		if (value1.getType().equals(Var.Type.DOUBLE) || value2.getType().equals(Var.Type.DOUBLE))
+			return (value1.getObjectAsDouble() >= value2.getObjectAsDouble()) ? value1 : value2;
+		return (value1.getObjectAsInt() >= value2.getObjectAsInt()) ? value1 : value2;
 	}
 }
