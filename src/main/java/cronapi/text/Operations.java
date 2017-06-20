@@ -190,28 +190,12 @@ public class Operations {
 			index1 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
 			index1 = new Var(text.getObjectAsString().length());
-		return new Var(text.getObjectAsString().substring(0, text.length() - ( index1.getObjectAsInt() -1) ));
+		return new Var(text.getObjectAsString().substring(0, text.length() - (index1.getObjectAsInt() - 1)));
 
 	}
-	
+
 	public static final Var getLettersFromFirstToEnd(Var text) throws Exception {
-	  return new Var(text.getObjectAsString());
-	  
-	  
-	}
-
-	public static void main(String[] args) {
-
-		try {
-
-			System.out
-					.println("toString: " + Operations.getLettersFromFirstToFromEnd(new Var("123456789"), new Var(-1)));
-			System.out
-					.println("toString: " + Operations.getLettersFromFirstToFromEnd(new Var("123456789"), new Var(18)));
-
-		} catch (Exception e) {
-			System.out.println(e);
-		}
+		return new Var(text.getObjectAsString());
 
 	}
 
