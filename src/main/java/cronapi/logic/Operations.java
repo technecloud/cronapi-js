@@ -8,16 +8,15 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{isNullName}}", nameTags = {
-			"isNullFunction" }, description = "{{isNullDescription}}", returnType = ObjectType.BOOLEAN)
-	public static final Var isNull(@ParamMetaData(type = ObjectType.STRING, description = "{{isNullParam0}}") Var var)
+			"isNullFunction" }, description = "{{isNullDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
+	public static final Var isNull(@ParamMetaData(type = ObjectType.OBJECT, description = "") Var var)
 			throws Exception {
 		return (var.equals(Var.VAR_NULL)) ? Var.VAR_TRUE : Var.VAR_FALSE;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{isNullOrEmptyName}}", nameTags = {
-			"isNullOrEmptyFunction" }, description = "{{isNullOrEmptyDescription}}", returnType = ObjectType.BOOLEAN)
-	public static final Var isNullOrEmpty(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{isNullOrEmptyParam0}}") Var var)
+			"isNullOrEmptyFunction" }, description = "{{isNullOrEmptyDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
+	public static final Var isNullOrEmpty(@ParamMetaData(type = ObjectType.OBJECT, description = "") Var var)
 			throws Exception {
 		return (var.equals(Var.VAR_NULL) || var.getObjectAsString() == ""
 				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
@@ -25,8 +24,8 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{isEmptyName}}", nameTags = {
-			"isEmptyFunction" }, description = "{{isEmptyDescription}}", returnType = ObjectType.BOOLEAN)
-	public static final Var isEmpty(@ParamMetaData(type = ObjectType.STRING, description = "{{isEmptyParam0}}") Var var)
+			"isEmptyFunction" }, description = "{{isEmptyDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
+	public static final Var isEmpty(@ParamMetaData(type = ObjectType.OBJECT, description = "") Var var)
 			throws Exception {
 		return (!var.equals(Var.VAR_NULL) & var.getObjectAsString() == ""
 				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
