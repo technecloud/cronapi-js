@@ -114,20 +114,5 @@ public class Operations {
 		} catch (EmailException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
-
-	public static void main(String[] args) {
-		try {
-			Operations.sendEmail(Var.valueOf("rodrigo.reis@techne.com.br"), Var.valueOf("digo.santos.reis@gmail.com"),
-					Var.VAR_NULL, Var.VAR_NULL, Var.valueOf("Teste de Email"), Var.valueOf("E-mail de Teste"),
-					Var.valueOf(
-							"<h1> Testando e-mail </h1>\n<br/>\n<h2> Essa menina quer usar a função </h2>\n<h3>... </h3>"),
-					Var.VAR_NULL, Var.valueOf("smtp.office365.com"), Var.valueOf("587"),
-					Var.valueOf("rodrigo.reis@techne.com.br"), Var.valueOf("d@141214"), new Var(false));
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-	}
-
 }
