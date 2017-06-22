@@ -93,7 +93,7 @@ public class Operations {
   public static final Var getFromEnd(Var list, Var index) throws Exception {
     list = isNull(list);
     if (list.getType() == Var.Type.LIST) {
-      Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt());
+      Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
       Var item = get(list, i);
       if (item != Var.VAR_NULL)
         return new Var(item);
