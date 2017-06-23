@@ -165,5 +165,7 @@
 	"createDefaultModalParam4": "Confirm button name",
 	"showModalName": "Show modal",
 	"showModalDescription": "Function that shows a modal",
-	"showModalParam0": "Modal"
+	"showModalParam0": "Modal",
+	"createDefaultModalParam5": "On Success",
+	"createDefaultModalParam6": "On Error"
 }
