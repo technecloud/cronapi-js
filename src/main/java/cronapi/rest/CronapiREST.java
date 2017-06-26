@@ -195,16 +195,17 @@ public class CronapiREST {
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
   public HttpEntity<List> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
-
-
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
 
       JsonObject obj = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(obj, "GET");
       TranslationPath translationPath = translatePathVars(id, 0, obj.getAsJsonArray("queryParamsValues").size());
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
       String query = obj.get("query") != null ? obj.get("query").getAsString() : null;
 
       ds.filter(query, page, translationPath.params);
+
+      QueryManager.executeNavigateEvent(obj, ds);
 
       return Var.valueOf(ds.getPage());
     });
@@ -220,9 +221,14 @@ public class CronapiREST {
 
       JsonObject obj = QueryManager.getQuery(id);
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
+
       ds.insert((Map<?, ?>)data.getObject());
 
-      return Var.valueOf(ds.save());
+      QueryManager.executeEvent(obj, ds, "beforeInsert");
+      Object inserted = ds.save(false);
+      QueryManager.executeEvent(obj, ds, "afterInsert");
+
+      return Var.valueOf(inserted);
     });
 
     return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
