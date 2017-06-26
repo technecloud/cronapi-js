@@ -19,6 +19,7 @@ public class ErrorResponse {
   
   private String error;
   private int status;
+  private String method;
   
   private String stackTrace;
   
@@ -49,25 +50,26 @@ public class ErrorResponse {
     }
   }
   
-  private static String heandleDatabaseException(String message) {
+  private static String heandleDatabaseException(String message, String method) {
     for(JsonElement elem : getDataBaseJSON().getAsJsonArray("primaryKeyError")) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
-        return "primaryKeyError";
+        return Messages.format(Messages.getString("primaryKeyError"), Messages.getString("error" + method + "Type"));
       }
     }
     
     for(JsonElement elem : getDataBaseJSON().getAsJsonArray("foreignKeyError")) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
-        return "foreignKeyError";
+        return Messages.format(Messages.getString("foreignKeyError"), Messages.getString("error" + method + "Type"));
       }
     }
     
     return message;
   }
   
-  public ErrorResponse(int status, Throwable ex) {
-    this.error = getExceptionMessage(ex);
+  public ErrorResponse(int status, Throwable ex, String method) {
+    this.error = getExceptionMessage(ex, method);
     this.status = status;
+    this.method = method;
     
     if(ex != null) {
       StringWriter writer = new StringWriter();
@@ -79,6 +81,10 @@ public class ErrorResponse {
   
   public String getError() {
     return error;
+  }
+  
+  public String getMethod() {
+    return method;
   }
   
   public void setError(String error) {
@@ -101,6 +107,16 @@ public class ErrorResponse {
     this.stackTrace = stackTrace;
   }
   
+  private static boolean hasIgnoredException(Throwable ex) {
+    for(String s : IGNORED) {
+      if((ex.getMessage() != null && ex.getMessage().contains(s)) || ex.getClass().getCanonicalName().equals(s)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
   private static boolean hasThrowable(Throwable ex, Class clazz) {
     while(ex != null) {
       if(ex.getClass() == clazz) {
@@ -113,21 +129,21 @@ public class ErrorResponse {
     return false;
   }
   
-  public static String getExceptionMessage(Throwable ex) {
+  public static String getExceptionMessage(Throwable ex, String method) {
     
     String message = null;
     
     if(ex != null) {
-      if(ex.getMessage() != null && !ex.getMessage().trim().isEmpty() && !IGNORED.contains(ex.getMessage().trim())) {
+      if(ex.getMessage() != null && !ex.getMessage().trim().isEmpty() && !hasIgnoredException(ex)) {
         message = ex.getMessage();
         if(hasThrowable(ex, javax.persistence.RollbackException.class) ||
                 hasThrowable(ex, javax.persistence.PersistenceException.class)) {
-          message = heandleDatabaseException(message);
+          message = heandleDatabaseException(message, method);
         }
       }
       else {
         if(ex.getCause() != null) {
-          return getExceptionMessage(ex.getCause());
+          return getExceptionMessage(ex.getCause(), method);
         }
       }
     }

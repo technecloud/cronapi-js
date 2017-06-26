@@ -22,7 +22,6 @@
     "ORA-02291",
     "ORA-02292",
     "DB2 SQL error: SQLCODE: -532",
-    "DB2 SQL error: SQLCODE: -803",
     "Referential integrity constraint violation"
   ]
 }
