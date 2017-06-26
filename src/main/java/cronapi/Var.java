@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-
+import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 
 public class Var implements Comparable<Var>, JsonSerializable {
@@ -165,13 +165,17 @@ public class Var implements Comparable<Var>, JsonSerializable {
 	}
 
 	/**
-	 * Get the contained object
+	 * Get the contained datasource
 	 *
 	 * @return the object
 	 */
-	public Object getObject() {
-		return _object;
+	public DataSource getObjectAsDataSource() {
+		return (DataSource)_object;
 	}
+
+  public Object getObject() {
+    return _object;
+  }
 
 	public Object getObject(Class type) {
 		if (type == String.class || type == StringBuilder.class || type == StringBuffer.class

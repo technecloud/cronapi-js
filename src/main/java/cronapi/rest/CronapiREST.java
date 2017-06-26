@@ -108,7 +108,7 @@ public class CronapiREST {
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
-    ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex);
+    ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
@@ -195,16 +195,17 @@ public class CronapiREST {
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
   public HttpEntity<List> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
-
-
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
 
       JsonObject obj = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(obj, "GET");
       TranslationPath translationPath = translatePathVars(id, 0, obj.getAsJsonArray("queryParamsValues").size());
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
       String query = obj.get("query") != null ? obj.get("query").getAsString() : null;
 
       ds.filter(query, page, translationPath.params);
+
+      QueryManager.executeNavigateEvent(obj, ds);
 
       return Var.valueOf(ds.getPage());
     });
@@ -219,10 +220,16 @@ public class CronapiREST {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject obj = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(obj, "POST");
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
+
       ds.insert((Map<?, ?>)data.getObject());
 
-      return Var.valueOf(ds.save());
+      QueryManager.executeEvent(obj, ds, "beforeInsert");
+      Object inserted = ds.save(false);
+      QueryManager.executeEvent(obj, ds, "afterInsert");
+
+      return Var.valueOf(inserted);
     });
 
     return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
@@ -233,11 +240,15 @@ public class CronapiREST {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject obj = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(obj, "PUT");
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
 
       ds.filter(data, null);
+      QueryManager.executeEvent(obj, ds, "beforeUpdate");
       ds.update(data);
-      return Var.valueOf(ds.save());
+      Var saved = Var.valueOf(ds.save());
+      QueryManager.executeEvent(obj, ds, "afterUpdate");
+      return saved;
     });
 
     return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
@@ -248,10 +259,13 @@ public class CronapiREST {
     runIntoTransaction(() -> {
 
       JsonObject obj = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(obj, "DELETE");
       TranslationPath translationPath = translatePathVars(id, obj.getAsJsonArray("queryParamsValues").size(), -1);
       DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
-      ds.delete(translationPath.params);
-
+      ds.filter(null, new PageRequest(1, 1), translationPath.params);
+      QueryManager.executeEvent(obj, ds, "beforeDelete");
+      ds.delete();
+      QueryManager.executeEvent(obj, ds, "afterDelete");
       return null;
     });
   }
