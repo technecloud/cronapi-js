@@ -117,3 +117,7 @@ Desktop.ini
 # ESLint
 ######################
 .eslintcache
+
+.history
+.classpath
+.gitignore

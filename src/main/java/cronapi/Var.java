@@ -1,21 +1,25 @@
 package cronapi;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -620,7 +624,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
 			sb.append("[");
 			for (Var v : ll) {
 				sb.append(v.toString());
-				sb.append(", ");
+				sb.append(",");
 			}
 			sb.deleteCharAt(sb.length()-1);
 			sb.append("]");

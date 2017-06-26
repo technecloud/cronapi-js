@@ -24,15 +24,15 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{sendEmailName}}", nameTags = {
-			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}","{{sendEmailParam1}}",
-					"{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}", "{{sendEmailParam5}}",
-					"{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}", "{{sendEmailParam9}}",
-					"{{sendEmailParam10}}", "{{sendEmailParam11}}" }, paramsType = { ObjectType.STRING,
-							ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
-							ObjectType.STRING })
+			"sendEmail" }, description = "{{sendEmailDescription}}", params = { "{{sendEmailParam0}}",
+					"{{sendEmailParam1}}", "{{sendEmailParam2}}", "{{sendEmailParam3}}", "{{sendEmailParam4}}",
+					"{{sendEmailParam5}}", "{{sendEmailParam6}}", "{{sendEmailParam7}}", "{{sendEmailParam8}}",
+					"{{sendEmailParam9}}", "{{sendEmailParam10}}", "{{sendEmailParam11}}" }, paramsType = {
+							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.LIST, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING, ObjectType.LIST, ObjectType.STRING, ObjectType.STRING,
+							ObjectType.STRING, ObjectType.STRING })
 	public static final void sendEmail(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam0}}") Var from,
+			@ParamMetaData(defaultValue = "email@techne.com.br", type = ObjectType.STRING, description = "{{sendEmailParam0}}") Var from,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam1}}") Var to,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam2}}") Var Cc,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam3}}") Var Bcc,
@@ -40,17 +40,25 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam5}}") Var msg,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam6}}") Var html,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam7}}") Var attachments,
-			@ParamMetaData(defaultValue = "smtp.gmail.com", type = ObjectType.STRING, description = "{{sendEmailParam8}}") Var smtpHost,
-			@ParamMetaData(defaultValue = "465", type = ObjectType.STRING, description = "{{sendEmailParam9}}") Var smtpPort,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam10}}") Var login,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam11}}") Var password)
+			@ParamMetaData(defaultValue = "smtp.office365.com", type = ObjectType.STRING, description = "{{sendEmailParam8}}") Var smtpHost,
+			@ParamMetaData(defaultValue = "587", type = ObjectType.STRING, description = "{{sendEmailParam9}}") Var smtpPort,
+			@ParamMetaData(defaultValue = "email@techne.com.br", type = ObjectType.STRING, description = "{{sendEmailParam10}}") Var login,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam11}}") Var password,
+			@ParamMetaData(type = ObjectType.BOOLEAN, description = "{{sendEmailParam12}}", defaultValue = "false") Var ssl)
 			throws Exception {
 		try {
 			HtmlEmail email = new HtmlEmail();
 			email.setCharset(cronapi.CronapiConfigurator.ENCODING);
-			email.setSSLOnConnect(true);
+			if (ssl.getObjectAsBoolean() == true) {
+				email.setSSLOnConnect(true);
+				email.setSslSmtpPort(smtpPort.getObjectAsString());
+			} else {
+				email.setTLS(true);
+				email.setSSLOnConnect(false);
+				email.setSmtpPort(smtpPort.getObjectAsInt());
+			}
+
 			email.setHostName(smtpHost.getObjectAsString());
-			email.setSslSmtpPort(smtpPort.getObjectAsString());
 			email.setAuthenticator(new DefaultAuthenticator(login.getObjectAsString(), password.getObjectAsString()));
 			email.setFrom(from.getObjectAsString());
 			email.setDebug(false);
@@ -106,6 +114,5 @@ public class Operations {
 		} catch (EmailException e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 }
