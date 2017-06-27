@@ -30,7 +30,7 @@ public class Messages {
       return '!' + key + '!';
     }
   }
-  
+
   public static String format(String pattern, Object ... arguments) {
     // MessageFormat não aceita apostrofo simples diretamente.
     String fixedPattern = pattern.replace("'", "''");

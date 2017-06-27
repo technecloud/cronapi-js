@@ -82,8 +82,17 @@ public class Operations {
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
 	public static Var getField(
 			@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK, description = "{{datasource}}") Var ds,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) {
+		@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.BLOCK, description = "{{fieldName}}") Var fieldName) 
+	{
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
+			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}",  
+			returnType = ObjectType.STRING, wizard = "procedures_get_field_datasource")
+	public static Var getFieldFromDatasource() 
+	{
+		return Var.VAR_NULL;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceRemove}}", nameTags = { "remove", "delete", "apagar",

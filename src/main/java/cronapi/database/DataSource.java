@@ -151,21 +151,43 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
-  public void insert(Map<?,?> values) {
+  public Object toObject(Map<?,?> values) {
     try {
-      this.insertedElement = this.domainClass.newInstance();
+      Object insertedElement = this.domainClass.newInstance();
       for (Object key: values.keySet()) {
-        updateField(key.toString(), values.get(key));
+        updateField(insertedElement, key.toString(), values.get(key));
+      }
+
+      return insertedElement;
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public void insert(Object value) {
+    try {
+      if (value instanceof Map) {
+        this.insertedElement = this.domainClass.newInstance();
+        Map<?,?> values = (Map<?,?>) value;
+        for (Object key : values.keySet()) {
+          updateField(key.toString(), values.get(key));
+        }
+      } else {
+        this.insertedElement = value;
       }
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
   }
 
+  public Object save() {
+	  return save(true);
+  }
+
 	/**
 	 * Saves the object in the current index or a new object when has insertedElement
 	 */
-	public Object save() {
+	public Object save(boolean returnCursorAfterInsert) {
 		try {
 			Object toSave;
 			EntityManager em = TransactionManager.getEntityManager(domainClass);
@@ -177,7 +199,8 @@ public class DataSource implements JsonSerializable {
 
 			if (this.insertedElement != null) {
 				toSave = this.insertedElement;
-				this.insertedElement = null;
+				if (returnCursorAfterInsert)
+				  this.insertedElement = null;
 				em.persist(toSave);
 			} else
 				toSave = this.getObject();
@@ -245,6 +268,8 @@ public class DataSource implements JsonSerializable {
       Method setMethod = Utils.findMethod(obj, "set" + fieldName);
       if (setMethod != null) {
         setMethod.invoke(obj, fieldValue);
+      } else {
+        throw new RuntimeException("Field "+fieldName+" not found");
       }
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -328,7 +353,7 @@ public class DataSource implements JsonSerializable {
 		if (this.insertedElement != null)
 			return this.insertedElement;
 
-		if (this.current < 0)
+		if (this.current < 0 || this.current > this.page.getContent().size()-1)
 			return null;
 
 		return this.page.getContent().get(this.current);
@@ -369,6 +394,14 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
+  /**
+   * Moves the index for next position, in pageable case,
+   * looking for next page and so on
+   */
+  public void nextOnPage() {
+    this.current++;
+  }
+
 	/**
 	 * Verify if can moves the index for next position,
 	 * in pageable case, looking for next page and so on
@@ -386,6 +419,10 @@ public class DataSource implements JsonSerializable {
 			}
 		}
 	}
+
+  public boolean hasData() {
+	  return getObject() != null;
+  }
 
 	/**
 	 * Moves the index for previous position, in pageable case,
@@ -407,6 +444,14 @@ public class DataSource implements JsonSerializable {
 		}
 		return true;
 	}
+
+	public void setCurrent(int current) {
+	  this.current = current;
+  }
+
+  public int getCurrent() {
+	  return this.current;
+  }
 
 	/**
 	 * Gets a Pageable object retrieved from repository
