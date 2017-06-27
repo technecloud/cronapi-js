@@ -49,17 +49,22 @@ public class Operations {
 	}
 
 	public static final Var getLetter(Var text, Var index) throws Exception {
-
-		return (!text.getType().equals(Var.Type.NULL) && text.getObjectAsString().length() >= index.getObjectAsInt()
-				&& index.getObjectAsInt() > 0) ? new Var(text.getObjectAsString().charAt(index.getObjectAsInt() - 1))
-						: new Var("");
+		if (text.getType().equals(Var.Type.NULL))
+			return Var.VAR_NULL;
+		return (text.getObjectAsString().length() >= index.getObjectAsInt())
+				? (index.getObjectAsInt() < 1 ? new Var(text.getObjectAsString().charAt(0))
+						: new Var(text.getObjectAsString().charAt(index.getObjectAsInt() - 1)))
+				: new Var(text.getObjectAsString().charAt(text.getObjectAsString().length() - 1));
 	}
 
 	public static final Var getLetterFromEnd(Var text, Var index) throws Exception {
-
-		return (!text.getType().equals(Var.Type.NULL) && text.getObjectAsString().length() - index.getObjectAsInt() > 0)
+		if (text.getType().equals(Var.Type.NULL))
+			return Var.VAR_NULL;
+		if (index.getObjectAsInt() <= 0)
+			return new Var(text.getObjectAsString().charAt(text.getObjectAsString().length() - 1));
+		return (text.getObjectAsString().length() - index.getObjectAsInt() > 0)
 				? new Var(text.getObjectAsString().charAt(text.getObjectAsString().length() - index.getObjectAsInt()))
-				: new Var("");
+				: new Var(text.getObjectAsString().charAt(0));
 	}
 
 	public static final Var getFirstLetter(Var text) throws Exception {
