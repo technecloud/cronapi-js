@@ -267,6 +267,9 @@ public class DataSource implements JsonSerializable {
     try {
       Method setMethod = Utils.findMethod(obj, "set" + fieldName);
       if (setMethod != null) {
+        if (fieldValue instanceof  Var) {
+          fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
+        }
         setMethod.invoke(obj, fieldValue);
       } else {
         throw new RuntimeException("Field "+fieldName+" not found");

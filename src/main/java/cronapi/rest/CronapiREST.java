@@ -225,6 +225,8 @@ public class CronapiREST {
 
       ds.insert((Map<?, ?>)data.getObject());
 
+      QueryManager.addDefaultValues(obj, ds);
+
       QueryManager.executeEvent(obj, ds, "beforeInsert");
       Object inserted = ds.save(false);
       QueryManager.executeEvent(obj, ds, "afterInsert");

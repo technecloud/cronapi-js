@@ -53,13 +53,31 @@ public class ErrorResponse {
   private static String heandleDatabaseException(String message, String method) {
     for(JsonElement elem : getDataBaseJSON().getAsJsonArray("primaryKeyError")) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
-        return Messages.format(Messages.getString("primaryKeyError"), Messages.getString("error" + method + "Type"));
+        JsonObject obj = RestClient.getRestClient().getQuery();
+        if(obj != null && obj.get("errorHandles") != null && !obj.get("errorHandles").isJsonNull()) {
+          obj = obj.get("errorHandles").getAsJsonObject();
+        }
+        if(obj != null && obj.get("primaryKey") != null && !obj.get("primaryKey").isJsonNull()) {
+          return Messages.format(obj.get("primaryKey").getAsString(), Messages.getString("error" + method + "Type"));
+        }
+        else {
+          return Messages.format(Messages.getString("primaryKeyError"), Messages.getString("error" + method + "Type"));
+        }
       }
     }
     
     for(JsonElement elem : getDataBaseJSON().getAsJsonArray("foreignKeyError")) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
-        return Messages.format(Messages.getString("foreignKeyError"), Messages.getString("error" + method + "Type"));
+        JsonObject obj = RestClient.getRestClient().getQuery();
+        if(obj != null && obj.get("errorHandles") != null) {
+          obj = obj.get("errorHandles").getAsJsonObject();
+        }
+        if(obj != null && obj.get("foreignKey") != null && !obj.get("foreignKey").isJsonNull()) {
+          return Messages.format(obj.get("foreignKey").getAsString(), Messages.getString("error" + method + "Type"));
+        }
+        else {
+          return Messages.format(Messages.getString("foreignKeyError"), Messages.getString("error" + method + "Type"));
+        }
       }
     }
     
