@@ -63,6 +63,7 @@ public class Operations {
 							ObjectType.STRING }, returnType = ObjectType.VOID)
 	public static void updateField(Var ds, Var fieldName, Var fieldValue) {
 		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
+		((DataSource) ds.getObject()).save();
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create", "novo",
