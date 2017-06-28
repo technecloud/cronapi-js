@@ -229,7 +229,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
 	public Integer getObjectAsInt() {
 		switch (getType()) {
 		case STRING:
-			return Integer.parseInt(((String) getObject()));
+      try {
+        return Integer.parseInt((String) getObject());
+      } catch (Exception e) {
+        return ((Double)Double.parseDouble((String) getObject())).intValue();
+      }
 		case INT:
 			return ((Long) getObject()).intValue();
 		case BOOLEAN:
@@ -255,7 +259,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
 	public Long getObjectAsLong() {
 		switch (getType()) {
 		case STRING:
-			return Long.parseLong((String) getObject());
+		  try {
+        return Long.parseLong((String) getObject());
+      } catch (Exception e) {
+        return ((Double)Double.parseDouble((String) getObject())).longValue();
+      }
 		case INT:
 			return (Long) getObject();
 		case BOOLEAN:

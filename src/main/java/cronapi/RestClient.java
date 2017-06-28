@@ -1,5 +1,7 @@
 package cronapi;
 
+import com.google.gson.JsonObject;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedList;
@@ -17,6 +19,7 @@ public class RestClient {
   private LinkedList<ClientCommand> commands = new LinkedList<>();
   private HttpServletResponse response = CronapiFilter.RESPONSE.get();
   private HttpServletRequest request = CronapiFilter.REQUEST.get();
+  private JsonObject query = null;
 
   private RestBody body;
   
@@ -59,5 +62,13 @@ public class RestClient {
   
   public HttpServletResponse getResponse() {
     return response;
+  }
+
+  public JsonObject getQuery() {
+    return query;
+  }
+
+  public void setQuery(JsonObject query) {
+    this.query = query;
   }
 }

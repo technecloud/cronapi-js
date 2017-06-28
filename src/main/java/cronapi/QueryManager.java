@@ -2,6 +2,7 @@ package cronapi;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,6 +11,8 @@ import com.google.gson.JsonParser;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
+
+import javax.json.JsonValue;
 
 public class QueryManager {
   private static JsonObject JSON;
@@ -45,6 +48,7 @@ public class QueryManager {
       throw new RuntimeException(Messages.getString("queryNotFound"));
     }
     
+    RestClient.getRestClient().setQuery(obj);
     return obj;
   }
   
@@ -54,9 +58,36 @@ public class QueryManager {
     }
   }
   
+  private static boolean isNull(JsonElement value) {
+    return value == null || value.isJsonNull();
+  }
+  
+  public static void addDefaultValues(JsonObject obj, DataSource ds) {
+    if(!isNull(obj.get("defaultValues"))) {
+      for(Map.Entry<String, JsonElement> entry : obj.get("defaultValues").getAsJsonObject().entrySet()) {
+        if(!entry.getValue().isJsonNull()) {
+          Var value;
+          if (entry.getValue().isJsonObject()) {
+            JsonObject event = entry.getValue().getAsJsonObject();
+            Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
+            try {
+              value = Operations.callBlockly(name, Var.valueOf(ds));
+            }
+            catch(Exception e) {
+              throw new RuntimeException(e);
+            }
+          } else {
+            value = Var.valueOf(entry.getValue().getAsString());
+          }
+
+          ds.updateField(entry.getKey(), value);
+        }
+      }
+    }
+  }
+  
   public static void executeEvent(JsonObject obj, DataSource ds, String eventName) {
-    if(obj.getAsJsonObject("events").get(eventName) != null &&
-            !obj.getAsJsonObject("events").get(eventName).isJsonNull()) {
+    if(!isNull(obj.getAsJsonObject("events").get(eventName))) {
       JsonObject event = obj.getAsJsonObject("events").getAsJsonObject(eventName);
       Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
       try {
@@ -69,8 +100,7 @@ public class QueryManager {
   }
   
   public static void executeNavigateEvent(JsonObject obj, DataSource ds) {
-    if(obj.getAsJsonObject("events").get("onNavigate") != null &&
-            !obj.getAsJsonObject("events").get("onNavigate").isJsonNull()) {
+    if(!isNull(obj.getAsJsonObject("events").get("onNavigate"))) {
       JsonObject event = obj.getAsJsonObject("events").getAsJsonObject("onNavigate");
       Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
       
