@@ -201,7 +201,7 @@ public class Operations {
 			index1 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
 			index1 = new Var(text.getObjectAsString().length());
-		return new Var(text.getObjectAsString().substring(0, text.length() - (index1.getObjectAsInt() - 1)));
+		return new Var(text.getObjectAsString().substring(0, text.length() - (index1.getObjectAsInt())));
 
 	}
 
@@ -209,5 +209,4 @@ public class Operations {
 		return new Var(text.getObjectAsString());
 
 	}
-
 }

@@ -246,13 +246,18 @@ public class Operations {
 
 	public static final Var setFromEnd(Var list, Var index, Var element) throws Exception {
 		list = isNull(list);
-		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= index.getObjectAsInt())
-				&& (list.getObjectAsList().size() - index.getObjectAsInt()) >= 0 && index.getObjectAsInt() > 0) {
-			Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt());
-			set(list, i, element);
+		if (index.getObjectAsInt() <= 1) {
+			set(list, new Var(list.size()), element);
 			return Var.VAR_TRUE;
 		}
-		return Var.VAR_FALSE;
+
+		if (index.getObjectAsInt() >= list.size()) {
+			set(list, new Var(1), element);
+			return Var.VAR_TRUE;
+		}
+		Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
+		set(list, i, element);
+		return Var.VAR_TRUE;
 	}
 
 	public static final Var setFirst(Var list, Var element) throws Exception {
@@ -267,7 +272,7 @@ public class Operations {
 	public static final Var setLast(Var list, Var element) throws Exception {
 		list = isNull(list);
 		if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
-			set(list, new Var(list.getObjectAsList().size() - 1), element);
+			set(list, new Var(list.getObjectAsList().size()), element);
 			return Var.VAR_TRUE;
 		}
 		return Var.VAR_FALSE;
