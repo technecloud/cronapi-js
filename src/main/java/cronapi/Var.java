@@ -34,6 +34,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
 	private boolean created = false;
 	private static final NumberFormat _formatter = new DecimalFormat("0.00000");
 
+  public static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
+
 	public static final Var VAR_NULL = new Var(null, false);
 	public static final Var VAR_TRUE = new Var(true, false);
 	public static final Var VAR_FALSE = new Var(false, false);
@@ -738,4 +740,17 @@ public class Var implements Comparable<Var>, JsonSerializable {
 			gen.writeObject(_object);
 		}
 	}
+
+	public static Object[] asObjectArray(Var[] vars) {
+	  if (vars.length > 0) {
+      Object[] objs = new Object[vars.length];
+      for (int i = 0; i < vars.length; i++) {
+        objs[i] = vars[i].getObject();
+      }
+
+      return objs;
+    }
+
+    return EMPTY_OBJ_ARRAY;
+  }
 }
