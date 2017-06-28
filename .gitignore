@@ -60,3 +60,8 @@ Desktop.ini
 # POM
 ######################
 pom.xml
+
+.project*
+.history*
+.settings*
+.classpath*

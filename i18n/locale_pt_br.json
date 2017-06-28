@@ -136,9 +136,9 @@
 	"getParam": "Obter parâmetro",
 	"functionToGetParam": "Função para obter parâmetro da query string",
 	"paramName": "Nome do parâmetro",
-	"changeView": "Mudar view",
-	"functionToChangeView": "Função para mudar a view corrente",
-	"view": "View de destino",
+	"changeView": "Mudar tela",
+	"functionToChangeView": "Função para mudar a tela corrente",
+	"view": "Tela de destino",
 	"openUrl": "Abrir url",
 	"functionToOpenUrl": "Função para abrir url",
 	"url": "Url de destino",
@@ -163,7 +163,9 @@
 	"createDefaultModalParam2": "Mensagem",
 	"createDefaultModalParam3": "Nome do botão cancelar",
 	"createDefaultModalParam4": "Nome do botão confirmar",
-	"showModalName":"Exibe modal",
-	"showModalDescription":"Função que exibe um modal",
-	"showModalParam0":"Modal"
+	"showModalName": "Exibe modal",
+	"showModalDescription": "Função que exibe um modal",
+	"showModalParam0": "Modal",
+	"createDefaultModalParam5": "No Sucesso",
+	"createDefaultModalParam6": "No Erro"
 }
