@@ -1177,6 +1177,24 @@
   this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
     return node.tagName;
   };
+  
+  
+  this.cronapi.i18n = {};
+
+  this.cronapi.i18n.translate = function(value , params) {
+    if (value) {
+      var text = cronapi.$translate.instant(value);
+      for (var i = 0; i < params.length; i++){
+        var param = params[i];
+        if (param != null && typeof param != "undefined") {
+          var regexp = new RegExp("\\{" + (i) + "\\}", "g");
+          text = text.replace(regexp, param);
+        }
+      }
+      return text;
+    }
+    return;
+  };
 
   //Private variables and functions
   var ptDate = function(varray) {
