@@ -12,8 +12,6 @@ import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 
-import javax.json.JsonValue;
-
 public class QueryManager {
   private static JsonObject JSON;
   

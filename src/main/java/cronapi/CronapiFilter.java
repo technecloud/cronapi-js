@@ -6,6 +6,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cronapi.i18n.AppMessages;
 import org.springframework.stereotype.Component;
 
 import cronapi.i18n.Messages;
@@ -29,6 +30,7 @@ public class CronapiFilter implements Filter {
         RESPONSE.set(response);
 
         Messages.set(req.getLocale());
+        AppMessages.set(req.getLocale());
         try {
           chain.doFilter(req, resp);
         } finally {
@@ -36,6 +38,7 @@ public class CronapiFilter implements Filter {
           REQUEST.remove();
           RESPONSE.remove();
           Messages.remove();
+          AppMessages.remove();
         }
     }
 
