@@ -165,10 +165,10 @@ public class Operations {
 
 		if (index1.getObjectAsInt() < index2.getObjectAsInt()) {
 			return new Var(text.getObjectAsString().substring(text.length() - index2.getObjectAsInt(),
-					text.length() - (index1.getObjectAsInt() - 1)));
+					text.length() - (index1.getObjectAsInt())));
 		} else {
 			return new Var(text.getObjectAsString().substring(text.length() - index1.getObjectAsInt(),
-					text.length() - (index2.getObjectAsInt() - 1)));
+					text.length() - (index2.getObjectAsInt())));
 		}
 	}
 
