@@ -495,14 +495,12 @@
 
   /**
    * @type function
-   * @name {{screenNotifyName}}
-   * @nameTags screenNotify
-   * @description {{screenNotifyDescription}}
-   * @param {ObjectType.STRING} name {{screenNotifyParam0}}
-   * @param {ObjectType.STRING} value {{screenNotifyParam1}}
+   * @param {ObjectType.STRING} type {{screenNotifyParam0}}
+   * @param {ObjectType.STRING} message {{screenNotifyParam1}}
+   * @wizard notify_type
    * @multilayer true
    */
-  this.cronapi.screen.notify = function( /** @type {ObjectType.BLOCK} @blockType notify_type*/  type, /** @type {ObjectType.STRING} */ message) {
+  this.cronapi.screen.notify = function(/** @type {ObjectType.STRING} */ type, /** @type {ObjectType.STRING} */  message) {
     cronapi.$scope.Notification({'message':message },type);
   };
 
