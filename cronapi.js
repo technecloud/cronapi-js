@@ -474,7 +474,6 @@
    * @description {{createScopeVariableDescription}}
    * @param {ObjectType.STRING} name {{createScopeVariableParam0}}
    * @param {ObjectType.STRING} value {{createScopeVariableParam1}}
-   * @multilayer true
    */
   this.cronapi.screen.createScopeVariable = function(name,value) {
     cronapi.$scope.vars[name] = value;
@@ -487,7 +486,6 @@
    * @description {{getScopeVariableDescription}}
    * @param {ObjectType.STRING} name {{getScopeVariableParam0}}
    * @returns {ObjectType.STRING}
-   * @multilayer true
    */
   this.cronapi.screen.getScopeVariable = function(name) {
     return cronapi.$scope.vars[name];
