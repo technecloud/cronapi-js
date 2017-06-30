@@ -24,7 +24,7 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	private static Var getFromCalendar(Var date, int type) {
-		return new Var(Utils.getFromCalendar((Date) date.getObject(), type));
+		return new Var(Utils.getFromCalendar(((Calendar) date.getObject()).getTime(), type));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getSecondFromDate}}", nameTags = {
@@ -111,8 +111,8 @@ public class Operations {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
 	public static final Var getDaysBetweenDates(Var dateVar, Var date2Var) throws Exception {
 		final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-		Date date = ((Date) dateVar.getObject());
-		Date date2 = ((Date) date2Var.getObject());
+		Date date = ((Calendar) dateVar.getObject()).getTime();
+		Date date2 = ((Calendar) date2Var.getObject()).getTime();
 		int daysBetween = (int) ((date.getTime() - date2.getTime()) / DAY_IN_MILLIS);
 		return new Var(daysBetween);
 	}
@@ -124,8 +124,8 @@ public class Operations {
 	public static final Var getMonthsBetweenDates(Var dateVar, Var date2Var) throws Exception {
 		int yearBetween = 0, monthBetween = 0;
 		Calendar date = Calendar.getInstance(), date2 = Calendar.getInstance();
-		date.setTime((Date) dateVar.getObject());
-		date2.setTime((Date) date2Var.getObject());
+		date.setTime(((Calendar) dateVar.getObject()).getTime());
+		date2.setTime(((Calendar) date2Var.getObject()).getTime());
 		yearBetween = (date.get(Calendar.YEAR) - date2.get(Calendar.YEAR)) * 12;
 		monthBetween = date.get(Calendar.MONTH) - date2.get(Calendar.MONTH);
 		monthBetween += yearBetween;
@@ -141,18 +141,33 @@ public class Operations {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
 	public static final Var getYearsBetweenDates(Var dateVar, Var date2Var) throws Exception {
-		int yearBetween = 0;
 		Calendar date = Calendar.getInstance(), date2 = Calendar.getInstance();
-		date.setTime((Date) dateVar.getObject());
-		date2.setTime((Date) date2Var.getObject());
-		yearBetween = (date.get(Calendar.YEAR) - date2.get(Calendar.YEAR));
-		if (date2.before(date) && (date.get(Calendar.MONTH) < date2.get(Calendar.MONTH)
-				|| date.get(Calendar.DAY_OF_MONTH) < date2.get(Calendar.DAY_OF_MONTH)))
-			yearBetween--;
-		else if (date2.after(date) && (date.get(Calendar.MONTH) > date2.get(Calendar.MONTH)
-				|| date.get(Calendar.DAY_OF_MONTH) > date2.get(Calendar.DAY_OF_MONTH)))
-			yearBetween++;
-		return new Var(yearBetween);
+		date.setTime(((Calendar) dateVar.getObject()).getTime());
+		date2.setTime(((Calendar) date2Var.getObject()).getTime());
+		if (date2.before(date)) {
+			double diference = ((date.get(Calendar.YEAR) * 12 * 30) + (date.get(Calendar.MONTH) * 30)
+					+ date.get(Calendar.DAY_OF_MONTH))
+					- ((date2.get(Calendar.YEAR) * 12 * 30) + (date2.get(Calendar.MONTH) * 30)
+							+ date2.get(Calendar.DAY_OF_MONTH));
+			double result = diference / (12 * 30);
+
+			if ((result - (int) result) >= 0.5) {
+				return new Var((int) ++result);
+			} else {
+				return new Var((int) result);
+			}
+		} else {
+			double diference = ((date2.get(Calendar.YEAR) * 12 * 30) + (date2.get(Calendar.MONTH) * 30)
+					+ date2.get(Calendar.DAY_OF_MONTH))
+					- ((date.get(Calendar.YEAR) * 12 * 30) + (date.get(Calendar.MONTH) * 30)
+							+ date.get(Calendar.DAY_OF_MONTH));
+			double result = diference / (12 * 30);
+			if ((result - (int) result) >= 0.5) {
+				return new Var((int) ++result);
+			} else {
+				return new Var((int) result);
+			}
+		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{incDay}}", nameTags = { "incDay",
@@ -161,7 +176,7 @@ public class Operations {
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incDay(Var value, Var day) throws Exception {
 		Calendar d = Calendar.getInstance();
-		d.setTime((Date) value.getObject());
+		d.setTime(((Calendar) value.getObject()).getTime());
 		d.add(Calendar.DAY_OF_MONTH, day.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -200,6 +215,9 @@ public class Operations {
 							ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var formatDateTime(Var value, Var format) throws Exception {
 		SimpleDateFormat sdf = new SimpleDateFormat(format.getObjectAsString());
+		if (value.getObject() instanceof Calendar) {
+			return new Var(sdf.format(((Calendar) value.getObject()).getTime()));
+		}
 		return new Var(sdf.format((Date) value.getObject()));
 	}
 }
