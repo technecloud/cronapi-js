@@ -59,7 +59,7 @@ public class Operations {
 			"getMonth" }, description = "{{functionToGetMonthFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
 	public static final Var getMonth(Var value) throws Exception {
-		return getFromCalendar(value, Calendar.MONTH);
+		return new Var(getFromCalendar(value, Calendar.MONTH).getObjectAsInt()+1);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getDayFromDate}}", nameTags = {
