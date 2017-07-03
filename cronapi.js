@@ -161,8 +161,10 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.conversion.toString = function(value) {
-    if (value)
-      return new String(value)
+    if (value){
+      var result = new String(value);
+      return result.toString();
+    }
     return "";
   };
 
