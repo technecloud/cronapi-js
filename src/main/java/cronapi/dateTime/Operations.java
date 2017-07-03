@@ -144,7 +144,6 @@ public class Operations {
 		Calendar date = Calendar.getInstance(), date2 = Calendar.getInstance();
 		date.setTime(((Calendar) dateVar.getObject()).getTime());
 		date2.setTime(((Calendar) date2Var.getObject()).getTime());
-		if (date2.before(date)) {
 			double diference = ((date.get(Calendar.YEAR) * 12 * 30) + (date.get(Calendar.MONTH) * 30)
 					+ date.get(Calendar.DAY_OF_MONTH))
 					- ((date2.get(Calendar.YEAR) * 12 * 30) + (date2.get(Calendar.MONTH) * 30)
@@ -156,18 +155,6 @@ public class Operations {
 			} else {
 				return new Var((int) result);
 			}
-		} else {
-			double diference = ((date2.get(Calendar.YEAR) * 12 * 30) + (date2.get(Calendar.MONTH) * 30)
-					+ date2.get(Calendar.DAY_OF_MONTH))
-					- ((date.get(Calendar.YEAR) * 12 * 30) + (date.get(Calendar.MONTH) * 30)
-							+ date.get(Calendar.DAY_OF_MONTH));
-			double result = diference / (12 * 30);
-			if ((result - (int) result) >= 0.5) {
-				return new Var((int) ++result);
-			} else {
-				return new Var((int) result);
-			}
-		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{incDay}}", nameTags = { "incDay",
