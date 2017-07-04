@@ -27,9 +27,22 @@ public class Operations {
 			"isEmptyFunction" }, description = "{{isEmptyDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
 	public static final Var isEmpty(@ParamMetaData(type = ObjectType.OBJECT, description = "") Var var)
 			throws Exception {
-		return (!var.equals(Var.VAR_NULL) & var.getObjectAsString() == ""
+		return (var.getObjectAsString().isEmpty()
 				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
 						: Var.VAR_FALSE;
+	}
+
+	public static void main(String... args) {
+
+		try {
+			System.out.println(Operations.isEmpty(Var.VAR_NULL));
+
+			System.out.println(Operations.isEmpty(Var.valueOf("12")));
+
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+
 	}
 
 }
