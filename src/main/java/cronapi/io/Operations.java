@@ -31,6 +31,17 @@ import cronapi.CronapiMetaData.ObjectType;
 @CronapiMetaData(category = CategoryType.IO, categoryTags = { "Arquivo", "File" })
 public class Operations {
 
+  private static String APP_FOLDER;
+  static {
+    URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
+    String file = new File(location.getFile()).getAbsolutePath();
+    APP_FOLDER = file.substring(0, file.indexOf("WEB-INF")-1);
+
+    if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
+      APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
+    }
+  }
+
 	/**
 	 * Criar nova pasta 
 	 */
@@ -302,14 +313,20 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{applicationTemporaryFolder}}", nameTags = {
 			"fileTempDir" }, description = "{{functionToReturnApplicationTemporaryFolder}}", params = {}, returnType = ObjectType.STRING)
 	public static final Var fileTempDir() throws Exception {
-		URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
-		File tempDirectory = new File(location.getFile() + "/tmp");
-		if (!tempDirectory.exists())
-			tempDirectory.mkdirs();
-		return new Var(tempDirectory.getAbsolutePath());
+		return new Var(System.getProperty("java.io.tmpdir"));
 	}
 
-	/**
+  /**
+   * Diretorio temporário da aplicação
+   */
+  @CronapiMetaData(type = "function", name = "{{applicationFolder}}", nameTags = {
+      "fileTempDir" }, description = "{{functionToReturnApplicationTemporaryFolder}}", params = {}, returnType = ObjectType.STRING)
+  public static final Var fileAppDir() throws Exception {
+    return new Var(APP_FOLDER);
+  }
+
+
+  /**
 	 * Ler todo conteudo do arquivo
 	 */
 	@CronapiMetaData(type = "function", name = "{{readAllContentFileInBytes}}", nameTags = {
