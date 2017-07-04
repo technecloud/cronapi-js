@@ -320,7 +320,7 @@ public class Operations {
    * Diretorio temporário da aplicação
    */
   @CronapiMetaData(type = "function", name = "{{applicationFolder}}", nameTags = {
-      "fileTempDir" }, description = "{{functionToReturnApplicationTemporaryFolder}}", params = {}, returnType = ObjectType.STRING)
+      "fileTempDir" }, description = "{{functionToReturnApplicationFolder}}", params = {}, returnType = ObjectType.STRING)
   public static final Var fileAppDir() throws Exception {
     return new Var(APP_FOLDER);
   }
