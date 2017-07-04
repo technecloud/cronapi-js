@@ -185,7 +185,7 @@ public class Operations {
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incYear(Var value, Var year) throws Exception {
 		Calendar d = Calendar.getInstance();
-		d.setTime((Date) value.getObject());
+		d.setTime( ((Calendar) value.getObject()).getTime() );
 		d.add(Calendar.YEAR, year.getObjectAsInt());
 		return new Var(d.getTime());
 	}
