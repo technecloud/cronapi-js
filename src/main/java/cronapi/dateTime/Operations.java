@@ -174,7 +174,7 @@ public class Operations {
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
 	public static final Var incMonth(Var value, Var month) throws Exception {
 		Calendar d = Calendar.getInstance();
-		d.setTime((Date) value.getObject());
+		d.setTime( ((Calendar) value.getObject()).getTime() );
 		d.add(Calendar.MONTH, month.getObjectAsInt());
 		return new Var(d.getTime());
 	}
