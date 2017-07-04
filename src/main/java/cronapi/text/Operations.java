@@ -135,23 +135,18 @@ public class Operations {
 		if (index1.getObjectAsInt() < 1)
 			index1 = new Var(1);
 
-		if (index2.getObjectAsInt() > text.getObjectAsString().length())
-			index2 = new Var(text.getObjectAsString().length());
+		if (index2.getObjectAsInt() >= text.getObjectAsString().length())
+			index2 = new Var(text.getObjectAsString().length() + 1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
-			index1 = new Var(1);
+			index1 = new Var(text.getObjectAsString().length());
 
-		if (index2.getObjectAsInt() < (text.length() - index1.getObjectAsInt())) {
-			return new Var(text.getObjectAsString().substring(index2.getObjectAsInt() - 1,
-					(text.length() - (index1.getObjectAsInt() - 1))));
-
-		} else if (index2.getObjectAsInt() > text.length() - (index1.getObjectAsInt() - 1)) {
-			return new Var(text.getObjectAsString().substring(text.length() - (index1.getObjectAsInt()),
+		if (index2.getObjectAsInt() == 1 && (text.length() - index1.getObjectAsInt()) == 0) {
+			return new Var(text.getObjectAsString().substring(0, 1));
+		} else if ((text.length() - index1.getObjectAsInt()) < index2.getObjectAsInt()) {
+			return new Var(text.getObjectAsString().substring((text.length() - (index1.getObjectAsInt())),
 					index2.getObjectAsInt() - 1));
-
 		}
-
 		return Var.VAR_NULL;
-
 	}
 
 	public static final Var getLettersFromEndToFromEnd(Var text, Var index1, Var index2) throws Exception {
@@ -163,15 +158,19 @@ public class Operations {
 		if (index2.getObjectAsInt() > text.getObjectAsString().length())
 			index2 = new Var(text.getObjectAsString().length());
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
-			index1 = new Var(1);
+			index1 = new Var(text.getObjectAsString().length());
 
-		if (index1.getObjectAsInt() < index2.getObjectAsInt()) {
-			return new Var(text.getObjectAsString().substring(text.length() - index2.getObjectAsInt(),
-					text.length() - (index1.getObjectAsInt())));
-		} else {
-			return new Var(text.getObjectAsString().substring(text.length() - index1.getObjectAsInt(),
-					text.length() - (index2.getObjectAsInt())));
+		System.out.println("index1: " + index1 + "\tindex2: " + index2);
+
+		if (index1.getObjectAsInt() > index2.getObjectAsInt()) {
+			return new Var(text.getObjectAsString().substring((text.length() - index1.getObjectAsInt()),
+					(text.length() - index2.getObjectAsInt() + 1)));
+		} else if (index1.getObjectAsInt() == index2.getObjectAsInt()) {
+			return new Var(text.getObjectAsString().substring((text.length() - (index1.getObjectAsInt())),
+					(text.length() - (index1.getObjectAsInt() - 1))));
 		}
+		return Var.VAR_NULL;
+
 	}
 
 	public static final Var getLettersFromEndToFromLast(Var text, Var index1) throws Exception {
@@ -202,9 +201,8 @@ public class Operations {
 		if (index1.getObjectAsInt() < 1)
 			index1 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
-			index1 = new Var(text.getObjectAsString().length());
-		return new Var(text.getObjectAsString().substring(0, text.length() - (index1.getObjectAsInt())));
-
+			return new Var(text.getObjectAsString().substring(0, 1));
+		return new Var(text.getObjectAsString().substring(0, text.length() - (index1.getObjectAsInt() - 1)));
 	}
 
 	public static final Var getLettersFromFirstToEnd(Var text) throws Exception {
