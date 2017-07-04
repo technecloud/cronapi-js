@@ -104,17 +104,19 @@ public class Operations {
 	public static final Var getLettersFromStartToFromEnd(Var text, Var index1, Var index2) throws Exception {
 		if (index1.getObjectAsInt() < 1)
 			index1 = new Var(1);
-		if (index2.getObjectAsInt() < 1)
-			index2 = new Var(text.getObjectAsString().length());
+		if (index2.getObjectAsInt() <= 1)
+			index2 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
 			index1 = new Var(text.getObjectAsString().length());
 		if (index2.getObjectAsInt() > text.getObjectAsString().length())
-			index2 = new Var(1);
+			index2 = new Var(text.getObjectAsString().length());
 
-		if (index1.getObjectAsInt() <= text.getObjectAsString().length() - index2.getObjectAsInt()) {
+		if (index1.getObjectAsInt() <= (text.getObjectAsString().length() - index2.getObjectAsInt())) {
 			return new Var(text.getObjectAsString().substring(index1.getObjectAsInt() - 1,
-					text.getObjectAsString().length() - index2.getObjectAsInt()));
+					text.getObjectAsString().length() - (index2.getObjectAsInt() - 1)));
 		}
+		if (index1.getObjectAsInt() == 1 && index2.getObjectAsInt() == text.getObjectAsString().length())
+			return new Var(text.getObjectAsString().substring(0, 1));
 
 		return Var.VAR_NULL;
 	}

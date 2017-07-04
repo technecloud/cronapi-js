@@ -32,17 +32,4 @@ public class Operations {
 						: Var.VAR_FALSE;
 	}
 
-	public static void main(String... args) {
-
-		try {
-			System.out.println(Operations.isEmpty(Var.VAR_NULL));
-
-			System.out.println(Operations.isEmpty(Var.valueOf("12")));
-
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-
-	}
-
 }
