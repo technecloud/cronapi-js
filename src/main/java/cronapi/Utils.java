@@ -41,6 +41,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import cronapi.i18n.Messages;
+import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 
 /**
  * Classe que representa ...
@@ -268,16 +269,33 @@ public class Utils {
 	private static final Object getValueByKey(Object obj, String key) {
 	  if (obj instanceof JsonObject)
       return ((JsonObject) obj).get(key);
-    else
+    else if (obj instanceof java.util.HashMap)
       return ((Map) obj).get(key);
+    else
+      return getFieldReflection(obj, key);
+	}
+	
+	private static final Object getFieldReflection(Object obj, String key) {
+	  Object o = null;
+	  try {
+	    Class c = obj.getClass();
+  	  Field f = c.getDeclaredField(key);
+  	  f.setAccessible(true);
+  	  o = f.get(obj);  
+	  }
+	  catch (Exception e) {
+	  }
+	  return o;
 	}
 	
 	private static final Object getValueByIndex(Object obj, int idx) {
 	  try {
   	  if (obj instanceof JsonArray)
         return ((JsonArray)obj).get(idx);
+      else if (obj instanceof java.util.ArrayList)
+        return ((List) obj).get(idx);
       else
-        return ((List) obj).get(idx);  
+        return ((Object[])obj)[idx];
 	  }
 	  catch(Exception e) {
 	    //Dont has index, return null
