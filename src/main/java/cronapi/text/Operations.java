@@ -160,8 +160,6 @@ public class Operations {
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
 			index1 = new Var(text.getObjectAsString().length());
 
-		System.out.println("index1: " + index1 + "\tindex2: " + index2);
-
 		if (index1.getObjectAsInt() > index2.getObjectAsInt()) {
 			return new Var(text.getObjectAsString().substring((text.length() - index1.getObjectAsInt()),
 					(text.length() - index2.getObjectAsInt() + 1)));
