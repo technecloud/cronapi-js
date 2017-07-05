@@ -1053,10 +1053,10 @@
 
   /**
    * @type function
-   * @name Obtém valor do elemento
+   * @name {{XMLGetElementValueName}}Obtém valor do elemento
    * @nameTags XMLGetElementValue
-   * @description Função que retorna o valor de um elemento
-   * @param {ObjectType.OBJECT} node Elemento passado para obter-se o valor;
+   * @description {{XMLGetElementValueDescription}}
+   * @param {ObjectType.OBJECT} node {{XMLGetElementValueParam0}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetElementValue = function(node) {
@@ -1068,11 +1068,11 @@
 
   /**
    * @type function
-   * @name Obtém o primeiro filho do elemento
+   * @name {{XMLGetChildElementName}}
    * @nameTags XMLGetChildElement
-   * @description Função para retornar o nó
-   * @param {ObjectType.OBJECT} node Elemento passado para obter-se o valor;
-   * @param {ObjectType.STRING} childName Filho a ser obtido do elemento;
+   * @description {{XMLGetChildElementDescription}}
+   * @param {ObjectType.OBJECT} node {{node}}
+   * @param {ObjectType.STRING} {{childName}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetChildElement = function(node, childName) {
@@ -1083,10 +1083,10 @@
 
   /**
    * @type function
-   * @name Obtém a raiz do elemento
+   * @name {{XMLGetRootName}}
    * @nameTags XMLGetRoot
-   * @description Função que retorna o elemento raiz a partir de um elemento
-   * @param {ObjectType.OBJECT} element Elemento passado para obter-se a raiz
+   * @description {{XMLGetRootDescription}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetRoot = function(element) {
@@ -1096,11 +1096,11 @@
 
   /**
    * @type function
-   * @name Obtém o atributo do elemento
+   * @name {{XMLGetAttributeName}}
    * @nameTags XMLGetAttribute
-   * @description Função que retorna o elemento raiz a partir de um elemento
-   * @param {ObjectType.OBJECT} element - Elemento passado para obter-se a raiz
-   * @param {ObjectType.OBJECT} attribute - Atributo a ser obtido
+   * @description {{XMLGetAttributeDescription}}
+   * @param {ObjectType.OBJECT} {{element}} 
+   * @param {ObjectType.OBJECT} {{attribute}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
@@ -1109,10 +1109,10 @@
 
   /**
    * @type function
-   * @name Cria Document
+   * @name {{XMLOpenName}}
    * @nameTags XMLOpen
-   * @description Função que cria um objeto Document a partir de uma String
-   * @param {ObjectType.OBJECT} XMLText - Elemento passado para obter-se a raiz
+   * @description {{XMLOpenDescription}}
+   * @param {ObjectType.OBJECT} {{XMLOpenParam0}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLOpen = function(XMLText) {
@@ -1131,11 +1131,11 @@
 
   /**
    * @type function
-   * @name Busca filhos do elemento
+   * @name {{XMLGetChildrenElementName}}
    * @nameTags XMLGetChildrenElement
-   * @description Função que retorna os filhos do tipo de um determinado elemento
-   * @param {ObjectType.OBJECT} node - Elemento passado para buscar os filhos
-   * @param {ObjectType.OBJECT} childName - Elemento do tipo a ser buscado
+   * @description {{XMLGetChildrenElementDescription}}
+   * @param {ObjectType.OBJECT} {{node}}
+   * @param {ObjectType.OBJECT} {{childName}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetChildrenElement = function(node, childName) {
@@ -1148,10 +1148,10 @@
 
   /**
    * @type function
-   * @name Retorna o elemento pai
+   * @name {{XMLGetParentElementName}}
    * @nameTags XMLGetParentElement
-   * @description Função que retorna o pai de um elemento
-   * @param {ObjectType.OBJECT} node - Elemento a ser buscado o pai
+   * @description {{XMLGetParentElementDescription}}
+   * @param {ObjectType.OBJECT} {{node}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetParentElement = function XMLGetParentElement(node) {
@@ -1160,10 +1160,10 @@
 
   /**
    * @type function
-   * @name Retorna a tag do elemento
+   * @name {{XMLGetElementTagNameName}}
    * @nameTags XMLGetElementTagName
-   * @description Função que retorna o nome da tag do elemento
-   * @param {ObjectType.OBJECT} node - Elemento a ser buscado a tag
+   * @description {{XMLGetElementTagNameDescription}}
+   * @param {ObjectType.OBJECT} {{node}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
