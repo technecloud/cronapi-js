@@ -279,13 +279,25 @@ public class Utils {
 	}
 
 	private static final Object getFieldReflection(Object obj, String key) {
+
 		Object o = null;
 		try {
-			Class c = obj.getClass();
-			Field f = c.getDeclaredField(key);
-			f.setAccessible(true);
-			o = f.get(obj);
+			String keyWithGet = String.format("get%s", Character.toUpperCase(key.charAt(0)));
+			if (key.length() > 1)
+				keyWithGet += key.substring(1);
+			Method getMethod = Utils.findMethod(obj, keyWithGet);
+			if (getMethod != null)
+				o = getMethod.invoke(obj, null);
+			else
+				throw new Exception("method not found");
 		} catch (Exception e) {
+			try {
+				Class c = obj.getClass();
+				Field f = c.getDeclaredField(key);
+				f.setAccessible(true);
+				o = f.get(obj);
+			} catch (Exception e1) {
+			}
 		}
 		return o;
 	}
@@ -304,7 +316,7 @@ public class Utils {
 		}
 	}
 
-	private static final void setValueByIndex(Object list, Object valueToSet, int idx) {
+	private static final Object setValueByIndex(Object list, Object valueToSet, int idx) {
 
 		Object val = valueToSet;
 		if (val instanceof Var)
@@ -339,7 +351,8 @@ public class Utils {
 				else if (val instanceof String)
 					((JsonArray) list).add((String) val);
 			}
-		} else {
+		} 
+		else if (list instanceof java.util.ArrayList) {
 			if (idx <= (((ArrayList) list).size() - 1))
 				((ArrayList) list).set(idx, val);
 			else {
@@ -350,6 +363,27 @@ public class Utils {
 				((ArrayList) list).add(val);
 			}
 		}
+		else {
+		  if (idx <= ((Object[]) list).length - 1)
+		    ((Object[]) list)[idx] = val;
+		  else {
+		    ArrayList<Object> tempToArray = new ArrayList<Object>();
+		    for (int i = 0; i < ((Object[]) list).length; i++)
+		      tempToArray.add(((Object[]) list)[i]);
+		      
+		    for (int i = 0; i < idx; i++) {
+					if (i >= tempToArray.size())
+						tempToArray.add(null);
+				}
+				tempToArray.add(val);
+				Object newArray = java.lang.reflect.Array.newInstance( val.getClass(), tempToArray.size());
+				for (int i = 0; i < tempToArray.size(); i++) {
+				  java.lang.reflect.Array.set(newArray, i, tempToArray.get(i)); 
+				}
+				return newArray;
+		  }
+		}
+		return null;
 	}
 
 	private static final void setValueInObj(Object obj, String key, Object valueToSet) {
@@ -388,7 +422,8 @@ public class Utils {
 			if (setMethod != null) {
 				valueToSet = Var.valueOf(valueToSet).getObject(setMethod.getParameterTypes()[0]);
 				setMethod.invoke(obj, valueToSet);
-			}
+			} else
+				throw new Exception("method not found");
 		} catch (Exception e) {
 			try {
 				Object o = null;
@@ -516,8 +551,11 @@ public class Utils {
 				Object o = value;
 				if (value instanceof Var)
 					o = ((Var) value).getObject();
-				if (i == indexes.size() - 1)
-					setValueByIndex(o, valueToSet, Integer.parseInt(idx));
+				if (i == indexes.size() - 1) {
+					Object result = setValueByIndex(o, valueToSet, Integer.parseInt(idx));
+					if (result != null) //Se for array, irá gerar um novo array e retornar
+					  setValueInObj(obj, key, result);
+				}
 				else
 					value = getValueByIndex(o, Integer.parseInt(idx));
 			}
