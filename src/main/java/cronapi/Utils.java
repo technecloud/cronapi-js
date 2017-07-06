@@ -41,7 +41,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import cronapi.i18n.Messages;
-import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 
 /**
  * Classe que representa ...
