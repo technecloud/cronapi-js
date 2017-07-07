@@ -2,6 +2,7 @@ package cronapi.io;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
@@ -12,8 +13,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
@@ -31,16 +35,16 @@ import cronapi.CronapiMetaData.ObjectType;
 @CronapiMetaData(category = CategoryType.IO, categoryTags = { "Arquivo", "File" })
 public class Operations {
 
-  private static String APP_FOLDER;
-  static {
-    URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
-    String file = new File(location.getFile()).getAbsolutePath();
-    APP_FOLDER = file.substring(0, file.indexOf("WEB-INF")-1);
+	private static String APP_FOLDER;
+	static {
+		URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
+		String file = new File(location.getFile()).getAbsolutePath();
+		APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
 
-    if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-      APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
-    }
-  }
+		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
+			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
+		}
+	}
 
 	/**
 	 * Criar nova pasta 
@@ -316,17 +320,16 @@ public class Operations {
 		return new Var(System.getProperty("java.io.tmpdir"));
 	}
 
-  /**
-   * Diretorio temporário da aplicação
-   */
-  @CronapiMetaData(type = "function", name = "{{applicationFolder}}", nameTags = {
-      "fileTempDir" }, description = "{{functionToReturnApplicationFolder}}", params = {}, returnType = ObjectType.STRING)
-  public static final Var fileAppDir() throws Exception {
-    return new Var(APP_FOLDER);
-  }
+	/**
+	 * Diretorio temporário da aplicação
+	 */
+	@CronapiMetaData(type = "function", name = "{{applicationFolder}}", nameTags = {
+			"fileTempDir" }, description = "{{functionToReturnApplicationFolder}}", params = {}, returnType = ObjectType.STRING)
+	public static final Var fileAppDir() throws Exception {
+		return new Var(APP_FOLDER);
+	}
 
-
-  /**
+	/**
 	 * Ler todo conteudo do arquivo
 	 */
 	@CronapiMetaData(type = "function", name = "{{readAllContentFileInBytes}}", nameTags = {
@@ -518,4 +521,58 @@ public class Operations {
 		}
 		zis.close();
 	}
+
+@CronapiMetaData(type = "function", name = "{{listFilesName}}", nameTags = {
+			"listFiles" }, description = "{{listFilesDescription}}", returnType = ObjectType.STRING)
+	public static final Var listFiles(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam0}}") Var path,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}") Var type)
+			throws Exception {
+		try {
+			if (path.equals(Var.VAR_NULL))
+				return Var.newList();
+
+			if (type.getObjectAsString().equals("directories")) {
+
+				FileFilter filter = new FileFilter() {
+					@Override
+					public boolean accept(File pathname) {
+						return pathname.isDirectory();
+					}
+				};
+
+				File[] files = new File(path.getObjectAsString()).listFiles(filter);
+				LinkedList<String> result = new LinkedList<String>();
+				for (File f : files) {
+					result.add(f.getName());
+				}
+				return new Var(result);
+
+			} else if (type.getObjectAsString().equals("files")) {
+
+				FileFilter filter = new FileFilter() {
+					@Override
+					public boolean accept(File pathname) {
+						return pathname.isFile();
+					}
+				};
+
+				File[] files = new File(path.getObjectAsString()).listFiles(filter);
+				LinkedList<String> result = new LinkedList<String>();
+				for (File f : files) {
+					result.add(f.getName());
+				}
+				return new Var(result);
+
+			} else {
+				String[] files = new File(path.getObjectAsString()).list();
+				Var list = new Var(new LinkedList<String>(Arrays.asList(files)));
+				return list;
+			}
+
+		} catch (Exception e) {
+			return Var.newList();
+		}
+	}
+
 }

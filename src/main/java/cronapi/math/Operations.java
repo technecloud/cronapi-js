@@ -626,34 +626,12 @@ public class Operations {
 	public static final Var listAverage(Var value) throws Exception {
 
 		Var result;
-		switch (value.getObjectAsList().getFirst().getType()) {
-		case DOUBLE: {
-			Double sum = 0.0;
-			for (Var v : value.getObjectAsList()) {
-				sum += v.getObjectAsDouble();
-			}
-			result = new Var(sum / value.size());
-			break;
+		Double sum = 0.0;
+		for (Var v : value.getObjectAsList()) {
+			sum += v.getObjectAsDouble();
 		}
-		case INT: {
-			Long sum = 0L;
-			for (Var v : value.getObjectAsList()) {
-				sum += v.getObjectAsLong();
-			}
-			result = new Var(sum / value.size());
-			break;
-		}
-		default: {
-			Long sum = 0L;
-			for (Var v : value.getObjectAsList()) {
-				sum += v.getObjectAsLong();
-			}
-			result = new Var(sum / value.size());
-			break;
-		}
-		}
+		result = new Var(sum / value.size());
 		return result;
-
 	}
 
 	public static final Var listMedium(Var value) throws Exception {
