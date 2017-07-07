@@ -495,6 +495,7 @@
 
   /**
    * @type function
+   * @name {{screenNotifyName}}
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
    * @wizard notify_type
