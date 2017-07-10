@@ -1,16 +1,11 @@
 package cronapi.screen;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
-
-import cronapi.*;
+import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.clazz.CronapiClassLoader;
-import cronapi.i18n.Messages;
+import cronapi.ParamMetaData;
+import cronapi.RestClient;
+import cronapi.Var;
 
 @CronapiMetaData(category = CategoryType.SCREEN, categoryTags = { "Tela", "Screen", "Frontend" })
 public class Operations {

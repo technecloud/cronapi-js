@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 
@@ -566,47 +567,51 @@ public class Var implements Comparable<Var>, JsonSerializable {
 	 * if this is numerically greater than the argument (signed comparison).
 	 */
 	@Override
-	public int compareTo(Var var) {
+  public int compareTo(Var var) {
     var = Var.valueOf(var);
 
-		if (getType() == Type.NULL && var.getType() == Type.NULL) {
-		  return 0;
-    } else if (getType() == Type.NULL && var.getType() != Type.NULL){
-      return -1;
-    } else {
-
-      if (var == this) {
+    try {
+      if (getType() == Type.NULL && var.getType() == Type.NULL) {
         return 0;
-      }
-
-      if(this.getObject().equals(var.getObject())) {
-        return 0;
-      }
-
-      switch (getType()) {
-        case STRING:
-          return this.getObjectAsString().compareTo(var.getObjectAsString());
-        case INT:
-          if (var.getType().equals(Var.Type.INT)) {
-            return ((Long) this.getObjectAsLong()).compareTo(var.getObjectAsLong());
-          } else {
+      } else if (getType() == Type.NULL && var.getType() != Type.NULL){
+        return -1;
+      } else {
+  
+        if (var == this) {
+          return 0;
+        }
+  
+        if(this.getObject().equals(var.getObject())) {
+          return 0;
+        }
+  
+        switch (getType()) {
+          case STRING:
+            return this.getObjectAsString().compareTo(var.getObjectAsString());
+          case INT:
+            if (var.getType().equals(Var.Type.INT)) {
+              return ((Long) this.getObjectAsLong()).compareTo(var.getObjectAsLong());
+            } else {
+              return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
+            }
+          case DOUBLE:
             return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-          }
-        case DOUBLE:
-          return ((Double) this.getObjectAsDouble()).compareTo(var.getObjectAsDouble());
-        case BOOLEAN:
-          return this.getObjectAsBoolean().compareTo(var.getObjectAsBoolean());
-        case DATETIME:
-          return this.getObjectAsDateTime().compareTo(var.getObjectAsDateTime());
-        default:
-          if(this.getObject() instanceof Comparable) {
-            return Comparable.class.cast(this.getObject()).compareTo(var.getObject());
-          }
+          case BOOLEAN:
+            return this.getObjectAsBoolean().compareTo(var.getObjectAsBoolean());
+          case DATETIME:
+            return this.getObjectAsDateTime().compareTo(var.getObjectAsDateTime());
+          default:
+            if(this.getObject() instanceof Comparable) {
+              return Comparable.class.cast(this.getObject()).compareTo(var.getObject());
+            }
+        }
       }
+    } catch(Exception e) {
+      //Abafa
     }
 
     return -1;
-	}
+  }
 
 	/**
 	 * Convert this Var to a string format.
