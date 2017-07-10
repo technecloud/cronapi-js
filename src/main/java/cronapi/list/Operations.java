@@ -3,6 +3,7 @@ package cronapi.list;
 import java.util.LinkedList;
 
 import cronapi.Var;
+import java.lang.RuntimeException;
 
 /**
  * Classe que representa ...
@@ -464,10 +465,13 @@ public class Operations {
   }
   
   public static final Var orderListNumericGrowing(Var list) throws Exception {
+    try{
     list = isNull(list);
     list.getObjectAsList().sort((p1, p2) -> p1.getObjectAsInt().compareTo(p2.getObjectAsInt()));
-    
     return list;
+    }catch(Exception e){
+      throw e;
+    }
   }
   
   public static final Var orderListNumericDecreasing(Var list) throws Exception {

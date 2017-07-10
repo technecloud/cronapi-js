@@ -136,7 +136,7 @@ public class Operations {
 			index1 = new Var(1);
 
 		if (index2.getObjectAsInt() >= text.getObjectAsString().length())
-			index2 = new Var(text.getObjectAsString().length() + 1);
+			index2 = new Var(text.getObjectAsString().length());
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
 			index1 = new Var(text.getObjectAsString().length());
 
@@ -144,7 +144,7 @@ public class Operations {
 			return new Var(text.getObjectAsString().substring(0, 1));
 		} else if ((text.length() - index1.getObjectAsInt()) < index2.getObjectAsInt()) {
 			return new Var(text.getObjectAsString().substring((text.length() - (index1.getObjectAsInt())),
-					index2.getObjectAsInt() - 1));
+					index2.getObjectAsInt()));
 		}
 		return Var.VAR_NULL;
 	}
