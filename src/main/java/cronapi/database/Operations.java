@@ -82,8 +82,8 @@ public class Operations {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
 	public static Var getField(
-			@ParamMetaData(blockType = "variables_get", type = ObjectType.BLOCK, description = "{{datasource}}") Var ds,
-		@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.BLOCK, description = "{{fieldName}}") Var fieldName) 
+			@ParamMetaData(blockType = "variables_get", type = ObjectType.OBJECT, description = "{{datasource}}") Var ds,
+		@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) 
 	{
 		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
