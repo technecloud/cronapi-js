@@ -58,8 +58,9 @@ public class Operations {
 		File dir = new File(path.getObjectAsString().trim());
 		if (!dir.exists()) {
 			success = dir.mkdirs();
+			return new Var(success);
 		}
-		return new Var(success);
+		return Var.VAR_FALSE;
 	}
 
 	/**
@@ -522,12 +523,11 @@ public class Operations {
 		zis.close();
 	}
 
-@CronapiMetaData(type = "function", name = "{{listFilesName}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{listFilesName}}", nameTags = {
 			"listFiles" }, description = "{{listFilesDescription}}", returnType = ObjectType.STRING)
 	public static final Var listFiles(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam0}}") Var path,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}") Var type)
-			throws Exception {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}") Var type) throws Exception {
 		try {
 			if (path.equals(Var.VAR_NULL))
 				return Var.newList();

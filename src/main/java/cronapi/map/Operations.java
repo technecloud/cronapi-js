@@ -40,7 +40,7 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{createObjectMapName}}", nameTags = {
-			"createObjectMap" }, description = "{{createObjectMapNameDescription}}", returnType = ObjectType.OBJECT)
+			"createObjectMap" }, description = "{{createObjectMapDescription}}", returnType = ObjectType.OBJECT)
 	public static final Var createObjectMap() throws Exception {
 		Var value = new Var(new HashMap<>());
 		return value;
