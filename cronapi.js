@@ -1054,7 +1054,7 @@
 
   /**
    * @type function
-   * @name {{XMLGetElementValueName}}Obtém valor do elemento
+   * @name {{XMLGetElementValueName}}
    * @nameTags XMLGetElementValue
    * @description {{XMLGetElementValueDescription}}
    * @param {ObjectType.OBJECT} node {{XMLGetElementValueParam0}}
@@ -1073,7 +1073,7 @@
    * @nameTags XMLGetChildElement
    * @description {{XMLGetChildElementDescription}}
    * @param {ObjectType.OBJECT} node {{node}}
-   * @param {ObjectType.STRING} {{childName}}
+   * @param {ObjectType.STRING} childName {{childName}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetChildElement = function(node, childName) {
@@ -1100,8 +1100,8 @@
    * @name {{XMLGetAttributeName}}
    * @nameTags XMLGetAttribute
    * @description {{XMLGetAttributeDescription}}
-   * @param {ObjectType.OBJECT} {{element}} 
-   * @param {ObjectType.OBJECT} {{attribute}}
+   * @param {ObjectType.OBJECT} element  {{element}} 
+   * @param {ObjectType.OBJECT} attribute  {{attribute}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetAttribute = function(element, attribute) {
@@ -1113,7 +1113,7 @@
    * @name {{XMLOpenName}}
    * @nameTags XMLOpen
    * @description {{XMLOpenDescription}}
-   * @param {ObjectType.OBJECT} {{XMLOpenParam0}}
+   * @param {ObjectType.OBJECT} XMLText {{XMLOpenParam0}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLOpen = function(XMLText) {
@@ -1121,7 +1121,6 @@
     if (document.implementation && document.implementation.createDocument) { //Mozzila
       var domParser = new DOMParser();
       doc = domParser.parseFromString(XMLText, 'application/xml');
-      fixXMLDocument(doc);
       return doc;
     } else {
       doc = new ActiveXObject("MSXML2.DOMDocument");
@@ -1135,8 +1134,8 @@
    * @name {{XMLGetChildrenElementName}}
    * @nameTags XMLGetChildrenElement
    * @description {{XMLGetChildrenElementDescription}}
-   * @param {ObjectType.OBJECT} {{node}}
-   * @param {ObjectType.OBJECT} {{childName}}
+   * @param {ObjectType.OBJECT} node {{node}}
+   * @param {ObjectType.OBJECT} childName {{childName}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetChildrenElement = function(node, childName) {
@@ -1152,7 +1151,7 @@
    * @name {{XMLGetParentElementName}}
    * @nameTags XMLGetParentElement
    * @description {{XMLGetParentElementDescription}}
-   * @param {ObjectType.OBJECT} {{node}}
+   * @param {ObjectType.OBJECT} node {{node}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetParentElement = function XMLGetParentElement(node) {
@@ -1164,7 +1163,7 @@
    * @name {{XMLGetElementTagNameName}}
    * @nameTags XMLGetElementTagName
    * @description {{XMLGetElementTagNameDescription}}
-   * @param {ObjectType.OBJECT} {{node}}
+   * @param {ObjectType.OBJECT} node {{node}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
