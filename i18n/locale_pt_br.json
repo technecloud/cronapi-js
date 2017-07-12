@@ -189,5 +189,6 @@
 	"XMLGetParentElementName": "Retorna o elemento pai",
 	"XMLGetParentElementDescription": "Função que retorna o pai de um elemento",
 	"XMLGetElementTagNameName": "Obtém a tag do elemento",
-	"XMLGetElementTagNameDescription": "Função que retorna o nome da tag do elemento"
+	"XMLGetElementTagNameDescription": "Função que retorna o nome da tag do elemento",
+	"XMLGetElementValueName":"Obter valor do elemento"
 }
