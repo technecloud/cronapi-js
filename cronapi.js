@@ -1169,7 +1169,48 @@
   this.cronapi.xml.XMLGetElementTagName = function XMLGetElementTagName(node) {
     return node.tagName;
   };
+   
+  /**
+   * @category CategoryType.LOGIC
+   * @categoryTags LOGIC|logic
+   */
+   this.cronapi.logic = {};
+   
+   /**
+   * @type function
+    * @name {{LogicIsNullName}}
+    * @nameTags isNull
+    * @description {{LogicIsNullDescription}}
+    * @returns {ObjectType.BOOLEAN}
+    * @displayInline true
+   */
+   this.cronapi.logic.isNull = function(/** @type {ObjectType.OBJECT} @description */ value) {
+     return (value === null || typeof value  == 'undefined');
+   }
+   
+   /**
+   * @type function
+    * @name {{LogicIsEmptyName}}
+    * @nameTags isEmpty
+    * @description {{LogicIsEmptyDescription}}
+    * @returns {ObjectType.BOOLEAN}
+    * @displayInline true
+   */
+   this.cronapi.logic.isEmpty = function(/** @type {ObjectType.OBJECT} @description */ value) {
+     return (value  === '');
+   }
   
+   /**
+   * @type function
+    * @name {{LogicIsNullOrEmptyName}}
+    * @nameTags isNullOrEmpty
+    * @description {{LogicIsNullOrEmptyDescription}}
+    * @returns {ObjectType.BOOLEAN}
+    * @displayInline true
+   */
+   this.cronapi.logic.isNullOrEmpty = function(/** @type {ObjectType.OBJECT} @description */ value) {
+     return (cronapi.logic.isNull(value) || cronapi.logic.isEmpty(value));
+   }
   
   this.cronapi.i18n = {};
 
