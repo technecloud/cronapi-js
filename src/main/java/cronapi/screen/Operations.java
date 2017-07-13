@@ -7,7 +7,7 @@ import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
 
-@CronapiMetaData(category = CategoryType.SCREEN, categoryTags = { "Tela", "Screen", "Frontend" })
+@CronapiMetaData(category = CategoryType.SCREEN, categoryTags = { "Formulário", "Form", "Frontend" })
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{getValueOfFieldName}}", nameTags = {
