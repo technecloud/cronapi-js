@@ -36,15 +36,20 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	private static String APP_FOLDER;
-	static {
-		URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
-		String file = new File(location.getFile()).getAbsolutePath();
-		APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
 
-		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
-		}
-	}
+  static {
+    if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
+      APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
+    } else {
+      try {
+        URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
+        String file = new File(location.getFile()).getAbsolutePath();
+        APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
+      } catch(Exception e) {
+        //Abafa
+      }
+    }
+  }
 
 	/**
 	 * Criar nova pasta 

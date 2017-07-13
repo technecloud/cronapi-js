@@ -5,13 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
@@ -24,549 +18,611 @@ import cronapi.i18n.Messages;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
-	public enum Type {
-		STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, DATETIME
-	};
+  public enum Type {
+    STRING, INT, DOUBLE, LIST, NULL, UNKNOWN, BOOLEAN, DATETIME
+  };
 
-	private String id;
-	private Type _type;
-	private Object _object;
-	private boolean modifiable = true;
-	private boolean created = false;
-	private static final NumberFormat _formatter = new DecimalFormat("0.00000");
+  private String id;
+  private Type _type;
+  private Object _object;
+  private boolean modifiable = true;
+  private boolean created = false;
+  private static final NumberFormat _formatter = new DecimalFormat("0.00000");
 
   public static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
 
-	public static final Var VAR_NULL = new Var(null, false);
-	public static final Var VAR_TRUE = new Var(true, false);
-	public static final Var VAR_FALSE = new Var(false, false);
-	public static final Var VAR_ZERO = new Var(0, false);
-	public static final Var VAR_ONE = new Var(1, false);
-	public static final Var VAR_NEGATIVE_ONE = new Var(-1, false);
-	public static final Var VAR_EMPTY = new Var("", false);
-	public static final Var VAR_DATE_ZERO;
+  public static final Var VAR_NULL = new Var(null, false);
+  public static final Var VAR_TRUE = new Var(true, false);
+  public static final Var VAR_FALSE = new Var(false, false);
+  public static final Var VAR_ZERO = new Var(0, false);
+  public static final Var VAR_ONE = new Var(1, false);
+  public static final Var VAR_NEGATIVE_ONE = new Var(-1, false);
+  public static final Var VAR_EMPTY = new Var("", false);
+  public static final Var VAR_DATE_ZERO;
 
-	static {
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(1980, 1, 1, 0, 0, 0);
-		VAR_DATE_ZERO = new Var(calendar, false);
-	}
+  static {
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(1980, 1, 1, 0, 0, 0);
+    VAR_DATE_ZERO = new Var(calendar, false);
+  }
 
-	/**
-	 * Construct a Var with an NULL type
-	 *
-	 */
-	public Var() {
-		_type = Type.NULL;
-		created = true;
-	}
+  /**
+   * Construct a Var with an NULL type
+   *
+   */
+  public Var() {
+    _type = Type.NULL;
+    created = true;
+  }
 
-	/**
-	 * Construct a Var and assign its contained object to that specified.
-	 *
-	 * @param object The value to set this object to
-	 */
-	public Var(String id, Object object) {
-		this.id = id;
-		setObject(object);
-	}
+  /**
+   * Construct a Var and assign its contained object to that specified.
+   *
+   * @param object The value to set this object to
+   */
+  public Var(String id, Object object) {
+    this.id = id;
+    setObject(object);
+  }
 
-	/**
-	 * Construct a Var and assign its contained object to that specified.
-	 *
-	 * @param object The value to set this object to
-	 */
-	public Var(Object object) {
-		setObject(object);
-	}
+  /**
+   * Construct a Var and assign its contained object to that specified.
+   *
+   * @param object The value to set this object to
+   */
+  public Var(Object object) {
+    setObject(object);
+  }
 
-	public Var(Object object, boolean modifiable) {
-		setObject(object);
-		this.modifiable = modifiable;
-	}
+  public Var(Object object, boolean modifiable) {
+    setObject(object);
+    this.modifiable = modifiable;
+  }
 
-	/**
-	 * Construct a Var from a given Var
-	 *
-	 * @param var var to construct this one from
-	 */
-	public Var(Var var) {
-		_type = Type.UNKNOWN;
-		if (var != null) {
-			this.id = var.id;
-			setObject(var.getObject());
-		}
-	}
+  /**
+   * Construct a Var from a given Var
+   *
+   * @param var var to construct this one from
+   */
+  public Var(Var var) {
+    _type = Type.UNKNOWN;
+    if (var != null) {
+      this.id = var.id;
+      setObject(var.getObject());
+    }
+  }
 
-	/**
-	 * Set the value of the underlying object. Note that the type of Var will be
-	 * determined when setObject is called.
-	 *
-	 * @param val the value to set this Var to
-	 */
-	public void setObject(Object val) {
-		if (created && !modifiable) {
-			throw new RuntimeException(Messages.getString("NotModifiable"));
-		}
-		this._object = val;
-		inferType();
-		// make sure each element of List is Var if type is list
-		if (_type.equals(Var.Type.LIST)) {
-			LinkedList<Var> myList = new LinkedList<>();
-			for (Object obj : this.getObjectAsList()) {
-				myList.add(Var.valueOf(obj));
-			}
-			this._object = myList;
-		}
+  /**
+   * Set the value of the underlying object. Note that the type of Var will be
+   * determined when setObject is called.
+   *
+   * @param val the value to set this Var to
+   */
+  public void setObject(Object val) {
+    if (created && !modifiable) {
+      throw new RuntimeException(Messages.getString("NotModifiable"));
+    }
+    this._object = val;
+    inferType();
+    // make sure each element of List is Var if type is list
+    if (_type.equals(Var.Type.LIST)) {
+      LinkedList<Var> myList = new LinkedList<>();
+      for (Object obj : this.getObjectAsList()) {
+        myList.add(Var.valueOf(obj));
+      }
+      this._object = myList;
+    }
 
-		created = true;
-	}
+    created = true;
+  }
 
-	/**
-	 * Static constructor to make a var from some value.
-	 *
-	 * @param val some value to construct a var around
-	 * @return the Var object
-	 */
-	public static Var valueOf(Object val) {
-		if (val instanceof Var)
-			return (Var) val;
+  /**
+   * Static constructor to make a var from some value.
+   *
+   * @param val some value to construct a var around
+   * @return the Var object
+   */
+  public static Var valueOf(Object val) {
+    if (val instanceof Var)
+      return (Var) val;
 
-		if (val instanceof Boolean) {
-			if (((Boolean) val)) {
-				return VAR_TRUE;
-			} else {
-				return VAR_FALSE;
-			}
-		}
+    if (val instanceof Boolean) {
+      if (((Boolean) val)) {
+        return VAR_TRUE;
+      } else {
+        return VAR_FALSE;
+      }
+    }
 
-		if (val == null) {
-			return VAR_NULL;
-		}
+    if (val == null) {
+      return VAR_NULL;
+    }
 
-		return new Var(val);
-	}
+    return new Var(val);
+  }
 
-	public static Var valueOf(String id, Object val) {
-		if (val instanceof Var && Objects.equals(((Var) val).getId(), id))
-			return (Var) val;
+  public static Var valueOf(String id, Object val) {
+    if (val instanceof Var && Objects.equals(((Var) val).getId(), id))
+      return (Var) val;
 
-		return new Var(id, val);
-	}
+    return new Var(id, val);
+  }
 
-	/**
-	 * Get the type of the underlying object
-	 *
-	 * @return Will return the object's type as defined by Type
-	 */
-	public Type getType() {
-		return _type;
-	}
+  /**
+   * Get the type of the underlying object
+   *
+   * @return Will return the object's type as defined by Type
+   */
+  public Type getType() {
+    return _type;
+  }
 
-	public String getId() {
-		return this.id;
-	}
+  public String getId() {
+    return this.id;
+  }
 
-	/**
-	 * Get the contained datasource
-	 *
-	 * @return the object
-	 */
-	public DataSource getObjectAsDataSource() {
-		return (DataSource)_object;
-	}
+  /**
+   * Get the contained datasource
+   *
+   * @return the object
+   */
+  public DataSource getObjectAsDataSource() {
+    return (DataSource)_object;
+  }
 
   public Object getObject() {
     return _object;
   }
 
-	public Object getObject(Class type) {
-		if (type == String.class || type == StringBuilder.class || type == StringBuffer.class
-				|| type == Character.class) {
-			return getObjectAsString();
-		} else if (type == Boolean.class) {
-			return getObjectAsBoolean();
-		} else if (type == Date.class) {
-			return getObjectAsDateTime().getTime();
-		} else if (type == Calendar.class) {
-			return getObjectAsDateTime();
-		} else if (type == Long.class) {
-			return getObjectAsLong();
-		} else if (type == Integer.class) {
-			return getObjectAsInt();
-		} else if (type == Double.class) {
-			return getObjectAsDouble();
-		} else if (type == Float.class) {
-			return getObjectAsDouble().floatValue();
-		} else if (type == BigDecimal.class) {
-			return new BigDecimal(getObjectAsDouble());
-		} else if (type == BigInteger.class) {
-			return BigInteger.valueOf(getObjectAsLong());
-		} else {
+  public Object getObject(Class type) {
+    if (type == String.class || type == StringBuilder.class || type == StringBuffer.class
+        || type == Character.class) {
+      return getObjectAsString();
+    } else if (type == Boolean.class) {
+      return getObjectAsBoolean();
+    } else if (type == Date.class) {
+      return getObjectAsDateTime().getTime();
+    } else if (type == Calendar.class) {
+      return getObjectAsDateTime();
+    } else if (type == Long.class) {
+      return getObjectAsLong();
+    } else if (type == Integer.class) {
+      return getObjectAsInt();
+    } else if (type == Double.class) {
+      return getObjectAsDouble();
+    } else if (type == Float.class) {
+      return getObjectAsDouble().floatValue();
+    } else if (type == BigDecimal.class) {
+      return new BigDecimal(getObjectAsDouble());
+    } else if (type == BigInteger.class) {
+      return BigInteger.valueOf(getObjectAsLong());
+    } else {
 
-			if (_object instanceof Map && type != Map.class) {
-				ObjectMapper mapper = new ObjectMapper();
-				((Map<?, ?>) _object).remove("$$hashKey");
-				return mapper.convertValue(_object, type);
-			}
-
-			return getObject();
-		}
-	}
-
-	/**
-	 * Clone Object
-	 *
-	 * @return a new object equal to this one
-	 */
-	public Object cloneObject() {
-		Var tempVar = new Var(this);
-		return tempVar.getObject();
-	}
-
-	/**
-	 * Get object as an int. Does not make sense for a "LIST" type object
-	 *
-	 * @return an integer whose value equals this object
-	 */
-	public Integer getObjectAsInt() {
-		switch (getType()) {
-		case STRING:
-      try {
-        return Integer.parseInt((String) getObject());
-      } catch (Exception e) {
-        return ((Double)Double.parseDouble((String) getObject())).intValue();
+      if (_object instanceof Map && type != Map.class) {
+        ObjectMapper mapper = new ObjectMapper();
+        ((Map<?, ?>) _object).remove("$$hashKey");
+        return mapper.convertValue(_object, type);
       }
-		case INT:
-			return ((Long) getObject()).intValue();
-		case BOOLEAN:
-			return ((Boolean) getObject()) ? 1 : 0;
-		case DOUBLE:
-			return new Double((double) getObject()).intValue();
-		case DATETIME:
-			return (int) (((Calendar) getObject()).getTimeInMillis());
-		case LIST:
-			return ((List)_object).size();
-		default:
-			// has no meaning
-			break;
-		}
-		return 0;
-	}
 
-	/**
-	 * Get object as an int. Does not make sense for a "LIST" type object
-	 *
-	 * @return an integer whose value equals this object
-	 */
-	public Long getObjectAsLong() {
-		switch (getType()) {
-		case STRING:
-		  try {
-        return Long.parseLong((String) getObject());
-      } catch (Exception e) {
-        return ((Double)Double.parseDouble((String) getObject())).longValue();
+      return getObject();
+    }
+  }
+
+  /**
+   * Clone Object
+   *
+   * @return a new object equal to this one
+   */
+  public Object cloneObject() {
+    Var tempVar = new Var(this);
+    return tempVar.getObject();
+  }
+
+  /**
+   * Get object as an int. Does not make sense for a "LIST" type object
+   *
+   * @return an integer whose value equals this object
+   */
+  public Integer getObjectAsInt() {
+    switch (getType()) {
+      case STRING:
+        try {
+          return Integer.parseInt((String) getObject());
+        } catch (Exception e) {
+          return ((Double)Double.parseDouble((String) getObject())).intValue();
+        }
+      case INT:
+        return ((Long) getObject()).intValue();
+      case BOOLEAN:
+        return ((Boolean) getObject()) ? 1 : 0;
+      case DOUBLE:
+        return new Double((double) getObject()).intValue();
+      case DATETIME:
+        return (int) (((Calendar) getObject()).getTimeInMillis());
+      case LIST:
+        return ((List)_object).size();
+      default:
+        // has no meaning
+        break;
+    }
+    return 0;
+  }
+
+  /**
+   * Get object as an int. Does not make sense for a "LIST" type object
+   *
+   * @return an integer whose value equals this object
+   */
+  public Long getObjectAsLong() {
+    switch (getType()) {
+      case STRING:
+        try {
+          return Long.parseLong((String) getObject());
+        } catch (Exception e) {
+          return ((Double)Double.parseDouble((String) getObject())).longValue();
+        }
+      case INT:
+        return (Long) getObject();
+      case BOOLEAN:
+        return ((Boolean) getObject()) ? 1L : 0L;
+      case DOUBLE:
+        return new Double((double) getObject()).longValue();
+      case DATETIME:
+        return (Long) ((Calendar) getObject()).getTimeInMillis();
+      case LIST:
+        return Long.valueOf(((List)_object).size());
+      default:
+        // has no meaning
+        break;
+    }
+    return 0L;
+  }
+
+  /**
+   * Get object as an boolean.
+   *
+   * @return an bool whose value equals this object
+   */
+  public Calendar getObjectAsDateTime() {
+    switch (getType()) {
+      case STRING:
+        String s = (String) getObject();
+        return Utils.toCalendar(s, null);
+      case INT:
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(getObjectAsInt());
+        return c;
+      case DOUBLE:
+        Calendar cd = Calendar.getInstance();
+        cd.setTimeInMillis(getObjectAsInt());
+        return cd;
+      case DATETIME:
+        return (Calendar) getObject();
+      case LIST:
+        // has no meaning
+        break;
+      default:
+        // has no meaning
+        break;
+    }
+    return VAR_DATE_ZERO.getObjectAsDateTime();
+  }
+
+  /**
+   * Get object as an boolean.
+   *
+   * @return an bool whose value equals this object
+   */
+  public Boolean getObjectAsBoolean() {
+    switch (getType()) {
+      case STRING:
+        String s = (String) getObject();
+        if (s.equals("1") || s.equalsIgnoreCase("true")) {
+          s = "true";
+        } else {
+          s = "false";
+        }
+        return Boolean.valueOf(s);
+      case INT:
+        return (Long) getObject() > 0;
+      case BOOLEAN:
+        return (boolean) getObject();
+      case DOUBLE:
+        return new Double((double) getObject()).intValue() > 0;
+      case DATETIME:
+        //has no meaning
+        break;
+      case LIST:
+        // has no meaning
+        break;
+      default:
+        // has no meaning
+        break;
+    }
+    return false;
+  }
+
+  /**
+   * Get object as a double. Does not make sense for a "LIST" type object.
+   *
+   * @return a double whose value equals this object
+   */
+  public Double getObjectAsDouble() {
+    switch (getType()) {
+      case STRING:
+        return Double.parseDouble((String) getObject());
+      case INT:
+        return new Long((Long) getObject()).doubleValue();
+      case BOOLEAN:
+        return ((boolean) getObject()) ? 1.0 : 0.0;
+      case DOUBLE:
+        return (double) getObject();
+      case DATETIME:
+        return (double) ((Calendar) getObject()).getTimeInMillis();
+      case LIST:
+        return Double.valueOf(((List)_object).size());
+      default:
+        // has no meaning
+        break;
+    }
+    return 0.0;
+  }
+
+  /**
+   * Get object as a string.
+   *
+   * @return The string value of the object. Note that for lists, this is a
+   * comma separated list of the form {x,y,z,...}
+   */
+  public String getObjectAsString() {
+    return this.toString();
+  }
+
+  private LinkedList<Var> getSingleList(Object o) {
+    LinkedList<Var> list = new LinkedList<>();
+    list.add(Var.valueOf(o));
+
+    return list;
+  }
+  /**
+   * Get the object as a list.
+   *
+   * @return a LinkedList whose elements are of type Var
+   */
+  public LinkedList<Var> getObjectAsList() {
+
+    if (getObject() instanceof Map) {
+      LinkedList<Var> myList = new LinkedList<>();
+      for (Object obj : ((Map)getObject()).values()) {
+        myList.add(Var.valueOf(obj));
       }
-		case INT:
-			return (Long) getObject();
-		case BOOLEAN:
-			return ((Boolean) getObject()) ? 1L : 0L;
-		case DOUBLE:
-			return new Double((double) getObject()).longValue();
-		case DATETIME:
-			return (Long) ((Calendar) getObject()).getTimeInMillis();
-    case LIST:
-      return Long.valueOf(((List)_object).size());
-		default:
-			// has no meaning
-			break;
-		}
-		return 0L;
-	}
 
-	/**
-	 * Get object as an boolean.
-	 *
-	 * @return an bool whose value equals this object
-	 */
-	public Calendar getObjectAsDateTime() {
-		switch (getType()) {
-		case STRING:
-			String s = (String) getObject();
-			return Utils.toCalendar(s, null);
-		case INT:
-			Calendar c = Calendar.getInstance();
-			c.setTimeInMillis(getObjectAsInt());
-			return c;
-		case DOUBLE:
-			Calendar cd = Calendar.getInstance();
-			cd.setTimeInMillis(getObjectAsInt());
-			return cd;
-		case DATETIME:
-			return (Calendar) getObject();
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
-		}
-		return VAR_DATE_ZERO.getObjectAsDateTime();
-	}
+      return myList;
+    } else if (getObject() instanceof List) {
+      return (LinkedList<Var>) getObject();
+    }
 
-	/**
-	 * Get object as an boolean.
-	 *
-	 * @return an bool whose value equals this object
-	 */
-	public Boolean getObjectAsBoolean() {
-		switch (getType()) {
-		case STRING:
-			String s = (String) getObject();
-			if (s.equals("1") || s.equalsIgnoreCase("true")) {
-				s = "true";
-			} else {
-				s = "false";
-			}
-			return Boolean.valueOf(s);
-		case INT:
-			return (Long) getObject() > 0;
-		case BOOLEAN:
-			return (boolean) getObject();
-		case DOUBLE:
-			return new Double((double) getObject()).intValue() > 0;
-		case DATETIME:
-			//has no meaning
-			break;
-		case LIST:
-			// has no meaning
-			break;
-		default:
-			// has no meaning
-			break;
-		}
-		return false;
-	}
+    return getSingleList(getObject());
+  }
 
-	/**
-	 * Get object as a double. Does not make sense for a "LIST" type object.
-	 *
-	 * @return a double whose value equals this object
-	 */
-	public Double getObjectAsDouble() {
-		switch (getType()) {
-		case STRING:
-			return Double.parseDouble((String) getObject());
-		case INT:
-			return new Long((Long) getObject()).doubleValue();
-		case BOOLEAN:
-			return ((boolean) getObject()) ? 1.0 : 0.0;
-		case DOUBLE:
-			return (double) getObject();
-		case DATETIME:
-			return (double) ((Calendar) getObject()).getTimeInMillis();
-		case LIST:
-			return Double.valueOf(((List)_object).size());
-		default:
-			// has no meaning
-			break;
-		}
-		return 0.0;
-	}
+  public Var getObjectAsPOJOList() {
 
-	/**
-	 * Get object as a string.
-	 *
-	 * @return The string value of the object. Note that for lists, this is a
-	 * comma separated list of the form {x,y,z,...}
-	 */
-	public String getObjectAsString() {
-		return this.toString();
-	}
+    LinkedList<Var> myList = null;
 
-	/**
-	 * Get the object as a list.
-	 *
-	 * @return a LinkedList whose elements are of type Var
-	 */
-	public LinkedList<Var> getObjectAsList() {
-		return (LinkedList<Var>) getObject();
-	}
+    if (getObject() instanceof List) {
+      myList = new LinkedList<>();
+      for (Var obj : ((LinkedList<Var>)getObject())) {
+        myList.add(obj.getPOJO());
+      }
+    } else {
+      myList = getSingleList(getPOJO());
+    }
 
-	public Iterator<Var> iterator() {
-		return getObjectAsList().iterator();
-	}
+    return Var.valueOf(myList);
+  }
 
-	/**
-	 * If this object is a linked list, then calling this method will return the
-	 * Var at the index indicated
-	 *
-	 * @param index the index of the Var to read (0 based)
-	 * @return the Var at that index
-	 */
-	public Var get(int index) {
-		return ((LinkedList<Var>) getObject()).get(index);
-	}
+  public boolean isNative() {
+    switch (getType()) {
+      case STRING:
+      case INT:
+      case DOUBLE:
+      case BOOLEAN:
+      case DATETIME:
+        return true;
+    }
 
-	/**
-	 * If this object is a linked list, then calling this method will return the
-	 * size of the linked list.
-	 *
-	 * @return size of list
-	 */
-	public int size() {
-		return ((LinkedList<Var>) getObject()).size();
-	}
+    return false;
+  }
 
-	public int length() {
-		return getObjectAsString().length();
-	}
+  public Var getPOJO() {
+    if (isNative()) {
+      Map map = new LinkedHashMap();
+      map.put("value", getObject());
+      if (id == null) {
+        map.put("id", getObjectAsString());
+      } else {
+        map.put("id", id);
+      }
+      return Var.valueOf(map);
+    } else {
+      return this;
+    }
+  }
 
-	public void trim() {
-		setObject(getObjectAsString().trim());
-	}
+  public Iterator<Var> iterator() {
+    return getObjectAsList().iterator();
+  }
 
-	public static Var newList() {
-		return new Var(new LinkedList<>());
-	}
+  /**
+   * If this object is a linked list, then calling this method will return the
+   * Var at the index indicated
+   *
+   * @param index the index of the Var to read (0 based)
+   * @return the Var at that index
+   */
+  public Var get(int index) {
+    return ((LinkedList<Var>) getObject()).get(index);
+  }
 
-	/**
-	 * Set the value of of a list at the index specified. Note that this is only
-	 * value if this object is a list and also note that index must be in
-	 * bounds.
-	 *
-	 * @param index the index into which the Var will be inserted
-	 * @param var the var to insert
-	 */
-	public void set(int index, Var var) {
-		((LinkedList<Var>) getObject()).add(index, var);
-	}
+  /**
+   * If this object is a linked list, then calling this method will return the
+   * size of the linked list.
+   *
+   * @return size of list
+   */
+  public int size() {
+    return ((LinkedList<Var>) getObject()).size();
+  }
 
-	/**
-	 * Add all values from one List to another. Both lists are Var objects that
-	 * contain linked lists.
-	 *
-	 * @param var The list to add
-	 */
-	public void addAll(Var var) {
-		((LinkedList<Var>) getObject()).addAll(var.getObjectAsList());
-	}
+  public int length() {
+    return getObjectAsString().length();
+  }
 
-	@Override
-	public int hashCode() {
-		int hash = 5;
-		hash = 43 * hash + Objects.hashCode(this._type);
-		hash = 43 * hash + Objects.hashCode(this._object);
-		return hash;
-	}
+  public void trim() {
+    setObject(getObjectAsString().trim());
+  }
 
-	/**
-	 * Test to see if this object equals another one. This is done by converting
-	 * both objects to strings and then doing a string compare.
-	 *
-	 * @param obj
-	 * @return true if equals
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return this.compareTo(Var.valueOf(obj)) == 0;
-	}
+  public static Var newList() {
+    return new Var(new LinkedList<>());
+  }
 
-	public void inc(Object value) {
-		Object result = null;
+  /**
+   * Set the value of of a list at the index specified. Note that this is only
+   * value if this object is a list and also note that index must be in
+   * bounds.
+   *
+   * @param index the index into which the Var will be inserted
+   * @param var the var to insert
+   */
+  public void set(int index, Var var) {
+    ((LinkedList<Var>) getObject()).add(index, var);
+  }
 
-		switch (getType()) {
-		case DATETIME: {
-			getObjectAsDateTime().add(Calendar.DAY_OF_MONTH, Var.valueOf(value).getObjectAsInt());
-			break;
-		}
-		case INT: {
-			result = getObjectAsLong() + Var.valueOf(value).getObjectAsLong();
-			break;
-		}
-		default: {
-			result = getObjectAsDouble() + Var.valueOf(value).getObjectAsDouble();
-		}
+  /**
+   * Add all values from one List to another. Both lists are Var objects that
+   * contain linked lists.
+   *
+   * @param var The list to add
+   */
+  public void addAll(Var var) {
+    ((LinkedList<Var>) getObject()).addAll(var.getObjectAsList());
+  }
 
-		}
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 43 * hash + Objects.hashCode(this._type);
+    hash = 43 * hash + Objects.hashCode(this._object);
+    return hash;
+  }
 
-		if (result != null)
-			setObject(result);
-	}
+  /**
+   * Test to see if this object equals another one. This is done by converting
+   * both objects to strings and then doing a string compare.
+   *
+   * @param obj
+   * @return true if equals
+   */
+  @Override
+  public boolean equals(Object obj) {
+    return this.compareTo(Var.valueOf(obj)) == 0;
+  }
 
-	public void multiply(Object value) {
-		Object result = null;
+  public void inc(Object value) {
+    Object result = null;
 
-		switch (getType()) {
-		case INT: {
-			result = getObjectAsLong() * Var.valueOf(value).getObjectAsLong();
-			break;
-		}
-		default: {
-			result = getObjectAsDouble() * Var.valueOf(value).getObjectAsDouble();
-		}
+    switch (getType()) {
+      case DATETIME: {
+        getObjectAsDateTime().add(Calendar.DAY_OF_MONTH, Var.valueOf(value).getObjectAsInt());
+        break;
+      }
+      case INT: {
+        result = getObjectAsLong() + Var.valueOf(value).getObjectAsLong();
+        break;
+      }
+      default: {
+        result = getObjectAsDouble() + Var.valueOf(value).getObjectAsDouble();
+      }
 
-		}
+    }
 
-		if (result != null)
-			setObject(result);
-	}
+    if (result != null)
+      setObject(result);
+  }
 
-	public Var append(Object value) {
-		Object result = getObjectAsString() + (value != null ? value.toString() : "");
-		setObject(result);
-		return this;
-	}
+  public void multiply(Object value) {
+    Object result = null;
 
-	/**
-	 * Check to see if this Var is less than some other var.
-	 *
-	 * @param var the var to compare to
-	 * @return true if it is less than
-	 */
-	public boolean lessThan(Var var) {
-		return this.compareTo(var) < 0;
-	}
+    switch (getType()) {
+      case INT: {
+        result = getObjectAsLong() * Var.valueOf(value).getObjectAsLong();
+        break;
+      }
+      default: {
+        result = getObjectAsDouble() * Var.valueOf(value).getObjectAsDouble();
+      }
 
-	/**
-	 * Check to see if this var is less than or equal to some other var
-	 *
-	 * @param var the var to compare to
-	 * @return true if this is less than or equal to var
-	 */
-	public boolean lessThanOrEqual(Var var) {
-		return this.compareTo(var) <= 0;
-	}
+    }
 
-	/**
-	 * Check to see if this var is greater than a given var.
-	 *
-	 * @param var the var to compare to.
-	 * @return true if this object is grater than the given var
-	 */
-	public boolean greaterThan(Var var) {
-		return this.compareTo(var) > 0;
-	}
+    if (result != null)
+      setObject(result);
+  }
 
-	/**
-	 * Check to see if this var is greater than or equal to a given var
-	 *
-	 * @param var the var to compare to
-	 * @return true if this var is greater than or equal to the given var
-	 */
-	public boolean greaterThanOrEqual(Var var) {
-		return this.compareTo(var) >= 0;
-	}
+  public Var append(Object value) {
+    Object result = getObjectAsString() + (value != null ? value.toString() : "");
+    setObject(result);
+    return this;
+  }
 
-	/**
-	 * Compare this object's value to another
-	 *
-	 * @param var the object to compare to
-	 * @return the value 0 if this is equal to the argument; a value less than 0
-	 * if this is numerically less than the argument; and a value greater than 0
-	 * if this is numerically greater than the argument (signed comparison).
-	 */
-	@Override
+  /**
+   * Check to see if this Var is less than some other var.
+   *
+   * @param var the var to compare to
+   * @return true if it is less than
+   */
+  public boolean lessThan(Var var) {
+    return this.compareTo(var) < 0;
+  }
+
+  /**
+   * Check to see if this var is less than or equal to some other var
+   *
+   * @param var the var to compare to
+   * @return true if this is less than or equal to var
+   */
+  public boolean lessThanOrEqual(Var var) {
+    return this.compareTo(var) <= 0;
+  }
+
+  /**
+   * Check to see if this var is greater than a given var.
+   *
+   * @param var the var to compare to.
+   * @return true if this object is grater than the given var
+   */
+  public boolean greaterThan(Var var) {
+    return this.compareTo(var) > 0;
+  }
+
+  /**
+   * Check to see if this var is greater than or equal to a given var
+   *
+   * @param var the var to compare to
+   * @return true if this var is greater than or equal to the given var
+   */
+  public boolean greaterThanOrEqual(Var var) {
+    return this.compareTo(var) >= 0;
+  }
+
+  /**
+   * Compare this object's value to another
+   *
+   * @param var the object to compare to
+   * @return the value 0 if this is equal to the argument; a value less than 0
+   * if this is numerically less than the argument; and a value greater than 0
+   * if this is numerically greater than the argument (signed comparison).
+   */
+  @Override
   public int compareTo(Var var) {
     var = Var.valueOf(var);
 
@@ -576,15 +632,15 @@ public class Var implements Comparable<Var>, JsonSerializable {
       } else if (getType() == Type.NULL && var.getType() != Type.NULL){
         return -1;
       } else {
-  
+
         if (var == this) {
           return 0;
         }
-  
+
         if(this.getObject().equals(var.getObject())) {
           return 0;
         }
-  
+
         switch (getType()) {
           case STRING:
             return this.getObjectAsString().compareTo(var.getObjectAsString());
@@ -613,141 +669,141 @@ public class Var implements Comparable<Var>, JsonSerializable {
     return -1;
   }
 
-	/**
-	 * Convert this Var to a string format.
-	 *
-	 * @return the string format of this var
-	 */
-	@Override
-	public String toString() {
-		switch (getType()) {
-		case STRING:
-			return getObject().toString();
-		case INT:
-			Long i = (Long) getObject();
-			return i.toString();
-		case DOUBLE:
-			Double d = (double) _object;
-			return _formatter.format(d);
-		case DATETIME:
-			return Utils.getDateFormat().format(((Calendar) getObject()).getTime());
-		case LIST:
-			LinkedList<Var> ll = (LinkedList) getObject();
-			StringBuilder sb = new StringBuilder();
-			if (ll.isEmpty())
-				return "[]";
-			sb.append("[");
-			for (Var v : ll) {
-				sb.append(v.toString());
-				sb.append(",");
-			}
-			sb.deleteCharAt(sb.length()-1);
-			sb.append("]");
-			return sb.toString();
-		case NULL:
-			return "";
-		default:
-			if (getObject() == null)
-				return "";
-			return getObject().toString();
-		}
-	}
+  /**
+   * Convert this Var to a string format.
+   *
+   * @return the string format of this var
+   */
+  @Override
+  public String toString() {
+    switch (getType()) {
+      case STRING:
+        return getObject().toString();
+      case INT:
+        Long i = (Long) getObject();
+        return i.toString();
+      case DOUBLE:
+        Double d = (double) _object;
+        return _formatter.format(d);
+      case DATETIME:
+        return Utils.getDateFormat().format(((Calendar) getObject()).getTime());
+      case LIST:
+        LinkedList<Var> ll = (LinkedList) getObject();
+        StringBuilder sb = new StringBuilder();
+        if (ll.isEmpty())
+          return "[]";
+        sb.append("[");
+        for (Var v : ll) {
+          sb.append(v.toString());
+          sb.append(",");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        sb.append("]");
+        return sb.toString();
+      case NULL:
+        return "";
+      default:
+        if (getObject() == null)
+          return "";
+        return getObject().toString();
+    }
+  }
 
-	public Var negate() {
-		if (getObjectAsBoolean()) {
-			return VAR_FALSE;
-		}
+  public Var negate() {
+    if (getObjectAsBoolean()) {
+      return VAR_FALSE;
+    }
 
-		return VAR_TRUE;
-	}
+    return VAR_TRUE;
+  }
 
-	/**
-	 * Internal method for inferring the "object type" of this object. When it
-	 * is done, it sets the private member value of _type. This will be
-	 * referenced later on when various method calls are made on this object.
-	 */
-	private void inferType() {
-		if (_object == null) {
-			_type = Type.NULL;
-		} else if (_object instanceof Var) {
-			Var oldObj = (Var) _object;
-			_type = oldObj.getType();
-			_object = oldObj.getObject();
-			if (id == null)
-				id = oldObj.id;
-		} else if (_object instanceof String || _object instanceof StringBuilder || _object instanceof StringBuffer
-				|| _object instanceof Character) {
-			_type = Type.STRING;
-			_object = _object.toString();
-		} else if (_object instanceof Boolean) {
-			_type = Type.BOOLEAN;
-		} else if (_object instanceof Date) {
-			Date date = (Date) _object;
-			_type = Type.DATETIME;
-			_object = Calendar.getInstance();
-			((Calendar) _object).setTime(date);
-		} else if (_object instanceof Calendar) {
-			_type = Type.DATETIME;
-		} else if (_object instanceof Long) {
-			_type = Type.INT;
-		} else if (_object instanceof Integer) {
-			_type = Type.INT;
-			_object = Long.valueOf((Integer) _object);
-		} else if (_object instanceof Double) {
-			_type = Type.DOUBLE;
-		} else if (_object instanceof Float) {
-			_type = Type.DOUBLE;
-			_object = Double.valueOf((Float) _object);
-		} else if (_object instanceof BigDecimal) {
-			if (((BigDecimal) _object).scale() == 0) {
-				_type = Type.INT;
-				_object = ((BigDecimal) _object).longValue();
-			} else {
-				_type = Type.DOUBLE;
-				_object = ((BigDecimal) _object).doubleValue();
-			}
-		} else if (_object instanceof BigInteger) {
-			_type = Type.INT;
-			_object = ((BigInteger) _object).longValue();
-		} else if (_object instanceof LinkedList) {
-			_type = Type.LIST;
-		} else if (_object instanceof List) {
-			_type = Type.LIST;
-			_object = new LinkedList<>((List) _object);
-		} else {
-			_type = Type.UNKNOWN;
-		}
-	}
+  /**
+   * Internal method for inferring the "object type" of this object. When it
+   * is done, it sets the private member value of _type. This will be
+   * referenced later on when various method calls are made on this object.
+   */
+  private void inferType() {
+    if (_object == null) {
+      _type = Type.NULL;
+    } else if (_object instanceof Var) {
+      Var oldObj = (Var) _object;
+      _type = oldObj.getType();
+      _object = oldObj.getObject();
+      if (id == null)
+        id = oldObj.id;
+    } else if (_object instanceof String || _object instanceof StringBuilder || _object instanceof StringBuffer
+        || _object instanceof Character) {
+      _type = Type.STRING;
+      _object = _object.toString();
+    } else if (_object instanceof Boolean) {
+      _type = Type.BOOLEAN;
+    } else if (_object instanceof Date) {
+      Date date = (Date) _object;
+      _type = Type.DATETIME;
+      _object = Calendar.getInstance();
+      ((Calendar) _object).setTime(date);
+    } else if (_object instanceof Calendar) {
+      _type = Type.DATETIME;
+    } else if (_object instanceof Long) {
+      _type = Type.INT;
+    } else if (_object instanceof Integer) {
+      _type = Type.INT;
+      _object = Long.valueOf((Integer) _object);
+    } else if (_object instanceof Double) {
+      _type = Type.DOUBLE;
+    } else if (_object instanceof Float) {
+      _type = Type.DOUBLE;
+      _object = Double.valueOf((Float) _object);
+    } else if (_object instanceof BigDecimal) {
+      if (((BigDecimal) _object).scale() == 0) {
+        _type = Type.INT;
+        _object = ((BigDecimal) _object).longValue();
+      } else {
+        _type = Type.DOUBLE;
+        _object = ((BigDecimal) _object).doubleValue();
+      }
+    } else if (_object instanceof BigInteger) {
+      _type = Type.INT;
+      _object = ((BigInteger) _object).longValue();
+    } else if (_object instanceof LinkedList) {
+      _type = Type.LIST;
+    } else if (_object instanceof List) {
+      _type = Type.LIST;
+      _object = new LinkedList<>((List) _object);
+    } else {
+      _type = Type.UNKNOWN;
+    }
+  }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	@Override
-	public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
-		if (id != null) {
-			gen.writeStartObject();
-			gen.writeObjectField(id, _object);
-			gen.writeEndObject();
-		} else {
-			gen.writeObject(_object);
-		}
-	}
+  @Override
+  public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    if (id != null) {
+      gen.writeStartObject();
+      gen.writeObjectField(id, _object);
+      gen.writeEndObject();
+    } else {
+      gen.writeObject(_object);
+    }
+  }
 
-	@Override
-	public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer)
-			throws IOException {
-		if (id != null) {
-			gen.writeStartObject();
-			gen.writeObjectField(id, _object);
-			gen.writeEndObject();
-		} else {
-			gen.writeObject(_object);
-		}
-	}
+  @Override
+  public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer)
+      throws IOException {
+    if (id != null) {
+      gen.writeStartObject();
+      gen.writeObjectField(id, _object);
+      gen.writeEndObject();
+    } else {
+      gen.writeObject(_object);
+    }
+  }
 
-	public static Object[] asObjectArray(Var[] vars) {
-	  if (vars.length > 0) {
+  public static Object[] asObjectArray(Var[] vars) {
+    if (vars.length > 0) {
       Object[] objs = new Object[vars.length];
       for (int i = 0; i < vars.length; i++) {
         objs[i] = vars[i].getObject();
