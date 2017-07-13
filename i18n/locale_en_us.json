@@ -190,5 +190,12 @@
 	"XMLGetParentElementDescription": "Function that return the parent element",
 	"XMLGetElementTagNameName": "Get element tag",
 	"XMLGetElementTagNameDescription": "Function that return the element tag",
-	"XMLGetElementValueName":"Get element value"
+	"XMLGetElementValueName":"Get element value",
+  "LogicIsNullParam" : "Variable: Variable to be checked",
+  "LogicIsNullName": "is null?",
+  "LogicIsNullDescription" : "Function that check if a variable is null",
+  "LogicIsNullOrEmptyName": "is null or empty?",
+  "LogicIsNullOrEmptyDescription" : "Function that check if a variable is null or empty",
+  "LogicIsEmptyName": "is empty?",
+  "LogicIsEmptyDescription" : "Function that check if a variable is empty"
 }
