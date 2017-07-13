@@ -1,20 +1,13 @@
 package cronapi.map;
 
-import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 import cronapi.CronapiMetaData;
-import cronapi.ParamMetaData;
-import cronapi.Utils;
-import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
+import cronapi.Var;
 
 /**
  * Classe que representa ...
@@ -28,7 +21,7 @@ import cronapi.CronapiMetaData.ObjectType;
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{createObjectWithMapName}}", nameTags = {
-			"createObjectWithMap" }, description = "{{createObjectWithMapDescription}}", arbitraryParams = true, returnType = ObjectType.MAP)
+			"createObjectWithMap" }, description = "{{createObjectWithMapDescription}}", wizard = "maps_create_with" , returnType = ObjectType.MAP)
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
