@@ -22,6 +22,8 @@ public class RestClient {
   private JsonObject query = null;
 
   private RestBody body;
+
+  private Var rawBody;
   
   public static RestClient getRestClient() {
     return REST_CLIENT.get();
@@ -51,17 +53,33 @@ public class RestClient {
       body = new RestBody();
     return body;
   }
-  
+
   public void setBody(RestBody body) {
     this.body = body;
   }
-  
+
+  public Var getRawBody() {
+    return rawBody;
+  }
+
+  public void setRawBody(Var rawBody) {
+    this.rawBody = rawBody;
+  }
+
   public HttpServletRequest getRequest() {
     return request;
   }
   
   public HttpServletResponse getResponse() {
     return response;
+  }
+
+  public String getParameter(String key) {
+    return request.getParameter(key);
+  }
+
+  public String getMethod() {
+    return request.getMethod();
   }
 
   public JsonObject getQuery() {

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +30,12 @@ import cronapi.database.TransactionManager;
 @RestController
 @RequestMapping(value = "/api/cronapi")
 public class CronapiREST {
-  
+
   private static Pattern RELATION_PARAM = Pattern.compile("relation:(.*?):(.*?)$");
-  
+
   @Autowired
   private HttpServletRequest request;
-  
+
   private class TranslationPath {
     Var[] params;
     String relationClass;
@@ -145,7 +146,7 @@ public class CronapiREST {
 
   @RequestMapping(method = RequestMethod.PUT, value = "/crud/{entity}/**")
   public HttpEntity<Object> crudPost(@PathVariable("entity") String entity, @RequestBody final Var data)
-          throws Exception {
+      throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
       ds.filter(data, null);
@@ -158,7 +159,7 @@ public class CronapiREST {
 
   @RequestMapping(method = RequestMethod.POST, value = "/crud/{entity}/**")
   public HttpEntity<Object> crudPut(@PathVariable("entity") String entity, @RequestBody final Var data)
-          throws Exception {
+      throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
       TranslationPath translationPath = translatePathVars(entity);
@@ -193,45 +194,70 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
-  public HttpEntity<List> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
+  public HttpEntity<?> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
 
-      JsonObject obj = QueryManager.getQuery(id);
-      QueryManager.checkSecurity(obj, "GET");
-      TranslationPath translationPath = translatePathVars(id, 0, obj.getAsJsonArray("queryParamsValues").size());
-      DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
-      String query = obj.get("query") != null ? obj.get("query").getAsString() : null;
+      JsonObject query = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(query, "GET");
 
-      ds.filter(query, page, translationPath.params);
+      if (QueryManager.getType(query).equals("blockly")) {
+        TranslationPath translationPath = translatePathVars(id);
+        return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
+      } else {
+        TranslationPath translationPath = translatePathVars(id, 0, query.getAsJsonArray("queryParamsValues").size());
 
-      QueryManager.executeNavigateEvent(obj, ds);
+        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        String jpql = query.get("query") != null ? query.get("query").getAsString() : null;
 
-      return Var.valueOf(ds.getPage());
+        ds.filter(jpql, page, translationPath.params);
+
+        QueryManager.executeNavigateEvent(query, ds);
+
+        return Var.valueOf(ds.getPage());
+      }
     });
 
-    Page page = (Page)data.getValue().getObject();
+    if (data.getValue().getObject() instanceof Page) {
+      Page page = (Page) data.getValue().getObject();
+      return new ResponseEntity<List>(page.getContent(), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<Var>(data.getValue(), HttpStatus.OK);
+    }
 
-    return new ResponseEntity<List>(page.getContent(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
   public HttpEntity<Object> queryPost(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
-      JsonObject obj = QueryManager.getQuery(id);
-      QueryManager.checkSecurity(obj, "POST");
-      DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
+      JsonObject query = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(query, "POST");
 
-      ds.insert((Map<?, ?>)data.getObject());
+      if (QueryManager.getType(query).equals("blockly")) {
+        TranslationPath translationPath = translatePathVars(id);
 
-      QueryManager.addDefaultValues(obj, ds);
+        Var body =  Var.valueOf((Map<?, ?>) data.getObject());
+        RestClient.getRestClient().setRawBody(body);
+        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {body}, translationPath.params);
+        QueryManager.executeEvent(query, body, "beforeInsert");
+        Var inserted = QueryManager.executeBlockly(query, "POST", params);
+        QueryManager.executeEvent(query, body, "afterInsert");
 
-      QueryManager.executeEvent(obj, ds, "beforeInsert");
-      Object inserted = ds.save(false);
-      QueryManager.executeEvent(obj, ds, "afterInsert");
+        return inserted.getPOJO();
+      } else {
+        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
 
-      return Var.valueOf(inserted);
+        ds.insert((Map<?, ?>) data.getObject());
+
+        QueryManager.addDefaultValues(query, ds);
+
+        QueryManager.executeEvent(query, ds, "beforeInsert");
+        Object inserted = ds.save(false);
+        QueryManager.executeEvent(query, ds, "afterInsert");
+
+        return Var.valueOf(inserted);
+      }
     });
 
     return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
@@ -241,16 +267,31 @@ public class CronapiREST {
   public HttpEntity<Object> queryPut(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
-      JsonObject obj = QueryManager.getQuery(id);
-      QueryManager.checkSecurity(obj, "PUT");
-      DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
+      JsonObject query = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(query, "PUT");
 
-      ds.filter(data, null);
-      QueryManager.executeEvent(obj, ds, "beforeUpdate");
-      ds.update(data);
-      Var saved = Var.valueOf(ds.save());
-      QueryManager.executeEvent(obj, ds, "afterUpdate");
-      return saved;
+
+      if (QueryManager.getType(query).equals("blockly")) {
+        TranslationPath translationPath = translatePathVars(id);
+
+        Var body =  Var.valueOf((Map<?, ?>) data.getObject());
+        RestClient.getRestClient().setRawBody(body);
+        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {body}, translationPath.params);
+        QueryManager.executeEvent(query, body, "beforeUpdate");
+        Var modified = QueryManager.executeBlockly(query, "PUT", params);
+        QueryManager.executeEvent(query, body, "beforeUpdate");
+
+        return modified.getPOJO();
+      } else {
+        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+
+        ds.filter(data, null);
+        QueryManager.executeEvent(query, ds, "beforeUpdate");
+        ds.update(data);
+        Var saved = Var.valueOf(ds.save());
+        QueryManager.executeEvent(query, ds, "afterUpdate");
+        return saved;
+      }
     });
 
     return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
@@ -260,18 +301,28 @@ public class CronapiREST {
   public void queryDelete(@PathVariable("id") String id) throws Exception {
     runIntoTransaction(() -> {
 
-      JsonObject obj = QueryManager.getQuery(id);
-      QueryManager.checkSecurity(obj, "DELETE");
-      TranslationPath translationPath = translatePathVars(id, obj.getAsJsonArray("queryParamsValues").size(), -1);
-      DataSource ds = new DataSource(obj.get("entityFullName").getAsString());
-      ds.filter(null, new PageRequest(1, 1), translationPath.params);
-      QueryManager.executeEvent(obj, ds, "beforeDelete");
-      ds.delete();
-      QueryManager.executeEvent(obj, ds, "afterDelete");
+      JsonObject query = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(query, "DELETE");
+
+      if (QueryManager.getType(query).equals("blockly")) {
+        TranslationPath translationPath = translatePathVars(id);
+
+        QueryManager.executeEvent(query, "beforeDelete", translationPath.params);
+        QueryManager.executeBlockly(query, "DELETE", translationPath.params);
+        QueryManager.executeEvent(query, "afterDelete", translationPath.params);
+      } else {
+        TranslationPath translationPath = translatePathVars(id, query.getAsJsonArray("queryParamsValues").size(), -1);
+
+        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        ds.filter(null, new PageRequest(1, 1), translationPath.params);
+        QueryManager.executeEvent(query, ds, "beforeDelete");
+        ds.delete();
+        QueryManager.executeEvent(query, ds, "afterDelete");
+      }
       return null;
     });
   }
-  
+
   @RequestMapping(method = RequestMethod.POST, value = "/call/body/{class}")
   public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
@@ -279,7 +330,7 @@ public class CronapiREST {
       return cronapi.util.Operations.callBlockly(new Var(clazz), body.getInputs());
     });
   }
-  
+
   @RequestMapping(method = RequestMethod.GET, value = "/call/{class}/**")
   public RestResult getOneParam(@PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
@@ -287,14 +338,14 @@ public class CronapiREST {
       return cronapi.util.Operations.callBlockly(new Var(clazz), translationPath.params);
     });
   }
-  
+
   @RequestMapping(method = RequestMethod.POST, value = "/call/{class}")
   public RestResult postParams(@RequestBody Var[] vars, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
     });
   }
-  
+
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     Var var = Var.VAR_NULL;
     try {
