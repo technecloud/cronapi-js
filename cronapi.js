@@ -404,6 +404,30 @@
     }
     return result;
   };
+  
+  /**
+   * @type function
+   * @name {{executeJavascriptNoReturnName}}
+   * @nameTags executeJavascriptNoReturn
+   * @description {{executeJavascriptNoReturnDescription}}
+   * @param {ObjectType.STRING} value {{executeJavascriptNoReturnParam0}}
+   * @multilayer true
+   */
+  this.cronapi.util.executeJavascriptNoReturn = function(value) {
+    eval( value );
+  };
+  
+  /**
+   * @type function
+   * @name {{executeJavascriptNoReturnName}}
+   * @nameTags executeJavascriptNoReturn
+   * @description {{executeJavascriptNoReturnDescription}}
+   * @param {ObjectType.STRING} value {{executeJavascriptNoReturnParam0}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.executeJavascriptNoReturn = function(value) {
+    return eval( value );
+  };
 
   /**
    * @category CategoryType.SCREEN

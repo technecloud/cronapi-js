@@ -194,5 +194,8 @@
 	"LogicIsNullOrEmptyDescription": "Função que verifique se a variável é nula ou vazia",
 	"LogicIsEmptyName": "é vazio?",
 	"LogicIsEmptyDescription": "Função que verifique se a variável é vazia",
-	"createDefaultModalParam7": "Ao fechar: Comandos executados ao clicar no botão de fechar modal."
+	"createDefaultModalParam7": "Ao fechar: Comandos executados ao clicar no botão de fechar modal.",
+	"executeJavascriptNoReturnName": "Executa javascript",
+	"executeJavascriptNoReturnDescription": "Função que executa javascript",
+	"executeJavascriptNoReturnParam0": "Comando:Comando a ser executado (exemplo: alert('teste');)."
 }

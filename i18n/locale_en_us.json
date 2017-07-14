@@ -194,5 +194,8 @@
 	"LogicIsNullOrEmptyDescription": "Function that check if a variable is null or empty",
 	"LogicIsEmptyName": "is empty?",
 	"LogicIsEmptyDescription": "Function that check if a variable is empty",
-	"createDefaultModalParam7": "On close: statements executed when close button is clicked on modal"
+	"createDefaultModalParam7": "On close: statements executed when close button is clicked on modal",
+	"executeJavascriptNoReturnName": "Execute javascript",
+	"executeJavascriptNoReturnDescription": "Function that execute a javascript",
+	"executeJavascriptNoReturnParam0": "Command:Command to be executed (example: alert('test');)."
 }
