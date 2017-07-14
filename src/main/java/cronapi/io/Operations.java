@@ -12,16 +12,16 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa ...
@@ -533,7 +533,11 @@ public class Operations {
 			"listFiles" }, description = "{{listFilesDescription}}", returnType = ObjectType.STRING)
 	public static final Var listFiles(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam0}}") Var path,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}") Var type) throws Exception {
+			@ParamMetaData(type = ObjectType.STRING, 
+			               description = "{{listFilesParam1}}",
+			               blockType = "util_dropdown",
+			               keys = { "all","directories","files" },
+			               values = { "{{all}}","{{directories}}","{{files}}" }) Var type) throws Exception {
 		try {
 			if (path.equals(Var.VAR_NULL))
 				return Var.newList();
