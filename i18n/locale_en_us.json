@@ -158,16 +158,12 @@
 	"confirmDialogParam0": "Message",
 	"createDefaultModalDescription": "Function that create a modal",
 	"createDefaultModalName": "Create Modal",
-	"createDefaultModalParam0": "Modal Identifier",
-	"createDefaultModalParam1": "Title",
-	"createDefaultModalParam2": "Message",
+	"createDefaultModalParam1": "Title: Modal title",
+	"createDefaultModalParam2": "Message: Message shown on modal",
 	"createDefaultModalParam3": "Cancel button name",
 	"createDefaultModalParam4": "Confirm button name",
-	"showModalName": "Show modal",
-	"showModalDescription": "Function that shows a modal",
-	"showModalParam0": "Modal",
-	"createDefaultModalParam5": "On Success",
-	"createDefaultModalParam6": "On Error",
+	"createDefaultModalParam5": "On Success: Statements to be executed when a confirm button is clicked on modal",
+	"createDefaultModalParam6": "On Cancel: Statements to be executed when a cancel button is clicked on modal",
 	"XMLGetElementValue": "Get element value",
 	"XMLGetElementValueDescription": "Function that return a element value",
 	"XMLGetElementValueParam0": "Element: Element to get value",
@@ -198,5 +194,5 @@
 	"LogicIsNullOrEmptyDescription": "Function that check if a variable is null or empty",
 	"LogicIsEmptyName": "is empty?",
 	"LogicIsEmptyDescription": "Function that check if a variable is empty",
-	"createDefaultModalParam7": "On close"
+	"createDefaultModalParam7": "On close: statements executed when close button is clicked on modal"
 }
