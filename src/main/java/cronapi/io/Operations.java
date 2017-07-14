@@ -51,11 +51,12 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{createFolder}}", nameTags = {
 			"createFolder" }, description = "{{functionToCreateNewFolder}}", params = {
-					"{{pathMustBeCreatedForFolder}}" }, paramsType = {
+					"{{pathMustBeCreatedForFolder}}", "{{folderName}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public static final Var folderCreate(Var path) throws Exception {
+	public static final Var folderCreate(Var path, Var folderName) throws Exception {
 		boolean success = true;
-		File dir = new File(path.getObjectAsString().trim());
+		String folder = path.getObjectAsString().trim() + File.separator + folderName.getObjectAsString().trim();
+		File dir = new File(folder);
 		if (!dir.exists()) {
 			success = dir.mkdirs();
 			return new Var(success);
@@ -575,4 +576,9 @@ public class Operations {
 		}
 	}
 
+	@CronapiMetaData(type = "function", name = "{{fileSeparatorName}}", nameTags = {
+			"fileSeparator" }, description = "{{fileSeparatorDescription}}", returnType = ObjectType.STRING)
+	public static final Var fileSeparator() {
+		return Var.valueOf(File.separator);
+	}
 }
