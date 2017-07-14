@@ -157,7 +157,7 @@
 	"confirmDialogDescription": "Função que exibe uma confirmação da ação e retorna verdadeiro ou falso",
 	"confirmDialogParam0": "Mensagem",
 	"createDefaultModalDescription": "Função que cria um modal",
-	"createDefaultModalName": "Cria Modal: Função que cria e exibe um modal",
+	"createDefaultModalName": "Cria Modal",
 	"createDefaultModalParam1": "Título: Título do modal",
 	"createDefaultModalParam2": "Mensagem: Mensagem exibida no modal",
 	"createDefaultModalParam3": "Nome do botão cancelar: Nome atribuído ao botão cancelar do modal",
