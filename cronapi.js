@@ -726,13 +726,13 @@
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    *
    */
-  this.cronapi.screen.createDefaultModal = function(title, msg, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError) {
+  this.cronapi.screen.createDefaultModal = function(title, msg, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError,/** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam7}}*/ onClose ) {
    $('#modalTemplateTitle').text(title);
    $('#modalTemplateBody').text(msg);
    $('#modalTemplateCancel').text(buttonCancelName);
    $('#modalTemplateSave').text(buttonSaveName);
-   $( "modalTemplateClose").unbind( "click" );
-   $('#modalTemplateClose').click(onError);
+   $( "#modalTemplateClose").unbind( "click" );
+   $('#modalTemplateClose').click(onClose);
    $( "#modalTemplateCancel").unbind( "click" );
    $('#modalTemplateCancel').click(onError);
    $( "#modalTemplateSave").unbind( "click" );   
