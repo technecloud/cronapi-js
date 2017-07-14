@@ -43,9 +43,18 @@ public class QueryManager {
   public static JsonObject getQuery(String id) {
     JsonObject obj = getJSON().getAsJsonObject(id);
     if(obj == null) {
-      throw new RuntimeException(Messages.getString("queryNotFound"));
+      for (Map.Entry<String, JsonElement> entry : getJSON().entrySet()) {
+        JsonObject customObj = entry.getValue().getAsJsonObject();
+        if (!isNull(customObj.get("customId")) && customObj.get("customId").getAsString().equalsIgnoreCase(id)) {
+          obj = customObj;
+          break;
+        }
+      }
+      if(obj == null) {
+        throw new RuntimeException(Messages.getString("queryNotFound"));
+      }
     }
-    
+
     RestClient.getRestClient().setQuery(obj);
     return obj;
   }
