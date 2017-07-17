@@ -334,4 +334,28 @@ public class Operations {
 		}
 		return new Var("");
 	}
+	
+		@CronapiMetaData(type = "function", name = "{{XMLRemoveElementName}}", nameTags = {
+			"XMLRemoveElement" }, description = "{{XMLRemoveElementDescription}}", params = {
+					"{{XMLRemoveElementParam0}}", "{{XMLRemoveElementParam1}}" }, paramsType = { ObjectType.OBJECT,
+							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
+	public static final Var XMLRemoveElement(Var parent, Var element) throws Exception {
+
+		if (!parent.equals(Var.VAR_NULL)) {
+			if (element.equals(Var.VAR_NULL)) {
+				Element parentCasted = (Element) parent.getObject();
+				parentCasted.removeContent();
+				return Var.VAR_TRUE;
+			}
+			Element parentCasted = (Element) parent.getObject();
+			if (element.getObject() instanceof Element) {
+				parentCasted.removeChildren(((Element) element.getObject()).getName());
+				return Var.VAR_TRUE;
+			}
+			parentCasted.removeChildren(element.getObjectAsString());
+			return Var.VAR_TRUE;
+		} else
+			return Var.VAR_FALSE;
+
+	}
 }
