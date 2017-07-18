@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
 
+import cronapi.database.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -275,8 +276,10 @@ public class Utils {
 
 		if (obj instanceof JsonObject)
 			return ((JsonObject) obj).get(key);
-		else if (obj instanceof java.util.HashMap)
+		else if (obj instanceof java.util.Map)
 			return ((Map) obj).get(key);
+    else if (obj instanceof DataSource)
+      return ((DataSource) obj).getObject(key);
 		else
 			return getFieldReflection(obj, key);
 	}
@@ -355,15 +358,15 @@ public class Utils {
 					((JsonArray) list).add((String) val);
 			}
 		} 
-		else if (list instanceof java.util.ArrayList) {
-			if (idx <= (((ArrayList) list).size() - 1))
-				((ArrayList) list).set(idx, val);
+		else if (list instanceof java.util.List) {
+			if (idx <= (((List) list).size() - 1))
+				((List) list).set(idx, val);
 			else {
 				for (int i = 0; i < idx; i++) {
-					if (i >= ((ArrayList) list).size())
-						((ArrayList) list).add(null);
+					if (i >= ((List) list).size())
+						((List) list).add(null);
 				}
-				((ArrayList) list).add(val);
+				((List) list).add(val);
 			}
 		}
 		else {
@@ -409,8 +412,10 @@ public class Utils {
 				((JsonObject) obj).addProperty(key, (Boolean) valueToSet);
 			else if (valueToSet instanceof String)
 				((JsonObject) obj).addProperty(key, (String) valueToSet);
-		} else if (obj instanceof java.util.HashMap) {
+		} else if (obj instanceof java.util.Map) {
 			((Map) obj).put(key, valueToSet);
+		} else if (obj instanceof DataSource) {
+      ((DataSource) obj).updateField(key, valueToSet);
 		} else {
 			setValueInObjByReflection(obj, key, valueToSet);
 		}
@@ -458,14 +463,14 @@ public class Utils {
 				value = new JsonArray();
 			setValueByIndex(value, new JsonObject(), idx);
 		} else {
-			if (value == null || !(value instanceof ArrayList))
+			if (value == null || !(value instanceof List))
 				value = new ArrayList();
 			setValueByIndex(value, new HashMap(), idx);
 		}
 
 		if (obj instanceof JsonObject || obj instanceof Map)
 			setValueInObj(obj, keyOrPreviusIdx, value);
-		else if (obj instanceof JsonArray || obj instanceof ArrayList)
+		else if (obj instanceof JsonArray || obj instanceof List)
 			setValueByIndex(obj, value, Integer.parseInt(keyOrPreviusIdx));
 		return value;
 	}
@@ -480,8 +485,8 @@ public class Utils {
 			} else {
 				if (obj instanceof Map)
 					return ((Map) obj).get(keyOrPreviusIdx);
-				else if (obj instanceof ArrayList)
-					return ((ArrayList) obj).get(Integer.parseInt(keyOrPreviusIdx));
+				else if (obj instanceof List)
+					return ((List) obj).get(Integer.parseInt(keyOrPreviusIdx));
 			}
 		} catch (Exception e) {
 		}

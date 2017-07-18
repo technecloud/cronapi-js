@@ -64,8 +64,9 @@ public class DatabaseQueryManager {
     });
   }
   
-  public Var insert(final Var data, final Object ... extraObjParams) throws Exception {
+  public Var insert(final Object objData, final Object ... extraObjParams) throws Exception {
     final Var[] extraParams = toVarArray(extraObjParams);
+    final Var data = Var.valueOf(objData);
 
     return runIntoTransaction(() -> {
       
@@ -96,8 +97,9 @@ public class DatabaseQueryManager {
     });
   }
   
-  public Var update(final Var data, final Object ... extraObjParams) throws Exception {
+  public Var update(final Var objData, final Object ... extraObjParams) throws Exception {
     final Var[] extraParams = toVarArray(extraObjParams);
+    final Var data = Var.valueOf(objData);
 
     return runIntoTransaction(() -> {
       

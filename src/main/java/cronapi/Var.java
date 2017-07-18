@@ -1,6 +1,8 @@
 package cronapi;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.google.gson.JsonObject;
 
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
@@ -813,6 +816,27 @@ public class Var implements Comparable<Var>, JsonSerializable {
     } else {
       gen.writeObject(_object);
     }
+  }
+
+  public LinkedList<String> keySet() {
+    LinkedList<String> keys = new LinkedList<>();
+
+    if (getObject() != null) {
+      if (getObject() instanceof Map) {
+        ((Map) getObject()).keySet().stream().forEach(c -> keys.add(String.valueOf(c)));
+      } else if (getObject() instanceof JsonObject) {
+        ((JsonObject) getObject()).entrySet().stream().forEach(c -> keys.add(c.getKey()));
+      } else {
+        Method[] methods = getObject().getClass().getMethods();
+        for (Method m : methods) {
+          if (m.getName().startsWith("get") && Modifier.isPublic(m.getModifiers()) && m.getName().length() >= 4) {
+            keys.add(m.getName().substring(3,4).toLowerCase()+m.getName().substring(4));
+          }
+        }
+      }
+    }
+
+    return keys;
   }
 
   public Var getField(String field) {

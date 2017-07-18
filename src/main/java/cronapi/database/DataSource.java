@@ -335,7 +335,6 @@ public class DataSource implements JsonSerializable {
 	}
 
   public void filter(Var data, Var[] extraParams) {
-	  Map<?, ?> primaryKeys = (Map<?,?>) data.getObject();
 
     EntityManager em = TransactionManager.getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
@@ -350,7 +349,7 @@ public class DataSource implements JsonSerializable {
           jpql += " AND ";
         }
         jpql += "e." + field.getName() + " = :p" + i;
-        params.add(Var.valueOf("p" + i, Var.valueOf(primaryKeys.get(field.getName())).getObject(field.getType().getJavaType())));
+        params.add(Var.valueOf("p" + i, data.getField(field.getName()).getObject(field.getType().getJavaType())));
         i++;
       }
     }
@@ -370,10 +369,8 @@ public class DataSource implements JsonSerializable {
 
   public void update(Var data) {
     try {
-      Map<?, ?> values = (Map<?,?>) data.getObject();
-
-      for (Object key: values.keySet()) {
-        updateField(key.toString(), values.get(key));
+      for (String key: data.keySet()) {
+        updateField(key.toString(), data.getField(key));
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
