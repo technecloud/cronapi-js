@@ -1,6 +1,8 @@
 package cronapi;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -12,9 +14,11 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.google.gson.JsonObject;
 
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
+import cronapi.json.Operations;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -461,7 +465,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * @return the Var at that index
    */
   public Var get(int index) {
-    return ((LinkedList<Var>) getObject()).get(index);
+    switch (getType()) {
+      case LIST: {
+        return ((LinkedList<Var>) getObject()).get(index);
+      }
+    }
+
+    return VAR_NULL;
   }
 
   /**
@@ -471,7 +481,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * @return size of list
    */
   public int size() {
-    return ((LinkedList<Var>) getObject()).size();
+    switch (getType()) {
+      case LIST: {
+        return ((LinkedList<Var>) getObject()).size();
+      }
+    }
+
+    return 0;
   }
 
   public int length() {
@@ -799,6 +815,49 @@ public class Var implements Comparable<Var>, JsonSerializable {
       gen.writeEndObject();
     } else {
       gen.writeObject(_object);
+    }
+  }
+
+  public LinkedList<String> keySet() {
+    LinkedList<String> keys = new LinkedList<>();
+
+    if (getObject() != null) {
+      if (getObject() instanceof Map) {
+        ((Map) getObject()).keySet().stream().forEach(c -> keys.add(String.valueOf(c)));
+      } else if (getObject() instanceof JsonObject) {
+        ((JsonObject) getObject()).entrySet().stream().forEach(c -> keys.add(c.getKey()));
+      } else {
+        Method[] methods = getObject().getClass().getMethods();
+        for (Method m : methods) {
+          if (m.getName().startsWith("get") && Modifier.isPublic(m.getModifiers()) && m.getName().length() >= 4) {
+            keys.add(m.getName().substring(3,4).toLowerCase()+m.getName().substring(4));
+          }
+        }
+      }
+    }
+
+    return keys;
+  }
+
+  public Var getField(String field) {
+    try {
+      return Operations.getJsonOrMapField(this, Var.valueOf(field));
+    } catch (Exception e) {
+      //Abafa
+    }
+
+    return VAR_NULL;
+  }
+
+  public String getStringField(String field) {
+    return getField(field).getObjectAsString();
+  }
+
+  public void setField(String field, Object value) {
+    try {
+      Operations.setJsonOrMapField(this, Var.valueOf(field), Var.valueOf(value));
+    } catch (Exception e) {
+      //Abafa
     }
   }
 
