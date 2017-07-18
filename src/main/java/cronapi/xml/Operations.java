@@ -161,9 +161,9 @@ public class Operations {
 		return Var.VAR_NULL;
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLDocumentToStringName}}", nameTags = {
-			"XMLDocumentToString" }, description = "{{XMLDocumentToStringDescription}}", params = {
-					"{{XMLDocumentToStringParam0}}" }, paramsType = {
+	@CronapiMetaData(type = "function", name = "{{XMLElementToStringName}}", nameTags = {
+			"XMLElementToString" }, description = "{{XMLElementToStringDescription}}", params = {
+					"{{XMLElementToStringParam0}}" }, paramsType = {
 							ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public final static Var XMLElementToString(Var document) {
 		if (!document.equals(Var.VAR_NULL)) {
