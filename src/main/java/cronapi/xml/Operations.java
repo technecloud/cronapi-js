@@ -30,7 +30,8 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{newXMLEmptyName}}", nameTags = {
-			"newXMLEmpty" }, description = "{{newXMLEmptyDescription}}", returnType = ObjectType.OBJECT)
+			"newXMLEmpty" }, description = "{{newXMLEmptyDescription}}",  params = {
+					"{{newXMLEmptyParam0}}"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var newXMLEmpty(Var rootElement) throws Exception {
 		return new Var(new Document((Element) rootElement.getObject()));
 	}
