@@ -71,7 +71,7 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLaddElementName}}", nameTags = {
-			"XMLaddElement" }, description = "{{XMLaddElementDescription}}", params = { "{{XMLcreateElementParam0}}",
+			"XMLaddElement" }, description = "{{XMLaddElementDescription}}", params = { "{{XMLaddElementParam0}}",
 					"{{XMLaddElementParam1}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public final static Var XMLaddElement(Var parent, Var element) {
