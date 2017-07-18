@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,6 +16,8 @@ import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 
 public class ErrorResponse {
+  private static final Pattern EXCEPTION_NAME_PATTERN = Pattern.compile("^([a-zA-Z0-9]+\\.[a-zA-Z0-9._]+:)");
+
   private static JsonObject DATABASE;
   private static HashSet<String> IGNORED = new HashSet<>();
   
@@ -154,6 +158,11 @@ public class ErrorResponse {
     if(ex != null) {
       if(ex.getMessage() != null && !ex.getMessage().trim().isEmpty() && !hasIgnoredException(ex)) {
         message = ex.getMessage();
+        Matcher matcher = EXCEPTION_NAME_PATTERN.matcher(message);
+        while (matcher.find()) {
+          message = message.substring(matcher.group(1).length()).trim();
+          matcher = EXCEPTION_NAME_PATTERN.matcher(message);
+        }
         if(hasThrowable(ex, javax.persistence.RollbackException.class) ||
                 hasThrowable(ex, javax.persistence.PersistenceException.class)) {
           message = heandleDatabaseException(message, method);
@@ -166,7 +175,7 @@ public class ErrorResponse {
       }
     }
     
-    if(message == null) {
+    if(message == null || message.trim().isEmpty()) {
       return Messages.getString("errorNotSpecified");
     }
     
