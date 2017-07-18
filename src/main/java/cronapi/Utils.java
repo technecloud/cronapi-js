@@ -270,6 +270,9 @@ public class Utils {
 	}
 
 	private static final Object getValueByKey(Object obj, String key) {
+	  if (key.equals("this"))
+	    return obj;
+
 		if (obj instanceof JsonObject)
 			return ((JsonObject) obj).get(key);
 		else if (obj instanceof java.util.HashMap)
@@ -306,7 +309,7 @@ public class Utils {
 		try {
 			if (obj instanceof JsonArray)
 				return ((JsonArray) obj).get(idx);
-			else if (obj instanceof java.util.ArrayList)
+			else if (obj instanceof java.util.List)
 				return ((List) obj).get(idx);
 			else
 				return ((Object[]) obj)[idx];

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
+import cronapi.json.Operations;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -461,7 +462,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * @return the Var at that index
    */
   public Var get(int index) {
-    return ((LinkedList<Var>) getObject()).get(index);
+    switch (getType()) {
+      case LIST: {
+        return ((LinkedList<Var>) getObject()).get(index);
+      }
+    }
+
+    return VAR_NULL;
   }
 
   /**
@@ -471,7 +478,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * @return size of list
    */
   public int size() {
-    return ((LinkedList<Var>) getObject()).size();
+    switch (getType()) {
+      case LIST: {
+        return ((LinkedList<Var>) getObject()).size();
+      }
+    }
+
+    return 0;
   }
 
   public int length() {
@@ -799,6 +812,28 @@ public class Var implements Comparable<Var>, JsonSerializable {
       gen.writeEndObject();
     } else {
       gen.writeObject(_object);
+    }
+  }
+
+  public Var getField(String field) {
+    try {
+      return Operations.getJsonOrMapField(this, Var.valueOf(field));
+    } catch (Exception e) {
+      //Abafa
+    }
+
+    return VAR_NULL;
+  }
+
+  public String getStringField(String field) {
+    return getField(field).getObjectAsString();
+  }
+
+  public void setField(String field, Object value) {
+    try {
+      Operations.setJsonOrMapField(this, Var.valueOf(field), Var.valueOf(value));
+    } catch (Exception e) {
+      //Abafa
     }
   }
 

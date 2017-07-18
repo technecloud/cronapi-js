@@ -2,9 +2,7 @@ package cronapi.database;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
@@ -90,6 +88,41 @@ public class DataSource implements JsonSerializable {
 		}
 	}
 
+  private List<String> parseParams(String SQL) {
+    final String delims = " \n\r\t.(){},+:=!";
+    final String quots = "\'";
+    String token = "";
+    boolean isQuoted = false;
+    List<String> tokens = new LinkedList<>();
+
+    for(int i = 0; i < SQL.length(); i++) {
+      if(quots.indexOf(SQL.charAt(i)) != -1) {
+        isQuoted = token.length() == 0;
+      }
+      if(delims.indexOf(SQL.charAt(i)) == -1 || isQuoted) {
+        token += SQL.charAt(i);
+      }
+      else {
+        if(token.length() > 0) {
+          if (token.startsWith(":"))
+            tokens.add(token.substring(1));
+          token = "";
+          isQuoted = false;
+        }
+        if (SQL.charAt(i) == ':') {
+          token = ":";
+        }
+      }
+    }
+
+    if(token.length() > 0) {
+      if (token.startsWith(":"))
+        tokens.add(token.substring(1));
+    }
+
+    return tokens;
+  }
+
 	/**
 	 * Retrieve objects from database using repository when filter is null or empty,
 	 * if filter not null or is not empty, this method uses entityManager and create a
@@ -104,13 +137,14 @@ public class DataSource implements JsonSerializable {
 				TypedQuery<?> query = em.createQuery(filter, domainClass);
 
 				int i = 0;
-        Parameter<?>[] queryParams = query.getParameters().toArray(new Parameter<?>[query.getParameters().size()]);
+				List<String> parsedParams = parseParams(filter);
+
 				for (Var p : this.params) {
 				  if (p.getId() != null) {
-            query.setParameter(p.getId(), p.getObject(queryParams[i].getParameterType()));
+            query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
           } else {
-				    if (i <= queryParams.length-1) {
-              query.setParameter(queryParams[i].getName(), p.getObject(queryParams[i].getParameterType()));
+				    if (i <= parsedParams.size()-1) {
+              query.setParameter(parsedParams.get(i), p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
             }
           }
           i++;
