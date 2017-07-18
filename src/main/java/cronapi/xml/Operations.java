@@ -30,8 +30,8 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{newXMLEmptyName}}", nameTags = {
-			"newXMLEmpty" }, description = "{{newXMLEmptyDescription}}",  params = {
-					"{{newXMLEmptyParam0}}"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+			"newXMLEmpty" }, description = "{{newXMLEmptyDescription}}", params = {
+					"{{newXMLEmptyParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var newXMLEmpty(Var rootElement) throws Exception {
 		return new Var(new Document((Element) rootElement.getObject()));
 	}
@@ -277,23 +277,6 @@ public class Operations {
 		return Var.VAR_NULL;
 	}
 
-	@CronapiMetaData(type = "function", name = "{{XMLGetElementTagNameName}}", nameTags = {
-			"XMLGetElementTagName" }, description = "{{XMLGetElementTagNameDescription}}", params = {
-					"{{XMLGetElementTagNameParam0}}" }, paramsType = {
-							ObjectType.OBJECT }, returnType = ObjectType.STRING)
-	public static final Var XMLGetElementTagName(Var element) throws Exception {
-		if (!element.equals(Var.VAR_NULL)) {
-			if (element.getObject() instanceof Element) {
-				Element elementCasted = (Element) element.getObject();
-				return new Var(elementCasted.getName());
-			}
-		}
-		return Var.VAR_NULL;
-
-	}
-
-	//PAREI AQUI
-	//Alterar o valor de um Elemento XML
 	@CronapiMetaData(type = "function", name = "{{XMLSetElementValueName}}", nameTags = {
 			"XMLSetElementValue" }, description = "{{XMLSetElementValueDescription}}", params = {
 					"{{XMLSetElementValueParam0}}",
@@ -335,8 +318,8 @@ public class Operations {
 		}
 		return new Var("");
 	}
-	
-		@CronapiMetaData(type = "function", name = "{{XMLRemoveElementName}}", nameTags = {
+
+	@CronapiMetaData(type = "function", name = "{{XMLRemoveElementName}}", nameTags = {
 			"XMLRemoveElement" }, description = "{{XMLRemoveElementDescription}}", params = {
 					"{{XMLRemoveElementParam0}}", "{{XMLRemoveElementParam1}}" }, paramsType = { ObjectType.OBJECT,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
@@ -357,6 +340,37 @@ public class Operations {
 			return Var.VAR_TRUE;
 		} else
 			return Var.VAR_FALSE;
-
 	}
+
+	@CronapiMetaData(type = "function", name = "{{XMLGetElementTagNameName}}", nameTags = {
+			"XMLGetElementTagName" }, description = "{{XMLGetElementTagNameDescription}}", params = {
+					"{{XMLGetElementTagNameParam0}}" }, paramsType = {
+							ObjectType.OBJECT }, returnType = ObjectType.STRING)
+	public static final Var XMLGetElementTagName(Var element) throws Exception {
+		if (!element.equals(Var.VAR_NULL)) {
+			if (element.getObject() instanceof Element) {
+				Element elementCasted = (Element) element.getObject();
+				return new Var(elementCasted.getName());
+			}
+		}
+		return Var.VAR_NULL;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{XMLChangeNodeNameName}}", nameTags = {
+			"XMLChangeNodeName" }, description = "{{XMLChangeNodeNameDescription}}", params = {
+					"{{XMLChangeNodeNameParam0}}", "{{XMLChangeNodeNameParam1}}" }, paramsType = { ObjectType.OBJECT,
+							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
+	public static final Var XMLChangeNodeName(Var node, Var name) throws Exception {
+
+		if (!node.equals(Var.VAR_NULL) && !name.equals(Var.VAR_NULL)) {
+			if (node.getObject() instanceof Element) {
+				Element elementCasted = (Element) node.getObject();
+				elementCasted.setName(name.getObjectAsString());
+				return Var.VAR_TRUE;
+			} else
+				return Var.VAR_FALSE;
+		}
+		return Var.VAR_FALSE;
+	}
+
 }
