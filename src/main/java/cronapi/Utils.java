@@ -155,6 +155,8 @@ public class Utils {
 	}
 
 	public static Method findMethod(Object obj, String method) {
+		if(obj == null)
+			return null;
 		Method[] methods = obj instanceof Class ? ((Class) obj).getMethods() : obj.getClass().getMethods();
 		for (Method m : methods) {
 			if (m.getName().equalsIgnoreCase(method)) {
