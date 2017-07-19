@@ -128,25 +128,27 @@ public class QueryManager {
   }
 
   public static void executeNavigateEvent(JsonObject query, DataSource ds) {
-    if(!isNull(query.getAsJsonObject("events").get("onNavigate"))) {
-      JsonObject event = query.getAsJsonObject("events").getAsJsonObject("onNavigate");
-      Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
+    JsonObject events = query.getAsJsonObject("events");
+    if(!isNull(events)) {
+      if(!isNull(events.get("onNavigate"))) {
+        JsonObject event = events.getAsJsonObject("onNavigate");
+        Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
 
-      Var dsVar = Var.valueOf(ds);
+        Var dsVar = Var.valueOf(ds);
 
-      int current = ds.getCurrent();
+        int current = ds.getCurrent();
 
-      for(int i = 0; i < ds.getPage().getContent().size(); i++) {
-        try {
-          Operations.callBlockly(name, dsVar);
-          ds.nextOnPage();
+        for(int i = 0; i < ds.getPage().getContent().size(); i++) {
+          try {
+            Operations.callBlockly(name, dsVar);
+            ds.nextOnPage();
+          } catch(Exception e) {
+            throw new RuntimeException(e);
+          }
         }
-        catch(Exception e) {
-          throw new RuntimeException(e);
-        }
+
+        ds.setCurrent(current);
       }
-
-      ds.setCurrent(current);
     }
 
   }
