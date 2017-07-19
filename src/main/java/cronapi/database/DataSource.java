@@ -2,10 +2,12 @@ package cronapi.database;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
@@ -369,10 +371,13 @@ public class DataSource implements JsonSerializable {
 
   public void update(Var data) {
     try {
-      for (String key: data.keySet()) {
-        updateField(key.toString(), data.getField(key));
+      LinkedList<String> fields = data.keySet();
+      for(String key : fields) {
+        if(!key.equalsIgnoreCase(Class.class.getSimpleName()))
+          this.updateField(key, data.getField(key));
       }
-    } catch (Exception e) {
+    }
+    catch(Exception e) {
       throw new RuntimeException(e);
     }
   }
