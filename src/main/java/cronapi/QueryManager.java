@@ -102,27 +102,31 @@ public class QueryManager {
   }
 
   public static void executeEvent(JsonObject query, Object ds, String eventName) {
-    if(!isNull(query.getAsJsonObject("events").get(eventName))) {
-      JsonObject event = query.getAsJsonObject("events").getAsJsonObject(eventName);
-      Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
-      try {
-        Operations.callBlockly(name, Var.valueOf(ds));
-      }
-      catch(Exception e) {
-        throw new RuntimeException(e);
+    JsonObject events = query.getAsJsonObject("events");
+    if(!isNull(events)) {
+      if(!isNull(events.get(eventName))) {
+        JsonObject event = events.getAsJsonObject(eventName);
+        Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
+        try {
+          Operations.callBlockly(name, Var.valueOf(ds));
+        } catch(Exception e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
 
   public static void executeEvent(JsonObject query, String eventName, Var...params) {
-    if(!isNull(query.getAsJsonObject("events").get(eventName))) {
-      JsonObject event = query.getAsJsonObject("events").getAsJsonObject(eventName);
-      Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
-      try {
-        Operations.callBlockly(name, params);
-      }
-      catch(Exception e) {
-        throw new RuntimeException(e);
+    JsonObject events = query.getAsJsonObject("events");
+    if(!isNull(events)) {
+      if(!isNull(events.get(eventName))) {
+        JsonObject event = events.getAsJsonObject(eventName);
+        Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
+        try {
+          Operations.callBlockly(name, params);
+        } catch(Exception e) {
+          throw new RuntimeException(e);
+        }
       }
     }
   }
