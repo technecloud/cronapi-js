@@ -132,25 +132,25 @@ public class QueryManager {
     if(!isNull(events)) {
       if(!isNull(events.get("onNavigate"))) {
         JsonObject event = events.getAsJsonObject("onNavigate");
+        
         Var name = Var.valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod").getAsString());
-
         Var dsVar = Var.valueOf(ds);
-
+        
         int current = ds.getCurrent();
-
-        for(int i = 0; i < ds.getPage().getContent().size(); i++) {
+        int size = ds.getPage().getContent().size();
+        for(int i = 0; i < size; i++) {
           try {
             Operations.callBlockly(name, dsVar);
             ds.nextOnPage();
-          } catch(Exception e) {
+          }
+          catch(Exception e) {
             throw new RuntimeException(e);
           }
         }
-
+        
         ds.setCurrent(current);
       }
     }
-
   }
 
   private static Var doExecuteBlockly(JsonObject blockly, String method, Var...params) throws Exception {
