@@ -23,7 +23,7 @@ Java library for CronApp's users
     <dependency>
         <groupId>io.cronapp</groupId>
         <artifactId>cronapi-java</artifactId>
-        <version>0.0.28</version>
+        <version>0.0.29</version>
     </dependency>
 </dependencies>
 ```
