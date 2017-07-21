@@ -6,7 +6,14 @@ import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 
-import cronapi.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import cronapi.ClientCommand;
+import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
+import cronapi.RestClient;
+import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
@@ -203,9 +210,24 @@ public class Operations {
 		if (!isBlockly) {
 			throw new Exception(Messages.getString("accessDenied"));
 		}
-
 		Object o = methodToCall.invoke(clazz, callParams);
-
 		return Var.valueOf(o);
+	}
+	
+		@CronapiMetaData(type = "function", name = "{{encryptPasswordName}}", nameTags = {
+			"encryptPassword" }, description = "{{encryptPasswordDescription}}", params = {
+					"{{encryptPasswordParam0}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
+	public static final Var encryptPassword(Var password) throws Exception {
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		return new Var(passwordEncoder.encode(password.getObjectAsString()));
+	}
+
+	@CronapiMetaData(type = "function", name = "{{matchesencryptPasswordName}}", nameTags = {
+			"matchesencryptPassword" }, description = "{{matchesencryptPasswordDescription}}", params = {
+					"{{matchesencryptPasswordParam0}}", "{{matchesencryptPasswordParam1}}" }, paramsType = {
+							ObjectType.STRING, ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
+	public static final Var matchesencryptPassword(Var password, Var encrypted) throws Exception {
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		return new Var(passwordEncoder.matches(password.getObjectAsString(), encrypted.getObjectAsString()));
 	}
 }
