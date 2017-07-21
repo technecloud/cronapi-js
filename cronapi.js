@@ -520,6 +520,7 @@
   /**
    * @type function
    * @name {{screenNotifyName}}
+   * @description {{screenNotifyDescription}}
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
    * @wizard notify_type
@@ -1075,7 +1076,313 @@
    * @categoryTags XML|xml
    */
   this.cronapi.xml = {};
+  
+  /**
+   * @type function
+   * @name {{newXMLEmptyName}}
+   * @nameTags newXMLEmptyValue
+   * @description {{newXMLEmptyDescription}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.xml.newXMLEmpty = function() {
+  return $.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>');
+  };
+  
+  /**
+   * @type function
+   * @name {{newXMLEmptyWithRootName}}
+   * @nameTags newXMLEmptyWithRoot
+   * @description {{newXMLEmptyWithRootDescription}}
+   * @param {ObjectType.OBJECT} rootElement {{newXMLEmptyWithRootParam0}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.xml.newXMLEmptyWithRoot = function(rootElement) {
+  var t__temp = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>');
+  t__temp.removeChild(cronapi.$scope.vars.__temp.firstElementChild);
+  t__temp.appendChild(cronapi.$scope.vars.__temp.createElement(rootElement));
+  return t__temp;
+  };
+  
+  
+  /**
+   * @type function
+   * @name {{newXMLElementName}}
+   * @nameTags newXMLElement
+   * @description {{newXMLElementDescription}}
+   * @param {ObjectType.STRING} elementName {{newXMLElementParam0}}
+   * @param {ObjectType.STRING} value {{newXMLElementParam1}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.xml.newXMLElement = function(elementName, value) {
+    debugger;
+  var t__tempElement = document.createElement(elementName);
+  t__tempElement.textContent = value;
+  return t__tempElement;
+  };
+  
+  /**
+   * @type function
+   * @name {{addXMLElementName}}
+   * @nameTags addXMLElement
+   * @description {{addXMLElementDescription}}
+   * @param {ObjectType.OBJECT} parent {{addXMLElementParam0}}
+   * @param {ObjectType.OBJECT} value {{addXMLElementParam1}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.xml.addXMLElement = function(parent, element) {
+  try{
+  var temp = element.cloneNode(true);
+  parent.appendChild(temp);
+  return true;
+  }catch(e){
+    return false;
+  }
+  };
+  
+  /**
+   * @type function
+   * @name {{XMLHasRootElementName}}
+   * @nameTags XMLHasRootElement
+   * @description {{XMLHasRootElementDescription}}
+   * @param {ObjectType.OBJECT} element {{XMLHasRootElementParam0}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.xml.XMLHasRootElement = function(element) {
+    if(element  &&  element.getRootNode()) return true;
+    return false;
+  }
+  
+  
+    /**
+   * @type function
+   * @name {{XMLGetRootElementName}}
+   * @nameTags XMLGetRootElement
+   * @description {{XMLGetRootElementDescription}}
+   * @param {ObjectType.OBJECT} element {{XMLGetRootElementParam0}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.xml.XMLGetRootElement = function(element) {
+    return element.getRootNode();
+  }
+  
+  /**
+   * @type function
+   * @name {{XMLDocumentToTextName}}
+   * @nameTags XMLDocumentToText
+   * @description {{XMLDocumentToTextDescription}}
+   * @param {ObjectType.OBJECT} xml {{XMLDocumentToTextParam0}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.xml.XMLDocumentToText = function(xml) {
+  return $($($(xml.firstElementChild).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
+  }
+  
+  
+  /**
+   * @type function
+   * @name {{getChildrenName}}
+   * @nameTags getChildren
+   * @description {{getChildrenDescription}}
+   * @param {ObjectType.OBJECT} element {{getChildrenParam0}}
+   * @param {ObjectType.STRING} search {{getChildrenParam1}}
+   * @returns {ObjectType.LIST}
+   */
+  this.cronapi.xml.getChildren = function(element, search) {
+    if(element instanceof XMLDocument){
+      return element.firstElementChild.toArray;
+    }
+    if(search){
+      if(search.localName){
+        return $(element).find(search.localName).toArray();
+      }else {
+        return $(element).find(search).toArray();
+      }
+    }
+    return $(element).children().toArray();
+  };
+  
+  /**
+   * @type function
+   * @name {{setAttributeName}}
+   * @nameTags setAttribute
+   * @description {{setAttributeDescription}}
+   * @param {ObjectType.OBJECT} element {{setAttributeParam0}}
+   * @param {ObjectType.STRING} attributeName {{setAttributeParam1}}
+   * @param {ObjectType.STRING} attributeValue {{setAttributeParam2}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.xml.setAttribute = function(element, attributeName, attributeValue) {
+    if(!attributeName){
+      return false;
+    }
+    if(element instanceof XMLDocument){
+      element.firstChild.setAttribute(attributeName, attributeValue);
+      return true;
+    }
+    if(element){
+      element.setAttribute(attributeName, attributeValue);
+      return true;
+    }
+    return false;
+  };
+  
+  
+  /**
+   * @type function
+   * @name {{getAttributeValueName}}
+   * @nameTags getAttributeValue
+   * @description {{getAttributeValueDescription}}
+   * @param {ObjectType.OBJECT} element {{getAttributeValueParam0}}
+   * @param {ObjectType.STRING} attributeName {{getAttributeValueParam1}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.xml.getAttributeValue = function(element, attributeName) {
+    debugger;
+    if(!attributeName){
+        return '';
+      }
+    if(element instanceof XMLDocument){
+      return element.firstChild.getAttribute(attributeName)  ? element.firstChild.getAttribute(attributeName) : '' ;
+    }
+    if(element && attributeName ){
+      return element.getAttribute(attributeName) ;
+    }
+    return '';
+  }
+  
+  
+  /**
+   * @type function
+   * @name {{getParentNodeName}}
+   * @nameTags getParentNode
+   * @description {{getParentNodeDescription}}
+   * @param {ObjectType.OBJECT} element {{getParentNodeParam0}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.xml.getParentNode = function(element){
 
+    if(element instanceof XMLDocument){
+      return element.firstChild;
+    }
+    return element.parentNode;
+  }
+  
+  
+  
+  /**
+   * @type function
+   * @name {{setElementValueName}}
+   * @nameTags setElementValue
+   * @description {{setElementValueDescription}}
+   * @param {ObjectType.OBJECT} element {{getAttributeValueParam0}}
+   * @param {ObjectType.STRING} attributeName {{getAttributeValueParam1}}
+   */
+  this.cronapi.xml.setElementContent = function(element, content) {
+    
+      if(element instanceof XMLDocument){
+      element.firstChild.textContent = content;
+    }
+     element.textContent = content;
+  }
+  
+  /**
+   * @type function
+   * @name {{removeElementName}}
+   * @nameTags removeElement
+   * @description {{removeElementDescription}}
+   * @param {ObjectType.OBJECT} parent {{removeElementParam0}}
+   * @param {ObjectType.STRING} element {{removeElementParam1}}
+   */
+  this.cronapi.xml.removeElement = function(parent, element) {
+    debugger;
+      if(parent instanceof XMLDocument)
+      {
+      if(element)
+        {
+        if( element instanceof HTMLUnknownElement ){
+         element.remove();
+        }else
+          {
+          $.each( $(parent.firstElementChild.children), function( key , value )
+            {  
+            if(value.localName == element)
+            value.remove();
+            });
+        }
+        }else
+        {
+      $.each( $(parent.firstElementChild.children), function( key , currentObject ){  currentObject.remove() });
+        }
+      }else
+      {
+      if(element)
+        {
+        if( element instanceof HTMLUnknownElement ){
+         element.remove();
+        }else
+          {
+          $.each( $(parent.children), function( key , value )
+            {  
+            if(value.localName == element)
+            value.remove();
+            });
+        }
+        }else
+        {
+      $.each( $(parent.children), function( key , currentObject ){  currentObject.remove() });
+        }
+      }
+      
+  }
+  
+  /**
+   * @type function
+   * @name {{getElementNameName}}
+   * @nameTags getElementName
+   * @description {{getElementNameDescription}}
+   * @param {ObjectType.OBJECT} element {{getElementNameParam0}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.xml.getElementName = function(element){
+    
+    if(element instanceof XMLDocument){
+      return element.firstChild.localName;
+    }
+    return element.localName;
+  }
+  
+   /**
+   * @type function
+   * @name {{getElementNameName}}
+   * @nameTags getElementName
+   * @description {{getElementNameDescription}}
+   * @param {ObjectType.OBJECT} element {{getElementNameParam0}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.xml.getElementName = function(element, name){ 
+  
+  
+  $(element).replaceWith($('<'+name+'>' + element.innerHTML + '</'+name+'>'));
+  
+  }
+  
+  
+      /**
+   * @type function
+   * @name {{renameElementName}}
+   * @nameTags renameElement
+   * @description {{renameElementDescription}}
+   * @param {ObjectType.OBJECT} element {{renameElementParam0}}
+   * @param {ObjectType.STRING} name {{renameElementParam1}}
+   */
+  this.cronapi.xml.renameElement = function(element, name){
+    var newElement = element.outerHTML.replace(element.localName, name )
+    newElement = newElement.replace('/'+ element.localName ,'/'+name);
+    newElement = $(newElement).removeAttr('xmlns');
+    element.replaceWith(newElement[0]);
+  }
+  
+  
   /**
    * @type function
    * @name {{XMLGetElementValueName}}
