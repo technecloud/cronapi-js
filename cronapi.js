@@ -1093,7 +1093,7 @@
    * @name {{newXMLEmptyWithRootName}}
    * @nameTags newXMLEmptyWithRoot
    * @description {{newXMLEmptyWithRootDescription}}
-   * @param {ObjectType.OBJECT} rootElement {{newXMLEmptyWithRootParam0}}
+   * @param {ObjectType.OBJECT} rootElement {{rootElement}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.newXMLEmptyWithRoot = function(rootElement) {
@@ -1109,12 +1109,11 @@
    * @name {{newXMLElementName}}
    * @nameTags newXMLElement
    * @description {{newXMLElementDescription}}
-   * @param {ObjectType.STRING} elementName {{newXMLElementParam0}}
-   * @param {ObjectType.STRING} value {{newXMLElementParam1}}
+   * @param {ObjectType.STRING} elementName {{elementName}}
+   * @param {ObjectType.STRING} value {{content}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.newXMLElement = function(elementName, value) {
-    debugger;
   var t__tempElement = document.createElement(elementName);
   t__tempElement.textContent = value;
   return t__tempElement;
@@ -1125,8 +1124,8 @@
    * @name {{addXMLElementName}}
    * @nameTags addXMLElement
    * @description {{addXMLElementDescription}}
-   * @param {ObjectType.OBJECT} parent {{addXMLElementParam0}}
-   * @param {ObjectType.OBJECT} value {{addXMLElementParam1}}
+   * @param {ObjectType.OBJECT} parent {{parentElement}}
+   * @param {ObjectType.OBJECT} value {{elementToAdd}}
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.xml.addXMLElement = function(parent, element) {
@@ -1144,7 +1143,7 @@
    * @name {{XMLHasRootElementName}}
    * @nameTags XMLHasRootElement
    * @description {{XMLHasRootElementDescription}}
-   * @param {ObjectType.OBJECT} element {{XMLHasRootElementParam0}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.xml.XMLHasRootElement = function(element) {
@@ -1158,7 +1157,7 @@
    * @name {{XMLGetRootElementName}}
    * @nameTags XMLGetRootElement
    * @description {{XMLGetRootElementDescription}}
-   * @param {ObjectType.OBJECT} element {{XMLGetRootElementParam0}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetRootElement = function(element) {
@@ -1170,11 +1169,14 @@
    * @name {{XMLDocumentToTextName}}
    * @nameTags XMLDocumentToText
    * @description {{XMLDocumentToTextDescription}}
-   * @param {ObjectType.OBJECT} xml {{XMLDocumentToTextParam0}}
+   * @param {ObjectType.OBJECT} xml {{element}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLDocumentToText = function(xml) {
-  return $($($(xml.firstElementChild).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
+    if(element instanceof XMLDocument){
+      return $($($(xml.firstElementChild).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
+    }
+    return $($($(xml).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
   }
   
   
@@ -1183,7 +1185,7 @@
    * @name {{getChildrenName}}
    * @nameTags getChildren
    * @description {{getChildrenDescription}}
-   * @param {ObjectType.OBJECT} element {{getChildrenParam0}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @param {ObjectType.STRING} search {{getChildrenParam1}}
    * @returns {ObjectType.LIST}
    */
@@ -1206,9 +1208,9 @@
    * @name {{setAttributeName}}
    * @nameTags setAttribute
    * @description {{setAttributeDescription}}
-   * @param {ObjectType.OBJECT} element {{setAttributeParam0}}
-   * @param {ObjectType.STRING} attributeName {{setAttributeParam1}}
-   * @param {ObjectType.STRING} attributeValue {{setAttributeParam2}}
+   * @param {ObjectType.OBJECT} element {{element}}
+   * @param {ObjectType.STRING} attributeName {{attributeName}}
+   * @param {ObjectType.STRING} attributeValue {{attributeValue}}
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.xml.setAttribute = function(element, attributeName, attributeValue) {
@@ -1232,8 +1234,8 @@
    * @name {{getAttributeValueName}}
    * @nameTags getAttributeValue
    * @description {{getAttributeValueDescription}}
-   * @param {ObjectType.OBJECT} element {{getAttributeValueParam0}}
-   * @param {ObjectType.STRING} attributeName {{getAttributeValueParam1}}
+   * @param {ObjectType.OBJECT} element {{element}}
+   * @param {ObjectType.STRING} attributeName {{attributeName}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.getAttributeValue = function(element, attributeName) {
@@ -1256,7 +1258,7 @@
    * @name {{getParentNodeName}}
    * @nameTags getParentNode
    * @description {{getParentNodeDescription}}
-   * @param {ObjectType.OBJECT} element {{getParentNodeParam0}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.getParentNode = function(element){
@@ -1274,8 +1276,8 @@
    * @name {{setElementValueName}}
    * @nameTags setElementValue
    * @description {{setElementValueDescription}}
-   * @param {ObjectType.OBJECT} element {{getAttributeValueParam0}}
-   * @param {ObjectType.STRING} attributeName {{getAttributeValueParam1}}
+   * @param {ObjectType.OBJECT} element {{element}}
+   * @param {ObjectType.STRING} content {{content}}
    */
   this.cronapi.xml.setElementContent = function(element, content) {
     
@@ -1290,11 +1292,10 @@
    * @name {{removeElementName}}
    * @nameTags removeElement
    * @description {{removeElementDescription}}
-   * @param {ObjectType.OBJECT} parent {{removeElementParam0}}
-   * @param {ObjectType.STRING} element {{removeElementParam1}}
+   * @param {ObjectType.OBJECT} parent {{parentElement}}
+   * @param {ObjectType.STRING} element {{element}}
    */
   this.cronapi.xml.removeElement = function(parent, element) {
-    debugger;
       if(parent instanceof XMLDocument)
       {
       if(element)
@@ -1340,7 +1341,7 @@
    * @name {{getElementNameName}}
    * @nameTags getElementName
    * @description {{getElementNameDescription}}
-   * @param {ObjectType.OBJECT} element {{getElementNameParam0}}
+   * @param {ObjectType.OBJECT} element {{element}}
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.getElementName = function(element){
@@ -1351,29 +1352,13 @@
     return element.localName;
   }
   
-   /**
-   * @type function
-   * @name {{getElementNameName}}
-   * @nameTags getElementName
-   * @description {{getElementNameDescription}}
-   * @param {ObjectType.OBJECT} element {{getElementNameParam0}}
-   * @returns {ObjectType.STRING}
-   */
-  this.cronapi.xml.getElementName = function(element, name){ 
-  
-  
-  $(element).replaceWith($('<'+name+'>' + element.innerHTML + '</'+name+'>'));
-  
-  }
-  
-  
-      /**
+  /**
    * @type function
    * @name {{renameElementName}}
    * @nameTags renameElement
    * @description {{renameElementDescription}}
-   * @param {ObjectType.OBJECT} element {{renameElementParam0}}
-   * @param {ObjectType.STRING} name {{renameElementParam1}}
+   * @param {ObjectType.OBJECT} element {{element}}
+   * @param {ObjectType.STRING} name {{name}}
    */
   this.cronapi.xml.renameElement = function(element, name){
     var newElement = element.outerHTML.replace(element.localName, name )
