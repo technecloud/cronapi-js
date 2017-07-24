@@ -38,57 +38,57 @@ import cronapi.Var;
  */
 public class DataSource implements JsonSerializable {
 
-	private String entity;
+  private String entity;
   private String simpleEntity;
-	private Class domainClass;
-	private String filter;
-	private Var[] params;
-	private int pageSize;
-	private Page page;
-	private int index;
-	private int current;
-	private JpaRepository<Object, String> repository;
-	private Pageable pageRequest;
-	private Object insertedElement = null;
+  private Class domainClass;
+  private String filter;
+  private Var[] params;
+  private int pageSize;
+  private Page page;
+  private int index;
+  private int current;
+  private JpaRepository<Object, String> repository;
+  private Pageable pageRequest;
+  private Object insertedElement = null;
 
-	/**
-	 * Init a datasource with a page size equals 100
-	 *
-	 * @param entity - full name of entitiy class like String
-	 */
-	public DataSource(String entity) {
-		this(entity, 100);
-	}
+  /**
+   * Init a datasource with a page size equals 100
+   *
+   * @param entity - full name of entitiy class like String
+   */
+  public DataSource(String entity) {
+    this(entity, 100);
+  }
 
-	/**
-	 * Init a datasource setting a page size
-	*
-	* @param entity - full name of entitiy class like String
-	* @param pageSize - page size of a Pageable object retrieved from repository
-	*/
-	public DataSource(String entity, int pageSize) {
-		this.entity = entity;
-		this.simpleEntity = entity.substring(entity.lastIndexOf(".")+1);
-		this.pageSize = pageSize;
-		this.pageRequest = new PageRequest(0, pageSize);
+  /**
+   * Init a datasource setting a page size
+   *
+   * @param entity - full name of entitiy class like String
+   * @param pageSize - page size of a Pageable object retrieved from repository
+   */
+  public DataSource(String entity, int pageSize) {
+    this.entity = entity;
+    this.simpleEntity = entity.substring(entity.lastIndexOf(".")+1);
+    this.pageSize = pageSize;
+    this.pageRequest = new PageRequest(0, pageSize);
 
-		//initialize dependencies and necessaries objects
-		this.instantiateRepository();
-	}
+    //initialize dependencies and necessaries objects
+    this.instantiateRepository();
+  }
 
-	/**
-	 * Retrieve repository from entity
-	 *
-	 * @throws RuntimeException when repository not fount, entity passed not found or cast repository
-	 */
-	private void instantiateRepository() {
-		try {
-			domainClass = Class.forName(this.entity);
-			this.repository = TransactionManager.findRepository(domainClass);
-		} catch (ClassNotFoundException cnfex) {
-			throw new RuntimeException(cnfex);
-		}
-	}
+  /**
+   * Retrieve repository from entity
+   *
+   * @throws RuntimeException when repository not fount, entity passed not found or cast repository
+   */
+  private void instantiateRepository() {
+    try {
+      domainClass = Class.forName(this.entity);
+      this.repository = TransactionManager.findRepository(domainClass);
+    } catch (ClassNotFoundException cnfex) {
+      throw new RuntimeException(cnfex);
+    }
+  }
 
   private List<String> parseParams(String SQL) {
     final String delims = " \n\r\t.(){},+:=!";
@@ -125,67 +125,73 @@ public class DataSource implements JsonSerializable {
     return tokens;
   }
 
-	/**
-	 * Retrieve objects from database using repository when filter is null or empty,
-	 * if filter not null or is not empty, this method uses entityManager and create a
-	 * jpql instruction.
-	 *
-	 * @return a array of Object
-	 */
-	public Object[] fetch() {
-		if (this.filter != null && !"".equals(this.filter)) {
-			try {
-				EntityManager em = TransactionManager.getEntityManager(domainClass);
-				TypedQuery<?> query = em.createQuery(filter, domainClass);
+  /**
+   * Retrieve objects from database using repository when filter is null or empty,
+   * if filter not null or is not empty, this method uses entityManager and create a
+   * jpql instruction.
+   *
+   * @return a array of Object
+   */
+  public Object[] fetch() {
+    if (this.filter != null && !"".equals(this.filter)) {
+      try {
+        EntityManager em = TransactionManager.getEntityManager(domainClass);
+        TypedQuery<?> query = em.createQuery(filter, domainClass);
 
-				int i = 0;
-				List<String> parsedParams = parseParams(filter);
+        int i = 0;
+        List<String> parsedParams = parseParams(filter);
 
-				for (Var p : this.params) {
-				  if (p.getId() != null) {
-            query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
-          } else {
-				    if (i <= parsedParams.size()-1) {
-              query.setParameter(parsedParams.get(i), p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
+        for (String param : parsedParams) {
+          Var p = null;
+          if (i <= this.params.length-1) {
+            p = this.params[i];
+          }
+          if (p != null) {
+            if (p.getId() != null) {
+              query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
+            } else {
+              query.setParameter(param, p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
             }
+          } else {
+            query.setParameter(param, null);
           }
           i++;
-				}
+        }
 
-				query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
-				query.setMaxResults(this.pageRequest.getPageSize());
+        query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
+        query.setMaxResults(this.pageRequest.getPageSize());
 
-				List<?> resultsInPage = query.getResultList();
+        List<?> resultsInPage = query.getResultList();
 
-				this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
-			} catch (Exception ex) {
-				throw new RuntimeException(ex);
-			}
-		} else
-			this.page = this.repository.findAll(this.pageRequest);
+        this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    } else
+      this.page = this.repository.findAll(this.pageRequest);
 
-		//has data, moves cursor to first position
-		if (this.page.getNumberOfElements() > 0)
-			this.current = 0;
+    //has data, moves cursor to first position
+    if (this.page.getNumberOfElements() > 0)
+      this.current = 0;
 
-		return this.page.getContent().toArray();
-	}
-
-	public EntityMetadata getMetadata() {
-	  return new EntityMetadata(domainClass);
+    return this.page.getContent().toArray();
   }
 
-	/**
-	 * Create a new instance of entity and add a
-	 * results and set current (index) for his position
-	 */
-	public void insert() {
-		try {
-			this.insertedElement = this.domainClass.newInstance();
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+  public EntityMetadata getMetadata() {
+    return new EntityMetadata(domainClass);
+  }
+
+  /**
+   * Create a new instance of entity and add a
+   * results and set current (index) for his position
+   */
+  public void insert() {
+    try {
+      this.insertedElement = this.domainClass.newInstance();
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
   public Object toObject(Map<?,?> values) {
     try {
@@ -206,7 +212,11 @@ public class DataSource implements JsonSerializable {
         this.insertedElement = this.domainClass.newInstance();
         Map<?,?> values = (Map<?,?>) value;
         for (Object key : values.keySet()) {
-          updateField(key.toString(), values.get(key));
+          try {
+            updateField(key.toString(), values.get(key));
+          } catch(Exception e) {
+            //Abafa campo não encontrado
+          }
         }
       } else {
         this.insertedElement = value;
@@ -217,46 +227,46 @@ public class DataSource implements JsonSerializable {
   }
 
   public Object save() {
-	  return save(true);
+    return save(true);
   }
 
-	/**
-	 * Saves the object in the current index or a new object when has insertedElement
-	 */
-	public Object save(boolean returnCursorAfterInsert) {
-		try {
-			Object toSave;
-			EntityManager em = TransactionManager.getEntityManager(domainClass);
+  /**
+   * Saves the object in the current index or a new object when has insertedElement
+   */
+  public Object save(boolean returnCursorAfterInsert) {
+    try {
+      Object toSave;
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
 
       if (!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
 
-			if (this.insertedElement != null) {
-				toSave = this.insertedElement;
-				if (returnCursorAfterInsert)
-				  this.insertedElement = null;
-				em.persist(toSave);
-			} else
-				toSave = this.getObject();
+      if (this.insertedElement != null) {
+        toSave = this.insertedElement;
+        if (returnCursorAfterInsert)
+          this.insertedElement = null;
+        em.persist(toSave);
+      } else
+        toSave = this.getObject();
 
-			return em.merge(toSave);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+      return em.merge(toSave);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public void delete(Var[] primaryKeys) {
-	  insert();
-	  int i = 0;
-	  Var[] params = new Var[primaryKeys.length];
+    insert();
+    int i = 0;
+    Var[] params = new Var[primaryKeys.length];
 
-	  EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = TransactionManager.getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
 
-	  String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
-	  for (Object obj: type.getAttributes()) {
+    String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
+    for (Object obj: type.getAttributes()) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         if (i > 0) {
@@ -271,33 +281,33 @@ public class DataSource implements JsonSerializable {
     execute(jpql, params);
   }
 
-	/**
-	 * Removes the object in the current index
-	 */
-	public void delete() {
-		try {
-			Object toRemove = this.getObject();
-			EntityManager em = TransactionManager.getEntityManager(domainClass);
-			if (!em.getTransaction().isActive()) {
-				em.getTransaction().begin();
-			}
-			//returns managed instance
-			toRemove = em.merge(toRemove);
-			em.remove(toRemove);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+  /**
+   * Removes the object in the current index
+   */
+  public void delete() {
+    try {
+      Object toRemove = this.getObject();
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      if (!em.getTransaction().isActive()) {
+        em.getTransaction().begin();
+      }
+      //returns managed instance
+      toRemove = em.merge(toRemove);
+      em.remove(toRemove);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	/**
-	 * Update a field from object in the current index
-	 *
-	 * @param fieldName - attributte name in entity
-	 * @param fieldValue - value that replaced or inserted in field name passed
-	 */
-	public void updateField(String fieldName, Object fieldValue) {
+  /**
+   * Update a field from object in the current index
+   *
+   * @param fieldName - attributte name in entity
+   * @param fieldValue - value that replaced or inserted in field name passed
+   */
+  public void updateField(String fieldName, Object fieldValue) {
     updateField(getObject(), fieldName, fieldValue);
-	}
+  }
 
   private void updateField(Object obj, String fieldName, Object fieldValue) {
     try {
@@ -305,6 +315,9 @@ public class DataSource implements JsonSerializable {
       if (setMethod != null) {
         if (fieldValue instanceof  Var) {
           fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
+        } else {
+          Var tVar = Var.valueOf(fieldValue);
+          fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
         }
         setMethod.invoke(obj, fieldValue);
       } else {
@@ -315,26 +328,26 @@ public class DataSource implements JsonSerializable {
     }
   }
 
-	/**
-	 * Update fields from object in the current index
-	 *
-	 * @param fields - bidimensional array like fields
-	 * sample: { {"name", "Paul"}, {"age", "21"} }
-	 *
-	 * @thows RuntimeException if a field is not accessible through a set method
-	 */
-	public void updateFields(Var... fields) {
-		try {
-			for (Var field : fields) {
-				Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
-				if (setMethod != null) {
-					setMethod.invoke(getObject(), field.getObject());
-				}
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+  /**
+   * Update fields from object in the current index
+   *
+   * @param fields - bidimensional array like fields
+   * sample: { {"name", "Paul"}, {"age", "21"} }
+   *
+   * @thows RuntimeException if a field is not accessible through a set method
+   */
+  public void updateFields(Var... fields) {
+    try {
+      for (Var field : fields) {
+        Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
+        if (setMethod != null) {
+          setMethod.invoke(getObject(), field.getObject());
+        }
+      }
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
   public void filter(Var data, Var[] extraParams) {
 
@@ -382,56 +395,56 @@ public class DataSource implements JsonSerializable {
     }
   }
 
-	/**
-	 * Return object in current index
-	 *
-	 * @return Object from database in current position
-	 */
-	public Object getObject() {
+  /**
+   * Return object in current index
+   *
+   * @return Object from database in current position
+   */
+  public Object getObject() {
 
-		if (this.insertedElement != null)
-			return this.insertedElement;
+    if (this.insertedElement != null)
+      return this.insertedElement;
 
-		if (this.current < 0 || this.current > this.page.getContent().size()-1)
-			return null;
+    if (this.current < 0 || this.current > this.page.getContent().size()-1)
+      return null;
 
-		return this.page.getContent().get(this.current);
-	}
+    return this.page.getContent().get(this.current);
+  }
 
-	/**
-	 * Return field passed from object in current index
-	 *
-	 * @return Object value of field passed
-	 * @thows RuntimeException if a field is not accessible through a set method
-	 */
-	public Object getObject(String fieldName) {
-		try {
-			Method getMethod = Utils.findMethod(getObject(), "get" + fieldName);
-			if (getMethod != null)
-				return getMethod.invoke(getObject());
-			return null;
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+  /**
+   * Return field passed from object in current index
+   *
+   * @return Object value of field passed
+   * @thows RuntimeException if a field is not accessible through a set method
+   */
+  public Object getObject(String fieldName) {
+    try {
+      Method getMethod = Utils.findMethod(getObject(), "get" + fieldName);
+      if (getMethod != null)
+        return getMethod.invoke(getObject());
+      return null;
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
-	/**
-	 * Moves the index for next position, in pageable case,
-	 * looking for next page and so on
-	 */
-	public void next() {
-		if (this.page.getNumberOfElements() > (this.current + 1))
-			this.current++;
-		else {
-			if (this.page.hasNext()) {
-				this.pageRequest = this.page.nextPageable();
-				this.fetch();
-				this.current = 0;
-			} else {
-				this.current = -1;
-			}
-		}
-	}
+  /**
+   * Moves the index for next position, in pageable case,
+   * looking for next page and so on
+   */
+  public void next() {
+    if (this.page.getNumberOfElements() > (this.current + 1))
+      this.current++;
+    else {
+      if (this.page.hasNext()) {
+        this.pageRequest = this.page.nextPageable();
+        this.fetch();
+        this.current = 0;
+      } else {
+        this.current = -1;
+      }
+    }
+  }
 
   /**
    * Moves the index for next position, in pageable case,
@@ -441,78 +454,78 @@ public class DataSource implements JsonSerializable {
     this.current++;
   }
 
-	/**
-	 * Verify if can moves the index for next position,
-	 * in pageable case, looking for next page and so on
-	 *
-	 * @return boolean true if has next, false else
-	 */
-	public boolean hasNext() {
-		if (this.page.getNumberOfElements() > (this.current + 1))
-			return true;
-		else {
-			if (this.page.hasNext()) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-
-  public boolean hasData() {
-	  return getObject() != null;
+  /**
+   * Verify if can moves the index for next position,
+   * in pageable case, looking for next page and so on
+   *
+   * @return boolean true if has next, false else
+   */
+  public boolean hasNext() {
+    if (this.page.getNumberOfElements() > (this.current + 1))
+      return true;
+    else {
+      if (this.page.hasNext()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
-	/**
-	 * Moves the index for previous position, in pageable case,
-	 * looking for next page and so on
-	 *
-	 * @return boolean true if has previous, false else
-	 */
-	public boolean previous() {
-		if (this.current - 1 >= 0) {
-			this.current--;
-		} else {
-			if (this.page.hasPrevious()) {
-				this.pageRequest = this.page.previousPageable();
-				this.fetch();
-				this.current = this.page.getNumberOfElements() - 1;
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
+  public boolean hasData() {
+    return getObject() != null;
+  }
 
-	public void setCurrent(int current) {
-	  this.current = current;
+  /**
+   * Moves the index for previous position, in pageable case,
+   * looking for next page and so on
+   *
+   * @return boolean true if has previous, false else
+   */
+  public boolean previous() {
+    if (this.current - 1 >= 0) {
+      this.current--;
+    } else {
+      if (this.page.hasPrevious()) {
+        this.pageRequest = this.page.previousPageable();
+        this.fetch();
+        this.current = this.page.getNumberOfElements() - 1;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public void setCurrent(int current) {
+    this.current = current;
   }
 
   public int getCurrent() {
-	  return this.current;
+    return this.current;
   }
 
-	/**
-	 * Gets a Pageable object retrieved from repository
-	 *
-	 * @return pageable from repository, returns null when fetched by filter
-	 */
-	public Page getPage() {
-		return this.page;
-	}
+  /**
+   * Gets a Pageable object retrieved from repository
+   *
+   * @return pageable from repository, returns null when fetched by filter
+   */
+  public Page getPage() {
+    return this.page;
+  }
 
-	/**
-	 * Create a new page request with size passed
-	 *
-	 * @param pageSize size of page request
-	 */
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
-		this.pageRequest = new PageRequest(0, pageSize);
-		this.current = -1;
-	}
+  /**
+   * Create a new page request with size passed
+   *
+   * @param pageSize size of page request
+   */
+  public void setPageSize(int pageSize) {
+    this.pageSize = pageSize;
+    this.pageRequest = new PageRequest(0, pageSize);
+    this.current = -1;
+  }
 
-	/**
+  /**
    * Fetch objects from database by a filter
    *
    * @param filter jpql instruction like a namedQuery
@@ -706,55 +719,55 @@ public class DataSource implements JsonSerializable {
 
   }
 
-	/**
-	 * Clean Datasource and to free up allocated memory
-	 */
-	public void clear() {
-		this.pageRequest = new PageRequest(0, 100);
-		this.current = -1;
-		this.page = null;
-	}
+  /**
+   * Clean Datasource and to free up allocated memory
+   */
+  public void clear() {
+    this.pageRequest = new PageRequest(0, 100);
+    this.current = -1;
+    this.page = null;
+  }
 
-	/**
-	 * Execute Query
-	 *
-	 * @param query - JPQL instruction for filter objects to remove
-	 * @param params - Bidimentional array with params name and params value
-	 */
-	public void execute(String query, Var... params) {
-		try {
+  /**
+   * Execute Query
+   *
+   * @param query - JPQL instruction for filter objects to remove
+   * @param params - Bidimentional array with params name and params value
+   */
+  public void execute(String query, Var... params) {
+    try {
 
-			EntityManager em = TransactionManager.getEntityManager(domainClass);
-			TypedQuery<?> strQuery = em.createQuery(query, domainClass);
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
-			for (Var p : params) {
+      for (Var p : params) {
         strQuery.setParameter(p.getId(), p.getObject());
-			}
+      }
 
-			try {
-				if (!em.getTransaction().isActive()) {
-					em.getTransaction().begin();
-				}
-				strQuery.executeUpdate();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+      try {
+        if (!em.getTransaction().isActive()) {
+          em.getTransaction().begin();
+        }
+        strQuery.executeUpdate();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
 
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
-	public Var getTotalElements() {
-	  return new Var(this.page.getTotalElements());
-	}
+  public Var getTotalElements() {
+    return new Var(this.page.getTotalElements());
+  }
 
   @Override
   public String toString() {
-	  if (this.page != null) {
-	    return this.page.getContent().toString();
+    if (this.page != null) {
+      return this.page.getContent().toString();
     } else {
-	    return "[]";
+      return "[]";
     }
   }
 
