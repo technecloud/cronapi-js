@@ -5,7 +5,22 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -18,6 +33,7 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
+import org.apache.http.client.methods.HttpDelete;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -145,7 +161,8 @@ public class Operations {
 			"callClienteFunction" }, description = "{{callClienteFunctionDescription}}", returnType = ObjectType.VOID, arbitraryParams = true)
 	public static final void callClientFunction(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam0}}") Var function,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam1}}") Var... params) throws Exception {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam1}}") Var... params)
+			throws Exception {
 		ClientCommand command = new ClientCommand(function.getObjectAsString());
 		for (Var p : params)
 			command.addParam(p);
@@ -213,8 +230,8 @@ public class Operations {
 		Object o = methodToCall.invoke(clazz, callParams);
 		return Var.valueOf(o);
 	}
-	
-		@CronapiMetaData(type = "function", name = "{{encryptPasswordName}}", nameTags = {
+
+	@CronapiMetaData(type = "function", name = "{{encryptPasswordName}}", nameTags = {
 			"encryptPassword" }, description = "{{encryptPasswordDescription}}", params = {
 					"{{encryptPasswordParam0}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var encryptPassword(Var password) throws Exception {
@@ -230,4 +247,159 @@ public class Operations {
 		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		return new Var(passwordEncoder.matches(password.getObjectAsString(), encrypted.getObjectAsString()));
 	}
+
+	@CronapiMetaData(type = "function", name = "{{getURLFromOthersName}}", nameTags = {
+			"matchesencryptPassword" }, description = "{{getURLFromOthersDescription}}", returnType = ObjectType.STRING)
+	public static final Var getURLFromOthers(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{HTTPMethod}}", blockType = "util_dropdown", keys = {
+					"GET", "POST", "PUT",
+					"DELETE" }, values = { "{{HTTPGet}}", "{{HTTPPost}}", "{{HTTPPut}}", "{{HTTPDelete}}" }) Var method,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{contentType}}", blockType = "util_dropdown", keys = {
+					"application/x-www-form-urlencoded",
+					"application/json" }, values = { "{{x_www_form_urlencoded}}", "{{app_json}}" }) Var contentType,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{params}}") Var params,
+			@ParamMetaData(type = ObjectType.LIST, description = "{{cookieContainer}}") Var cookieContainer)
+			throws Exception {
+		try {
+			String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+			String APPLICATION_JSON = "application/json";
+
+			if (method.getObjectAsString().toUpperCase().equals("GET")) {
+				HttpClient httpClient = HttpClients.createDefault();
+				HttpGet httpGet = new HttpGet(address.getObjectAsString());
+				for (Var cookie : cookieContainer.getObjectAsList()) {
+					httpGet.addHeader("Cookie", cookie.getObjectAsString());
+				}
+
+				HttpResponse httpResponse = httpClient.execute(httpGet);
+				Header[] headers = httpResponse.getHeaders("Set-Cookie");
+				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
+					cookieContainer.getObjectAsList().clear();
+					for (Header h : headers) {
+						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
+					}
+				}
+				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+						cronapi.CronapiConfigurator.ENCODING);
+				String response = "";
+				try {
+					response = scanner.useDelimiter("\\A").next();
+				} catch (Exception e) {
+				}
+				scanner.close();
+				return new Var(response);
+			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
+				HttpClient httpClient = HttpClients.createDefault();
+				HttpPost httpPost = new HttpPost(address.getObjectAsString());
+				for (Var cookie : cookieContainer.getObjectAsList()) {
+					httpPost.addHeader("Cookie", cookie.getObjectAsString());
+				}
+
+				if (params != Var.VAR_NULL && params.size() > 0) {
+					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
+						String[] values = params.getObjectAsString().split("&");
+						List<NameValuePair> params2 = new ArrayList<NameValuePair>(values.length);
+						for (String value : values) {
+							String[] keyValue = value.split("=", -1);
+							params2.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
+						}
+						httpPost.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
+					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
+						StringEntity params2 = new StringEntity(params.getObjectAsString(),
+								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+						httpPost.setEntity(params2);
+					}
+				}
+
+				HttpResponse httpResponse = httpClient.execute(httpPost);
+				Header[] headers = httpResponse.getHeaders("Set-Cookie");
+				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
+					cookieContainer.getObjectAsList().clear();
+					for (Header h : headers) {
+						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
+					}
+				}
+				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+						cronapi.CronapiConfigurator.ENCODING);
+				String response = "";
+				try {
+					response = scanner.useDelimiter("\\A").next();
+				} catch (Exception e) {
+				}
+				scanner.close();
+				return new Var(response);
+
+			} else if (method.getObjectAsString().toUpperCase().equals("PUT")) {
+				HttpClient httpClient = HttpClients.createDefault();
+				HttpPut httpPut = new HttpPut(address.getObjectAsString());
+				for (Var cookie : cookieContainer.getObjectAsList()) {
+					httpPut.addHeader("Cookie", cookie.getObjectAsString());
+				}
+
+				if (params != Var.VAR_NULL && params.size() > 0) {
+					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
+						String[] values = params.getObjectAsString().split("&");
+						List<NameValuePair> params2 = new ArrayList<NameValuePair>(values.length);
+						for (String value : values) {
+							String[] keyValue = value.split("=", -1);
+							params2.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
+						}
+						httpPut.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
+					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
+						StringEntity params2 = new StringEntity(params.getObjectAsString(),
+								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+						httpPut.setEntity(params2);
+					}
+				}
+
+				HttpResponse httpResponse = httpClient.execute(httpPut);
+				Header[] headers = httpResponse.getHeaders("Set-Cookie");
+				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
+					cookieContainer.getObjectAsList().clear();
+					for (Header h : headers) {
+						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
+					}
+				}
+				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+						cronapi.CronapiConfigurator.ENCODING);
+				String response = "";
+				try {
+					response = scanner.useDelimiter("\\A").next();
+				} catch (Exception e) {
+				}
+				scanner.close();
+				return new Var(response);
+
+			} else if (method.getObjectAsString().toUpperCase().equals("DELETE")) {
+				HttpClient httpClient = HttpClients.createDefault();
+				HttpDelete httpDelete = new HttpDelete(address.getObjectAsString());
+				for (Var cookie : cookieContainer.getObjectAsList()) {
+					httpDelete.addHeader("Cookie", cookie.getObjectAsString());
+				}
+
+				HttpResponse httpResponse = httpClient.execute(httpDelete);
+				Header[] headers = httpResponse.getHeaders("Set-Cookie");
+				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
+					cookieContainer.getObjectAsList().clear();
+					for (Header h : headers) {
+						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
+					}
+				}
+				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+						cronapi.CronapiConfigurator.ENCODING);
+				String response = "";
+				try {
+					response = scanner.useDelimiter("\\A").next();
+				} catch (Exception e) {
+				}
+				scanner.close();
+				return new Var(response);
+			}
+			return new Var();
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
 }
