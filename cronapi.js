@@ -1239,7 +1239,6 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.getAttributeValue = function(element, attributeName) {
-    debugger;
     if(!attributeName){
         return '';
       }
