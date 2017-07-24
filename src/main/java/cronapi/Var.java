@@ -205,6 +205,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
       if (_object instanceof Map && type != Map.class) {
         ObjectMapper mapper = new ObjectMapper();
         ((Map<?, ?>) _object).remove("$$hashKey");
+        ((Map<?, ?>) _object).remove("links");
         return mapper.convertValue(_object, type);
       }
 
