@@ -34,6 +34,7 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 import org.apache.http.client.methods.HttpDelete;
+import jdk.internal.instrumentation.Logger;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -266,6 +267,7 @@ public class Operations {
 			String APPLICATION_JSON = "application/json";
 
 			if (method.getObjectAsString().toUpperCase().equals("GET")) {
+
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
 				for (Var cookie : cookieContainer.getObjectAsList()) {
@@ -274,6 +276,7 @@ public class Operations {
 
 				HttpResponse httpResponse = httpClient.execute(httpGet);
 				Header[] headers = httpResponse.getHeaders("Set-Cookie");
+
 				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
 					cookieContainer.getObjectAsList().clear();
 					for (Header h : headers) {
@@ -288,6 +291,13 @@ public class Operations {
 				} catch (Exception e) {
 				}
 				scanner.close();
+				httpGet.completed();
+
+				for (Header h : httpResponse.getAllHeaders()) {
+					System.out.println(h.toString());
+				}
+				;
+
 				return new Var(response);
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
@@ -401,5 +411,4 @@ public class Operations {
 			throw e;
 		}
 	}
-
 }
