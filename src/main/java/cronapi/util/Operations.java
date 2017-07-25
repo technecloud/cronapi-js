@@ -34,7 +34,6 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 import org.apache.http.client.methods.HttpDelete;
-import jdk.internal.instrumentation.Logger;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
