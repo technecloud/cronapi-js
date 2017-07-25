@@ -185,8 +185,8 @@
 	"newXMLElementName": "Create XML element",
 	"newXMLElementDescription": "Function that create a XML element",
 	"elementName": "Element name",
-	"addXMLElementName": "Function that add a XML element inside a parent element",
-	"addXMLElementDescription": "Add XML element",
+	"addXMLElementName": "Add XML element",
+	"addXMLElementDescription": "Function that add a XML element inside a parent element",
 	"parentElement": "Parent element",
 	"elementToAdd": "Element to add",
 	"XMLHasRootElementDescription": "Function that verify if exists a XML root element on XML document",
@@ -213,5 +213,7 @@
 	"getElementNameDescription":"Function that get an element name, example <test> return test",
 	"renameElementName":"Rename element",
 	"renameElementDescription":"Function that rename an element name, example: before<oldElement/> after:<newElement/>",
-	"name":"Name"
+	"name":"Name",
+	"newXMLEmptyWithRootName":"Create XML",
+	"XMLHasRootElementName":"Has Root element?"
 }
