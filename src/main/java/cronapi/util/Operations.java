@@ -292,12 +292,6 @@ public class Operations {
 				}
 				scanner.close();
 				httpGet.completed();
-
-				for (Header h : httpResponse.getAllHeaders()) {
-					System.out.println(h.toString());
-				}
-				;
-
 				return new Var(response);
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
