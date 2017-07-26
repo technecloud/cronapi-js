@@ -1098,8 +1098,8 @@
    */
   this.cronapi.xml.newXMLEmptyWithRoot = function(rootElement) {
   var t__temp = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>');
-  t__temp.removeChild(cronapi.$scope.vars.__temp.firstElementChild);
-  t__temp.appendChild(cronapi.$scope.vars.__temp.createElement(rootElement));
+  t__temp.removeChild(t__temp.firstElementChild);
+  t__temp.appendChild(t__temp.createElement(rootElement));
   return t__temp;
   };
   
@@ -1161,6 +1161,9 @@
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.xml.XMLGetRootElement = function(element) {
+    if(element instanceof XMLDocument){
+      return element.firstElementChild;
+    }
     return element.getRootNode();
   }
   
@@ -1173,8 +1176,13 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.xml.XMLDocumentToText = function(xml) {
-    if(element instanceof XMLDocument){
+    if(xml instanceof XMLDocument){
       return $($($(xml.firstElementChild).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
+    }
+    if($(xml).size() > 1 ){
+      var __v = '';
+      $.each($(xml).toArray() , function(key , value){  __v += $($(value)[0].outerHTML).removeAttr('xmlns')[0].outerHTML  } );
+      return __v;
     }
     return $($($(xml).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
   }
