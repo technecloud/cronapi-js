@@ -216,5 +216,7 @@
 	"getElementNameDescription":"Função que obtém o nome do elemento, exemplo <teste> retorna teste",
 	"renameElementName":"Renomeia elemento",
 	"renameElementDescription":"Função que renomeia o elemento, exemplo: antes <elementoAntigo/> após:<elementoNovo/>",
-	"name":"Nome"
+	"name":"Nome",
+	"getElementContentName":"Obter conteúdo do elemento",
+	"getElementContentDescription":"Função para obter o conteúdo do elemento. Exemplo <elemento>conteúdo<elemento> retorna conteúdo"
 }

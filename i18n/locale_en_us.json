@@ -215,5 +215,7 @@
 	"renameElementDescription":"Function that rename an element name, example: before<oldElement/> after:<newElement/>",
 	"name":"Name",
 	"newXMLEmptyWithRootName":"Create XML",
-	"XMLHasRootElementName":"Has Root element?"
+	"XMLHasRootElementName":"Has Root element?",
+	"getElementContentName":"Get element content",
+	"getElementContentDescription":"Function that get a content from element. Example <element>content<element> return content"
 }

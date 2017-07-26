@@ -1294,6 +1294,22 @@
      element.textContent = content;
   }
   
+  
+  /**
+   * @type function
+   * @name {{getElementContentName}}
+   * @nameTags getElementContent
+   * @description {{getElementContentDescription}}
+   * @param {ObjectType.OBJECT} element {{element}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.xml.getElementContent = function(element) {
+      if(element instanceof XMLDocument){
+      return element.firstChild.innerText;
+    }
+     return element.innerText;
+  }
+  
   /**
    * @type function
    * @name {{removeElementName}}
