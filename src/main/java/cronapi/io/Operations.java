@@ -1,11 +1,6 @@
 package cronapi.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -294,13 +289,13 @@ public class Operations {
   /**
    * Ler uma linha do arquivo
    */
-  @CronapiMetaData(type = "function", name = "Read bytes of File", nameTags = {
-      "fileReadBytes" }, description = "Read bytes of File", params = {
-      "{{streamOfFileToRead}}", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
-  public static final void fileReadBytes(Var input, Var size, Callback callback) throws Exception {
+  @CronapiMetaData(type = "function", name = "Read bytes of Stream", nameTags = {
+      "readBytes" }, description = "Read bytes of Stream", params = {
+      "Stream: File or any Stream (File, Connection etc)", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
+  public static final void readBytes(Var input, Var size, Callback callback) throws Exception {
     byte[] buffer = new byte[size.getObjectAsInt()>0?size.getObjectAsInt():1024];
 
-    FileInputStream ios =(FileInputStream) input.getObject();
+    InputStream ios = (InputStream) input.getObject();
     int read = 0;
     while ((read = ios.read(buffer)) != -1) {
       byte[] readBytes = Arrays.copyOf(buffer, read);
