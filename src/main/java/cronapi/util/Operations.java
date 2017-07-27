@@ -6,7 +6,8 @@ import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,6 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -33,7 +35,6 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
-import org.apache.http.client.methods.HttpDelete;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -258,7 +259,7 @@ public class Operations {
 					"application/x-www-form-urlencoded",
 					"application/json" }, values = { "{{x_www_form_urlencoded}}", "{{app_json}}" }) Var contentType,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{params}}") Var params,
+			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
 			@ParamMetaData(type = ObjectType.LIST, description = "{{cookieContainer}}") Var cookieContainer)
 			throws Exception {
 		try {
@@ -299,16 +300,20 @@ public class Operations {
 					httpPost.addHeader("Cookie", cookie.getObjectAsString());
 				}
 
-				if (params != Var.VAR_NULL && params.size() > 0) {
+				if (params != Var.VAR_NULL) {
+
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
-						String[] values = params.getObjectAsString().split("&");
-						List<NameValuePair> params2 = new ArrayList<NameValuePair>(values.length);
-						for (String value : values) {
-							String[] keyValue = value.split("=", -1);
-							params2.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
-						}
+
+						LinkedHashMap<String, Object> mapObject = (LinkedHashMap) params.getObject();
+						List<NameValuePair> params2 = new LinkedList<>();
+						mapObject.entrySet().stream().forEach((entry) -> {
+							params2.add(new BasicNameValuePair(entry.getKey(),
+									new Var(entry.getValue()).getObjectAsString()));
+						});
+
 						httpPost.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
 					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
+
 						StringEntity params2 = new StringEntity(params.getObjectAsString(),
 								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
 						httpPost.setEntity(params2);
@@ -340,14 +345,14 @@ public class Operations {
 					httpPut.addHeader("Cookie", cookie.getObjectAsString());
 				}
 
-				if (params != Var.VAR_NULL && params.size() > 0) {
+				if (params != Var.VAR_NULL) {
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
-						String[] values = params.getObjectAsString().split("&");
-						List<NameValuePair> params2 = new ArrayList<NameValuePair>(values.length);
-						for (String value : values) {
-							String[] keyValue = value.split("=", -1);
-							params2.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
-						}
+						LinkedHashMap<String, Object> mapObject = (LinkedHashMap) params.getObject();
+						List<NameValuePair> params2 = new LinkedList<>();
+						mapObject.entrySet().stream().forEach((entry) -> {
+							params2.add(new BasicNameValuePair(entry.getKey(),
+									new Var(entry.getValue()).getObjectAsString()));
+						});
 						httpPut.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
 					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
 						StringEntity params2 = new StringEntity(params.getObjectAsString(),
