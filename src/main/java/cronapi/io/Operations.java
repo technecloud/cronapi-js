@@ -278,13 +278,20 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{readLineOfFile}}", nameTags = {
 			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
 					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
-	public static final void fileReadLine(Var input, Callback callback) throws Exception {
-		BufferedReader reader = new BufferedReader(new InputStreamReader((FileInputStream) input.getObject()));
-		String line;
+	public static final void readLine(Var input, Callback callback) throws Exception {
+    readLinesFromStream(input, callback);
+	}
+
+  @CronapiMetaData(type = "function", name = "Read lines of Stream", nameTags = {
+      "readLines" }, description = "Read lines of Stream", params = {
+      "Stream: File or any Stream (File, Connection etc)", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
+  public static final void readLinesFromStream(Var input, Callback callback) throws Exception {
+    BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) input.getObject()));
+    String line;
     while ((line = reader.readLine()) != null) {
       callback.call(Var.valueOf(line));
     }
-	}
+  }
 
   /**
    * Ler uma linha do arquivo
@@ -292,7 +299,7 @@ public class Operations {
   @CronapiMetaData(type = "function", name = "Read bytes of Stream", nameTags = {
       "readBytes" }, description = "Read bytes of Stream", params = {
       "Stream: File or any Stream (File, Connection etc)", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
-  public static final void readBytes(Var input, Var size, Callback callback) throws Exception {
+  public static final void readBytesFromStream(Var input, Var size, Callback callback) throws Exception {
     byte[] buffer = new byte[size.getObjectAsInt()>0?size.getObjectAsInt():1024];
 
     InputStream ios = (InputStream) input.getObject();
