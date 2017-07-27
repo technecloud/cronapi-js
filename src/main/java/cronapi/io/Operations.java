@@ -291,6 +291,23 @@ public class Operations {
     }
 	}
 
+  /**
+   * Ler uma linha do arquivo
+   */
+  @CronapiMetaData(type = "function", name = "Read bytes of File", nameTags = {
+      "fileReadBytes" }, description = "Read bytes of File", params = {
+      "{{streamOfFileToRead}}", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
+  public static final void fileReadBytes(Var input, Var size, Callback callback) throws Exception {
+    byte[] buffer = new byte[size.getObjectAsInt()>0?size.getObjectAsInt():1024];
+
+    FileInputStream ios =(FileInputStream) input.getObject();
+    int read = 0;
+    while ((read = ios.read(buffer)) != -1) {
+      byte[] readBytes = Arrays.copyOf(buffer, read);
+      callback.call(Var.valueOf(readBytes));
+    }
+  }
+
 	/**
 	 * Limpar o arquivo
 	 */
