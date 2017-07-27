@@ -22,6 +22,7 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.util.Callback;
 
 /**
  * Classe que representa ...
@@ -281,13 +282,13 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{readLineOfFile}}", nameTags = {
 			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
-					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
-	public static final Var fileReadLine(Var input) throws Exception {
+					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
+	public static final void fileReadLine(Var input, Callback callback) throws Exception {
 		BufferedReader reader = new BufferedReader(new InputStreamReader((FileInputStream) input.getObject()));
-		String line = reader.readLine();
-		if (line != null)
-			return new Var(line);
-		return new Var(null);
+		String line;
+    while ((line = reader.readLine()) != null) {
+      callback.call(Var.valueOf(line));
+    }
 	}
 
 	/**
