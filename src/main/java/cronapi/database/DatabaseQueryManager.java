@@ -17,14 +17,23 @@ public class DatabaseQueryManager {
 
   private boolean isolatedTransaction = true;
   private String id;
+  private JsonObject query;
+  private boolean isDatabase = true;
 
   public DatabaseQueryManager(final String id) {
     this.id = id;
+    this.query = QueryManager.getQuery(id);
+    this.isDatabase = this.query.get("sourceType").getAsString().equals("entityFullName");
   }
 
   public DatabaseQueryManager(final String id, final boolean isolatedTransaction) {
     this.id = id;
     this.isolatedTransaction = isolatedTransaction;
+    this.query = QueryManager.getQuery(id);
+  }
+
+  public boolean isDatabase() {
+    return this.isDatabase;
   }
 
   public Var get(final Object ... params) throws Exception {
@@ -45,7 +54,6 @@ public class DatabaseQueryManager {
     final Var[] params = toVarArray(objParams);
     return runIntoTransaction(() -> {
       
-      JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "GET");
       
       if(QueryManager.getType(query).equals("blockly")) {
@@ -70,7 +78,6 @@ public class DatabaseQueryManager {
 
     return runIntoTransaction(() -> {
       
-      JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "POST");
       
       if(QueryManager.getType(query).equals("blockly")) {
@@ -103,7 +110,6 @@ public class DatabaseQueryManager {
 
     return runIntoTransaction(() -> {
       
-      JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "PUT");
       
       if(QueryManager.getType(query).equals("blockly")) {
@@ -132,7 +138,6 @@ public class DatabaseQueryManager {
 
     runIntoTransaction(() -> {
       
-      JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "DELETE");
       
       if(QueryManager.getType(query).equals("blockly")) {
