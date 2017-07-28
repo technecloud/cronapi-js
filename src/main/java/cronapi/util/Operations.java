@@ -1,11 +1,13 @@
 package cronapi.util;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -409,4 +411,33 @@ public class Operations {
 			throw e;
 		}
 	}
+
+	// Internal Function - Missing translation
+	// @CronapiMetaData(type = "function", name = "{{readLinesFromStreamName}}", nameTags = {
+	//   "readLinesFromStream" }, description = "{{readLinesFromStreamDescription}}", params = {
+	//   "{{readLinesFromStreamParam0}}", "{{readLinesFromStreamParam1}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
+	public static void readLinesFromStream(Var input, Callback callback) throws Exception {
+		BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) input.getObject()));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			callback.call(Var.valueOf(line));
+		}
+	}
+
+	// Internal Function - Missing translation
+	// 	@CronapiMetaData(type = "function", name = "{{readBytesFromStreamName}}", nameTags = {
+	// 			"readBytesFromStream" }, description = "{{readBytesFromStreamDescription}}", params = {
+	// 					"{{readBytesFromStreamParam0}}", "{{readBytesFromStreamParam1}}",
+	// 					"{{readBytesFromStreamParam2}}", }, paramsType = { ObjectType.OBJECT, ObjectType.LONG,
+	// 							ObjectType.STATEMENTSENDER })
+	public static final void readBytesFromStream(Var input, Var size, Callback callback) throws Exception {
+		byte[] buffer = new byte[size.getObjectAsInt() > 0 ? size.getObjectAsInt() : 1024];
+		InputStream ios = (InputStream) input.getObject();
+		int read = 0;
+		while ((read = ios.read(buffer)) != -1) {
+			byte[] readBytes = Arrays.copyOf(buffer, read);
+			callback.call(Var.valueOf(readBytes));
+		}
+	}
+
 }

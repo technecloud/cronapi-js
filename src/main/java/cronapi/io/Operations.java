@@ -33,19 +33,19 @@ public class Operations {
 
 	private static String APP_FOLDER;
 
-  static {
-    if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-      APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
-    } else {
-      try {
-        URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
-        String file = new File(location.getFile()).getAbsolutePath();
-        APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
-      } catch(Exception e) {
-        //Abafa
-      }
-    }
-  }
+	static {
+		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
+			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
+		} else {
+			try {
+				URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
+				String file = new File(location.getFile()).getAbsolutePath();
+				APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
+			} catch (Exception e) {
+				//Abafa
+			}
+		}
+	}
 
 	/**
 	 * Criar nova pasta 
@@ -277,38 +277,19 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{readLineOfFile}}", nameTags = {
 			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
-					"{{streamOfFileToRead}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
-	public static final void readLine(Var input, Callback callback) throws Exception {
-    readLinesFromStream(input, callback);
+					"{{streamOfFileToRead}}", "{{callBackStatements}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
+	public static final void readLine(Var input, cronapi.util.Callback callback) throws Exception {
+		cronapi.util.Operations.readLinesFromStream(input, callback);
 	}
 
-  @CronapiMetaData(type = "function", name = "Read lines of Stream", nameTags = {
-      "readLines" }, description = "Read lines of Stream", params = {
-      "Stream: File or any Stream (File, Connection etc)", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
-  public static final void readLinesFromStream(Var input, Callback callback) throws Exception {
-    BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) input.getObject()));
-    String line;
-    while ((line = reader.readLine()) != null) {
-      callback.call(Var.valueOf(line));
-    }
-  }
-
-  /**
-   * Ler uma linha do arquivo
-   */
-  @CronapiMetaData(type = "function", name = "Read bytes of Stream", nameTags = {
-      "readBytes" }, description = "Read bytes of Stream", params = {
-      "Stream: File or any Stream (File, Connection etc)", "Size of each read" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG, ObjectType.STATEMENTSENDER })
-  public static final void readBytesFromStream(Var input, Var size, Callback callback) throws Exception {
-    byte[] buffer = new byte[size.getObjectAsInt()>0?size.getObjectAsInt():1024];
-
-    InputStream ios = (InputStream) input.getObject();
-    int read = 0;
-    while ((read = ios.read(buffer)) != -1) {
-      byte[] readBytes = Arrays.copyOf(buffer, read);
-      callback.call(Var.valueOf(readBytes));
-    }
-  }
+	@CronapiMetaData(type = "function", name = "{{readBytesFromStreamName}} ", nameTags = {
+			"readBytesFromStream" }, description = "{{readBytesFromStreamDescription}}", params = {
+					"{{readBytesFromStreamParam0}}", "{{readBytesFromStreamParam1}}",
+					"{{callBackStatements}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG,
+							ObjectType.STATEMENTSENDER })
+	public static void readBytesFromStream(Var input, Var size, Callback callback) throws Exception {
+		cronapi.util.Operations.readBytesFromStream(input, size, callback);
+	}
 
 	/**
 	 * Limpar o arquivo
@@ -553,11 +534,9 @@ public class Operations {
 			"listFiles" }, description = "{{listFilesDescription}}", returnType = ObjectType.STRING)
 	public static final Var listFiles(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam0}}") Var path,
-			@ParamMetaData(type = ObjectType.STRING, 
-			               description = "{{listFilesParam1}}",
-			               blockType = "util_dropdown",
-			               keys = { "all","directories","files" },
-			               values = { "{{all}}","{{directories}}","{{files}}" }) Var type) throws Exception {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}", blockType = "util_dropdown", keys = {
+					"all", "directories", "files" }, values = { "{{all}}", "{{directories}}", "{{files}}" }) Var type)
+			throws Exception {
 		try {
 			if (path.equals(Var.VAR_NULL))
 				return Var.newList();
