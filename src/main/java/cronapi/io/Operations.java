@@ -464,18 +464,22 @@ public class Operations {
 		return new Var(false);
 	}
 
-	/**
-	 *  Ler Todo Arquivo Definindo Charset	
-	 */
-	@CronapiMetaData(type = "function", name = "{{readAllFileWithCharset}}", nameTags = {
-			"fileReadContentWithCharset" }, description = "{{functionToReadAllFileWithCharset}}", params = {
-					"{{streamOfFileToRead}}", "{{charset}}" }, paramsType = { ObjectType.OBJECT,
-							ObjectType.STRING }, returnType = ObjectType.STRING)
-	public static final Var fileReadContentWithCharset(Var finp, Var charsetSelected) throws Exception {
-		String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream) finp.getObject(),
-				charsetSelected.getObjectAsString());
-		return new Var(result);
-	}
+  /**
+   *  Ler Todo Arquivo Definindo Charset  
+   */
+  @CronapiMetaData(type = "function", name = "{{readAllFileWithCharset}}", nameTags = {
+      "fileReadContentWithCharset" }, description = "{{functionToReadAllFileWithCharset}}", params = {
+          "{{streamOfFileToRead}}", "{{charset}}" }, paramsType = { ObjectType.OBJECT,
+              ObjectType.STRING }, returnType = ObjectType.STRING)
+  public static final Var fileReadContentWithCharset(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{streamOfFileToRead}}") Var finp,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{charset}}", blockType = "util_dropdown", keys = {
+          "UTF-8", "UTF-16", "US-ASCII", "ISO-8859-1", "ISO-8859-2" }) Var charsetSelected)
+      throws Exception {
+    String result = org.apache.commons.io.IOUtils.toString((java.io.InputStream) finp.getObject(),
+        charsetSelected.getObjectAsString());
+    return new Var(result);
+  }
 
 	/**
 	 *  Descompactar arquivo zip	
