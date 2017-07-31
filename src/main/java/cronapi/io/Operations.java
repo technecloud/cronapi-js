@@ -1,6 +1,9 @@
 package cronapi.io;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -271,7 +274,7 @@ public class Operations {
 		cronapi.util.Operations.readLinesFromStream(input, callback);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{readBytesFromStreamName}} ", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{readBytesFromStreamName}}", nameTags = {
 			"readBytesFromStream" }, description = "{{readBytesFromStreamDescription}}", params = {
 					"{{readBytesFromStreamParam0}}", "{{readBytesFromStreamParam1}}",
 					"{{callBackStatements}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG,
