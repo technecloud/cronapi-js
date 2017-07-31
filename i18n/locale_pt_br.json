@@ -138,7 +138,7 @@
 	"paramName": "Nome do parâmetro",
 	"changeView": "Mudar formulário",
 	"functionToChangeView": "Função para mudar o formulário corrente",
-	"view": "formulário de destino",
+	"view": "Formulário de destino",
 	"openUrl": "Abrir url",
 	"functionToOpenUrl": "Função para abrir url",
 	"url": "Url de destino",
@@ -218,5 +218,6 @@
 	"renameElementDescription":"Função que renomeia o elemento, exemplo: antes <elementoAntigo/> após:<elementoNovo/>",
 	"name":"Nome",
 	"getElementContentName":"Obter conteúdo do elemento",
-	"getElementContentDescription":"Função para obter o conteúdo do elemento. Exemplo <elemento>conteúdo<elemento> retorna conteúdo"
+	"getElementContentDescription":"Função para obter o conteúdo do elemento. Exemplo <elemento>conteúdo<elemento> retorna conteúdo",
+	"datasource" : "Fonte de dados"
 }

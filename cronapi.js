@@ -635,7 +635,7 @@
    * @name {{datasourcePostName}}
    * @nameTags post|datasource
    * @description {{datasourcePostDescription}}
-   * @param {ObjectType.STRING} datasource {{datasourcePostParam0}}
+   * @param {ObjectType.STRING} datasource {{datasource}}
    * @multilayer true
    */
   this.cronapi.screen.post = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {

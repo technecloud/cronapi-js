@@ -207,7 +207,7 @@
 	"getParentNodeDescription": "Function that return a parent element from a XML element",
 	"setElementValueName": "Set a content element",
 	"setElementValueDescription": "Function that set a content on element",
-		"removeElementName":"Remove element",
+	"removeElementName":"Remove element",
 	"removeElementDescription":"Function that receive a Função que recebe um elemento pai e um elemento ou nome de elemento para remover",
 	"getElementNameName":"Get an element name",
 	"getElementNameDescription":"Function that get an element name, example <test> return test",
@@ -217,5 +217,6 @@
 	"newXMLEmptyWithRootName":"Create XML",
 	"XMLHasRootElementName":"Has Root element?",
 	"getElementContentName":"Get element content",
-	"getElementContentDescription":"Function that get a content from element. Example <element>content<element> return content"
+	"getElementContentDescription":"Function that get a content from element. Example <element>content<element> return content",
+	 "datasource" : "Datasource"
 }
