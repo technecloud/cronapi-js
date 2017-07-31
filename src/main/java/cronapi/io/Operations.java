@@ -195,17 +195,6 @@ public class Operations {
 	}
 
 	/**
-	 * Forçar criação do diretorio para o arquivo
-	 */
-	@CronapiMetaData(type = "function", name = "{{forceFolderCreateToFile}}", nameTags = { "forceDirectories",
-			"forceFolder", "forceCreateDirectories",
-			"forceCreateFolder" }, description = "{{functionToForceFolderCreateToFile}}", params = {
-					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public static final Var forceDirectories(Var path) throws Exception {
-		return new Var(new File(path.getObjectAsString()).getParentFile().mkdirs());
-	}
-
-	/**
 	 * Abrir arquivo para escrita
 	 */
 	@CronapiMetaData(type = "function", name = "{{openFileToWrite}}", nameTags = {
@@ -276,8 +265,8 @@ public class Operations {
 	 * Ler uma linha do arquivo
 	 */
 	@CronapiMetaData(type = "function", name = "{{readLineOfFile}}", nameTags = {
-			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = {
-					"{{streamOfFileToRead}}", "{{callBackStatements}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
+			"fileReadLine" }, description = "{{functionToReadLineOfFile}}", params = { "{{streamOfFileToRead}}",
+					"{{callBackStatements}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STATEMENTSENDER })
 	public static final void readLine(Var input, cronapi.util.Callback callback) throws Exception {
 		cronapi.util.Operations.readLinesFromStream(input, callback);
 	}
