@@ -441,7 +441,7 @@ public class Operations {
 				String pathLocal = path.getObjectAsString();
 				java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
 				if (!pathLocal.endsWith(File.separator))
-					pathLocal += pathLocal + File.separator;
+					pathLocal += File.separator;
 
 				java.io.InputStream is = url.openStream();
 				java.io.FileOutputStream fos = new java.io.FileOutputStream(
