@@ -262,9 +262,10 @@ public class Operations {
 					"application/json" }, values = { "{{x_www_form_urlencoded}}", "{{app_json}}" }) Var contentType,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
-			@ParamMetaData(type = ObjectType.LIST, description = "{{cookieContainer}}") Var cookieContainer)
+			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
 			throws Exception {
 		try {
+
 			String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 			String APPLICATION_JSON = "application/json";
 
@@ -272,9 +273,11 @@ public class Operations {
 
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
-				for (Var cookie : cookieContainer.getObjectAsList()) {
-					httpGet.addHeader("Cookie", cookie.getObjectAsString());
-				}
+
+				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				headerObject.entrySet().stream().forEach((entry) -> {
+					httpGet.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+				});
 
 				HttpResponse httpResponse = httpClient.execute(httpGet);
 				Header[] headers = httpResponse.getHeaders("Set-Cookie");
@@ -298,9 +301,10 @@ public class Operations {
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost(address.getObjectAsString());
-				for (Var cookie : cookieContainer.getObjectAsList()) {
-					httpPost.addHeader("Cookie", cookie.getObjectAsString());
-				}
+				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				headerObject.entrySet().stream().forEach((entry) -> {
+					httpPost.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+				});
 
 				if (params != Var.VAR_NULL) {
 
@@ -343,9 +347,11 @@ public class Operations {
 			} else if (method.getObjectAsString().toUpperCase().equals("PUT")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPut httpPut = new HttpPut(address.getObjectAsString());
-				for (Var cookie : cookieContainer.getObjectAsList()) {
-					httpPut.addHeader("Cookie", cookie.getObjectAsString());
-				}
+
+				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				headerObject.entrySet().stream().forEach((entry) -> {
+					httpPut.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+				});
 
 				if (params != Var.VAR_NULL) {
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
@@ -384,9 +390,11 @@ public class Operations {
 			} else if (method.getObjectAsString().toUpperCase().equals("DELETE")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpDelete httpDelete = new HttpDelete(address.getObjectAsString());
-				for (Var cookie : cookieContainer.getObjectAsList()) {
-					httpDelete.addHeader("Cookie", cookie.getObjectAsString());
-				}
+
+				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				headerObject.entrySet().stream().forEach((entry) -> {
+					httpDelete.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+				});
 
 				HttpResponse httpResponse = httpClient.execute(httpDelete);
 				Header[] headers = httpResponse.getHeaders("Set-Cookie");
