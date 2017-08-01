@@ -245,7 +245,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{readContentOfFile}}", nameTags = {
 			"fileRead" }, description = "{{functionToReadContentOfFile}}", params = { "{{streamOfFileToRead}}",
-					"{{size}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG }, returnType = ObjectType.STRING)
+					"{{sizeInBytes}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG }, returnType = ObjectType.STRING)
 	public static final Var fileRead(Var input, Var size) throws Exception {
 		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
@@ -367,35 +367,6 @@ public class Operations {
 	}
 
 	/**
-	 * Conteudo do diretorio
-	 */
-	@CronapiMetaData(type = "function", name = "{{contentOfFolder}}", nameTags = { "contentOfDirectory",
-			"contentOfFolder" }, description = "{{functionToGetContentOfFolder}}", params = {
-					"{{pathOfFolder}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LIST)
-	public static final Var contentOfDirectory(Var input) throws Exception {
-		File dir = new File(input.getObjectAsString());
-		List<String> filesList = new ArrayList<String>();
-		String[] files = dir.list();
-		if (files != null && files.length > 0) {
-			for (String file : files) {
-				filesList.add(dir.getAbsolutePath() + File.separator + file);
-			}
-		}
-		return new Var(filesList);
-	}
-
-	/**
-	 * É arquivo?
-	 */
-	@CronapiMetaData(type = "function", name = "{{isFile}}", nameTags = {
-			"isFile" }, description = "{{functionToCheckIsFile}}", params = {
-					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public static final Var isFile(Var path) {
-		File file = new File(path.getObjectAsString());
-		return new Var(file.isFile());
-	}
-
-	/**
 	 * É diretorio?
 	 */
 	@CronapiMetaData(type = "function", name = "{{isFolder}}", nameTags = { "isDirectory",
@@ -423,7 +394,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{downloadFileFromUrl}}", nameTags = {
 			"downloadFileFromUrl" }, description = "{{functionToDownloadFileFromUrl}}", params = { "{{URLAddress}}",
-					"{{folderPathToSaveFile}}", "{{nameOfFile}}", "{{fileExtension}}" }, paramsType = {
+					"{{folderPathToSaveFile}}", "{{nameOfFileFromURL}}", "{{fileExtensionWithDot}}" }, paramsType = {
 							ObjectType.STRING, ObjectType.STRING, ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public static final Var downloadFileFromUrl(Var urlAddress, Var path, Var name, Var extension) {
