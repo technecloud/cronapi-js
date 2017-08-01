@@ -205,9 +205,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
 
       if (_object instanceof Map && type != Map.class) {
         CronapiObjectMapper mapper = new CronapiObjectMapper();
-        ((Map<?, ?>) _object).remove("$$hashKey");
-        ((Map<?, ?>) _object).remove("links");
-        ((Map<?, ?>) _object).remove("tempBufferId");
         return mapper.convertToObject(_object, type);
       }
 
