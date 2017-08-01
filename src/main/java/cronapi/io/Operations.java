@@ -245,7 +245,7 @@ public class Operations {
 	 */
 	@CronapiMetaData(type = "function", name = "{{readContentOfFile}}", nameTags = {
 			"fileRead" }, description = "{{functionToReadContentOfFile}}", params = { "{{streamOfFileToRead}}",
-					"{{size}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG }, returnType = ObjectType.STRING)
+					"{{sizeInBytes}}" }, paramsType = { ObjectType.OBJECT, ObjectType.LONG }, returnType = ObjectType.STRING)
 	public static final Var fileRead(Var input, Var size) throws Exception {
 		byte[] byteSizeToRead = new byte[size.getObjectAsInt()];
 		FileInputStream in = (FileInputStream) input.getObject();
