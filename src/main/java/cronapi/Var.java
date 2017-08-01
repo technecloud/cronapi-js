@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.google.gson.JsonObject;
 
+import cronapi.clazz.CronapiObjectMapper;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
@@ -203,11 +204,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
     } else {
 
       if (_object instanceof Map && type != Map.class) {
-        ObjectMapper mapper = new ObjectMapper();
+        CronapiObjectMapper mapper = new CronapiObjectMapper();
         ((Map<?, ?>) _object).remove("$$hashKey");
         ((Map<?, ?>) _object).remove("links");
         ((Map<?, ?>) _object).remove("tempBufferId");
-        return mapper.convertValue(_object, type);
+        return mapper.convertToObject(_object, type);
       }
 
       return getObject();
