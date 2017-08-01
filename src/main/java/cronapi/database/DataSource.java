@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
@@ -47,7 +46,6 @@ public class DataSource implements JsonSerializable {
   private Page page;
   private int index;
   private int current;
-  private JpaRepository<Object, String> repository;
   private Pageable pageRequest;
   private Object insertedElement = null;
 
@@ -84,7 +82,6 @@ public class DataSource implements JsonSerializable {
   private void instantiateRepository() {
     try {
       domainClass = Class.forName(this.entity);
-      this.repository = TransactionManager.findRepository(domainClass);
     } catch (ClassNotFoundException cnfex) {
       throw new RuntimeException(cnfex);
     }
@@ -133,42 +130,46 @@ public class DataSource implements JsonSerializable {
    * @return a array of Object
    */
   public Object[] fetch() {
-    if (this.filter != null && !"".equals(this.filter)) {
-      try {
-        EntityManager em = TransactionManager.getEntityManager(domainClass);
-        TypedQuery<?> query = em.createQuery(filter, domainClass);
 
-        int i = 0;
-        List<String> parsedParams = parseParams(filter);
+    String jpql = this.filter;
+    
+    if (jpql == null) {
+      jpql = "select e from " + simpleEntity + " e";
+    }
+    
+    try {
+      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      TypedQuery<?> query = em.createQuery(jpql, domainClass);
 
-        for (String param : parsedParams) {
-          Var p = null;
-          if (i <= this.params.length-1) {
-            p = this.params[i];
-          }
-          if (p != null) {
-            if (p.getId() != null) {
-              query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
-            } else {
-              query.setParameter(param, p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
-            }
-          } else {
-            query.setParameter(param, null);
-          }
-          i++;
+      int i = 0;
+      List<String> parsedParams = parseParams(jpql);
+
+      for (String param : parsedParams) {
+        Var p = null;
+        if (i <= this.params.length-1) {
+          p = this.params[i];
         }
-
-        query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
-        query.setMaxResults(this.pageRequest.getPageSize());
-
-        List<?> resultsInPage = query.getResultList();
-
-        this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
+        if (p != null) {
+          if (p.getId() != null) {
+            query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
+          } else {
+            query.setParameter(param, p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
+          }
+        } else {
+          query.setParameter(param, null);
+        }
+        i++;
       }
-    } else
-      this.page = this.repository.findAll(this.pageRequest);
+
+      query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
+      query.setMaxResults(this.pageRequest.getPageSize());
+
+      List<?> resultsInPage = query.getResultList();
+
+      this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
 
     //has data, moves cursor to first position
     if (this.page.getNumberOfElements() > 0)
