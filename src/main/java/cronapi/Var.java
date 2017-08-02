@@ -20,6 +20,7 @@ import cronapi.clazz.CronapiObjectMapper;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
+import java.util.LinkedHashMap;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -407,6 +408,16 @@ public class Var implements Comparable<Var>, JsonSerializable {
     }
 
     return getSingleList(getObject());
+  }
+  
+  
+  //TODO Incrementar outras conversões
+  public LinkedHashMap<Var,Var> getObjectAsMap(){
+    if(getObject() instanceof Map){
+      return (LinkedHashMap<Var,Var>) getObject();
+    }
+    
+    return new LinkedHashMap<Var,Var>();
   }
 
   public Var getObjectAsPOJOList() {
