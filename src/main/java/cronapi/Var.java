@@ -11,18 +11,15 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import com.google.gson.JsonPrimitive;
+
 import cronapi.clazz.CronapiObjectMapper;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
-import java.util.LinkedHashMap;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -253,9 +250,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
         break;
     }
 
-    if (getObject() instanceof JsonPrimitive) {
-      return Var.valueOf(getPrimitiveValue((JsonPrimitive)getObject())).getObjectAsInt();
-    }
     return 0;
   }
 
@@ -287,9 +281,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
         break;
     }
 
-    if (getObject() instanceof JsonPrimitive) {
-      return Var.valueOf(getPrimitiveValue((JsonPrimitive)getObject())).getObjectAsLong();
-    }
     return 0L;
   }
 
@@ -321,22 +312,16 @@ public class Var implements Comparable<Var>, JsonSerializable {
         break;
     }
 
-    if (getObject() instanceof JsonPrimitive) {
-      return Var.valueOf(getPrimitiveValue((JsonPrimitive)getObject())).getObjectAsDateTime();
-    }
-
     return VAR_DATE_ZERO.getObjectAsDateTime();
   }
 
   private Object getPrimitiveValue(JsonPrimitive element) {
-    if (element.isString())
-      return element.getAsString();
-    else if (element.isBoolean())
+    if (element.isBoolean())
       return element.getAsBoolean();
     else if (element.isNumber())
       return element.getAsBigDecimal();
     else
-      return "";
+      return element.getAsString();
   }
 
   /**
@@ -370,9 +355,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
         // has no meaning
         break;
     }
-    if (getObject() instanceof JsonPrimitive) {
-      return Var.valueOf(getPrimitiveValue((JsonPrimitive)getObject())).getObjectAsBoolean();
-    }
     return false;
   }
 
@@ -400,9 +382,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
         break;
     }
 
-    if (getObject() instanceof JsonPrimitive) {
-      return Var.valueOf(getPrimitiveValue((JsonPrimitive)getObject())).getObjectAsDouble();
-    }
     return 0.0;
   }
 
@@ -444,13 +423,28 @@ public class Var implements Comparable<Var>, JsonSerializable {
   }
   
   
-  //TODO Incrementar outras conversões
-  public LinkedHashMap<Var,Var> getObjectAsMap(){
+  public Map getObjectAsMap(){
     if(getObject() instanceof Map){
-      return (LinkedHashMap<Var,Var>) getObject();
+      return (Map) getObject();
+    } else {
+      if (getObject() != null) {
+        if (isNative()) {
+          Map map = new LinkedHashMap();
+          if (id == null) {
+            map.put(this, this);
+          } else {
+            map.put(id, this);
+          }
+
+          return map;
+        } else {
+          CronapiObjectMapper mapper = new CronapiObjectMapper();
+          return (Map) mapper.convertToObject(_object, Map.class);
+        }
+      }
     }
-    
-    return new LinkedHashMap<Var,Var>();
+
+    return new LinkedHashMap();
   }
 
   public Var getObjectAsPOJOList() {
@@ -529,6 +523,10 @@ public class Var implements Comparable<Var>, JsonSerializable {
       case LIST: {
         return ((LinkedList<Var>) getObject()).size();
       }
+    }
+
+    if (getObject() instanceof Map) {
+      return ((Map) getObject()).size();
     }
 
     return 0;
@@ -765,9 +763,6 @@ public class Var implements Comparable<Var>, JsonSerializable {
       default:
         if (getObject() == null)
           return "";
-        if (getObject() instanceof JsonPrimitive) {
-          return ((JsonPrimitive) getObject()).getAsString();
-        }
         return getObject().toString();
     }
   }
@@ -833,6 +828,9 @@ public class Var implements Comparable<Var>, JsonSerializable {
     } else if (_object instanceof List) {
       _type = Type.LIST;
       _object = new LinkedList<>((List) _object);
+    } else if (_object instanceof JsonPrimitive) {
+        _object = getPrimitiveValue((JsonPrimitive) _object);
+        inferType();
     } else {
       _type = Type.UNKNOWN;
     }

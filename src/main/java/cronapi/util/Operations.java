@@ -274,7 +274,7 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
 
-				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
+				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpGet.addHeader(entry.getKey().getObjectAsString(),
 							new Var(entry.getValue()).getObjectAsString());
@@ -294,7 +294,7 @@ public class Operations {
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost(address.getObjectAsString());
-				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
+				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpPost.addHeader(entry.getKey().getObjectAsString(),
 							new Var(entry.getValue()).getObjectAsString());
@@ -304,7 +304,7 @@ public class Operations {
 
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
 
-						LinkedHashMap<Var, Var> mapObject = params.getObjectAsMap();
+						LinkedHashMap<Var, Var> mapObject = (LinkedHashMap<Var, Var>) params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
 							params2.add(new BasicNameValuePair( new Var(entry.getKey()).getObjectAsString(),
@@ -335,7 +335,7 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPut httpPut = new HttpPut(address.getObjectAsString());
 
-				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
+				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpPut.addHeader(entry.getKey().getObjectAsString(),
 							new Var(entry.getValue()).getObjectAsString());
@@ -343,7 +343,7 @@ public class Operations {
 
 				if (params != Var.VAR_NULL) {
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
-						LinkedHashMap<Var, Var> mapObject = params.getObjectAsMap();
+						LinkedHashMap<Var, Var> mapObject = (LinkedHashMap<Var, Var>) params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
 							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
@@ -372,7 +372,7 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpDelete httpDelete = new HttpDelete(address.getObjectAsString());
 
-				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
+				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpDelete.addHeader(entry.getKey().getObjectAsString(),
 							new Var(entry.getValue()).getObjectAsString());

@@ -50,12 +50,13 @@ public class CronapiObjectMapper extends ObjectMapper {
         JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, toValueType);
         // note: no handling of unwarpping
         Field field = ReflectionUtils.findField(deser.getClass(), "_ignoreAllUnknown");
-        field.setAccessible(true);
-        try {
-          field.set(deser, true);
-        }
-        catch(IllegalAccessException e) {
-          //
+        if (field != null) {
+          field.setAccessible(true);
+          try {
+            field.set(deser, true);
+          } catch (IllegalAccessException e) {
+            //
+          }
         }
         result = deser.deserialize(jp, ctxt);
       }
