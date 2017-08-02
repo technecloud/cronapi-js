@@ -274,20 +274,13 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
 
-				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
-					httpGet.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+					httpGet.addHeader(entry.getKey().getObjectAsString(),
+							new Var(entry.getValue()).getObjectAsString());
 				});
 
 				HttpResponse httpResponse = httpClient.execute(httpGet);
-				Header[] headers = httpResponse.getHeaders("Set-Cookie");
-
-				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
-					cookieContainer.getObjectAsList().clear();
-					for (Header h : headers) {
-						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
-					}
-				}
 				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 						cronapi.CronapiConfigurator.ENCODING);
 				String response = "";
@@ -301,19 +294,20 @@ public class Operations {
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost(address.getObjectAsString());
-				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
-					httpPost.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+					httpPost.addHeader(entry.getKey().getObjectAsString(),
+							new Var(entry.getValue()).getObjectAsString());
 				});
 
 				if (params != Var.VAR_NULL) {
 
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
 
-						LinkedHashMap<String, Object> mapObject = (LinkedHashMap) params.getObject();
+						LinkedHashMap<Var, Var> mapObject = params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(entry.getKey(),
+							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
 									new Var(entry.getValue()).getObjectAsString()));
 						});
 
@@ -327,13 +321,6 @@ public class Operations {
 				}
 
 				HttpResponse httpResponse = httpClient.execute(httpPost);
-				Header[] headers = httpResponse.getHeaders("Set-Cookie");
-				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
-					cookieContainer.getObjectAsList().clear();
-					for (Header h : headers) {
-						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
-					}
-				}
 				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 						cronapi.CronapiConfigurator.ENCODING);
 				String response = "";
@@ -348,17 +335,18 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPut httpPut = new HttpPut(address.getObjectAsString());
 
-				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
-					httpPut.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+					httpPut.addHeader(entry.getKey().getObjectAsString(),
+							new Var(entry.getValue()).getObjectAsString());
 				});
 
 				if (params != Var.VAR_NULL) {
 					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
-						LinkedHashMap<String, Object> mapObject = (LinkedHashMap) params.getObject();
+						LinkedHashMap<Var, Var> mapObject = params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(entry.getKey(),
+							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
 									new Var(entry.getValue()).getObjectAsString()));
 						});
 						httpPut.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
@@ -370,13 +358,6 @@ public class Operations {
 				}
 
 				HttpResponse httpResponse = httpClient.execute(httpPut);
-				Header[] headers = httpResponse.getHeaders("Set-Cookie");
-				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
-					cookieContainer.getObjectAsList().clear();
-					for (Header h : headers) {
-						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
-					}
-				}
 				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 						cronapi.CronapiConfigurator.ENCODING);
 				String response = "";
@@ -391,19 +372,13 @@ public class Operations {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpDelete httpDelete = new HttpDelete(address.getObjectAsString());
 
-				LinkedHashMap<String, Object> headerObject = (LinkedHashMap) cookieContainer.getObject();
+				LinkedHashMap<Var, Var> headerObject = cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
-					httpDelete.addHeader(entry.getKey(), new Var(entry.getValue()).getObjectAsString());
+					httpDelete.addHeader(entry.getKey().getObjectAsString(),
+							new Var(entry.getValue()).getObjectAsString());
 				});
 
 				HttpResponse httpResponse = httpClient.execute(httpDelete);
-				Header[] headers = httpResponse.getHeaders("Set-Cookie");
-				if (cookieContainer != Var.VAR_NULL && headers != null && headers.length > 0) {
-					cookieContainer.getObjectAsList().clear();
-					for (Header h : headers) {
-						cookieContainer.getObjectAsList().add(new Var(h.getValue()));
-					}
-				}
 				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 						cronapi.CronapiConfigurator.ENCODING);
 				String response = "";
