@@ -180,19 +180,16 @@ public class Operations {
 			"XMLcreateElementInside" }, description = "{{XMLcreateElementInsideDescription}}", params = {
 					"{{XMLcreateElementInsideParam0}}", "{{XMLcreateElementInsideParam1}}",
 					"{{XMLcreateElementInsideParam2}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING,
-							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public final static Var XMLcreateElementInside(Var parent, Var name, Var value) {
+							ObjectType.STRING })
+	public final static void XMLcreateElementInside(Var parent, Var name, Var value) {
 		if (!parent.equals(Var.VAR_NULL) && !name.equals(Var.VAR_NULL)) {
 			if (parent.getObject() instanceof Element) {
 				Element parentCasted = (Element) parent.getObject();
 				Element newElement = new Element(name.getObjectAsString());
 				newElement.setText(value.getObjectAsString());
 				parentCasted.getChildren().add(newElement);
-				return new Var(true);
-			} else
-				return new Var(false);
+			}
 		}
-		return new Var(false);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLGetChildElementName}}", nameTags = {
