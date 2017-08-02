@@ -1,11 +1,14 @@
 package cronapi;
 
 import com.google.gson.JsonObject;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class RestClient {
   
@@ -20,9 +23,16 @@ public class RestClient {
   private HttpServletResponse response = CronapiFilter.RESPONSE.get();
   private HttpServletRequest request = CronapiFilter.REQUEST.get();
   private JsonObject query = null;
-
+  
+  private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
+  
+  static {
+    DEFAULT_AUTHORITIES = new ArrayList<>();
+    DEFAULT_AUTHORITIES.add(new SimpleGrantedAuthority("authenticated"));
+  }
+  
   private RestBody body;
-
+  
   private Var rawBody;
   
   public static RestClient getRestClient() {
@@ -53,19 +63,19 @@ public class RestClient {
       body = new RestBody();
     return body;
   }
-
+  
   public void setBody(RestBody body) {
     this.body = body;
   }
-
+  
   public Var getRawBody() {
     return rawBody;
   }
-
+  
   public void setRawBody(Var rawBody) {
     this.rawBody = rawBody;
   }
-
+  
   public HttpServletRequest getRequest() {
     return request;
   }
@@ -73,20 +83,41 @@ public class RestClient {
   public HttpServletResponse getResponse() {
     return response;
   }
-
+  
   public String getParameter(String key) {
     return request.getParameter(key);
   }
-
+  
   public String getMethod() {
     return request.getMethod();
   }
-
+  
   public JsonObject getQuery() {
     return query;
   }
-
+  
   public void setQuery(JsonObject query) {
     this.query = query;
+  }
+  
+  public User getUser() {
+    
+    Object user = null;
+    
+    if(SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null)
+      user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    if(user instanceof User)
+      return (User)user;
+    else
+      return null;
+  }
+  
+  public Collection<GrantedAuthority> getAuthorities() {
+    User user = getUser();
+    if(user != null)
+      return user.getAuthorities();
+    
+    return Collections.EMPTY_LIST;
   }
 }
