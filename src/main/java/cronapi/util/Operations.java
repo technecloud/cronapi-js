@@ -307,7 +307,7 @@ public class Operations {
 						LinkedHashMap<Var, Var> mapObject = params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
+							params2.add(new BasicNameValuePair( new Var(entry.getKey()).getObjectAsString(),
 									new Var(entry.getValue()).getObjectAsString()));
 						});
 
