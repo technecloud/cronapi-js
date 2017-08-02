@@ -72,16 +72,14 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{XMLaddElementName}}", nameTags = {
 			"XMLaddElement" }, description = "{{XMLaddElementDescription}}", params = { "{{XMLaddElementParam0}}",
-					"{{XMLaddElementParam1}}" }, paramsType = { ObjectType.STRING,
-							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public final static Var XMLaddElement(Var parent, Var element) {
+					"{{XMLaddElementParam1}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING })
+	public final static void XMLaddElement(Var parent, Var element) {
 
 		if (parent.getObject() instanceof Element && element.getObject() instanceof Element) {
 			Element parentCasted = (Element) parent.getObject();
 			Element elementCasted = (Element) element.getObject();
 
 			parentCasted.getChildren().add(elementCasted);
-			return Var.VAR_TRUE;
 
 		} else if (parent.getObject() instanceof Document && element.getObject() instanceof Element) {
 			Document parentCasted = (Document) parent.getObject();
@@ -89,14 +87,8 @@ public class Operations {
 			if (!parentCasted.hasRootElement()) {
 				Element elementCasted = (Element) element.getObject();
 				parentCasted.setRootElement(elementCasted);
-				return Var.VAR_TRUE;
-			} else
-				return Var.VAR_FALSE;
-
+			}
 		}
-
-		return Var.VAR_FALSE;
-
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLHasRootElementName}}", nameTags = {
@@ -174,22 +166,6 @@ public class Operations {
 			}
 		}
 		return Var.VAR_NULL;
-	}
-
-	@CronapiMetaData(type = "function", name = "{{XMLcreateElementInsideName}}", nameTags = {
-			"XMLcreateElementInside" }, description = "{{XMLcreateElementInsideDescription}}", params = {
-					"{{XMLcreateElementInsideParam0}}", "{{XMLcreateElementInsideParam1}}",
-					"{{XMLcreateElementInsideParam2}}" }, paramsType = { ObjectType.OBJECT, ObjectType.STRING,
-							ObjectType.STRING })
-	public final static void XMLcreateElementInside(Var parent, Var name, Var value) {
-		if (!parent.equals(Var.VAR_NULL) && !name.equals(Var.VAR_NULL)) {
-			if (parent.getObject() instanceof Element) {
-				Element parentCasted = (Element) parent.getObject();
-				Element newElement = new Element(name.getObjectAsString());
-				newElement.setText(value.getObjectAsString());
-				parentCasted.getChildren().add(newElement);
-			}
-		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLGetChildElementName}}", nameTags = {
