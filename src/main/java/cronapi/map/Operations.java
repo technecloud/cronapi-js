@@ -25,9 +25,9 @@ public class Operations {
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
-		LinkedHashMap<String, Object> mapObject = new LinkedHashMap<>();
+		LinkedHashMap<Var, Var> mapObject = new LinkedHashMap<>();
 		for (int i = 0; i < map.length; i++) {
-			mapObject.put(map[i].getId(), map[i].getObject());
+			mapObject.put(new Var(map[i].getId()), new Var(map[i].getObject()) );
 		}
 		return new Var(mapObject);
 	}
