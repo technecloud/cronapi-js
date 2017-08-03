@@ -22,16 +22,20 @@ import cronapi.CronapiMetaData.ObjectType;
 @CronapiMetaData(category = CategoryType.CONVERSION, categoryTags = { "Conversão", "Convert" })
 public class Operations {
 
+	@CronapiMetaData(type = "function", name = "{{TextToBase64Name}}", nameTags = {
+			"TextToBase64" }, description = "{{TextToBase64Description}}", params = {
+					"{{TextToConvert}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
+	public static final Var StringToBase64(Var text) throws Exception {
+		byte[] encodedBytes = Base64.getEncoder().encode(text.getObjectAsString().getBytes());
+		return new Var(encodedBytes);
+	}
+
 	@CronapiMetaData(type = "function", name = "{{base64ToText}}", nameTags = {
 			"base64ToString" }, description = "{{functionConvertBase64ToText}}", params = {
-					"{{contentInBase64}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
+					"{{contentInBase64}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var base64ToString(Var base64Var) throws Exception {
-		Var value = new Var();
-		String base64 = base64Var.getObjectAsString();
-		if (base64.length() > 0) {
-			value = new Var(new String(Base64.getDecoder().decode(base64), cronapi.CronapiConfigurator.ENCODING));
-		}
-		return value;
+		byte[] decodedBytes = Base64.getDecoder().decode((byte[]) base64Var.getObject());
+		return new Var(new String(decodedBytes));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{textToTextBinary}}", nameTags = {
@@ -85,9 +89,9 @@ public class Operations {
 		return new Var(Long.parseLong(value.getObjectAsString(), 16));
 	}
 
- 	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
- 			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = {
- 					"{{content}}" }, paramsType = { ObjectType.LIST }, returnType = ObjectType.LIST)
+	@CronapiMetaData(type = "function", name = "{{convertArrayToList}}", nameTags = {
+			"arrayToList" }, description = "{{functionToConvertArrayToList}}", params = {
+					"{{content}}" }, paramsType = { ObjectType.LIST }, returnType = ObjectType.LIST)
 	public static final Var arrayToList(Var arrayVar) throws Exception {
 		List<?> t = Arrays.asList(arrayVar.getObject());
 		return new Var(t);
