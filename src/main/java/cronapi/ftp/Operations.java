@@ -24,7 +24,7 @@ import cronapi.i18n.Messages;
  *
  */
 
-@CronapiMetaData(category = CategoryType.FTP, categoryTags = { "FTP" })
+// @CronapiMetaData(category = CategoryType.FTP, categoryTags = { "FTP" })
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{openFTPConnection}}", nameTags = { "openFTPConnection", "ftpConnect",
