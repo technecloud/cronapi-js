@@ -129,7 +129,7 @@ public class QueryManager {
     return value == null || value.isJsonNull();
   }
   
-  public static void addDefaultValues(JsonObject query, DataSource ds) {
+  public static void addDefaultValues(JsonObject query, DataSource ds, boolean onlyNull) {
     if(!isNull(query.get("defaultValues"))) {
       for(Map.Entry<String, JsonElement> entry : query.get("defaultValues").getAsJsonObject().entrySet()) {
         if(!entry.getValue().isJsonNull()) {
@@ -148,8 +148,13 @@ public class QueryManager {
           else {
             value = Var.valueOf(entry.getValue().getAsString());
           }
-          
-          ds.updateField(entry.getKey(), value);
+
+          if (onlyNull) {
+            if (ds.getObject(entry.getKey()) == null)
+              ds.updateField(entry.getKey(), value);
+          } else {
+            ds.updateField(entry.getKey(), value);
+          }
         }
       }
     }

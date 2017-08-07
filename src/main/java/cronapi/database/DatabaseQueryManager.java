@@ -93,7 +93,7 @@ public class DatabaseQueryManager {
         
         ds.insert(data.getObject());
         
-        QueryManager.addDefaultValues(query, ds);
+        QueryManager.addDefaultValues(query, ds, true);
         
         QueryManager.executeEvent(query, ds, "beforeInsert");
         Object inserted = ds.save(false);

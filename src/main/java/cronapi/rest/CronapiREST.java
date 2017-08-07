@@ -200,6 +200,31 @@ public class CronapiREST {
     });
   }
 
+  @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/__new__")
+  public HttpEntity<?> queryGetNew(@PathVariable("id") String id) throws Exception {
+    RestResult data = runIntoTransaction(() -> {
+      JsonObject query = QueryManager.getQuery(id);
+      QueryManager.checkSecurity(query, "POST");
+
+      if (!QueryManager.getType(query).equals("blockly")) {
+        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+
+        ds.insert();
+
+        QueryManager.addDefaultValues(query, ds, false);
+
+        QueryManager.executeNavigateEvent(query, ds);
+        QueryManager.checkFieldSecurity(query, ds, "GET");
+
+        return Var.valueOf(ds.getObject());
+      }
+
+      return Var.VAR_NULL;
+    });
+
+    return new ResponseEntity<Object>(data.getValue().getObject(), HttpStatus.OK);
+  }
+
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
   public HttpEntity<?> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
@@ -260,7 +285,7 @@ public class CronapiREST {
 
         ds.insert((Map<?, ?>) data.getObject());
 
-        QueryManager.addDefaultValues(query, ds);
+        QueryManager.addDefaultValues(query, ds, true);
 
         QueryManager.executeEvent(query, ds, "beforeInsert");
         Object inserted = ds.save(false);
