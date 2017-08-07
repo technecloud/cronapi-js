@@ -10,13 +10,14 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import cronapi.clazz.CronapiObjectMapper;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
@@ -204,8 +205,9 @@ public class Var implements Comparable<Var>, JsonSerializable {
     } else {
 
       if (_object instanceof Map && type != Map.class) {
-        CronapiObjectMapper mapper = new CronapiObjectMapper();
-        return mapper.convertToObject(_object, type);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper.convertValue(_object, type);
       }
 
       return getObject();
@@ -438,8 +440,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
 
           return map;
         } else {
-          CronapiObjectMapper mapper = new CronapiObjectMapper();
-          return (Map) mapper.convertToObject(_object, Map.class);
+          ObjectMapper mapper = new ObjectMapper();
+          return (Map) mapper.convertValue(_object, Map.class);
         }
       }
     }

@@ -1,25 +1,29 @@
 package cronapi;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.fasterxml.jackson.databind.util.ISO8601Utils;
-import com.google.gson.JsonElement;
-import cronapi.database.DataSource;
+import java.io.IOException;
+import java.text.FieldPosition;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.text.FieldPosition;
-import java.util.Calendar;
-import java.util.Date;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
+import com.fasterxml.jackson.databind.ser.PropertyWriter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.util.ISO8601Utils;
+import com.google.gson.JsonElement;
 
 @Configuration
 public class CronapiConfigurator {
@@ -54,6 +58,22 @@ public class CronapiConfigurator {
         return toAppendTo;
       }
     });
+
+    builder.filters(new SimpleFilterProvider()
+        .setDefaultFilter(new SimpleBeanPropertyFilter() {
+          @Override
+          protected boolean include(PropertyWriter writer) {
+            if (writer instanceof BeanPropertyWriter && request != null) {
+              if (request.getAttribute("BeanPropertyFilter") != null) {
+                HashSet<String> ignores = (HashSet<String>) request.getAttribute("BeanPropertyFilter");
+                String name = ((BeanPropertyWriter) writer).getMember().getDeclaringClass().getName() + "#" + writer.getName();
+                if (ignores.contains(name))
+                  return false;
+              }
+            }
+            return true;
+          }
+        }));
     return builder;
   }
 }

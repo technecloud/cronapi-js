@@ -1,6 +1,7 @@
 package cronapi.database;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,10 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
+import com.google.gson.JsonElement;
+import cronapi.RestClient;
+import cronapi.i18n.Messages;
+import cronapi.rest.security.CronappSecurity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +29,8 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
 import cronapi.Utils;
 import cronapi.Var;
+import org.springframework.data.util.ReflectionUtils;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -72,6 +79,14 @@ public class DataSource implements JsonSerializable {
 
     //initialize dependencies and necessaries objects
     this.instantiateRepository();
+  }
+
+  public Class getDomainClass() {
+    return domainClass;
+  }
+
+  public String getSimpleEntity() {
+    return simpleEntity;
   }
 
   /**
@@ -780,5 +795,60 @@ public class DataSource implements JsonSerializable {
   @Override
   public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
     gen.writeObject(this.page.getContent());
+  }
+
+  public void checkRESTSecurity(String method) throws Exception {
+    checkRESTSecurity(domainClass, method);
+  }
+
+  public void checkRESTSecurity(String relationId, String method) throws Exception {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(relationId);
+
+    checkRESTSecurity(Class.forName(relationMetadata.getName()), method);
+  }
+  
+  private void checkRESTSecurity(Class clazz, String method) throws Exception {
+    Annotation security = clazz.getAnnotation(CronappSecurity.class);
+    boolean authorized = false;
+    
+    if(security instanceof CronappSecurity) {
+      CronappSecurity cronappSecurity = (CronappSecurity)security;
+      Method methodPermission = cronappSecurity.getClass().getMethod(method.toLowerCase());
+      if(methodPermission != null) {
+        String value = (String)methodPermission.invoke(cronappSecurity);
+        if(value == null) {
+          value = "authenticated";
+        }
+        
+        String[] authorities = value.trim().split(";");
+        
+        for(String role : authorities) {
+          if(role.equalsIgnoreCase("authenticated")) {
+            authorized = RestClient.getRestClient().getUser() != null;
+            if(authorized)
+              break;
+          }
+          if(role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+            authorized = true;
+            break;
+          }
+          for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+            if(role.equalsIgnoreCase(authority.getAuthority())) {
+              authorized = true;
+              break;
+            }
+          }
+          
+          if(authorized)
+            break;
+        }
+        
+      }
+    }
+    
+    if(!authorized) {
+      throw new RuntimeException(Messages.getString("notAllowed"));
+    }
   }
 }

@@ -15,12 +15,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CronappSecurity {
   
-  String get() default "Administrators";
+  String get() default "Authenticated";
   
-  String post() default "Administrators";
+  String post() default "Authenticated";
   
-  String put() default "Administrators";
+  String put() default "Authenticated";
   
-  String delete() default "Administrators";
+  String delete() default "Authenticated";
   
 }

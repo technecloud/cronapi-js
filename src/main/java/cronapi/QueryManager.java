@@ -2,7 +2,11 @@ package cronapi;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.security.core.GrantedAuthority;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -12,7 +16,6 @@ import com.google.gson.JsonParser;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
-import org.springframework.security.core.GrantedAuthority;
 
 public class QueryManager {
   private static JsonObject JSON;
@@ -101,7 +104,7 @@ public class QueryManager {
           if(authorized)
             break;
         }
-        if(role.equalsIgnoreCase("permitAll")) {
+        if(role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
           authorized = true;
           break;
         }
@@ -235,6 +238,59 @@ public class QueryManager {
     }
     
     return Var.VAR_NULL;
+  }
+
+  private static void addIgnoreField(String field) {
+    HashSet<String> ignores = (HashSet<String>) RestClient.getRestClient().getRequest().getAttribute("BeanPropertyFilter");
+    if (ignores == null) {
+      ignores = new HashSet<>();
+      RestClient.getRestClient().getRequest().setAttribute("BeanPropertyFilter", ignores);
+    }
+
+    ignores.add(field);
+  }
+
+  public static void checkFieldSecurity(JsonObject query, Object ds, String method) throws Exception {
+    if (!isNull(query.get("security"))) {
+      JsonObject security = query.get("security").getAsJsonObject();
+
+      for (Map.Entry<String, JsonElement> entry: security.entrySet()) {
+        if (!isNull(entry.getValue())) {
+          JsonObject permission = entry.getValue().getAsJsonObject();
+          if (!isNull(permission.get(method.toLowerCase()))) {
+            String[] roles = permission.get(method.toLowerCase()).getAsString().toLowerCase().split(";");
+
+            boolean authorized = false;
+
+            if (ArrayUtils.contains(roles, "public") || ArrayUtils.contains(roles, "permitAll")) {
+              authorized = true;
+            }
+
+            if (ArrayUtils.contains(roles, "authenticated")) {
+              authorized = RestClient.getRestClient().getUser() != null;;
+            }
+
+            if (!authorized) {
+              for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                if (ArrayUtils.contains(roles, authority.getAuthority().toLowerCase())) {
+                  authorized = true;
+                  break;
+                }
+              }
+            }
+
+            if (!authorized && method.equalsIgnoreCase("GET")) {
+              addIgnoreField(((DataSource)ds).getDomainClass().getName()+"#"+entry.getKey());
+            }
+
+            if (!authorized && !method.equalsIgnoreCase("GET")) {
+              Var vards = (Var) ds;
+              vards.getObjectAsMap().remove(entry.getKey());
+            }
+          }
+        }
+      }
+    }
   }
   
 }

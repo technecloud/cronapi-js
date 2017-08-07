@@ -130,9 +130,11 @@ public class CronapiREST {
 
       DataSource ds = new DataSource(entity);
       if(translationPath.relationClass == null) {
+        ds.checkRESTSecurity("GET");
         ds.filter(null, page, translationPath.params);
       }
       else {
+        ds.checkRESTSecurity(translationPath.refId, "GET");
         ds.filterByRelation(translationPath.refId, page, translationPath.params);
       }
 
@@ -149,6 +151,7 @@ public class CronapiREST {
       throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
+      ds.checkRESTSecurity("PUT");
       ds.filter(data, null);
       ds.update(data);
       return Var.valueOf(ds.save());
@@ -166,10 +169,12 @@ public class CronapiREST {
 
       Object inserted = null;
       if(translationPath.relationClass == null) {
+        ds.checkRESTSecurity("POST");
         ds.insert((Map<?, ?>)data.getObject());
         inserted = ds.save();
       }
       else {
+        ds.checkRESTSecurity(translationPath.refId, "POST");
         inserted = ds.insertRelation(translationPath.refId, (Map<?, ?>)data.getObject(), translationPath.params);
       }
       return Var.valueOf(inserted);
@@ -184,9 +189,11 @@ public class CronapiREST {
       TranslationPath translationPath = translatePathVars(entity);
       DataSource ds = new DataSource(entity);
       if(translationPath.relationClass == null) {
+        ds.checkRESTSecurity("DELETE");
         ds.delete(translationPath.params);
       }
       else {
+        ds.checkRESTSecurity(translationPath.refId, "DELETE");
         ds.deleteRelation(translationPath.refId, translationPath.params, translationPath.relationParams);
       }
       return null;
@@ -213,6 +220,7 @@ public class CronapiREST {
         ds.filter(jpql, page, translationPath.params);
 
         QueryManager.executeNavigateEvent(query, ds);
+        QueryManager.checkFieldSecurity(query, ds, "GET");
 
         return Var.valueOf(ds.getPage());
       }
@@ -233,6 +241,8 @@ public class CronapiREST {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "POST");
+
+      QueryManager.checkFieldSecurity(query, data, "POST");
 
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
@@ -270,6 +280,7 @@ public class CronapiREST {
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "PUT");
 
+      QueryManager.checkFieldSecurity(query, data, "PUT");
 
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
