@@ -23,6 +23,7 @@ public class RestClient {
   private HttpServletResponse response = CronapiFilter.RESPONSE.get();
   private HttpServletRequest request = CronapiFilter.REQUEST.get();
   private JsonObject query = null;
+  private boolean filteredEnabled = false;
   
   private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
   
@@ -36,7 +37,12 @@ public class RestClient {
   private Var rawBody;
   
   public static RestClient getRestClient() {
-    return REST_CLIENT.get();
+    RestClient restClient = REST_CLIENT.get();
+    if (restClient == null) {
+      return new RestClient();
+    } else {
+      return restClient;
+    }
   }
   
   public static void removeClient() {
@@ -119,5 +125,13 @@ public class RestClient {
       return user.getAuthorities();
     
     return Collections.EMPTY_LIST;
+  }
+
+  public boolean isFilteredEnabled() {
+    return filteredEnabled;
+  }
+
+  public void setFilteredEnabled(boolean filteredEnabled) {
+    this.filteredEnabled = filteredEnabled;
   }
 }

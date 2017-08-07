@@ -13,24 +13,23 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
-import com.google.gson.JsonElement;
-import cronapi.RestClient;
-import cronapi.i18n.Messages;
-import cronapi.rest.security.CronappSecurity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
+import cronapi.RestClient;
+import cronapi.SecurityBeanFilter;
 import cronapi.Utils;
 import cronapi.Var;
-import org.springframework.data.util.ReflectionUtils;
-import org.springframework.security.core.GrantedAuthority;
+import cronapi.i18n.Messages;
+import cronapi.rest.security.CronappSecurity;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -327,17 +326,25 @@ public class DataSource implements JsonSerializable {
 
   private void updateField(Object obj, String fieldName, Object fieldValue) {
     try {
-      Method setMethod = Utils.findMethod(obj, "set" + fieldName);
-      if (setMethod != null) {
-        if (fieldValue instanceof  Var) {
-          fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
+
+      boolean update = true;
+      if(RestClient.getRestClient().isFilteredEnabled()) {
+        update = SecurityBeanFilter.includeProperty(obj.getClass(), fieldName);
+      }
+
+      if (update) {
+        Method setMethod = Utils.findMethod(obj, "set" + fieldName);
+        if (setMethod != null) {
+          if (fieldValue instanceof Var) {
+            fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
+          } else {
+            Var tVar = Var.valueOf(fieldValue);
+            fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
+          }
+          setMethod.invoke(obj, fieldValue);
         } else {
-          Var tVar = Var.valueOf(fieldValue);
-          fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
+          throw new RuntimeException("Field " + fieldName + " not found");
         }
-        setMethod.invoke(obj, fieldValue);
-      } else {
-        throw new RuntimeException("Field "+fieldName+" not found");
       }
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -402,8 +409,9 @@ public class DataSource implements JsonSerializable {
     try {
       LinkedList<String> fields = data.keySet();
       for(String key : fields) {
-        if(!key.equalsIgnoreCase(Class.class.getSimpleName()))
+        if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
           this.updateField(key, data.getField(key));
+        }
       }
     }
     catch(Exception e) {

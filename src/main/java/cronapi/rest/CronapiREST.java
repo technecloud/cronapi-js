@@ -147,7 +147,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/crud/{entity}/**")
-  public HttpEntity<Object> crudPost(@PathVariable("entity") String entity, @RequestBody final Var data)
+  public HttpEntity<Object> crudPut(@PathVariable("entity") String entity, @RequestBody final Var data)
       throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
@@ -161,7 +161,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/crud/{entity}/**")
-  public HttpEntity<Object> crudPut(@PathVariable("entity") String entity, @RequestBody final Var data)
+  public HttpEntity<Object> crudPost(@PathVariable("entity") String entity, @RequestBody final Var data)
       throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
@@ -383,6 +383,7 @@ public class CronapiREST {
   }
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
+    RestClient.getRestClient().setFilteredEnabled(true);
     Var var = Var.VAR_NULL;
     try {
       var = callable.call();
