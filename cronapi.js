@@ -1099,7 +1099,7 @@
   this.cronapi.xml.newXMLEmptyWithRoot = function(rootElement) {
   var t__temp = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>');
   t__temp.removeChild(t__temp.firstElementChild);
-  t__temp.appendChild(t__temp.createElement(rootElement));
+  t__temp.appendChild(rootElement);
   return t__temp;
   };
   
