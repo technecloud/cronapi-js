@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author arthemus
  * @since 01/08/17
  */
-@Target(ElementType.TYPE)
+@Target(value = { ElementType.METHOD, ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CronappSecurity {
   
