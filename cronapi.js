@@ -1028,7 +1028,7 @@
    * @param {ObjectType.LONG} hour {{hour}}
    * @param {ObjectType.LONG} minute {{minute}}
    * @param {ObjectType.LONG} second {{second}}
-   * @returns {ObjectType.STRING}
+   * @returns {ObjectType.DATETIME}
    */
   this.cronapi.dateTime.newDate = function(year, month, day, hour, minute, second) {
     var date = new Date();
