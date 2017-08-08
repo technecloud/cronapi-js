@@ -22,6 +22,8 @@ import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
 
+import javax.xml.crypto.Data;
+
 public class Var implements Comparable<Var>, JsonSerializable {
 
   public enum Type {
@@ -453,7 +455,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
 
     LinkedList<Var> myList = null;
 
-    if (getObject() instanceof List) {
+    if (getObject() instanceof DataSource) {
+      myList = new LinkedList<>();
+      DataSource ds = (DataSource) getObject();
+      for (Object obj : ds.getPage().getContent()) {
+        myList.add(Var.valueOf(obj));
+      }
+    } else if (getObject() instanceof List) {
       myList = new LinkedList<>();
       for (Var obj : ((LinkedList<Var>)getObject())) {
         myList.add(obj.getPOJO());
