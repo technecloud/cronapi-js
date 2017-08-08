@@ -54,8 +54,6 @@ public class DatabaseQueryManager {
     final Var[] params = toVarArray(objParams);
     return runIntoTransaction(() -> {
       
-      QueryManager.checkSecurity(query, "GET", false);
-      
       if(QueryManager.getType(query).equals("blockly")) {
         return QueryManager.executeBlockly(query, "GET", params);
       }
@@ -77,8 +75,6 @@ public class DatabaseQueryManager {
     final Var data = Var.valueOf(objData);
 
     return runIntoTransaction(() -> {
-      
-      QueryManager.checkSecurity(query, "POST", false);
       
       if(QueryManager.getType(query).equals("blockly")) {
         Var[] params = (Var[])ArrayUtils.addAll(new Var[] { data }, extraParams);
@@ -110,8 +106,6 @@ public class DatabaseQueryManager {
 
     return runIntoTransaction(() -> {
       
-      QueryManager.checkSecurity(query, "PUT", false);
-      
       if(QueryManager.getType(query).equals("blockly")) {
         Var[] params = (Var[])ArrayUtils.addAll(new Var[] { data }, extraParams);
         QueryManager.executeEvent(query, data, "beforeUpdate");
@@ -137,8 +131,6 @@ public class DatabaseQueryManager {
     final Var[] extraParams = toVarArray(extraObjParams);
 
     runIntoTransaction(() -> {
-      
-      QueryManager.checkSecurity(query, "DELETE", false);
       
       if(QueryManager.getType(query).equals("blockly")) {
         QueryManager.executeEvent(query, "beforeDelete", extraParams);
