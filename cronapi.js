@@ -1042,22 +1042,6 @@
   };
 
   /**
-   * @type function
-   * @name {{getValueIsNotNumber}}
-   * @nameTags getValueIsNotNumber
-   * @description {{functionToGetValueIsNotNumber}}
-   * @param {ObjectType.STRING} str {{content}}
-   * @returns {ObjectType.STRING}
-   */
-  this.cronapi.dateTime.getValueIsNotNumber = function(str) {
-    var numbers = '0123456789';
-    for (var i = 0; i < str.length; i++)
-      if (!numbers.includes(str.charAt(i)))
-        return str.charAt(i);
-    return '';
-  };
-  
-  /**
   * @category CategoryType.TEXT
   * @categoryTags TEXT|text
   */
