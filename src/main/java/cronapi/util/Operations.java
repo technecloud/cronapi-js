@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import cronapi.rest.security.BlocklySecurity;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -173,11 +174,16 @@ public class Operations {
 		RestClient.getRestClient().addCommand(command);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
-			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
-					"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
-							ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
-	public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
+  @CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
+      "callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
+      "{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
+      ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
+  public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
+	  return callBlockly(classNameWithMethod, false, "", params);
+  }
+
+  @CronapiMetaData(type = "internal")
+	public static final Var callBlockly(Var classNameWithMethod, boolean checkSecurity, String restMethod, Var... params) throws Exception {
 
 		String className = classNameWithMethod.getObjectAsString();
 		String method = null;
@@ -195,6 +201,10 @@ public class Operations {
 			clazz = Class.forName(className);
 		}
 
+		if (checkSecurity) {
+      BlocklySecurity.checkSecurity(clazz, restMethod);
+    }
+
 		Method methodToCall = clazz.getMethods()[0];
 		for (Method m : clazz.getMethods()) {
 			if (m.getName().equalsIgnoreCase(method)) {
@@ -202,6 +212,9 @@ public class Operations {
 				break;
 			}
 		}
+
+    if (params == null)
+      params = new Var[0];
 
 		Var[] callParams = params;
 

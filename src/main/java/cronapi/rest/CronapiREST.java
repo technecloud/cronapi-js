@@ -113,6 +113,7 @@ public class CronapiREST {
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
+  //Api de Crud
   @RequestMapping(method = RequestMethod.GET, value = "/metadata/{entity}/**")
   public HttpEntity<EntityMetadata> dataOptions(@PathVariable("entity") String entity) throws Exception {
     DataSource ds = new DataSource(entity);
@@ -199,7 +200,9 @@ public class CronapiREST {
       return null;
     });
   }
+  //Fim Api de Crud
 
+  //Api de Fonte de Dados
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/__new__")
   public HttpEntity<?> queryGetNew(@PathVariable("id") String id) throws Exception {
     RestResult data = runIntoTransaction(() -> {
@@ -358,29 +361,64 @@ public class CronapiREST {
       return null;
     });
   }
+  //Fim de api de Fonte de Dados
 
-  @RequestMapping(method = RequestMethod.POST, value = "/call/body/{class}")
+  //Api via bloco
+  @RequestMapping(method = RequestMethod.POST, value = "/call/body/{class}/**")
   public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       RestClient.getRestClient().setBody(body);
-      return cronapi.util.Operations.callBlockly(new Var(clazz), body.getInputs());
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), body.getInputs());
     });
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/call/{class}/**")
-  public RestResult getOneParam(@PathVariable("class") String clazz) throws Exception {
+  public RestResult getParam(@PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       TranslationPath translationPath = translatePathVars(clazz);
-      return cronapi.util.Operations.callBlockly(new Var(clazz), translationPath.params);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
     });
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/call/{class}")
+  @RequestMapping(method = RequestMethod.POST, value = "/call/{class}/**")
   public RestResult postParams(@RequestBody Var[] vars, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), vars);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
     });
   }
+  //Fim Api via bloco
+
+  //Api REST
+  @RequestMapping(method = RequestMethod.GET, value = "/rest/{class}/**")
+  public Var getRest(@PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      TranslationPath translationPath = translatePathVars(clazz);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**")
+  public Var postRest(@RequestBody(required = false) Var[] vars, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.PUT, value = "/rest/{class}/**")
+  public Var putRest(@RequestBody(required = false) Var[] vars, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.DELETE, value = "/rest/{class}/**")
+  public Var deleteRest(@PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      TranslationPath translationPath = translatePathVars(clazz);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
+    });
+  }
+  //Fim api REST
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);
@@ -398,5 +436,23 @@ public class CronapiREST {
       TransactionManager.clear();
     }
     return new RestResult(var, RestClient.getRestClient().getCommands());
+  }
+
+  private Var runIntoTransactionVar(Callable<Var> callable) throws Exception {
+    RestClient.getRestClient().setFilteredEnabled(true);
+    Var var = Var.VAR_NULL;
+    try {
+      var = callable.call();
+      TransactionManager.commit();
+    }
+    catch(Exception e) {
+      TransactionManager.rollback();
+      throw e;
+    }
+    finally {
+      TransactionManager.close();
+      TransactionManager.clear();
+    }
+    return var;
   }
 }
