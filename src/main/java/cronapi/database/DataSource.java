@@ -54,6 +54,7 @@ public class DataSource implements JsonSerializable {
   private int current;
   private Pageable pageRequest;
   private Object insertedElement = null;
+  private EntityManager customEntityManager;
 
   /**
    * Init a datasource with a page size equals 100
@@ -62,6 +63,17 @@ public class DataSource implements JsonSerializable {
    */
   public DataSource(String entity) {
     this(entity, 100);
+  }
+  
+  /**
+   * Init a datasource with a page size equals 100, and custom entity manager
+   *
+   * @param entity - full name of entitiy class like String
+   * @param entityManager - custom entity manager
+   */
+  public DataSource(String entity, EntityManager entityManager) {
+    this(entity, 100);
+    this.customEntityManager = entityManager;
   }
 
   /**
@@ -78,6 +90,13 @@ public class DataSource implements JsonSerializable {
 
     //initialize dependencies and necessaries objects
     this.instantiateRepository();
+  }
+  
+  private EntityManager getEntityManager(Class domainClass) {
+    if (customEntityManager != null)
+      return customEntityManager;
+    else
+      return TransactionManager.getEntityManager(domainClass);
   }
 
   public Class getDomainClass() {
@@ -152,7 +171,7 @@ public class DataSource implements JsonSerializable {
     }
     
     try {
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityManager em = getEntityManager(domainClass);
       TypedQuery<?> query = em.createQuery(jpql, domainClass);
 
       int i = 0;
@@ -251,7 +270,7 @@ public class DataSource implements JsonSerializable {
   public Object save(boolean returnCursorAfterInsert) {
     try {
       Object toSave;
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
 
       if (!em.getTransaction().isActive()) {
@@ -277,7 +296,7 @@ public class DataSource implements JsonSerializable {
     int i = 0;
     Var[] params = new Var[primaryKeys.length];
 
-    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
 
     String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
@@ -302,7 +321,7 @@ public class DataSource implements JsonSerializable {
   public void delete() {
     try {
       Object toRemove = this.getObject();
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityManager em = getEntityManager(domainClass);
       if (!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
@@ -374,7 +393,7 @@ public class DataSource implements JsonSerializable {
 
   public void filter(Var data, Var[] extraParams) {
 
-    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
 
     int i = 0;
@@ -572,7 +591,7 @@ public class DataSource implements JsonSerializable {
    */
   public void filter(String filter, PageRequest pageRequest, Var... params) {
     if (filter == null && params.length > 0) {
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityManager em = getEntityManager(domainClass);
       EntityType type =  em.getMetamodel().entity(domainClass);
 
       int i = 0;
@@ -619,7 +638,7 @@ public class DataSource implements JsonSerializable {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
 
-    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = getEntityManager(domainClass);
     int i = 0;
 
     String jpql = null;
@@ -682,7 +701,7 @@ public class DataSource implements JsonSerializable {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
 
-    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = getEntityManager(domainClass);
 
     filter(null, new PageRequest(0, 100), primaryKeys);
     Object insertion = null;
@@ -710,7 +729,7 @@ public class DataSource implements JsonSerializable {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
 
-    EntityManager em = TransactionManager.getEntityManager(domainClass);
+    EntityManager em = getEntityManager(domainClass);
 
     EntityType type = null;
     String name = null;
@@ -761,7 +780,7 @@ public class DataSource implements JsonSerializable {
   public void execute(String query, Var... params) {
     try {
 
-      EntityManager em = TransactionManager.getEntityManager(domainClass);
+      EntityManager em = getEntityManager(domainClass);
       TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
       for (Var p : params) {
