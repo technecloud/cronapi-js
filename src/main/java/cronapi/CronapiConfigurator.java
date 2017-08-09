@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.text.FieldPosition;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ConversionServiceFactoryBean;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -57,5 +62,21 @@ public class CronapiConfigurator {
     
     builder.filters(new SimpleFilterProvider().setDefaultFilter(new SecurityBeanFilter()));
     return builder;
+  }
+
+  @Bean
+  public StringToVarConverter stringToVarConverter(){
+    return new StringToVarConverter();
+  }
+
+  @Bean(name="conversionService")
+  public ConversionService getConversionService() {
+    ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
+    Set<Converter> converters = new HashSet<Converter>();
+
+    converters.add(stringToVarConverter());
+
+    bean.setConverters(converters);
+    return bean.getObject();
   }
 }
