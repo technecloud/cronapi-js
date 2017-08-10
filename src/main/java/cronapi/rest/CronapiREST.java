@@ -204,10 +204,10 @@ public class CronapiREST {
 
   //Api de Fonte de Dados
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/__new__")
-  public HttpEntity<?> queryGetNew(@PathVariable("id") String id) throws Exception {
+  public HttpEntity<Var> queryGetNew(@PathVariable("id") String id) throws Exception {
     RestResult data = runIntoTransaction(() -> {
       JsonObject query = QueryManager.getQuery(id);
-      QueryManager.checkSecurity(query, "POST");
+      QueryManager.checkSecurity(query, "GET");
 
       if (!QueryManager.getType(query).equals("blockly")) {
         DataSource ds = new DataSource(query.get("entityFullName").getAsString());
@@ -225,7 +225,7 @@ public class CronapiREST {
       return Var.VAR_NULL;
     });
 
-    return new ResponseEntity<Object>(data.getValue().getObject(), HttpStatus.OK);
+    return new ResponseEntity<Var>(data.getValue(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
@@ -264,7 +264,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
-  public HttpEntity<Object> queryPost(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+  public HttpEntity<Var> queryPost(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -293,16 +293,17 @@ public class CronapiREST {
         QueryManager.executeEvent(query, ds, "beforeInsert");
         Object inserted = ds.save(false);
         QueryManager.executeEvent(query, ds, "afterInsert");
+        QueryManager.checkFieldSecurity(query, ds, "GET");
 
         return Var.valueOf(inserted);
       }
     });
 
-    return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
+    return new ResponseEntity<Var>(restResult.getValue(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/query/{id}/**")
-  public HttpEntity<Object> queryPut(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+  public HttpEntity<Var> queryPut(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -329,11 +330,12 @@ public class CronapiREST {
         ds.update(data);
         Var saved = Var.valueOf(ds.save());
         QueryManager.executeEvent(query, ds, "afterUpdate");
+        QueryManager.checkFieldSecurity(query, ds, "GET");
         return saved;
       }
     });
 
-    return new ResponseEntity<Object>(restResult.getValue().getObject(), HttpStatus.OK);
+    return new ResponseEntity<Var>(restResult.getValue(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/query/{id}/**")

@@ -348,7 +348,7 @@ public class DataSource implements JsonSerializable {
 
       boolean update = true;
       if(RestClient.getRestClient().isFilteredEnabled()) {
-        update = SecurityBeanFilter.includeProperty(obj.getClass(), fieldName);
+        update = SecurityBeanFilter.includeProperty(obj.getClass(), fieldName, null);
       }
 
       if (update) {

@@ -17,8 +17,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import cronapi.rest.security.CronappSecurity;
 
 public class SecurityBeanFilter extends SimpleBeanPropertyFilter {
-  
-  public static boolean includeProperty(Class clazzToCheck, String key) {
+
+  public static boolean includeProperty(Class clazzToCheck, String key, String method) {
     RestClient client = RestClient.getRestClient();
     if(client.getRequest() != null) {
       HttpServletRequest request = RestClient.getRestClient().getRequest();
@@ -41,7 +41,7 @@ public class SecurityBeanFilter extends SimpleBeanPropertyFilter {
             if(security instanceof CronappSecurity) {
               CronappSecurity cronappSecurity = (CronappSecurity)security;
               try {
-                Method methodPermission = cronappSecurity.getClass().getMethod(client.getMethod().toLowerCase());
+                Method methodPermission = cronappSecurity.getClass().getMethod(method==null?client.getMethod().toLowerCase():method);
                 
                 if(methodPermission != null) {
                   String value = (String)methodPermission.invoke(cronappSecurity);
@@ -94,7 +94,7 @@ public class SecurityBeanFilter extends SimpleBeanPropertyFilter {
   @Override
   protected boolean include(PropertyWriter writer) {
     if(writer instanceof BeanPropertyWriter) {
-      return includeProperty(((BeanPropertyWriter)writer).getMember().getDeclaringClass(), writer.getName());
+      return includeProperty(((BeanPropertyWriter)writer).getMember().getDeclaringClass(), writer.getName(), "GET");
     }
     
     return true;
