@@ -243,7 +243,7 @@ public class CronapiREST {
         TranslationPath translationPath = translatePathVars(id, 0, query.getAsJsonArray("queryParamsValues").size());
 
         DataSource ds = new DataSource(query.get("entityFullName").getAsString());
-        String jpql = query.get("query") != null ? query.get("query").getAsString() : null;
+        String jpql = QueryManager.getJPQL(query);
 
         ds.filter(jpql, page, translationPath.params);
 

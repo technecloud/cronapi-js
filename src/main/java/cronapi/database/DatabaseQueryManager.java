@@ -59,7 +59,7 @@ public class DatabaseQueryManager {
       }
       else {
         DataSource ds = new DataSource(query.get("entityFullName").getAsString());
-        String jpql = query.get("query") != null ? query.get("query").getAsString() : null;
+        String jpql = QueryManager.getJPQL(query);
         
         ds.filter(jpql, page, params);
         
