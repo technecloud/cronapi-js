@@ -553,8 +553,7 @@
    * @multilayer true
    */
   this.cronapi.screen.startInsertingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].startInserting();
-    window[datasource].$apply();
+    window[datasource].$apply( function() { window[datasource].startInserting();});
   };
 
   /**
