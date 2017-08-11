@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -27,8 +29,11 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import cronapi.ClientCommand;
 import cronapi.CronapiMetaData;
@@ -59,7 +64,7 @@ public class Operations {
 
 		IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 	}
-
+	
 	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
 			"copyTextToTransferArea" }, description = "{{copyTextToTransferAreaDescription}}", params = {
 					"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
@@ -488,6 +493,26 @@ public class Operations {
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{getFromSession}}", nameTags = {
+			"getFromSession" }, description = "{{getFromSessionDescription}}", returnType = ObjectType.STRING)
+	public static final Var getValueFromSession(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName)
+			throws Exception {
+    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		return new Var(request.getSession().getValue(fieldName.toString()));
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{setInSession}}", nameTags = {
+			"setInSession" }, description = "{{setInSessionDescription}}", returnType = ObjectType.STRING)
+	public static final void getValueFromSession(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldValue}}") Var fieldValue)
+			throws Exception {
+			  
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+	  request.getSession().putValue(fieldName.toString(), fieldValue.toString());
 	}
 
 	// Internal Function - Missing translation
