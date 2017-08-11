@@ -8,12 +8,13 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
-import cronapi.rest.security.BlocklySecurity;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -38,6 +39,7 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
+import cronapi.rest.security.BlocklySecurity;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -174,16 +176,17 @@ public class Operations {
 		RestClient.getRestClient().addCommand(command);
 	}
 
-  @CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
-      "callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
-      "{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
-      ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
-  public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
-	  return callBlockly(classNameWithMethod, false, "", params);
-  }
+	@CronapiMetaData(type = "function", name = "{{callBlockly}}", nameTags = {
+			"callBlockly" }, description = "{{functionToCallBlockly}}", params = { "{{classNameWithMethod}}",
+					"{{params}}" }, wizard = "procedures_callblockly_callreturn", paramsType = { ObjectType.OBJECT,
+							ObjectType.OBJECT }, returnType = ObjectType.OBJECT, arbitraryParams = true)
+	public static final Var callBlockly(Var classNameWithMethod, Var... params) throws Exception {
+		return callBlockly(classNameWithMethod, false, "", params);
+	}
 
-  @CronapiMetaData(type = "internal")
-	public static final Var callBlockly(Var classNameWithMethod, boolean checkSecurity, String restMethod, Var... params) throws Exception {
+	@CronapiMetaData(type = "internal")
+	public static final Var callBlockly(Var classNameWithMethod, boolean checkSecurity, String restMethod,
+			Var... params) throws Exception {
 
 		String className = classNameWithMethod.getObjectAsString();
 		String method = null;
@@ -202,8 +205,8 @@ public class Operations {
 		}
 
 		if (checkSecurity) {
-      BlocklySecurity.checkSecurity(clazz, restMethod);
-    }
+			BlocklySecurity.checkSecurity(clazz, restMethod);
+		}
 
 		Method methodToCall = clazz.getMethods()[0];
 		for (Method m : clazz.getMethods()) {
@@ -213,8 +216,8 @@ public class Operations {
 			}
 		}
 
-    if (params == null)
-      params = new Var[0];
+		if (params == null)
+			params = new Var[0];
 
 		Var[] callParams = params;
 
@@ -264,27 +267,52 @@ public class Operations {
 		return new Var(passwordEncoder.matches(password.getObjectAsString(), encrypted.getObjectAsString()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{getURLFromOthersName}}", nameTags = {
-			"matchesencryptPassword" }, description = "{{getURLFromOthersDescription}}", returnType = ObjectType.STRING)
-	public static final Var getURLFromOthers(
+  @CronapiMetaData(type = "function", name = "{{getHeadersFromExternalURL}}", nameTags = {
+			"getHeadersFromExternalURL" }, description = "{{getHeadersFromExternalURLDescription}}", returnType = ObjectType.STRING)
+	public static final Var getHeadersFromExternalURL(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{HTTPMethod}}", blockType = "util_dropdown", keys = {
 					"GET", "POST", "PUT",
 					"DELETE" }, values = { "{{HTTPGet}}", "{{HTTPPost}}", "{{HTTPPut}}", "{{HTTPDelete}}" }) Var method,
+
 			@ParamMetaData(type = ObjectType.STRING, description = "{{contentType}}", blockType = "util_dropdown", keys = {
 					"application/x-www-form-urlencoded",
 					"application/json" }, values = { "{{x_www_form_urlencoded}}", "{{app_json}}" }) Var contentType,
+
 			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
 			throws Exception {
-		try {
+		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("HEADER"));
+	}
 
+	@CronapiMetaData(type = "function", name = "{{getURLFromOthersName}}", nameTags = {
+			"getURLFromOthersName" }, description = "{{getURLFromOthersDescription}}", returnType = ObjectType.STRING)
+	public static final Var getURLFromOthers(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{HTTPMethod}}", blockType = "util_dropdown", keys = {
+					"GET", "POST", "PUT",
+					"DELETE" }, values = { "{{HTTPGet}}", "{{HTTPPost}}", "{{HTTPPut}}", "{{HTTPDelete}}" }) Var method,
+
+			@ParamMetaData(type = ObjectType.STRING, description = "{{contentType}}", blockType = "util_dropdown", keys = {
+					"application/x-www-form-urlencoded",
+					"application/json" }, values = { "{{x_www_form_urlencoded}}", "{{app_json}}" }) Var contentType,
+
+			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
+			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
+			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
+			throws Exception {
+		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY") );
+	}
+
+	private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
+			Var cookieContainer, Var returnType) throws Exception {
+		try {
 			String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 			String APPLICATION_JSON = "application/json";
+			
 
 			if (method.getObjectAsString().toUpperCase().equals("GET")) {
 
-				HttpClient httpClient = HttpClients.createDefault();
+			  HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
 
 				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
@@ -293,17 +321,30 @@ public class Operations {
 							new Var(entry.getValue()).getObjectAsString());
 				});
 
+				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpGet);
-				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-						cronapi.CronapiConfigurator.ENCODING);
-				String response = "";
-				try {
-					response = scanner.useDelimiter("\\A").next();
-				} catch (Exception e) {
+				Map<String, String> responseMap = new HashMap<String, String>();
+				
+				if(returnType != null && returnType.equals("HEADER")){
+				  Header[] headers = httpResponse.getAllHeaders();
+          for (Header header : headers) {
+            responseMap.put(header.getName(), header.getValue());
+          }
+          toReturn = new Var(responseMap);
+				}else{
+  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+  						cronapi.CronapiConfigurator.ENCODING);
+  				String response = "";
+  				try {
+  					response = scanner.useDelimiter("\\A").next();
+  				} catch (Exception e) {
+  				}
+  				scanner.close();
+  				toReturn = new Var(response);
 				}
-				scanner.close();
 				httpGet.completed();
-				return new Var(response);
+  			return toReturn;
+  			
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost(address.getObjectAsString());
@@ -320,7 +361,7 @@ public class Operations {
 						LinkedHashMap<Var, Var> mapObject = (LinkedHashMap<Var, Var>) params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair( new Var(entry.getKey()).getObjectAsString(),
+							params2.add(new BasicNameValuePair(new Var(entry.getKey()).getObjectAsString(),
 									new Var(entry.getValue()).getObjectAsString()));
 						});
 
@@ -332,17 +373,31 @@ public class Operations {
 						httpPost.setEntity(params2);
 					}
 				}
-
+  			
+  			Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpPost);
-				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-						cronapi.CronapiConfigurator.ENCODING);
-				String response = "";
-				try {
-					response = scanner.useDelimiter("\\A").next();
-				} catch (Exception e) {
+				Map<String, String> responseMap = new HashMap<String, String>();
+				
+				if(returnType != null && returnType.equals("HEADER")){
+				  Header[] headers = httpResponse.getAllHeaders();
+          for (Header header : headers) {
+            responseMap.put(header.getName(), header.getValue());
+          }
+          toReturn = new Var(responseMap);
+				}else{
+  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+  						cronapi.CronapiConfigurator.ENCODING);
+  				String response = "";
+  				try {
+  					response = scanner.useDelimiter("\\A").next();
+  				} catch (Exception e) {
+  				}
+  				scanner.close();
+  				toReturn = new Var(response);
 				}
-				scanner.close();
-				return new Var(response);
+				httpPost.completed();
+  			return toReturn;
+  			
 
 			} else if (method.getObjectAsString().toUpperCase().equals("PUT")) {
 				HttpClient httpClient = HttpClients.createDefault();
@@ -370,16 +425,29 @@ public class Operations {
 					}
 				}
 
+				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpPut);
-				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-						cronapi.CronapiConfigurator.ENCODING);
-				String response = "";
-				try {
-					response = scanner.useDelimiter("\\A").next();
-				} catch (Exception e) {
+				Map<String, String> responseMap = new HashMap<String, String>();
+				
+				if(returnType != null && returnType.equals("HEADER")){
+				  Header[] headers = httpResponse.getAllHeaders();
+          for (Header header : headers) {
+            responseMap.put(header.getName(), header.getValue());
+          }
+          toReturn = new Var(responseMap);
+				}else{
+  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+  						cronapi.CronapiConfigurator.ENCODING);
+  				String response = "";
+  				try {
+  					response = scanner.useDelimiter("\\A").next();
+  				} catch (Exception e) {
+  				}
+  				scanner.close();
+  				toReturn = new Var(response);
 				}
-				scanner.close();
-				return new Var(response);
+				httpPut.completed();
+  			return toReturn;
 
 			} else if (method.getObjectAsString().toUpperCase().equals("DELETE")) {
 				HttpClient httpClient = HttpClients.createDefault();
@@ -391,16 +459,30 @@ public class Operations {
 							new Var(entry.getValue()).getObjectAsString());
 				});
 
+				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpDelete);
-				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-						cronapi.CronapiConfigurator.ENCODING);
-				String response = "";
-				try {
-					response = scanner.useDelimiter("\\A").next();
-				} catch (Exception e) {
+				Map<String, String> responseMap = new HashMap<String, String>();
+				
+				if(returnType != null && returnType.equals("HEADER")){
+				  Header[] headers = httpResponse.getAllHeaders();
+          for (Header header : headers) {
+            responseMap.put(header.getName(), header.getValue());
+          }
+          toReturn = new Var(responseMap);
+				}else{
+  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+  						cronapi.CronapiConfigurator.ENCODING);
+  				String response = "";
+  				try {
+  					response = scanner.useDelimiter("\\A").next();
+  				} catch (Exception e) {
+  				}
+  				scanner.close();
+  				toReturn = new Var(response);
 				}
-				scanner.close();
-				return new Var(response);
+				httpDelete.completed();
+  			return toReturn;
+				
 			}
 			return new Var();
 		} catch (Exception e) {
