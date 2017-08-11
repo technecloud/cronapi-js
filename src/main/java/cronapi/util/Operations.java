@@ -45,6 +45,7 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.BlocklySecurity;
+import java.util.UUID;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -64,7 +65,7 @@ public class Operations {
 
 		IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
 			"copyTextToTransferArea" }, description = "{{copyTextToTransferAreaDescription}}", params = {
 					"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
@@ -272,7 +273,7 @@ public class Operations {
 		return new Var(passwordEncoder.matches(password.getObjectAsString(), encrypted.getObjectAsString()));
 	}
 
-  @CronapiMetaData(type = "function", name = "{{getHeadersFromExternalURL}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{getHeadersFromExternalURL}}", nameTags = {
 			"getHeadersFromExternalURL" }, description = "{{getHeadersFromExternalURLDescription}}", returnType = ObjectType.STRING)
 	public static final Var getHeadersFromExternalURL(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{HTTPMethod}}", blockType = "util_dropdown", keys = {
@@ -305,7 +306,7 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
 			throws Exception {
-		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY") );
+		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY"));
 	}
 
 	private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
@@ -313,11 +314,10 @@ public class Operations {
 		try {
 			String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 			String APPLICATION_JSON = "application/json";
-			
 
 			if (method.getObjectAsString().toUpperCase().equals("GET")) {
 
-			  HttpClient httpClient = HttpClients.createDefault();
+				HttpClient httpClient = HttpClients.createDefault();
 				HttpGet httpGet = new HttpGet(address.getObjectAsString());
 
 				LinkedHashMap<Var, Var> headerObject = (LinkedHashMap<Var, Var>) cookieContainer.getObjectAsMap();
@@ -329,27 +329,27 @@ public class Operations {
 				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpGet);
 				Map<String, String> responseMap = new HashMap<String, String>();
-				
-				if(returnType != null && returnType.equals("HEADER")){
-				  Header[] headers = httpResponse.getAllHeaders();
-          for (Header header : headers) {
-            responseMap.put(header.getName(), header.getValue());
-          }
-          toReturn = new Var(responseMap);
-				}else{
-  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-  						cronapi.CronapiConfigurator.ENCODING);
-  				String response = "";
-  				try {
-  					response = scanner.useDelimiter("\\A").next();
-  				} catch (Exception e) {
-  				}
-  				scanner.close();
-  				toReturn = new Var(response);
+
+				if (returnType != null && returnType.equals("HEADER")) {
+					Header[] headers = httpResponse.getAllHeaders();
+					for (Header header : headers) {
+						responseMap.put(header.getName(), header.getValue());
+					}
+					toReturn = new Var(responseMap);
+				} else {
+					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+							cronapi.CronapiConfigurator.ENCODING);
+					String response = "";
+					try {
+						response = scanner.useDelimiter("\\A").next();
+					} catch (Exception e) {
+					}
+					scanner.close();
+					toReturn = new Var(response);
 				}
 				httpGet.completed();
-  			return toReturn;
-  			
+				return toReturn;
+
 			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
 				HttpClient httpClient = HttpClients.createDefault();
 				HttpPost httpPost = new HttpPost(address.getObjectAsString());
@@ -378,31 +378,30 @@ public class Operations {
 						httpPost.setEntity(params2);
 					}
 				}
-  			
-  			Var toReturn;
+
+				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpPost);
 				Map<String, String> responseMap = new HashMap<String, String>();
-				
-				if(returnType != null && returnType.equals("HEADER")){
-				  Header[] headers = httpResponse.getAllHeaders();
-          for (Header header : headers) {
-            responseMap.put(header.getName(), header.getValue());
-          }
-          toReturn = new Var(responseMap);
-				}else{
-  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-  						cronapi.CronapiConfigurator.ENCODING);
-  				String response = "";
-  				try {
-  					response = scanner.useDelimiter("\\A").next();
-  				} catch (Exception e) {
-  				}
-  				scanner.close();
-  				toReturn = new Var(response);
+
+				if (returnType != null && returnType.equals("HEADER")) {
+					Header[] headers = httpResponse.getAllHeaders();
+					for (Header header : headers) {
+						responseMap.put(header.getName(), header.getValue());
+					}
+					toReturn = new Var(responseMap);
+				} else {
+					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+							cronapi.CronapiConfigurator.ENCODING);
+					String response = "";
+					try {
+						response = scanner.useDelimiter("\\A").next();
+					} catch (Exception e) {
+					}
+					scanner.close();
+					toReturn = new Var(response);
 				}
 				httpPost.completed();
-  			return toReturn;
-  			
+				return toReturn;
 
 			} else if (method.getObjectAsString().toUpperCase().equals("PUT")) {
 				HttpClient httpClient = HttpClients.createDefault();
@@ -433,26 +432,26 @@ public class Operations {
 				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpPut);
 				Map<String, String> responseMap = new HashMap<String, String>();
-				
-				if(returnType != null && returnType.equals("HEADER")){
-				  Header[] headers = httpResponse.getAllHeaders();
-          for (Header header : headers) {
-            responseMap.put(header.getName(), header.getValue());
-          }
-          toReturn = new Var(responseMap);
-				}else{
-  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-  						cronapi.CronapiConfigurator.ENCODING);
-  				String response = "";
-  				try {
-  					response = scanner.useDelimiter("\\A").next();
-  				} catch (Exception e) {
-  				}
-  				scanner.close();
-  				toReturn = new Var(response);
+
+				if (returnType != null && returnType.equals("HEADER")) {
+					Header[] headers = httpResponse.getAllHeaders();
+					for (Header header : headers) {
+						responseMap.put(header.getName(), header.getValue());
+					}
+					toReturn = new Var(responseMap);
+				} else {
+					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+							cronapi.CronapiConfigurator.ENCODING);
+					String response = "";
+					try {
+						response = scanner.useDelimiter("\\A").next();
+					} catch (Exception e) {
+					}
+					scanner.close();
+					toReturn = new Var(response);
 				}
 				httpPut.completed();
-  			return toReturn;
+				return toReturn;
 
 			} else if (method.getObjectAsString().toUpperCase().equals("DELETE")) {
 				HttpClient httpClient = HttpClients.createDefault();
@@ -467,52 +466,52 @@ public class Operations {
 				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpDelete);
 				Map<String, String> responseMap = new HashMap<String, String>();
-				
-				if(returnType != null && returnType.equals("HEADER")){
-				  Header[] headers = httpResponse.getAllHeaders();
-          for (Header header : headers) {
-            responseMap.put(header.getName(), header.getValue());
-          }
-          toReturn = new Var(responseMap);
-				}else{
-  				Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-  						cronapi.CronapiConfigurator.ENCODING);
-  				String response = "";
-  				try {
-  					response = scanner.useDelimiter("\\A").next();
-  				} catch (Exception e) {
-  				}
-  				scanner.close();
-  				toReturn = new Var(response);
+
+				if (returnType != null && returnType.equals("HEADER")) {
+					Header[] headers = httpResponse.getAllHeaders();
+					for (Header header : headers) {
+						responseMap.put(header.getName(), header.getValue());
+					}
+					toReturn = new Var(responseMap);
+				} else {
+					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+							cronapi.CronapiConfigurator.ENCODING);
+					String response = "";
+					try {
+						response = scanner.useDelimiter("\\A").next();
+					} catch (Exception e) {
+					}
+					scanner.close();
+					toReturn = new Var(response);
 				}
 				httpDelete.completed();
-  			return toReturn;
-				
+				return toReturn;
+
 			}
 			return new Var();
 		} catch (Exception e) {
 			throw e;
 		}
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{getFromSession}}", nameTags = {
 			"getFromSession" }, description = "{{getFromSessionDescription}}", returnType = ObjectType.STRING)
 	public static final Var getValueFromSession(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName)
-			throws Exception {
-    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) throws Exception {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 		return new Var(request.getSession().getValue(fieldName.toString()));
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{setInSession}}", nameTags = {
 			"setInSession" }, description = "{{setInSessionDescription}}", returnType = ObjectType.STRING)
 	public static final void getValueFromSession(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldValue}}") Var fieldValue)
-			throws Exception {
-			  
-		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-	  request.getSession().putValue(fieldName.toString(), fieldValue.toString());
+			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldValue}}") Var fieldValue) throws Exception {
+
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
+		request.getSession().putValue(fieldName.toString(), fieldValue.toString());
 	}
 
 	// Internal Function - Missing translation
@@ -541,6 +540,12 @@ public class Operations {
 			byte[] readBytes = Arrays.copyOf(buffer, read);
 			callback.call(Var.valueOf(readBytes));
 		}
+	}
+
+	@CronapiMetaData(type = "function", name = "{{generateUUIDName}}", nameTags = {
+			"generateUUID" }, description = "{{generateUUIDDescription}}", paramsType = { ObjectType.STRING })
+	public static final Var generateUUID() throws Exception {
+		return new Var(UUID.randomUUID());
 	}
 
 }
