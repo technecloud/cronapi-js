@@ -55,6 +55,7 @@ public class DataSource implements JsonSerializable {
   private Pageable pageRequest;
   private Object insertedElement = null;
   private EntityManager customEntityManager;
+  private DataSourceFilter dsFilter;
 
   /**
    * Init a datasource with a page size equals 100
@@ -165,9 +166,16 @@ public class DataSource implements JsonSerializable {
   public Object[] fetch() {
 
     String jpql = this.filter;
+    Var[] params = this.params;
     
     if (jpql == null) {
       jpql = "select e from " + simpleEntity + " e";
+    }
+
+    if (dsFilter != null && dsFilter.items.size() > 0) {
+      dsFilter.applyTo(domainClass, jpql, params);
+      params = dsFilter.getAppliedParams();
+      jpql = dsFilter.getAppliedJpql();
     }
     
     try {
@@ -179,8 +187,8 @@ public class DataSource implements JsonSerializable {
 
       for (String param : parsedParams) {
         Var p = null;
-        if (i <= this.params.length-1) {
-          p = this.params[i];
+        if (i <= params.length-1) {
+          p = params[i];
         }
         if (p != null) {
           if (p.getId() != null) {
@@ -581,34 +589,34 @@ public class DataSource implements JsonSerializable {
     this.current = -1;
     this.fetch();
   }
+  public void setDataSourceFilter(DataSourceFilter dsFilter) {
+    this.dsFilter = dsFilter;
+  }
 
-  /**
-   * Fetch objects from database by a filter
-   *
-   * @param filter jpql instruction like a namedQuery
-   * @param pageRequest Page
-   * @param params parameters used in jpql instruction
-   */
   public void filter(String filter, PageRequest pageRequest, Var... params) {
-    if (filter == null && params.length > 0) {
-      EntityManager em = getEntityManager(domainClass);
-      EntityType type =  em.getMetamodel().entity(domainClass);
+    if (filter == null) {
+      if (params.length > 0) {
+        EntityManager em = getEntityManager(domainClass);
+        EntityType type = em.getMetamodel().entity(domainClass);
 
-      int i = 0;
-      String jpql = "Select e from " + simpleEntity + " e where ";
-      for (Object obj : type.getAttributes()) {
-        SingularAttribute field = (SingularAttribute) obj;
-        if (field.isId()) {
-          if (i > 0) {
-            jpql += " and ";
+        int i = 0;
+        String jpql = "Select e from " + simpleEntity + " e where (";
+        for (Object obj : type.getAttributes()) {
+          SingularAttribute field = (SingularAttribute) obj;
+          if (field.isId()) {
+            if (i > 0) {
+              jpql += " and ";
+            }
+            jpql += "e." + field.getName() + " = :p" + i;
+            params[i].setId("p" + i);
           }
-          jpql += "e." + field.getName() + " = :p" + i;
-          params[i].setId("p" + i);
         }
+        jpql += ")";
+
+        filter = jpql;
+      } else {
+        filter = "Select e from " + simpleEntity + " e ";
       }
-
-      filter = jpql;
-
     }
 
     this.params = params;
@@ -738,11 +746,24 @@ public class DataSource implements JsonSerializable {
     type = em.getMetamodel().entity(domainClass);
 
     if (relationMetadata.getAssossiationName() != null) {
-      name = relationMetadata.getAssossiationName();
+      name = relationMetadata.gettAssossiationSimpleName();
       selectAttr = "."+relationMetadata.getAttribute().getName();
       filterAttr = relationMetadata.getAssociationAttribute().getName();
+
+      try {
+        domainClass = Class.forName(relationMetadata.getAttribute().getJavaType().getName());
+      } catch (ClassNotFoundException e) {
+        //
+      }
+
     } else {
-      name = relationMetadata.getName();
+      name = relationMetadata.getSimpleName();
+
+      try {
+        domainClass = Class.forName(name);
+      } catch (ClassNotFoundException e) {
+        //
+      }
     }
 
     int i = 0;

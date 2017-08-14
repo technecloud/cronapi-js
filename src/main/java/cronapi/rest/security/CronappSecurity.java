@@ -22,5 +22,7 @@ public @interface CronappSecurity {
   String put() default "Authenticated";
   
   String delete() default "Authenticated";
+
+  String filter() default "Authenticated";
   
 }

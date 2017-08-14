@@ -1,15 +1,13 @@
 package cronapi.rest;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cronapi.database.DataSourceFilter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,13 +34,14 @@ public class CronapiREST {
   @Autowired
   private HttpServletRequest request;
 
-  private class TranslationPath {
-    Var[] params;
-    String relationClass;
-    String relationAssossiative;
-    String field;
-    String refId;
-    Var[] relationParams;
+  public class TranslationPath {
+    public Var[] params;
+    public String relationClass;
+    public String relationAssossiative;
+    public String field;
+    public String refId;
+    public Var[] relationParams;
+    public DataSourceFilter filter;
   }
 
   private TranslationPath translatePathVars(String clazz) {
@@ -94,6 +93,14 @@ public class CronapiREST {
     translationPath.params = params.toArray(new Var[params.size()]);
     translationPath.relationParams = relationParams.toArray(new Var[relationParams.size()]);
 
+    if(request.getParameter("filter") != null) {
+      translationPath.filter = new DataSourceFilter(request.getParameter("filter"));
+
+      if (request.getParameter("filterType") != null && (request.getParameter("filterType").equalsIgnoreCase("or") || request.getParameter("filterType").equalsIgnoreCase("and"))) {
+        translationPath.filter.type = request.getParameter("filterType");
+      }
+    }
+
     return translationPath;
   }
 
@@ -132,10 +139,12 @@ public class CronapiREST {
       DataSource ds = new DataSource(entity);
       if(translationPath.relationClass == null) {
         ds.checkRESTSecurity("GET");
+        ds.setDataSourceFilter(translationPath.filter);
         ds.filter(null, page, translationPath.params);
       }
       else {
         ds.checkRESTSecurity(translationPath.refId, "GET");
+        ds.setDataSourceFilter(translationPath.filter);
         ds.filterByRelation(translationPath.refId, page, translationPath.params);
       }
 
