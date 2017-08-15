@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Map;
 
+import cronapi.database.DataSourceFilter;
 import cronapi.database.JPQLConverter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -315,4 +316,48 @@ public class QueryManager {
     }
   }
   
+  public static void checkFilterSecurity(JsonObject query, DataSourceFilter filter) {
+    if(!isNull(query.get("security")) && filter != null && filter.getItems().size() > 0) {
+      JsonObject security = query.get("security").getAsJsonObject();
+      
+      for(DataSourceFilter.DataSourceFilterItem item : filter.getItems()) {
+        if(!isNull(security.get(item.key))) {
+          JsonObject permission = security.get(item.key).getAsJsonObject();
+          if(!isNull(permission.get("filter"))) {
+            String[] roles = permission.get("filter").getAsString().toLowerCase().split(";");
+            boolean authorized = false;
+            for(String role : roles) {
+              if(role.equalsIgnoreCase("public") && role.equalsIgnoreCase("permitAll")) {
+                authorized = true;
+                break;
+              }
+              
+              if(role.equalsIgnoreCase("authenticated")) {
+                authorized = RestClient.getRestClient().getUser() != null;
+                if(authorized)
+                  break;
+              }
+              
+              if(!authorized) {
+                for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                  if(authority.getAuthority().equalsIgnoreCase(role)) {
+                    authorized = true;
+                    break;
+                  }
+                }
+              }
+              
+              if(authorized) {
+                break;
+              }
+            }
+            
+            if(!authorized) {
+              throw new RuntimeException(Messages.getString("notAllowed"));
+            }
+          }
+        }
+      }
+    }
+  }
 }

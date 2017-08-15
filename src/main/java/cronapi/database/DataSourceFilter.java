@@ -17,6 +17,11 @@ import cronapi.RestClient;
 import cronapi.Var;
 import cronapi.rest.security.CronappSecurity;
 
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+
 public class DataSourceFilter {
   
   private LinkedList<DataSourceFilterItem> items = new LinkedList<>();
@@ -118,10 +123,26 @@ public class DataSourceFilter {
     return appliedParams;
   }
   
-  public List<String> findSearchables(Object obj) {
+  public List<String> findSearchables(Object obj, boolean filterWithAnnotation) {
     Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
     List<String> searchable = new ArrayList<>();
+
+    EntityManager em = TransactionManager.getEntityManager((Class)obj);
+    EntityType type = em.getMetamodel().entity((Class)obj);
+
     for(Field f : fields) {
+      boolean contains = false;
+      for (Object attrObj : type.getAttributes()) {
+        SingularAttribute attr = (SingularAttribute) attrObj;
+        if (attr.getName().equalsIgnoreCase(f.getName())) {
+          contains = true;
+          continue;
+        }
+      }
+
+      if (!contains)
+        continue;
+
       Annotation annotation = f.getAnnotation(CronappSecurity.class);
       boolean authorized = true;
       if(annotation != null) {
@@ -152,7 +173,12 @@ public class DataSourceFilter {
         }
       }
       if(authorized) {
-        searchable.add(f.getName());
+        if (filterWithAnnotation) {
+          if (f.getAnnotation(CronappSecurity.class) != null)
+            searchable.add(f.getName());
+        } else {
+          searchable.add(f.getName());
+        }
       }
     }
     return searchable;
@@ -194,9 +220,11 @@ public class DataSourceFilter {
       hasOrder = true;
     }
     
-    List<String> searchables = findSearchables(domainClass);
+    List<String> searchables = null;
     
     if(items.size() == 1 && items.get(0).key == "*") {
+      searchables = findSearchables(domainClass, true);
+
       if(searchables.isEmpty()) {
         throw new RuntimeException(Messages.getString("notAllowed"));
       }
@@ -204,10 +232,13 @@ public class DataSourceFilter {
         Var value = items.get(0).value;
         String type = items.get(0).type;
         items = new LinkedList<>();
+        this.type = "OR";
         for(String f : searchables) {
           items.add(new DataSourceFilterItem(f, value, type));
         }
       }
+    } else {
+      searchables = findSearchables(domainClass, false);
     }
     
     if(items.size() > 0) {
