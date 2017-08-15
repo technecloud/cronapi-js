@@ -865,7 +865,7 @@ public class DataSource implements JsonSerializable {
       Method methodPermission = cronappSecurity.getClass().getMethod(method.toLowerCase());
       if(methodPermission != null) {
         String value = (String)methodPermission.invoke(cronappSecurity);
-        if(value == null) {
+        if(value == null || value.trim().isEmpty()) {
           value = "authenticated";
         }
         
