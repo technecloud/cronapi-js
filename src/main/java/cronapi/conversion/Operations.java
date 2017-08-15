@@ -34,8 +34,12 @@ public class Operations {
 			"base64ToString" }, description = "{{functionConvertBase64ToText}}", params = {
 					"{{contentInBase64}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var base64ToString(Var base64Var) throws Exception {
-		byte[] decodedBytes = Base64.getDecoder().decode((byte[]) base64Var.getObject());
-		return new Var(new String(decodedBytes));
+		if (base64Var.getObject() instanceof String) {
+			return new Var(new String(Base64.getDecoder().decode(base64Var.getObjectAsString())));
+		} else {
+			byte[] decodedBytes = Base64.getDecoder().decode((byte[]) base64Var.getObject());
+			return new Var(new String(decodedBytes));
+		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{textToTextBinary}}", nameTags = {
