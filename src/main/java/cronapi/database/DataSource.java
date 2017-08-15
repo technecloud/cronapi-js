@@ -172,7 +172,7 @@ public class DataSource implements JsonSerializable {
       jpql = "select e from " + simpleEntity + " e";
     }
 
-    if (dsFilter != null && dsFilter.items.size() > 0) {
+    if (dsFilter != null) {
       dsFilter.applyTo(domainClass, jpql, params);
       params = dsFilter.getAppliedParams();
       jpql = dsFilter.getAppliedJpql();

@@ -19,14 +19,15 @@ import cronapi.rest.security.CronappSecurity;
 
 public class DataSourceFilter {
   
-  public LinkedList<DataSourceFilterItem> items = new LinkedList<>();
-  public String type = "AND";
+  private LinkedList<DataSourceFilterItem> items = new LinkedList<>();
+  private LinkedList<DataSourceOrderItem> orders = new LinkedList<>();
+  private String type = "AND";
   
   private String appliedJpql;
   private Var[] appliedParams;
   
-  public DataSourceFilter(String filter) {
-    if(!filter.trim().isEmpty()) {
+  private DataSourceFilter(String filter, String order) {
+    if(filter != null && !filter.trim().isEmpty()) {
       
       String[] values = filter.trim().split(";");
       if(values.length > 0) {
@@ -59,6 +60,54 @@ public class DataSourceFilter {
       }
     }
     
+    if(order != null && !order.trim().isEmpty()) {
+      
+      String[] values = order.trim().split(";");
+      if(values.length > 0) {
+        for(String v : values) {
+          String[] pair = v.trim().split("\\|");
+          
+          if(pair.length == 1) {
+            orders.add(new DataSourceFilter.DataSourceOrderItem(pair[0], "ASC"));
+          }
+          
+          if(pair.length == 2) {
+            orders.add(new DataSourceFilter.DataSourceOrderItem(pair[0], pair[1]));
+          }
+        }
+      }
+    }
+    
+  }
+  
+  public static DataSourceFilter getInstance(String filter, String order, String filterType) {
+    if((filter != null && !filter.trim().isEmpty()) || (order != null && !order.trim().isEmpty())) {
+      DataSourceFilter dsFilter = new DataSourceFilter(filter, order);
+      if(filterType != null)
+        dsFilter.setType(filterType);
+      
+      return dsFilter;
+    }
+    
+    return null;
+  }
+  
+  public LinkedList<DataSourceFilterItem> getItems() {
+    return items;
+  }
+  
+  public void setItems(LinkedList<DataSourceFilterItem> items) {
+    this.items = items;
+  }
+  
+  public String getType() {
+    return type;
+  }
+  
+  public void setType(String type) {
+    if(type.equalsIgnoreCase("or") || type.equalsIgnoreCase("and")) {
+      this.type = type;
+    }
   }
   
   public String getAppliedJpql() {
@@ -73,53 +122,53 @@ public class DataSourceFilter {
     Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
     List<String> searchable = new ArrayList<>();
     for(Field f : fields) {
-      Annotation[] annotations = f.getDeclaredAnnotations();
-      for(int i = 0; i < annotations.length; i++) {
-        if(annotations[i].annotationType().equals(CronappSecurity.class)) {
-          CronappSecurity security = (CronappSecurity)annotations[i];
-          String authoritiesStr = security.filter();
-          String[] authorities;
-          if(authoritiesStr != null && !authoritiesStr.trim().isEmpty()) {
-            authorities = authoritiesStr.trim().split(";");
-            boolean authorized = false;
-            for(String role : authorities) {
-              if(role.equalsIgnoreCase("authenticated")) {
-                authorized = RestClient.getRestClient().getUser() != null;
-                if(authorized)
-                  break;
-              }
-              if(role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+      Annotation annotation = f.getAnnotation(CronappSecurity.class);
+      boolean authorized = true;
+      if(annotation != null) {
+        CronappSecurity security = (CronappSecurity)annotation;
+        String authoritiesStr = security.filter();
+        String[] authorities;
+        if(authoritiesStr != null && !authoritiesStr.trim().isEmpty()) {
+          authorized = false;
+          authorities = authoritiesStr.trim().split(";");
+          for(String role : authorities) {
+            if(role.equalsIgnoreCase("authenticated")) {
+              authorized = RestClient.getRestClient().getUser() != null;
+              if(authorized)
+                break;
+            }
+            if(role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+              authorized = true;
+              break;
+            }
+            for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+              if(role.equalsIgnoreCase(authority.getAuthority())) {
                 authorized = true;
                 break;
               }
-              for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
-                if(role.equalsIgnoreCase(authority.getAuthority())) {
-                  authorized = true;
-                  break;
-                }
-              }
-              
             }
             
-            if(authorized) {
-              searchable.add(f.getName());
-            }
           }
         }
+      }
+      if(authorized) {
+        searchable.add(f.getName());
       }
     }
     return searchable;
   }
   
   public void applyTo(Class domainClass, String jpql, Var[] params) {
-    if(items.size() == 0) {
-      this.appliedParams = params;
-      this.appliedJpql = jpql;
+    this.appliedParams = params;
+    this.appliedJpql = jpql;
+    
+    if(items.size() == 0 && orders.size() == 0) {
       return;
     }
     
     String alias = "e";
     boolean hasWhere = false;
+    boolean hasOrder = false;
     JPQLParser parser = JPQLParser.buildParserFor(jpql);
     parser.parse();
     if(parser.getParseTree().getQueryNode().isSelectNode()) {
@@ -136,13 +185,17 @@ public class DataSourceFilter {
         }
       }
     }
-
-    if (parser.getParseTree().getWhereNode() != null) {
+    
+    if(parser.getParseTree().getWhereNode() != null) {
       hasWhere = true;
     }
-
+    
+    if(parser.getParseTree().getOrderByNode() != null) {
+      hasOrder = true;
+    }
+    
     List<String> searchables = findSearchables(domainClass);
-
+    
     if(items.size() == 1 && items.get(0).key == "*") {
       if(searchables.isEmpty()) {
         throw new RuntimeException(Messages.getString("notAllowed"));
@@ -157,36 +210,58 @@ public class DataSourceFilter {
       }
     }
     
-    if(!hasWhere) {
-      jpql += " where (";
-    }
-    else {
-      jpql += " AND (";
-    }
-    
-    Var[] newParams = new Var[params.length + items.size()];
-    for(int j = 0; j < params.length; j++) {
-      newParams[j] = params[j];
-    }
-    int i = params.length;
-    boolean add = false;
-    for(DataSourceFilterItem item : items) {
-      if(add) {
-        jpql += " " + type + " ";
+    if(items.size() > 0) {
+      if(!hasWhere) {
+        jpql += " where (";
       }
-      add = true;
+      else {
+        jpql += " AND (";
+      }
       
-      jpql += alias + "." + item.key + " " + item.type + " :p" + i;
-      newParams[i] = item.value;
-      i++;
-
-      if (!searchables.contains(item.key)) {
-        throw new RuntimeException(Messages.getString("notAllowed"));
+      Var[] newParams = new Var[params.length + items.size()];
+      for(int j = 0; j < params.length; j++) {
+        newParams[j] = params[j];
+      }
+      int i = params.length;
+      boolean add = false;
+      for(DataSourceFilterItem item : items) {
+        if(add) {
+          jpql += " " + type + " ";
+        }
+        add = true;
+        
+        jpql += alias + "." + item.key + " " + item.type + " :p" + i;
+        newParams[i] = item.value;
+        i++;
+        
+        if(!searchables.contains(item.key)) {
+          throw new RuntimeException(Messages.getString("notAllowed"));
+        }
+      }
+      
+      jpql += ")";
+      
+      this.appliedParams = newParams;
+    }
+    
+    if(orders.size() > 0) {
+      if(!hasOrder) {
+        jpql += " ORDER BY ";
+      }
+      else {
+        jpql += ", ";
+      }
+      
+      boolean add = false;
+      for(DataSourceOrderItem order : orders) {
+        if(add) {
+          jpql += ", ";
+        }
+        add = true;
+        jpql += alias + "." + order.key + " " + order.type;
       }
     }
     
-    jpql += ")";
-    this.appliedParams = newParams;
     this.appliedJpql = jpql;
   }
   
@@ -198,7 +273,19 @@ public class DataSourceFilter {
     public DataSourceFilterItem(String key, Var value, String type) {
       this.key = key;
       this.value = value;
-      this.type = type;
+      if(type.equalsIgnoreCase("=") || type.equalsIgnoreCase("like"))
+        this.type = type;
+    }
+  }
+  
+  public static class DataSourceOrderItem {
+    public String key;
+    public String type = "ASC";
+    
+    public DataSourceOrderItem(String key, String type) {
+      this.key = key;
+      if(type.equalsIgnoreCase("asc") || type.equalsIgnoreCase("desc"))
+        this.type = type;
     }
   }
 }

@@ -93,14 +93,9 @@ public class CronapiREST {
     translationPath.params = params.toArray(new Var[params.size()]);
     translationPath.relationParams = relationParams.toArray(new Var[relationParams.size()]);
 
-    if(request.getParameter("filter") != null) {
-      translationPath.filter = new DataSourceFilter(request.getParameter("filter"));
-
-      if (request.getParameter("filterType") != null && (request.getParameter("filterType").equalsIgnoreCase("or") || request.getParameter("filterType").equalsIgnoreCase("and"))) {
-        translationPath.filter.type = request.getParameter("filterType");
-      }
-    }
-
+    translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
+            request.getParameter("filterType"));
+    
     return translationPath;
   }
 

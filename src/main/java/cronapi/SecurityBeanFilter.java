@@ -41,12 +41,12 @@ public class SecurityBeanFilter extends SimpleBeanPropertyFilter {
             if(security instanceof CronappSecurity) {
               CronappSecurity cronappSecurity = (CronappSecurity)security;
               try {
-                Method methodPermission = cronappSecurity.getClass().getMethod(method==null?client.getMethod().toLowerCase():method);
+                Method methodPermission = cronappSecurity.getClass().getMethod(method==null?client.getMethod().toLowerCase():method.toLowerCase());
                 
                 if(methodPermission != null) {
                   String value = (String)methodPermission.invoke(cronappSecurity);
                   
-                  if(value != null) {
+                  if(value != null && !value.isEmpty()) {
                     boolean authorized = false;
                     
                     String[] authorities = value.trim().split(";");
