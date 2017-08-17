@@ -79,13 +79,11 @@ public class Operations {
 			"convertToAscii" }, description = "{{functionToConvertToAscii}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.DOUBLE)
 	public static final Var chrToAscii(Var value) throws Exception {
-		Var ascii = new Var(null);
-		if (value.getObjectAsString() != null && value.getObjectAsString().isEmpty()) {
-			ascii = new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
-		}
-		return ascii;
+	    if(!value.equals(Var.VAR_NULL))
+		  return new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
+		  else return Var.VAR_ZERO;
 	}
-
+	
 	@CronapiMetaData(type = "function", name = "{{convertHexadecimalToInt}}", nameTags = { "hexToInt",
 			"hexadecimalToInteger" }, description = "{{functionToConvertHexadecimalToInt}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.LONG)
