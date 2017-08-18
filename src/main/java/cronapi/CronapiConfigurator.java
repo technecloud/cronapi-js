@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import cronapi.serialization.CronappModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +61,7 @@ public class CronapiConfigurator {
       }
     });
     
-    builder.filters(new SimpleFilterProvider().setDefaultFilter(new SecurityBeanFilter()));
+    builder.modulesToInstall(new CronappModule());
     return builder;
   }
 

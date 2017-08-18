@@ -108,6 +108,10 @@ public class DataSource implements JsonSerializable {
     return simpleEntity;
   }
 
+  public String getEntity() {
+    return entity;
+  }
+
   /**
    * Retrieve repository from entity
    *

@@ -36,7 +36,9 @@ public class CronapiFilter implements Filter {
           chain.doFilter(req, resp);
         } finally {
           RestClient.removeClient();
+          REQUEST.set(null);
           REQUEST.remove();
+          RESPONSE.set(null);
           RESPONSE.remove();
           Messages.remove();
           AppMessages.remove();

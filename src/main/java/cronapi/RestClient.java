@@ -12,12 +12,7 @@ import java.util.*;
 
 public class RestClient {
   
-  private static ThreadLocal<RestClient> REST_CLIENT = new ThreadLocal<RestClient>() {
-    @Override
-    protected RestClient initialValue() {
-      return new RestClient();
-    }
-  };
+  private static ThreadLocal<RestClient> REST_CLIENT = new ThreadLocal<RestClient>();
   
   private LinkedList<ClientCommand> commands = new LinkedList<>();
   private HttpServletResponse response = CronapiFilter.RESPONSE.get();
@@ -46,6 +41,7 @@ public class RestClient {
   }
   
   public static void removeClient() {
+    REST_CLIENT.set(null);
     REST_CLIENT.remove();
   }
   

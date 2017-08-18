@@ -47,6 +47,7 @@ public class Messages {
   }
   
   public static void remove() {
+    RESOURCE_BUNDLE.set(null);
     RESOURCE_BUNDLE.remove();
   }
   

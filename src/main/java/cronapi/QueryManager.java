@@ -3,21 +3,20 @@ package cronapi;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.gson.*;
 import cronapi.database.DataSourceFilter;
 import cronapi.database.JPQLConverter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.security.core.GrantedAuthority;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
+
+import javax.json.Json;
 
 public class QueryManager {
   private static JsonObject JSON;
@@ -237,7 +236,7 @@ public class QueryManager {
     }
   }
   
-  private static Var doExecuteBlockly(JsonObject blockly, String method, Var ... params) throws Exception {
+  public static Var doExecuteBlockly(JsonObject blockly, String method, Var ... params) throws Exception {
     String function = blockly.get("blocklyMethod").getAsString();
     
     if(!isNull(blockly.get("blockly" + method + "Method"))) {
@@ -357,6 +356,61 @@ public class QueryManager {
             }
           }
         }
+      }
+    }
+  }
+  
+  public static void addCalcFields(JsonObject query, DataSource ds) {
+    if(!isNull(query.get("calcFields")) && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
+      for(Map.Entry<String, JsonElement> entry : query.get("calcFields").getAsJsonObject().entrySet()) {
+        LinkedHashMap<String, JsonElement> newProperties = (LinkedHashMap<String, JsonElement>)RestClient.getRestClient().getRequest()
+                .getAttribute("NewBeanProperty");
+        if(newProperties == null) {
+          newProperties = new LinkedHashMap<>();
+          RestClient.getRestClient().getRequest().setAttribute("NewBeanProperty", newProperties);
+        }
+
+        boolean authorized = true;
+
+        if(!isNull(query.get("calcFieldsSecurity"))) {
+          JsonObject obj = query.get("calcFieldsSecurity").getAsJsonObject();
+          if (!isNull(obj.get(entry.getKey())) && (!isNull(obj.get(entry.getKey()).getAsJsonObject().get("get")))) {
+            String security = obj.get(entry.getKey()).getAsJsonObject().get("get").getAsString();
+            if (security == null)
+              security = "public";
+            String[] roles = security.split(";");
+
+            authorized = false;
+            for(String role : roles) {
+              if(role.equalsIgnoreCase("public") && role.equalsIgnoreCase("permitAll")) {
+                authorized = true;
+                break;
+              }
+
+              if(role.equalsIgnoreCase("authenticated")) {
+                authorized = RestClient.getRestClient().getUser() != null;
+                if(authorized)
+                  break;
+              }
+
+              if(!authorized) {
+                for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                  if(authority.getAuthority().equalsIgnoreCase(role)) {
+                    authorized = true;
+                    break;
+                  }
+                }
+              }
+
+              if(authorized) {
+                break;
+              }
+            }
+          }
+        }
+
+        if (authorized)
+          newProperties.put(ds.getEntity() + "." + entry.getKey(), entry.getValue());
       }
     }
   }

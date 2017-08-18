@@ -254,6 +254,7 @@ public class CronapiREST {
         ds.setDataSourceFilter(translationPath.filter);
         ds.filter(jpql, page, translationPath.params);
 
+        QueryManager.addCalcFields(query, ds);
         QueryManager.executeNavigateEvent(query, ds);
         QueryManager.checkFieldSecurity(query, ds, "GET");
 
@@ -301,6 +302,7 @@ public class CronapiREST {
         Object inserted = ds.save(false);
         QueryManager.executeEvent(query, ds, "afterInsert");
         QueryManager.checkFieldSecurity(query, ds, "GET");
+        QueryManager.addCalcFields(query, ds);
 
         return Var.valueOf(inserted);
       }
@@ -338,6 +340,7 @@ public class CronapiREST {
         Var saved = Var.valueOf(ds.save());
         QueryManager.executeEvent(query, ds, "afterUpdate");
         QueryManager.checkFieldSecurity(query, ds, "GET");
+        QueryManager.addCalcFields(query, ds);
         return saved;
       }
     });

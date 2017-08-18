@@ -134,7 +134,8 @@ public class TransactionManager {
       }
       map.clear();
     }
-    
+
+    CACHE.set(null);
     CACHE.remove();
   }
 }
