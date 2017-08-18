@@ -126,9 +126,9 @@ public class Operations {
 		return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {
-			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = { "{{content}}"}, paramsType = { ObjectType.LONG }, returnType = ObjectType.STRING)
-	public static final Var intToHex(Var value) throws Exception {
+	@CronapiMetaData(type = "function", name = "{{convertDecToHex}}", nameTags = {
+			"decToHex" }, description = "{{functionToConvertDecToHex}}", params = { "{{content}}"}, paramsType = { ObjectType.LONG }, returnType = ObjectType.STRING)
+	public static final Var decToHex(Var value) throws Exception {
 		String hex = Long.toHexString(value.getObjectAsInt());
 		return new Var(hex);
 	}
