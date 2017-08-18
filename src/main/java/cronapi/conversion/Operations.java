@@ -79,11 +79,10 @@ public class Operations {
 			"convertToAscii" }, description = "{{functionToConvertToAscii}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.DOUBLE)
 	public static final Var chrToAscii(Var value) throws Exception {
-		Var ascii = new Var(null);
-		if (value.getObjectAsString() != null && value.getObjectAsString().isEmpty()) {
-			ascii = new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
-		}
-		return ascii;
+		if (!value.equals(Var.VAR_NULL))
+			return new Var(Long.valueOf(value.getObjectAsString().charAt(0)));
+		else
+			return Var.VAR_ZERO;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertHexadecimalToInt}}", nameTags = { "hexToInt",
@@ -105,11 +104,11 @@ public class Operations {
 			"base64ToBinary" }, description = "{{functionToConvertBase64ToBinary}}", params = {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
 	public static final Var base64ToBinary(Var base64) throws Exception {
-		Var binary = new Var(null);
-		byte[] temp = Utils.getFromBase64(base64.getObjectAsString());
-		if (temp != null)
-			binary = new Var(temp);
-		return binary;
+		if (!base64.equals(Var.VAR_NULL)) {
+			Var text = base64ToString(base64);
+			return asciiToBinary(text);
+		}
+		return Var.VAR_NULL;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertStringToJs}}", nameTags = {
@@ -127,13 +126,10 @@ public class Operations {
 		return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString()));
 	}
 
-	@CronapiMetaData(type = "function", name = "{{convertIntToHex}}", nameTags = {
-			"intToHex" }, description = "{{functionToConvertIntToHex}}", params = { "{{content}}",
-					"{{minSize}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.STRING)
-	public static final Var intToHex(Var value, Var minSize) throws Exception {
+	@CronapiMetaData(type = "function", name = "{{convertDecToHex}}", nameTags = {
+			"decToHex" }, description = "{{functionToConvertDecToHex}}", params = { "{{content}}"}, paramsType = { ObjectType.LONG }, returnType = ObjectType.STRING)
+	public static final Var decToHex(Var value) throws Exception {
 		String hex = Long.toHexString(value.getObjectAsInt());
-		while (hex.length() < minSize.getObjectAsInt())
-			hex = "0" + hex;
 		return new Var(hex);
 	}
 
