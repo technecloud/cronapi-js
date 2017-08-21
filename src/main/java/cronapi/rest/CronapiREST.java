@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 import cronapi.database.DataSourceFilter;
+import cronapi.util.SecurityUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -431,6 +432,14 @@ public class CronapiREST {
     });
   }
   //Fim api REST
+
+  //Api de segurança
+
+  @RequestMapping(method = RequestMethod.GET, value = "/security/roles")
+  public List<SecurityUtil.SecurityGroup> securityRoles() throws Exception {
+    return SecurityUtil.getRoles();
+  }
+  //Fim Api de Segurança
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);
