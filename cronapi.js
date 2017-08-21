@@ -527,7 +527,7 @@
    * @multilayer true
    */
   this.cronapi.screen.notify = function(/** @type {ObjectType.STRING} */ type, /** @type {ObjectType.STRING} */  message) {
-    cronapi.$scope.Notification({'message':message },type);
+    cronapi.$scope.Notification({'message':message.toString() },type);
   };
 
   /**
