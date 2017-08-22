@@ -12,7 +12,6 @@ import com.google.gson.JsonObject;
 public class JPQLConverter {
   
   private static Map<String, String> operators = new HashMap<String, String>();
-
   static {
     operators.put("in", "IN (%s)");
     operators.put("not_in", "NOT IN (%s)");
@@ -35,9 +34,7 @@ public class JPQLConverter {
     operators.put("between", "BETWEEN %s");
     operators.put("not_between", "NOT BETWEEN %s");
   }
-
   private static Map<String, String> functions = new HashMap<String, String>();
-
   static {
     functions.put("get", "%s");
     functions.put("min", "MIN(%s)");
@@ -61,17 +58,35 @@ public class JPQLConverter {
     return alias;
   }
   
+  public static String getTableFromSql(String sql) {
+    String aux = sql.replaceAll("\n", " ").replaceAll("\t", " ").replaceAll("\r", " ");
+    String table = "";
+    Pattern pattern = Pattern.compile("\\bfrom\\s*[A-Za-z0-9_.]*\\s*[A-Za-z0-9_.]*");
+    Matcher matcher = pattern.matcher(aux);
+    if(matcher.find()) {
+      String[] splited = matcher.group().split(" ");
+      table = splited[splited.length - 2];
+    }
+    return table;
+  }
+  
   public static JsonObject jsonFromTable(String tableName) {
+    String alias = tableName.substring(0,1).toLowerCase();
     JsonObject json = new JsonObject();
     json.addProperty("isValid", true);
-    json.addProperty("entity", tableName);
-    json.addProperty("alias", "o");
+    
+    JsonArray rulesEntity = new JsonArray();
+    JsonObject rulesEntityObject = new JsonObject();
+    rulesEntityObject.addProperty("entity", tableName);
+    rulesEntityObject.addProperty("alias", alias);
+    rulesEntity.add(rulesEntityObject);
+    json.add("rulesEntity", rulesEntity);
     
     JsonArray rulesSelect = new JsonArray();
-    JsonObject rulesBody = new JsonObject();
-    rulesBody.addProperty("func", "get");
-    rulesSelect.add(rulesBody);
-    
+    JsonObject rulesSelectBody = new JsonObject();
+    rulesSelectBody.addProperty("func", "get");
+    rulesSelectBody.addProperty("field", alias);
+    rulesSelect.add(rulesSelectBody);
     json.add("rulesSelect", rulesSelect);
     
     json.add("rulesGroupBy", new JsonArray());
@@ -88,17 +103,22 @@ public class JPQLConverter {
   }
   
   public static String sqlFromJson(JsonObject jsonObject) {
-    String sqlBase = "select %s from %s %s %s %s %s %s";
+    String sqlBase = "select %s from %s %s %s %s %s";
     
     String fields = getFields(jsonObject.get("rulesSelect").getAsJsonArray());
-    String entity = jsonObject.get("entity").getAsString();
-    String alias = jsonObject.get("alias").getAsString();
+    String entityWithAlias = "";
+    if(jsonObject.get("entity") != null && !jsonObject.get("entity").isJsonNull()) {
+      entityWithAlias = String.format("%s %s", jsonObject.get("entity").getAsString(), jsonObject.get("alias").getAsString());
+    }
+    else {
+      entityWithAlias = getEntities(jsonObject.get("rulesEntity").getAsJsonArray());
+    }
     String where = getCondition(jsonObject.get("rules").getAsJsonObject());
     String groupBy = getGroup(jsonObject.get("rulesGroupBy").getAsJsonArray());
     String having = getHaving(jsonObject.get("rulesHaving").getAsJsonArray());
     String orderBy = getOrder(jsonObject.get("rulesOrderBy").getAsJsonArray());
     
-    sqlBase = String.format(sqlBase, fields, entity, alias, where, groupBy, having, orderBy);
+    sqlBase = String.format(sqlBase, fields, entityWithAlias, where, groupBy, having, orderBy);
     return sqlBase.trim();
   }
   
@@ -163,6 +183,18 @@ public class JPQLConverter {
     return allFields;
   }
   
+  private static String getEntities(JsonArray rulesEntity) {
+    StringBuilder entities = new StringBuilder();
+    rulesEntity.forEach(rule -> {
+      JsonObject ruleObj = rule.getAsJsonObject();
+      String entity = String.format("%s %s, ", ruleObj.get("entity").getAsString(), ruleObj.get("alias").getAsString());
+      entities.append(entity);
+    });
+    String allEntities = entities.toString();
+    allEntities = allEntities.substring(0, allEntities.length() - 2);
+    return allEntities;
+  }
+  
   private static String getCondition(JsonObject cond) {
     StringBuilder sbRules = new StringBuilder();
     String rules = "";
@@ -190,11 +222,13 @@ public class JPQLConverter {
     if(ru.get("condition") != null && !ru.get("condition").isJsonNull())
       return String.format("(%s)", getCondition(ru));
     else {
-      String rule = String.format("%s %s", ru.get("field").getAsString(),
-              operators.get(ru.get("operator").getAsString()));
-      if(rule.contains("%s"))
-        rule = String.format(rule,
-                getValue(ru.get("value"), ru.get("operator").getAsString(), ru.get("type").getAsString()));
+      String rule = String.format("%s %s", ru.get("field").getAsString(), operators.get(ru.get("operator").getAsString()));
+      if(rule.contains("%s")) {
+        String type = ru.get("type").getAsString();
+        if (ru.get("valueIsField") != null && ru.get("valueIsField").getAsBoolean())
+          type = "field";
+        rule = String.format(rule, getValue(ru.get("value"), ru.get("operator").getAsString(), type));
+      }
       return rule;
     }
   }
