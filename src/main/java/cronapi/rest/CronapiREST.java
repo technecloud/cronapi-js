@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
-import cronapi.database.DataSourceFilter;
+import cronapi.database.*;
 import cronapi.util.SecurityUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import com.google.gson.JsonObject;
 
 import cronapi.*;
-import cronapi.database.DataSource;
-import cronapi.database.EntityMetadata;
-import cronapi.database.TransactionManager;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -34,6 +31,9 @@ public class CronapiREST {
 
   @Autowired
   private HttpServletRequest request;
+
+  @Autowired
+  private TenantService tenantService;
 
   public class TranslationPath {
     public Var[] params;
@@ -96,7 +96,7 @@ public class CronapiREST {
 
     translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
             request.getParameter("filterType"));
-    
+
     return translationPath;
   }
 
@@ -443,6 +443,7 @@ public class CronapiREST {
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);
+    RestClient.getRestClient().setTenantService(tenantService);
     Var var = Var.VAR_NULL;
     try {
       var = callable.call();
@@ -461,6 +462,7 @@ public class CronapiREST {
 
   private Var runIntoTransactionVar(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);
+    RestClient.getRestClient().setTenantService(tenantService);
     Var var = Var.VAR_NULL;
     try {
       var = callable.call();
