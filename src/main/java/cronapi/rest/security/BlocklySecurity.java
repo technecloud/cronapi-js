@@ -24,7 +24,7 @@ public class BlocklySecurity {
         }
       }
       
-      if(value == null)
+      if(value == null || value.isEmpty())
         value = "Authenticated";
       
       boolean authorized = false;
