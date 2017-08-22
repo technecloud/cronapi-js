@@ -19,7 +19,7 @@ public class ImportBlocklyREST {
 
   private static List<String> imports;
   private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-          .indexOf("-agentlib:jdwp") > 0;
+      .indexOf("-agentlib:jdwp") > 0;
 
   private void fill(String base, File folder, List<String> imports) {
     for(File file : folder.listFiles()) {
@@ -65,6 +65,10 @@ public class ImportBlocklyREST {
   }
 
   private void write(PrintWriter out, List<String> imports) {
+    out.println("window.blockly = window.blockly || {};");
+    out.println("window.blockly.js = window.blockly.js || {};");
+    out.println("window.blockly.js.blockly = window.blockly.js.blockly || {};");
+
     for(String js : imports) {
       out.println("document.write(\"<script src='" + js + "'></script>\")");
     }

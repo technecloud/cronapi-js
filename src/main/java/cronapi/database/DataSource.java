@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -42,7 +43,7 @@ import cronapi.rest.security.CronappSecurity;
  *
  */
 public class DataSource implements JsonSerializable {
-
+  
   private String entity;
   private String simpleEntity;
   private Class domainClass;
@@ -56,11 +57,12 @@ public class DataSource implements JsonSerializable {
   private Object insertedElement = null;
   private EntityManager customEntityManager;
   private DataSourceFilter dsFilter;
-
+  
   /**
    * Init a datasource with a page size equals 100
    *
-   * @param entity - full name of entitiy class like String
+   * @param entity
+   *          - full name of entitiy class like String
    */
   public DataSource(String entity) {
     this(entity, 100);
@@ -69,69 +71,75 @@ public class DataSource implements JsonSerializable {
   /**
    * Init a datasource with a page size equals 100, and custom entity manager
    *
-   * @param entity - full name of entitiy class like String
-   * @param entityManager - custom entity manager
+   * @param entity
+   *          - full name of entitiy class like String
+   * @param entityManager
+   *          - custom entity manager
    */
   public DataSource(String entity, EntityManager entityManager) {
     this(entity, 100);
     this.customEntityManager = entityManager;
   }
-
+  
   /**
    * Init a datasource setting a page size
    *
-   * @param entity - full name of entitiy class like String
-   * @param pageSize - page size of a Pageable object retrieved from repository
+   * @param entity
+   *          - full name of entitiy class like String
+   * @param pageSize
+   *          - page size of a Pageable object retrieved from repository
    */
   public DataSource(String entity, int pageSize) {
     this.entity = entity;
-    this.simpleEntity = entity.substring(entity.lastIndexOf(".")+1);
+    this.simpleEntity = entity.substring(entity.lastIndexOf(".") + 1);
     this.pageSize = pageSize;
     this.pageRequest = new PageRequest(0, pageSize);
-
-    //initialize dependencies and necessaries objects
+    
+    // initialize dependencies and necessaries objects
     this.instantiateRepository();
   }
   
   private EntityManager getEntityManager(Class domainClass) {
-    if (customEntityManager != null)
+    if(customEntityManager != null)
       return customEntityManager;
     else
       return TransactionManager.getEntityManager(domainClass);
   }
-
+  
   public Class getDomainClass() {
     return domainClass;
   }
-
+  
   public String getSimpleEntity() {
     return simpleEntity;
   }
-
+  
   public String getEntity() {
     return entity;
   }
-
+  
   /**
    * Retrieve repository from entity
    *
-   * @throws RuntimeException when repository not fount, entity passed not found or cast repository
+   * @throws RuntimeException
+   *           when repository not fount, entity passed not found or cast repository
    */
   private void instantiateRepository() {
     try {
       domainClass = Class.forName(this.entity);
-    } catch (ClassNotFoundException cnfex) {
+    }
+    catch(ClassNotFoundException cnfex) {
       throw new RuntimeException(cnfex);
     }
   }
-
+  
   private List<String> parseParams(String SQL) {
     final String delims = " \n\r\t.(){},+:=!";
     final String quots = "\'";
     String token = "";
     boolean isQuoted = false;
     List<String> tokens = new LinkedList<>();
-
+    
     for(int i = 0; i < SQL.length(); i++) {
       if(quots.indexOf(SQL.charAt(i)) != -1) {
         isQuoted = token.length() == 0;
@@ -141,25 +149,25 @@ public class DataSource implements JsonSerializable {
       }
       else {
         if(token.length() > 0) {
-          if (token.startsWith(":"))
+          if(token.startsWith(":"))
             tokens.add(token.substring(1));
           token = "";
           isQuoted = false;
         }
-        if (SQL.charAt(i) == ':') {
+        if(SQL.charAt(i) == ':') {
           token = ":";
         }
       }
     }
-
+    
     if(token.length() > 0) {
-      if (token.startsWith(":"))
+      if(token.startsWith(":"))
         tokens.add(token.substring(1));
     }
-
+    
     return tokens;
   }
-
+  
   /**
    * Retrieve objects from database using repository when filter is null or empty,
    * if filter not null or is not empty, this method uses entityManager and create a
@@ -168,15 +176,15 @@ public class DataSource implements JsonSerializable {
    * @return a array of Object
    */
   public Object[] fetch() {
-
+    
     String jpql = this.filter;
     Var[] params = this.params;
     
-    if (jpql == null) {
+    if(jpql == null) {
       jpql = "select e from " + simpleEntity + " e";
     }
-
-    if (dsFilter != null) {
+    
+    if(dsFilter != null) {
       dsFilter.applyTo(domainClass, jpql, params);
       params = dsFilter.getAppliedParams();
       jpql = dsFilter.getAppliedJpql();
@@ -185,48 +193,51 @@ public class DataSource implements JsonSerializable {
     try {
       EntityManager em = getEntityManager(domainClass);
       TypedQuery<?> query = em.createQuery(jpql, domainClass);
-
+      
       int i = 0;
       List<String> parsedParams = parseParams(jpql);
-
-      for (String param : parsedParams) {
+      
+      for(String param : parsedParams) {
         Var p = null;
-        if (i <= params.length-1) {
+        if(i <= params.length - 1) {
           p = params[i];
         }
-        if (p != null) {
-          if (p.getId() != null) {
+        if(p != null) {
+          if(p.getId() != null) {
             query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
-          } else {
+          }
+          else {
             query.setParameter(param, p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
           }
-        } else {
+        }
+        else {
           query.setParameter(param, null);
         }
         i++;
       }
-
+      
       query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
       query.setMaxResults(this.pageRequest.getPageSize());
-
+      
       List<?> resultsInPage = query.getResultList();
-
+      
       this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
-
-    //has data, moves cursor to first position
-    if (this.page.getNumberOfElements() > 0)
+    
+    // has data, moves cursor to first position
+    if(this.page.getNumberOfElements() > 0)
       this.current = 0;
-
+    
     return this.page.getContent().toArray();
   }
-
+  
   public EntityMetadata getMetadata() {
     return new EntityMetadata(domainClass);
   }
-
+  
   /**
    * Create a new instance of entity and add a
    * results and set current (index) for his position
@@ -234,48 +245,53 @@ public class DataSource implements JsonSerializable {
   public void insert() {
     try {
       this.insertedElement = this.domainClass.newInstance();
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
-  public Object toObject(Map<?,?> values) {
+  
+  public Object toObject(Map<?, ?> values) {
     try {
       Object insertedElement = this.domainClass.newInstance();
-      for (Object key: values.keySet()) {
+      for(Object key : values.keySet()) {
         updateField(insertedElement, key.toString(), values.get(key));
       }
-
+      
       return insertedElement;
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   public void insert(Object value) {
     try {
-      if (value instanceof Map) {
+      if(value instanceof Map) {
         this.insertedElement = this.domainClass.newInstance();
-        Map<?,?> values = (Map<?,?>) value;
-        for (Object key : values.keySet()) {
+        Map<?, ?> values = (Map<?, ?>)value;
+        for(Object key : values.keySet()) {
           try {
             updateField(key.toString(), values.get(key));
-          } catch(Exception e) {
-            //Abafa campo não encontrado
+          }
+          catch(Exception e) {
+            // Abafa campo não encontrado
           }
         }
-      } else {
+      }
+      else {
         this.insertedElement = value;
       }
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   public Object save() {
     return save(true);
   }
-
+  
   /**
    * Saves the object in the current index or a new object when has insertedElement
    */
@@ -284,49 +300,47 @@ public class DataSource implements JsonSerializable {
       Object toSave;
       EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
-
-      if (!em.getTransaction().isActive()) {
+      
+      if(!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
-
-      if (this.insertedElement != null) {
+      
+      if(this.insertedElement != null) {
         toSave = this.insertedElement;
-        if (returnCursorAfterInsert)
+        if(returnCursorAfterInsert)
           this.insertedElement = null;
         em.persist(toSave);
-      } else
+      }
+      else
         toSave = this.getObject();
-
+      
       return em.merge(toSave);
-    } catch (Exception e) {
+    }
+    catch(Exception e) {
       throw new RuntimeException(e);
     }
   }
-
+  
   public void delete(Var[] primaryKeys) {
     insert();
     int i = 0;
     Var[] params = new Var[primaryKeys.length];
-
+    
     EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
+    
+    String jpql = " DELETE FROM " + entity.substring(entity.lastIndexOf(".") + 1) + " WHERE ";
+    List<TypeKey> keys = getKeys(type);
 
-    String jpql = " DELETE FROM "+entity.substring(entity.lastIndexOf(".")+1) + " WHERE ";
-    for (Object obj: type.getAttributes()) {
-      SingularAttribute field = (SingularAttribute) obj;
-      if (field.isId()) {
-        if (i > 0) {
-          jpql += " AND ";
-        }
-        jpql += "" + field.getName() + " = :p" + i;
-        params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(field.getType().getJavaType()));
-        i++;
-      }
+    for(TypeKey key : keys) {
+      jpql += "" + key.name + " = :p" + i;
+      params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(key.field.getType().getJavaType()));
+      i++;
     }
-
+    
     execute(jpql, params);
   }
-
+  
   /**
    * Removes the object in the current index
    */
@@ -334,87 +348,95 @@ public class DataSource implements JsonSerializable {
     try {
       Object toRemove = this.getObject();
       EntityManager em = getEntityManager(domainClass);
-      if (!em.getTransaction().isActive()) {
+      if(!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
-      //returns managed instance
+      // returns managed instance
       toRemove = em.merge(toRemove);
       em.remove(toRemove);
-    } catch (Exception e) {
+    }
+    catch(Exception e) {
       throw new RuntimeException(e);
     }
   }
-
+  
   /**
    * Update a field from object in the current index
    *
-   * @param fieldName - attributte name in entity
-   * @param fieldValue - value that replaced or inserted in field name passed
+   * @param fieldName
+   *          - attributte name in entity
+   * @param fieldValue
+   *          - value that replaced or inserted in field name passed
    */
   public void updateField(String fieldName, Object fieldValue) {
     updateField(getObject(), fieldName, fieldValue);
   }
-
+  
   private void updateField(Object obj, String fieldName, Object fieldValue) {
     try {
-
+      
       boolean update = true;
       if(RestClient.getRestClient().isFilteredEnabled()) {
         update = SecurityBeanFilter.includeProperty(obj.getClass(), fieldName, null);
       }
-
-      if (update) {
+      
+      if(update) {
         Method setMethod = Utils.findMethod(obj, "set" + fieldName);
-        if (setMethod != null) {
-          if (fieldValue instanceof Var) {
-            fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
-          } else {
+        if(setMethod != null) {
+          if(fieldValue instanceof Var) {
+            fieldValue = ((Var)fieldValue).getObject(setMethod.getParameterTypes()[0]);
+          }
+          else {
             Var tVar = Var.valueOf(fieldValue);
             fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
           }
           setMethod.invoke(obj, fieldValue);
-        } else {
+        }
+        else {
           throw new RuntimeException("Field " + fieldName + " not found");
         }
       }
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   /**
    * Update fields from object in the current index
    *
-   * @param fields - bidimensional array like fields
-   * sample: { {"name", "Paul"}, {"age", "21"} }
+   * @param fields
+   *          - bidimensional array like fields
+   *          sample: { {"name", "Paul"}, {"age", "21"} }
    *
    * @thows RuntimeException if a field is not accessible through a set method
    */
-  public void updateFields(Var... fields) {
+  public void updateFields(Var ... fields) {
     try {
-      for (Var field : fields) {
+      for(Var field : fields) {
         Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
-        if (setMethod != null) {
+        if(setMethod != null) {
           setMethod.invoke(getObject(), field.getObject());
         }
       }
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   public void filter(Var data, Var[] extraParams) {
-
+    
     EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
-
+    
     int i = 0;
-    String jpql = " select e FROM "+entity.substring(entity.lastIndexOf(".")+1) + " e WHERE ";
+    String jpql = " select e FROM " + entity.substring(entity.lastIndexOf(".") + 1) + " e WHERE ";
     Vector<Var> params = new Vector<>();
-    for (Object obj: type.getAttributes()) {
-      SingularAttribute field = (SingularAttribute) obj;
-      if (field.isId()) {
-        if (i > 0) {
+    for(Object obj : type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute)obj;
+      if(field.isId()) {
+        if(i > 0) {
           jpql += " AND ";
         }
         jpql += "e." + field.getName() + " = :p" + i;
@@ -422,20 +444,20 @@ public class DataSource implements JsonSerializable {
         i++;
       }
     }
-
-    if (extraParams != null) {
-      for (Var p: extraParams) {
+    
+    if(extraParams != null) {
+      for(Var p : extraParams) {
         jpql += "e." + p.getId() + " = :p" + i;
         params.add(Var.valueOf("p" + i, p.getObject()));
         i++;
       }
     }
-
+    
     Var[] arr = params.toArray(new Var[params.size()]);
-
+    
     filter(jpql, arr);
   }
-
+  
   public void update(Var data) {
     try {
       LinkedList<String> fields = data.keySet();
@@ -449,23 +471,23 @@ public class DataSource implements JsonSerializable {
       throw new RuntimeException(e);
     }
   }
-
+  
   /**
    * Return object in current index
    *
    * @return Object from database in current position
    */
   public Object getObject() {
-
-    if (this.insertedElement != null)
+    
+    if(this.insertedElement != null)
       return this.insertedElement;
-
-    if (this.current < 0 || this.current > this.page.getContent().size()-1)
+    
+    if(this.current < 0 || this.current > this.page.getContent().size() - 1)
       return null;
-
+    
     return this.page.getContent().get(this.current);
   }
-
+  
   /**
    * Return field passed from object in current index
    *
@@ -475,32 +497,34 @@ public class DataSource implements JsonSerializable {
   public Object getObject(String fieldName) {
     try {
       Method getMethod = Utils.findMethod(getObject(), "get" + fieldName);
-      if (getMethod != null)
+      if(getMethod != null)
         return getMethod.invoke(getObject());
       return null;
-    } catch (Exception ex) {
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   /**
    * Moves the index for next position, in pageable case,
    * looking for next page and so on
    */
   public void next() {
-    if (this.page.getNumberOfElements() > (this.current + 1))
+    if(this.page.getNumberOfElements() > (this.current + 1))
       this.current++;
     else {
-      if (this.page.hasNext()) {
+      if(this.page.hasNext()) {
         this.pageRequest = this.page.nextPageable();
         this.fetch();
         this.current = 0;
-      } else {
+      }
+      else {
         this.current = -1;
       }
     }
   }
-
+  
   /**
    * Moves the index for next position, in pageable case,
    * looking for next page and so on
@@ -508,7 +532,7 @@ public class DataSource implements JsonSerializable {
   public void nextOnPage() {
     this.current++;
   }
-
+  
   /**
    * Verify if can moves the index for next position,
    * in pageable case, looking for next page and so on
@@ -516,21 +540,22 @@ public class DataSource implements JsonSerializable {
    * @return boolean true if has next, false else
    */
   public boolean hasNext() {
-    if (this.page.getNumberOfElements() > (this.current + 1))
+    if(this.page.getNumberOfElements() > (this.current + 1))
       return true;
     else {
-      if (this.page.hasNext()) {
+      if(this.page.hasNext()) {
         return true;
-      } else {
+      }
+      else {
         return false;
       }
     }
   }
-
+  
   public boolean hasData() {
     return getObject() != null;
   }
-
+  
   /**
    * Moves the index for previous position, in pageable case,
    * looking for next page and so on
@@ -538,28 +563,30 @@ public class DataSource implements JsonSerializable {
    * @return boolean true if has previous, false else
    */
   public boolean previous() {
-    if (this.current - 1 >= 0) {
+    if(this.current - 1 >= 0) {
       this.current--;
-    } else {
-      if (this.page.hasPrevious()) {
+    }
+    else {
+      if(this.page.hasPrevious()) {
         this.pageRequest = this.page.previousPageable();
         this.fetch();
         this.current = this.page.getNumberOfElements() - 1;
-      } else {
+      }
+      else {
         return false;
       }
     }
     return true;
   }
-
+  
   public void setCurrent(int current) {
     this.current = current;
   }
-
+  
   public int getCurrent() {
     return this.current;
   }
-
+  
   /**
    * Gets a Pageable object retrieved from repository
    *
@@ -568,47 +595,51 @@ public class DataSource implements JsonSerializable {
   public Page getPage() {
     return this.page;
   }
-
+  
   /**
    * Create a new page request with size passed
    *
-   * @param pageSize size of page request
+   * @param pageSize
+   *          size of page request
    */
   public void setPageSize(int pageSize) {
     this.pageSize = pageSize;
     this.pageRequest = new PageRequest(0, pageSize);
     this.current = -1;
   }
-
+  
   /**
    * Fetch objects from database by a filter
    *
-   * @param filter jpql instruction like a namedQuery
-   * @param params parameters used in jpql instruction
+   * @param filter
+   *          jpql instruction like a namedQuery
+   * @param params
+   *          parameters used in jpql instruction
    */
-  public void filter(String filter, Var... params) {
+  public void filter(String filter, Var ... params) {
     this.filter = filter;
     this.params = params;
     this.pageRequest = new PageRequest(0, pageSize);
     this.current = -1;
     this.fetch();
   }
+  
   public void setDataSourceFilter(DataSourceFilter dsFilter) {
     this.dsFilter = dsFilter;
   }
-
-  public void filter(String filter, PageRequest pageRequest, Var... params) {
-    if (filter == null) {
-      if (params.length > 0) {
+  
+  public void filter(String filter, PageRequest pageRequest, Var ... params) {
+    if(filter == null) {
+      if(params.length > 0) {
         EntityManager em = getEntityManager(domainClass);
         EntityType type = em.getMetamodel().entity(domainClass);
-
+        
         int i = 0;
         String jpql = "Select e from " + simpleEntity + " e where (";
-        for (Object obj : type.getAttributes()) {
-          SingularAttribute field = (SingularAttribute) obj;
-          if (field.isId()) {
-            if (i > 0) {
+        for(Object obj : type.getAttributes()) {
+          SingularAttribute field = (SingularAttribute)obj;
+          if(field.isId()) {
+            if(i > 0) {
               jpql += " and ";
             }
             jpql += "e." + field.getName() + " = :p" + i;
@@ -616,34 +647,68 @@ public class DataSource implements JsonSerializable {
           }
         }
         jpql += ")";
-
+        
         filter = jpql;
-      } else {
+      }
+      else {
         filter = "Select e from " + simpleEntity + " e ";
       }
     }
-
+    
     this.params = params;
     this.filter = filter;
     this.pageRequest = pageRequest;
     this.current = -1;
     this.fetch();
   }
-
+  
   private Class forName(String name) {
     try {
       return Class.forName(name);
-    } catch (ClassNotFoundException e) {
+    }
+    catch(ClassNotFoundException e) {
       return null;
     }
   }
-
+  
   private Object newInstance(String name) {
     try {
       return Class.forName(name).newInstance();
-    } catch (Exception e) {
+    }
+    catch(Exception e) {
       return null;
     }
+  }
+  
+  private static class TypeKey {
+    String name;
+    SingularAttribute field;
+  }
+  
+  private void addKeys(EntityManager em, EntityType type, String parent, List<TypeKey> keys) {
+    for(Object obj : type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute)obj;
+      if(field.isId()) {
+        if(field.getType().getPersistenceType() == Type.PersistenceType.BASIC) {
+          TypeKey key = new TypeKey();
+          key.name = parent == null ? field.getName() : parent + "." + field.getName();
+          key.field = field;
+          
+          keys.add(key);
+        }
+        else {
+          EntityType subType = (EntityType)field.getType();
+          addKeys(em, subType, (parent == null ? field.getName() : parent + "." + field.getName()), keys);
+        }
+      }
+    }
+  }
+
+  private List<TypeKey> getKeys(EntityType type) {
+    EntityManager em = getEntityManager(domainClass);
+    List<TypeKey> keys = new LinkedList<>();
+    addKeys(em, type, null, keys);
+    return keys;
   }
 
   public void deleteRelation(String refId, Var[] primaryKeys, Var[] relationKeys) {
@@ -656,137 +721,145 @@ public class DataSource implements JsonSerializable {
     String jpql = null;
 
     Var[] params = null;
-    if (relationMetadata.getAssossiationName() != null) {
+    if(relationMetadata.getAssossiationName() != null) {
       params = new Var[relationKeys.length + primaryKeys.length];
 
       jpql = " DELETE FROM " + relationMetadata.gettAssossiationSimpleName() + " WHERE ";
       EntityType type = em.getMetamodel().entity(domainClass);
-      for (Object obj : type.getAttributes()) {
-        SingularAttribute field = (SingularAttribute) obj;
-        if (field.isId()) {
-          if (i > 0) {
-            jpql += " AND ";
-          }
-          jpql += relationMetadata.getAssociationAttribute().getName() + "." + field.getName() + " = :p" + i;
-          params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(field.getType().getJavaType()));
-          i++;
+
+      List<TypeKey> keys = getKeys(type);
+
+      for(TypeKey key : keys) {
+        if(i > 0) {
+          jpql += " AND ";
         }
+
+        jpql += relationMetadata.getAssociationAttribute().getName() + "." + key.name + " = :p" + i;
+        params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(key.field.getType().getJavaType()));
+        i++;
       }
 
       int v = 0;
       type = em.getMetamodel().entity(forName(relationMetadata.getAssossiationName()));
-      for (Object obj : type.getAttributes()) {
-        SingularAttribute field = (SingularAttribute) obj;
-        if (field.isId()) {
-          if (i > 0) {
-            jpql += " AND ";
-          }
-          jpql += relationMetadata.getAttribute().getName() + "." + field.getName() + " = :p" + i;
-          params[i] = Var.valueOf("p" + i, relationKeys[v].getObject(field.getType().getJavaType()));
-          i++;
-          v++;
+      keys = getKeys(type);
+
+      for(TypeKey key : keys) {
+        if(i > 0) {
+          jpql += " AND ";
         }
+        jpql += relationMetadata.getAttribute().getName() + "." + key.name + " = :p" + i;
+        params[i] = Var.valueOf("p" + i, relationKeys[v].getObject(key.field.getType().getJavaType()));
+        i++;
+        v++;
       }
 
-    } else {
+    }
+    else {
       params = new Var[relationKeys.length];
 
       jpql = " DELETE FROM " + relationMetadata.getSimpleName() + " WHERE ";
       EntityType type = em.getMetamodel().entity(forName(relationMetadata.getName()));
-      for (Object obj : type.getAttributes()) {
-        SingularAttribute field = (SingularAttribute) obj;
-        if (field.isId()) {
-          if (i > 0) {
-            jpql += " AND ";
-          }
-          jpql += "" + field.getName() + " = :p" + i;
-          params[i] = Var.valueOf("p" + i, relationKeys[i].getObject(field.getType().getJavaType()));
-          i++;
+
+      List<TypeKey> keys = getKeys(type);
+
+      for(TypeKey key : keys) {
+        if(i > 0) {
+          jpql += " AND ";
         }
+
+        jpql += "" + key.name + " = :p" + i;
+
+        params[i] = Var.valueOf("p" + i, relationKeys[i].getObject(key.field.getType().getJavaType()));
+        i++;
       }
     }
 
     execute(jpql, params);
   }
 
-  public Object insertRelation(String refId, Map<?, ?> data, Var... primaryKeys) {
+  public Object insertRelation(String refId, Map<?, ?> data, Var ... primaryKeys) {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
-
+    
     EntityManager em = getEntityManager(domainClass);
-
+    
     filter(null, new PageRequest(0, 100), primaryKeys);
     Object insertion = null;
     Object result = null;
-    if (relationMetadata.getAssossiationName() != null) {
+    if(relationMetadata.getAssossiationName() != null) {
       insertion = this.newInstance(relationMetadata.getAssossiationName());
-      updateField(insertion, relationMetadata.getAttribute().getName(), Var.valueOf(data).getObject(forName(relationMetadata.getName())));
+      updateField(insertion, relationMetadata.getAttribute().getName(),
+              Var.valueOf(data).getObject(forName(relationMetadata.getName())));
       updateField(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
       result = getObject();
-    } else {
+    }
+    else {
       insertion = Var.valueOf(data).getObject(forName(relationMetadata.getName()));
       updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
       result = insertion;
     }
-
-    if (!em.getTransaction().isActive()) {
+    
+    if(!em.getTransaction().isActive()) {
       em.getTransaction().begin();
     }
-
+    
     em.persist(insertion);
     return result;
   }
-
-  public void filterByRelation(String refId, PageRequest pageRequest, Var... primaryKeys) {
+  
+  public void filterByRelation(String refId, PageRequest pageRequest, Var ... primaryKeys) {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
-
+    
     EntityManager em = getEntityManager(domainClass);
-
+    
     EntityType type = null;
     String name = null;
     String selectAttr = "";
     String filterAttr = relationMetadata.getAttribute().getName();
     type = em.getMetamodel().entity(domainClass);
-
-    if (relationMetadata.getAssossiationName() != null) {
+    
+    if(relationMetadata.getAssossiationName() != null) {
       name = relationMetadata.gettAssossiationSimpleName();
-      selectAttr = "."+relationMetadata.getAttribute().getName();
+      selectAttr = "." + relationMetadata.getAttribute().getName();
       filterAttr = relationMetadata.getAssociationAttribute().getName();
-
+      
       try {
         domainClass = Class.forName(relationMetadata.getAttribute().getJavaType().getName());
-      } catch (ClassNotFoundException e) {
+      }
+      catch(ClassNotFoundException e) {
         //
       }
-
-    } else {
+      
+    }
+    else {
       name = relationMetadata.getSimpleName();
-
+      
       try {
         domainClass = Class.forName(name);
-      } catch (ClassNotFoundException e) {
+      }
+      catch(ClassNotFoundException e) {
         //
       }
     }
-
+    
     int i = 0;
-    String jpql = "Select e"+selectAttr+" from "+name+" e where ";
-    for (Object obj: type.getAttributes()) {
-      SingularAttribute field = (SingularAttribute) obj;
-      if (field.isId()) {
-        if (i > 0) {
+    String jpql = "Select e" + selectAttr + " from " + name + " e where ";
+    for(Object obj : type.getAttributes()) {
+      SingularAttribute field = (SingularAttribute)obj;
+      if(field.isId()) {
+        if(i > 0) {
           jpql += " and ";
         }
-        jpql += "e."+filterAttr+"."+field.getName()+" = :p"+i;
-        primaryKeys[i].setId("p"+i);
+        jpql += "e." + filterAttr + "." + field.getName() + " = :p" + i;
+        primaryKeys[i].setId("p" + i);
       }
     }
-
+    
     filter(jpql, pageRequest, primaryKeys);
-
+    
   }
-
+  
   /**
    * Clean Datasource and to free up allocated memory
    */
@@ -795,68 +868,74 @@ public class DataSource implements JsonSerializable {
     this.current = -1;
     this.page = null;
   }
-
+  
   /**
    * Execute Query
    *
-   * @param query - JPQL instruction for filter objects to remove
-   * @param params - Bidimentional array with params name and params value
+   * @param query
+   *          - JPQL instruction for filter objects to remove
+   * @param params
+   *          - Bidimentional array with params name and params value
    */
-  public void execute(String query, Var... params) {
+  public void execute(String query, Var ... params) {
     try {
-
+      
       EntityManager em = getEntityManager(domainClass);
       TypedQuery<?> strQuery = em.createQuery(query, domainClass);
-
-      for (Var p : params) {
+      
+      for(Var p : params) {
         strQuery.setParameter(p.getId(), p.getObject());
       }
-
+      
       try {
-        if (!em.getTransaction().isActive()) {
+        if(!em.getTransaction().isActive()) {
           em.getTransaction().begin();
         }
         strQuery.executeUpdate();
-      } catch (Exception e) {
+      }
+      catch(Exception e) {
         throw new RuntimeException(e);
       }
-
-    } catch (Exception ex) {
+      
+    }
+    catch(Exception ex) {
       throw new RuntimeException(ex);
     }
   }
-
+  
   public Var getTotalElements() {
     return new Var(this.page.getTotalElements());
   }
-
+  
   @Override
   public String toString() {
-    if (this.page != null) {
+    if(this.page != null) {
       return this.page.getContent().toString();
-    } else {
+    }
+    else {
       return "[]";
     }
   }
-
+  
   @Override
   public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException {
     gen.writeObject(this.page.getContent());
   }
-
+  
   @Override
-  public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+  public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer)
+          throws IOException {
     gen.writeObject(this.page.getContent());
   }
-
+  
   public void checkRESTSecurity(String method) throws Exception {
     checkRESTSecurity(domainClass, method);
   }
-
+  
   public void checkRESTSecurity(String relationId, String method) throws Exception {
     EntityMetadata metadata = getMetadata();
     RelationMetadata relationMetadata = metadata.getRelations().get(relationId);
-
+    
     checkRESTSecurity(Class.forName(relationMetadata.getName()), method);
   }
   
