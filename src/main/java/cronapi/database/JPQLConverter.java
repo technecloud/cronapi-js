@@ -1,5 +1,6 @@
 package cronapi.database;
 
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -61,7 +62,7 @@ public class JPQLConverter {
   public static String getTableFromSql(String sql) {
     String aux = sql.replaceAll("\n", " ").replaceAll("\t", " ").replaceAll("\r", " ");
     String table = "";
-    Pattern pattern = Pattern.compile("\\bfrom\\s*[A-Za-z0-9_.]*\\s*[A-Za-z0-9_.]*");
+    Pattern pattern = Pattern.compile("(\\bfrom|\\bFROM)\\s*[A-Za-z0-9_.]*\\s*[A-Za-z0-9_.]*");
     Matcher matcher = pattern.matcher(aux);
     if(matcher.find()) {
       String[] splited = matcher.group().split(" ");
@@ -69,26 +70,26 @@ public class JPQLConverter {
     }
     return table;
   }
-  
+
   public static JsonObject jsonFromTable(String tableName) {
     String alias = tableName.substring(0,1).toLowerCase();
     JsonObject json = new JsonObject();
     json.addProperty("isValid", true);
-    
+
     JsonArray rulesEntity = new JsonArray();
     JsonObject rulesEntityObject = new JsonObject();
     rulesEntityObject.addProperty("entity", tableName);
     rulesEntityObject.addProperty("alias", alias);
     rulesEntity.add(rulesEntityObject);
     json.add("rulesEntity", rulesEntity);
-    
+
     JsonArray rulesSelect = new JsonArray();
     JsonObject rulesSelectBody = new JsonObject();
     rulesSelectBody.addProperty("func", "get");
     rulesSelectBody.addProperty("field", alias);
     rulesSelect.add(rulesSelectBody);
     json.add("rulesSelect", rulesSelect);
-    
+
     json.add("rulesGroupBy", new JsonArray());
     json.add("rulesHaving", new JsonArray());
     json.add("rulesOrderBy", new JsonArray());
@@ -194,7 +195,7 @@ public class JPQLConverter {
     allEntities = allEntities.substring(0, allEntities.length() - 2);
     return allEntities;
   }
-  
+
   private static String getCondition(JsonObject cond) {
     StringBuilder sbRules = new StringBuilder();
     String rules = "";
