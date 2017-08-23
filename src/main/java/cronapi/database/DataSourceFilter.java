@@ -49,7 +49,7 @@ public class DataSourceFilter {
           }
           
           if(values.length == 1 && pair.length == 1) {
-            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(pair[0]), type));
+            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(pair[0]), "LIKE"));
             break;
           }
           
