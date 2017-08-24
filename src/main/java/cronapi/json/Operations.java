@@ -15,6 +15,7 @@ import cronapi.Utils;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.database.DataSource;
 
 @CronapiMetaData(category = CategoryType.JSON, categoryTags = { "Json" })
 public class Operations {
@@ -34,6 +35,10 @@ public class Operations {
 		Var value = Var.VAR_NULL;
 		Object obj = mapVar.getObject();
 		Object key = keyVar.getObject();
+
+		if (obj instanceof DataSource) {
+		  obj = ((DataSource) obj).getObject();
+    }
 
 		String[] path = key.toString().split("\\.");
 		for (int i = 0; i < path.length; i++) {
@@ -57,6 +62,10 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBetSet}}") Var value) throws Exception {
 		Object obj = mapVar.getObject();
 		Object key = keyVar.getObject();
+
+    if (obj instanceof DataSource) {
+      obj = ((DataSource) obj).getObject();
+    }
 
 		String[] path = key.toString().split("\\.");
 		for (int i = 0; i < path.length; i++) {

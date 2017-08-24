@@ -62,8 +62,7 @@ public class Operations {
 					"{{fieldName}}", "{{fieldValue}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.VOID)
 	public static void updateField(Var ds, Var fieldName, Var fieldValue) {
-		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
-		((DataSource) ds.getObject()).save();
+		ds.setField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create", "novo",
@@ -85,7 +84,7 @@ public class Operations {
 			@ParamMetaData(blockType = "variables_get", type = ObjectType.OBJECT, description = "{{datasource}}") Var ds,
 		@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) 
 	{
-		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
+		return ds.getField(fieldName.getObjectAsString());
 	}
 	
 	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",

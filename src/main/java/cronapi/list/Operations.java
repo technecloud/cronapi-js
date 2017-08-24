@@ -80,31 +80,27 @@ public class Operations {
   
   public static final Var get(Var list, Var index) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST) {
-      if(index.getObjectAsInt() < 1)
-        index = new Var(1);
-      if(index.getObjectAsInt() > list.size())
-        index = new Var(list.size());
-      if(list.getObjectAsList().get(index.getObjectAsInt() - 1) != Var.VAR_NULL)
-        return new Var(list.getObjectAsList().get(index.getObjectAsInt() - 1));
-    }
+    if(index.getObjectAsInt() < 1)
+      index = new Var(1);
+    if(index.getObjectAsInt() > list.size())
+      index = new Var(list.size());
+    if(list.getObjectAsList().get(index.getObjectAsInt() - 1) != Var.VAR_NULL)
+      return new Var(list.getObjectAsList().get(index.getObjectAsInt() - 1));
     return Var.VAR_NULL;
   }
   
   public static final Var getFromEnd(Var list, Var index) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST) {
-      Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
-      Var item = get(list, i);
-      if(item != Var.VAR_NULL)
-        return new Var(item);
-    }
+    Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
+    Var item = get(list, i);
+    if(item != Var.VAR_NULL)
+      return new Var(item);
     return Var.VAR_NULL;
   }
   
   public static final Var getFirst(Var list) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
+    if(list.getObjectAsList().size() > 0) {
       return new Var(list.getObjectAsList().getFirst());
     }
     return Var.VAR_NULL;
@@ -112,7 +108,7 @@ public class Operations {
   
   public static final Var getLast(Var list) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
+    if(list.getObjectAsList().size() > 0) {
       return new Var(list.getObjectAsList().getLast());
     }
     return Var.VAR_NULL;
@@ -120,7 +116,7 @@ public class Operations {
   
   public static final Var getRandom(Var list) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
+    if(list.getObjectAsList().size() > 0) {
       return cronapi.math.Operations.listRandomItem(list);
     }
     return Var.VAR_NULL;

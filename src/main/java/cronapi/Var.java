@@ -405,6 +405,16 @@ public class Var implements Comparable<Var>, JsonSerializable {
 
     return list;
   }
+  
+  private LinkedList<Var> toList(List list) {
+    LinkedList<Var> myList = new LinkedList<>();
+    for (Object obj : list) {
+      myList.add(Var.valueOf(obj));
+    }
+    
+    return myList;
+  }
+  
   /**
    * Get the object as a list.
    *
@@ -421,6 +431,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return myList;
     } else if (getObject() instanceof List) {
       return (LinkedList<Var>) getObject();
+    } else if (getObject() instanceof DataSource) {
+      return toList(((DataSource) getObject()).getPage().getContent());
     }
 
     return getSingleList(getObject());
@@ -443,7 +455,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
           return map;
         } else {
           ObjectMapper mapper = new ObjectMapper();
-          return (Map) mapper.convertValue(_object, Map.class);
+          if (getObject() instanceof DataSource) {
+            return (Map) mapper.convertValue(((DataSource) getObject()).getObject(), Map.class);
+          } else {
+            return (Map) mapper.convertValue(_object, Map.class);
+          }
         }
       }
     }
