@@ -1,5 +1,7 @@
 package cronapi.database;
 
+import java.util.HashMap;
+
 import cronapi.CronapiMetaData;
 import cronapi.ParamMetaData;
 import cronapi.Var;
@@ -62,12 +64,20 @@ public class Operations {
 					"{{fieldName}}", "{{fieldValue}}" }, paramsType = { ObjectType.DATASET, ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.VOID)
 	public static void updateField(Var ds, Var fieldName, Var fieldValue) {
-		ds.setField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
+		((DataSource) ds.getObject()).updateField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
+		((DataSource) ds.getObject()).save();
+	}
+
+	@CronapiMetaData(type = "function", name = "{{datasourceGetActiveData}}", nameTags = { "getElement", "obterElemento" }, 
+	   description = "{{functionToDatasourceGetActiveData}}", params = {"{{datasource}}" }, paramsType = {
+							ObjectType.DATASET }, returnType = ObjectType.OBJECT)
+	public static Var getActiveData(Var ds) {
+		return new Var(((DataSource) ds.getObject()).getObject());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{datasourceInsert}}", nameTags = { "insert", "create", "novo",
 			"inserir", "criar" }, description = "{{functionToInsertObjectInDatasource}}", params = { "{{datasource}}",
-					"{{paramsInsertTuples}}" }, paramsType = { ObjectType.DATASET,
+					"{{params}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.LIST }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_insert_callnoreturn")
 	public static void insert(Var entity, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
@@ -76,22 +86,52 @@ public class Operations {
 		ds.save();
 	}
 
+	public static void insert(Var entity, Var object) {
+	if (!object.equals(Var.VAR_NULL)) {
+			DataSource ds = new DataSource(entity.getObjectAsString());
+			ds.insert(object.getObjectAsMap());
+			ds.save();
+		}
+	}
+
+	@CronapiMetaData(type = "function", name = "{{update}}", nameTags = { "update", "edit", "editar",
+			"alterar" }, description = "{{functionToUpdateObjectInDatasource}}", params = {
+					"{{datasource}}" , "{{entity}}" }, paramsType = { ObjectType.DATASET,
+							ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_update_callnoreturn")
+	public static void update(Var entity, Var object) {
+		if (!object.equals(Var.VAR_NULL)) {
+			DataSource ds = new DataSource(entity.getObjectAsString());
+			ds.filter(object, null);
+			ds.update(new Var(object.getObjectAsMap()));
+			ds.save();
+		}
+	}
+
+	@CronapiMetaData(type = "function", name = "{{datasourceRemove}}", nameTags = { "remove", "delete", "remover",
+			"deletar", "excluir" }, description = "{{functionToRemoveObject}}", params = {
+					"{{datasource}}" , "{{entity}}"}, paramsType = { ObjectType.DATASET,
+							ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_update_callnoreturn")
+	public static void remove(Var entity, Var object) {
+		if (!object.equals(Var.VAR_NULL)) {
+			DataSource ds = new DataSource(entity.getObjectAsString());
+			ds.filter(object, null);
+			ds.delete();
+		}
+	}
+
 	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
 			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", params = {
 					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
 							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
 	public static Var getField(
 			@ParamMetaData(blockType = "variables_get", type = ObjectType.OBJECT, description = "{{datasource}}") Var ds,
-		@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) 
-	{
-		return ds.getField(fieldName.getObjectAsString());
+			@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) {
+		return new Var(((DataSource) ds.getObject()).getObject(fieldName.getObjectAsString()));
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
-			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}",  
-			returnType = ObjectType.STRING, wizard = "procedures_get_field_datasource")
-	public static Var getFieldFromDatasource() 
-	{
+			"obterCampo" }, description = "{{functionToGetFieldOfCurrentCursorInDatasource}}", returnType = ObjectType.STRING, wizard = "procedures_get_field_datasource")
+	public static Var getFieldFromDatasource() {
 		return Var.VAR_NULL;
 	}
 
@@ -106,7 +146,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceExecuteQuery",
 			"executeCommand", "executarComando" }, description = "{{functionToExecuteQuery}}", params = { "{{entity}}",
 					"{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
-							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_callnoreturn")
+							ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_command_callnoreturn")
 	public static void execute(Var entity, Var query, Var... params) {
 		DataSource ds = new DataSource(entity.getObjectAsString());
 		ds.execute(query.getObjectAsString(), params);
