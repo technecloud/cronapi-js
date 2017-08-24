@@ -48,9 +48,7 @@ public class Operations {
   
   public static final Var size(Var list) throws Exception {
     list = isNull(list);
-    if(list.getType() == Var.Type.LIST)
-      return new Var(list.size());
-    return Var.VAR_ZERO;
+    return Var.valueOf(list.size());
   }
   
   public static final Var isEmpty(Var list) throws Exception {

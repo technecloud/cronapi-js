@@ -549,10 +549,14 @@ public class Var implements Comparable<Var>, JsonSerializable {
       case LIST: {
         return ((LinkedList<Var>) getObject()).size();
       }
-    }
-
-    if (getObject() instanceof Map) {
-      return ((Map) getObject()).size();
+      default: {
+        if (getObject() instanceof Map) {
+          return ((Map) getObject()).size();
+        }
+        else if (getObject() instanceof DataSource) {
+          return  ((DataSource) getObject()).getPage().getContent().size();
+        }
+      }
     }
 
     return 0;
