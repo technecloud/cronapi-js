@@ -1,12 +1,10 @@
 package cronapi.database;
 
-import java.util.HashMap;
-
 import cronapi.CronapiMetaData;
-import cronapi.ParamMetaData;
-import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
+import cronapi.Var;
 
 /**
  * Classe que representa operações de acesso ao banco
