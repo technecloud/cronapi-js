@@ -326,7 +326,7 @@ public class QueryManager {
             String[] roles = permission.get("filter").getAsString().toLowerCase().split(";");
             boolean authorized = false;
             for(String role : roles) {
-              if(role.equalsIgnoreCase("public") && role.equalsIgnoreCase("permitAll")) {
+              if(role.equalsIgnoreCase("public") || role.equalsIgnoreCase("permitAll")) {
                 authorized = true;
                 break;
               }
@@ -382,7 +382,7 @@ public class QueryManager {
 
             authorized = false;
             for(String role : roles) {
-              if(role.equalsIgnoreCase("public") && role.equalsIgnoreCase("permitAll")) {
+              if(role.equalsIgnoreCase("public") || role.equalsIgnoreCase("permitAll")) {
                 authorized = true;
                 break;
               }

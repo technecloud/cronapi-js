@@ -31,10 +31,7 @@ import com.google.gson.JsonElement;
 public class CronapiConfigurator {
   
   public static String ENCODING = "UTF-8";
-  
-  @Autowired
-  private HttpServletRequest request;
-  
+
   @Bean
   public Jackson2ObjectMapperBuilder objectMapperBuilder() {
     Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
@@ -46,7 +43,10 @@ public class CronapiConfigurator {
       
       @Override
       public void serialize(Calendar value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        if("true".equals(request.getHeader("toJS")) || "true".equals(request.getParameter("toJS")))
+        
+        if(RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null &&
+                ("true".equals(RestClient.getRestClient().getRequest().getHeader("toJS")) ||
+                        "true".equals(RestClient.getRestClient().getRequest().getParameter("toJS"))))
           gen.writeRawValue("new Date(\"" + ISO8601Utils.format(value.getTime(), true) + "\")");
         else
           gen.writeString(ISO8601Utils.format(value.getTime(), true));
@@ -64,19 +64,19 @@ public class CronapiConfigurator {
     builder.modulesToInstall(new CronappModule());
     return builder;
   }
-
+  
   @Bean
-  public StringToVarConverter stringToVarConverter(){
+  public StringToVarConverter stringToVarConverter() {
     return new StringToVarConverter();
   }
-
-  @Bean(name="conversionService")
+  
+  @Bean(name = "conversionService")
   public ConversionService getConversionService() {
     ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
     Set<Converter> converters = new HashSet<Converter>();
-
+    
     converters.add(stringToVarConverter());
-
+    
     bean.setConverters(converters);
     return bean.getObject();
   }
