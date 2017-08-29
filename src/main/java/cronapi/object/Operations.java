@@ -34,4 +34,21 @@ public class Operations {
     cronapi.json.Operations.setJsonOrMapField(objVar, keyVar, value);
   }
   
+  @CronapiMetaData(type = "function", name = "{{newObject}}", nameTags = { "newObject",
+      "NovoObjeto" }, description = "{{newObjectDescription}}", params = { "{{object}}", "{{params}}" }, paramsType = {
+          ObjectType.STRING,
+          ObjectType.MAP }, returnType = ObjectType.OBJECT, arbitraryParams = true, wizard = "procedures_createnewobject_callreturn")
+  public static final Var newObject(Var object, Var ... params) throws Exception {
+    if(!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      Var returnObject = new Var((Object)c.newInstance());
+      for(Var param : params) {
+        returnObject.setField(param.getId(), param.getObject());
+      }
+      return returnObject;
+    }
+    return Var.VAR_NULL;
+  }
+  
 }
