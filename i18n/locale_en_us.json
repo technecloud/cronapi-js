@@ -223,5 +223,7 @@
 	"showComponentDesc": "Function that shows a component on screen",
 	"ComponentParam": "Identifier: Component identifier to be showed on screen",
 	"hideComponent": "Hide component",
-	"hideComponentDesc": "Function that hide a component on screen"
+	"hideComponentDesc": "Function that hide a component on screen",
+	"CategoryType.TEXT": "Text",
+  "CategoryType.LOGIC": "Logic"
 }
