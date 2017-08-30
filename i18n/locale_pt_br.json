@@ -224,5 +224,7 @@
 	"showComponentDesc":"Função que exibe um componente da tela",
 	"ComponentParam":"Identificador: Identificador do componente a ser modificado",
 	"hideComponent":"Esconder componente",
-	"hideComponentDesc":"Função que esconde um componente da tela"
+	"hideComponentDesc":"Função que esconde um componente da tela",
+	"searchIds":"Identificador",
+	"searchIdsDescription":"Identificador do campo da tela. Exemplo <div id=meuId /> "
 }
