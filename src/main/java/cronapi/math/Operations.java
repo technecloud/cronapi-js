@@ -170,15 +170,15 @@ public class Operations {
 		Var result;
 		switch (value.getType()) {
 		case DOUBLE: {
-			result = new Var(Math.sqrt(value.getObjectAsDouble()));
+			result = new Var(Math.sqrt(Math.abs(value.getObjectAsDouble())));
 			break;
 		}
 		case INT: {
-			result = new Var(Math.sqrt(value.getObjectAsLong()));
+			result = new Var(Math.sqrt(Math.abs(value.getObjectAsLong())));
 			break;
 		}
 		default: {
-			result = new Var(Math.sqrt(value.getObjectAsInt()));
+			result = new Var(Math.sqrt(Math.abs(value.getObjectAsInt())));
 		}
 		}
 		return result;
