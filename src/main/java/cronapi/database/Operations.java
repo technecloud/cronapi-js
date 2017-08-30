@@ -104,7 +104,7 @@ public class Operations {
   @CronapiMetaData(type = "function", name = "{{datasourceRemove}}", nameTags = { "remove", "delete", "remover",
       "deletar", "excluir" }, description = "{{functionToRemoveObject}}", params = { "{{datasource}}",
           "{{entity}}" }, paramsType = { ObjectType.DATASET,
-              ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_update_callnoreturn")
+              ObjectType.OBJECT }, returnType = ObjectType.VOID, arbitraryParams = true, wizard = "procedures_sql_delete_callnoreturn")
   public static void remove(Var entity, Var object) {
     if(!object.equals(Var.VAR_NULL)) {
       DataSource ds = new DataSource(entity.getObjectAsString());
