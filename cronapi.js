@@ -770,11 +770,10 @@
    * @name {{searchIds}}
    * @nameTags searchIds
    * @description {{searchIdsDescription}}
-   * @param {ObjectType.STRING} id {{searchIdsParam}}
    * @wizard ids_from_screen
    * @multilayer true
    */
-  this.cronapi.screen.searchIds = function(id) {
+  this.cronapi.screen.searchIds = function() {
     
   };
   

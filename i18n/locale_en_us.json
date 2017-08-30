@@ -225,5 +225,7 @@
 	"hideComponent": "Hide component",
 	"hideComponentDesc": "Function that hide a component on screen",
 	"CategoryType.TEXT": "Text",
-  "CategoryType.LOGIC": "Logic"
+  "CategoryType.LOGIC": "Logic",
+  "searchIds":"Identifier",
+	"searchIdsDescription":"Identifier field from screen. Example <div id=myId /> "
 }
