@@ -768,7 +768,6 @@ public class Operations {
 	}
 
 	public static final Var mod(Var value1, Var value2) throws Exception {
-		Var result;
 		boolean isDouble = false;
 		if (value1.getType() == Var.Type.DOUBLE || value2.getType() == Var.Type.DOUBLE)
 			isDouble = true;
@@ -794,5 +793,12 @@ public class Operations {
 		if (value1.getType().equals(Var.Type.DOUBLE) || value2.getType().equals(Var.Type.DOUBLE))
 			return (value1.getObjectAsDouble() >= value2.getObjectAsDouble()) ? value1 : value2;
 		return (value1.getObjectAsInt() >= value2.getObjectAsInt()) ? value1 : value2;
+	}
+
+	public static final Var negate(Var value) throws Exception {
+		if (value.getType().equals(Var.Type.DOUBLE)) {
+			return new Var(value.getObjectAsDouble() * -1);
+		}
+		return new Var(value.getObjectAsLong() * -1);
 	}
 }
