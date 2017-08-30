@@ -765,6 +765,44 @@
    
   };
 
+  /**
+   * @type function
+   * @name {{searchIds}}
+   * @nameTags searchIds
+   * @description {{searchIdsDescription}}
+   * @param {ObjectType.STRING} id {{searchIdsParam}}
+   * @wizard ids_from_screen
+   * @multilayer true
+   */
+  this.cronapi.screen.searchIds = function(id) {
+    
+  };
+  
+  /**
+   * @type function
+   * @name {{showComponent}}
+   * @nameTags showComponent
+   * @description {{showComponentDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.showComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    debugger;
+    $('#'+id).show();
+  };
+  
+  /**
+   * @type function
+   * @name {{hideComponent}}
+   * @nameTags hideComponent
+   * @description {{hideComponentDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.hideComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    debugger;
+    $('#'+id).hide();
+  };
 
   /**
    * @category CategoryType.DATETIME
