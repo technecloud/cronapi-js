@@ -226,7 +226,7 @@
 	"hideComponent":"Esconder componente",
 	"hideComponentDesc":"Função que esconde um componente da tela",
 	"CategoryType.TEXT": "Texto",
-  "CategoryType.LOGIC": "Lógica"
+  "CategoryType.LOGIC": "Lógica",
 	"searchIds":"Identificador",
 	"searchIdsDescription":"Identificador do campo da tela. Exemplo <div id=meuId /> "
 }
