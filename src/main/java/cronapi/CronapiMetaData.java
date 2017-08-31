@@ -14,6 +14,8 @@ public @interface CronapiMetaData {
   
   CategoryType category() default CategoryType.OTHER;
   
+  String categoryName() default "";
+  
   String[] categoryTags() default "";
   
   String name() default "";
