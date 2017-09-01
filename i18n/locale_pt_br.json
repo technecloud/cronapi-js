@@ -228,5 +228,10 @@
 	"CategoryType.TEXT": "Texto",
   "CategoryType.LOGIC": "Lógica",
 	"searchIds":"Identificador",
-	"searchIdsDescription":"Identificador do campo da tela. Exemplo <div id=meuId /> "
+	"searchIdsDescription":"Identificador do campo da tela. Exemplo <div id=meuId /> ",
+	"enableComponent":"Habilitar componente",
+	"enableComponentDesc":"Função que habilita o componente o uso do componente na tela. Exemplo <input disabled=false/>",
+	"disableComponent":"Desabilitar componente",
+	"disableComponentDesc":"Função que desabilita o uso do componente na tela. Exemplo: <input disabled=true />"
+	
 }

@@ -227,5 +227,9 @@
 	"CategoryType.TEXT": "Text",
   "CategoryType.LOGIC": "Logic",
   "searchIds":"Identifier",
-	"searchIdsDescription":"Identifier field from screen. Example <div id=myId /> "
+	"searchIdsDescription":"Identifier field from screen. Example <div id=myId /> ",
+	"enableComponent":"Enable component",
+	"enableComponentDesc":"Function that enable a component from screen. Example: <input disabled=false />",
+	"disableComponent":"Disable component",
+	"disableComponentDesc":"Function that disable a component from screen. Example: <input disabled=true"
 }

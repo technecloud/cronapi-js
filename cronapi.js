@@ -786,7 +786,6 @@
    * @multilayer true
    */
   this.cronapi.screen.showComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    debugger;
     $('#'+id).show();
   };
   
@@ -799,9 +798,33 @@
    * @multilayer true
    */
   this.cronapi.screen.hideComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    debugger;
     $('#'+id).hide();
   };
+  
+  /**
+   * @type function
+   * @name {{disableComponent}}
+   * @nameTags disableComponent
+   * @description {{disableComponentDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    $('#'+id).prop('disabled',true);
+  };
+  
+  /**
+   * @type function
+   * @name {{enableComponent}}
+   * @nameTags enableComponent
+   * @description {{enableComponentDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    $('#'+id).prop('disabled',false);
+  };
+
 
   /**
    * @category CategoryType.DATETIME
