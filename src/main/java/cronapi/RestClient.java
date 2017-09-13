@@ -1,15 +1,22 @@
 package cronapi;
 
-import com.google.gson.JsonObject;
-import cronapi.database.TenantService;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import com.google.gson.JsonObject;
+
+import cronapi.database.TenantService;
 
 public class RestClient {
 
@@ -95,6 +102,8 @@ public class RestClient {
 	}
 
 	public String getMethod() {
+	   if (request == null)
+	      request = CronapiFilter.REQUEST.get();
 		return request.getMethod();
 	}
 
