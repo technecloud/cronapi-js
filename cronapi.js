@@ -379,7 +379,7 @@
 
     var resultData = $.ajax({
       type: 'POST',
-      url: serverUrl,
+      url: (window.hostApp || "") + serverUrl,
       dataType: 'html',
       data : JSON.stringify(dataCall),
       async: false,
