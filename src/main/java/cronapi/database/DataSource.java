@@ -24,11 +24,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.ser.SerializerCache.TypeKey;
 
 import cronapi.RestClient;
 import cronapi.SecurityBeanFilter;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
 
@@ -314,7 +316,17 @@ public class DataSource implements JsonSerializable {
       else
         toSave = this.getObject();
       
-      return em.merge(toSave);
+      Object saved = em.merge(toSave);
+      
+      List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(saved, "dropbox");
+      if (fieldsAnnotationCloud.size() > 0) {
+        String dropAppAccessToken = Utils.getAnnotationCloud(saved, fieldsAnnotationCloud.get(0)).value();
+        CloudManager cloudManager = CloudManager.newInstance().byID("id").toFields(fieldsAnnotationCloud.toArray(new String[0]));
+        cloudManager.byEntity(saved).build().dropbox(dropAppAccessToken).upload();
+      }
+      
+      return saved;
+      
     }
     catch(Exception e) {
       throw new RuntimeException(e);
