@@ -1492,6 +1492,22 @@
     return;
   };
 
+  this.cronapi.internal = {};
+  
+  this.cronapi.internal.setFile = function(field, file) {
+    cronapi.internal.fileToBase64(file, function(base64) { cronapi.screen.changeValueOfField(field, base64); });
+  };
+  
+  this.cronapi.internal.fileToBase64 = function(file, cb) {
+      var fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = function(e) {
+          debugger;
+          var base64Data = e.target.result.substr(e.target.result.indexOf('base64,') + 'base64,'.length);
+          cb(base64Data);
+      };
+  };
+
   //Private variables and functions
   var ptDate = function(varray) {
     var date;
