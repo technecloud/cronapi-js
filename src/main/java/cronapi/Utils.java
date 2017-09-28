@@ -369,18 +369,19 @@ public class Utils {
 	}
 
 	private static final Object getValueByIndex(Object obj, int idx) {
-		try {
-			if (obj instanceof JsonArray)
-				return ((JsonArray) obj).get(idx);
-			else if (obj instanceof java.util.List)
-				return ((List) obj).get(idx);
-			else
-				return ((Object[]) obj)[idx];
-		} catch (Exception e) {
-			//Dont has index, return null
-			return null;
-		}
-	}
+    try {
+      if (obj instanceof JsonArray)
+        return ((JsonArray) obj).get(idx);
+      else if (obj instanceof java.util.List)
+        return ((List) obj).get(idx);
+      else if (obj.getClass().isArray())
+        return ((Object[]) obj)[idx];
+      else
+        return obj;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
 	private static final Object setValueByIndex(Object list, Object valueToSet, int idx) {
 
