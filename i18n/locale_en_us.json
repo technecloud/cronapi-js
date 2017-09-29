@@ -178,6 +178,7 @@
 	"createDefaultModalParam7": "On close: statements executed when close button is clicked on modal",
 	"executeJavascriptNoReturnName": "Execute javascript",
 	"executeJavascriptNoReturnDescription": "Function that execute a javascript",
+	"executeJavascriptReturnDescription":"Function that execute a javascript and return the value",
 	"executeJavascriptNoReturnParam0": "Command:Command to be executed (example: alert('test');).",
 	"newXMLEmptyName": "Create XML",
 	"newXMLEmptyDescription": "Function that create a XML document",
@@ -231,5 +232,28 @@
 	"enableComponent":"Enable component",
 	"enableComponentDesc":"Function that enable a component from screen",
 	"disableComponent":"Disable component",
-	"disableComponentDesc":"Function that disable a component from screen"
+	"disableComponentDesc":"Function that disable a component from screen",
+	"CategoryType.OBJECT" : "Object",
+  "getProperty" : "Get Property",
+  "getPropertyDescription" : "Function to get object property."
+  "object" : "Object,
+  "property" : "Property",
+  "setProperty" : "Set Value",
+  "setPropertyDescription" : "Function to assign value to object."
+  "CategoryType.OBJECT" : "Cordova",
+  "vibrate" : "Vibrate",
+  "vibrateDescription" : "Function to vibrate the mobile device."
+  "getCurrentPosition" : "Get geo-referenced position",
+  "getCurrentPositionDescription" : "Function to obtain geo-referenced position."
+  "success" : "Success",
+  "error" : "Error",
+  "watchPosition" : "Observe Position",
+  "watchPositionDescription" : "Function to observe the change in geo-referenced position.",
+  "maximumAge" : "Maximum Age",
+  "timeout" : "Timeout",
+  "enableHighAccuracy" : "Enable High Accuracy",
+  "getPicture" : "Get Image",
+  "getPictureDescription" : "Function to get an image of the Camera, Gallery, Album of the device.",
+  "destinationType" : "Target type",
+  "pictureSourceType" : "Image Source"
 }

@@ -426,6 +426,18 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.util.executeJavascriptNoReturn = function(value) {
+     eval( value );
+  };
+
+  /**
+   * @type function
+   * @name {{executeJavascriptNoReturnName}}
+   * @nameTags executeJavascriptReturn
+   * @description {{executeJavascriptReturnDescription}}
+   * @param {ObjectType.STRING} value {{executeJavascriptNoReturnParam0}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.executeJavascriptReturn = function(value) {
     return eval( value );
   };
 
@@ -1507,6 +1519,77 @@
           cb(base64Data);
       };
   };
+  
+    this.cronapi.internal.startCamera = function(field, style, width, height) {
+    var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
+                                    <div class="btn btn-success" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-ok"></span>\
+                                    </div>\
+                                    <div class="btn btn-danger" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-remove"></span>\
+                                    </div>\
+                                    <video id="cronapiVideoCapture" style="$style$; height: $height$; width: $width$;" autoplay=""></video>\
+                            </div>';
+    
+    var halfWidth = width;
+    var halfHeight = height;
+    try {
+      halfWidth = parseInt(halfWidth.replace('px','').replace('em'))/2+'px';
+      halfHeight = parseInt(halfHeight.replace('px','').replace('em'))/2+'px';
+    }
+    catch (e) { }
+    
+    cameraContainer = 
+      cameraContainer
+      .split('$height$').join(height)
+      .split('$width$').join(width)
+      .split('$style$').join(style)
+      .split('$marginleft$').join(halfWidth)
+      .split('$margintop$').join(halfHeight)
+      ;
+    
+    var cronapiVideoCapture = $(cameraContainer);
+    cronapiVideoCapture.prependTo("body");
+    var streaming = null;
+    
+    cronapiVideoCapture.find('#cronapiVideoCaptureCancel').on('click',function() {
+       if (streaming!= null && streaming.getTracks().length > 0)
+          streaming.getTracks()[0].stop();
+       $(cronapiVideoCapture).remove();
+    });
+    
+    cronapiVideoCapture.find('#cronapiVideoCaptureOk').on('click',function() {
+       cronapi.internal.captureFromCamera(field);
+       if (streaming!= null && streaming.getTracks().length > 0)
+          streaming.getTracks()[0].stop();
+       $(cronapiVideoCapture).remove();
+    });
+    
+    var mediaConfig =  { video: true };
+    var errBack = function(e) {
+    	console.log('An error has occurred!', e)
+    };
+    var videoDOM = document.getElementById('cronapiVideoCapture');
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+            streaming = stream;
+            videoDOM.src = window.URL.createObjectURL(stream);
+            videoDOM.play();
+        });
+    }
+  }; 
+   
+  this.cronapi.internal.captureFromCamera = function(field) {
+    var canvas = document.createElement("canvas"); // create img tag
+    canvas.width = 320;
+    canvas.height = 240;
+    var context = canvas.getContext('2d');
+    var videoDOM = document.getElementById('cronapiVideoCapture');
+		context.drawImage(videoDOM, 0, 0, 320, 240);
+		var base64 = canvas.toDataURL().substr(22);
+		cronapi.screen.changeValueOfField(field, base64);
+  };
+  
   
   /**
  * @category CategoryType.OBJECT
