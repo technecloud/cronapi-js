@@ -439,16 +439,8 @@ public class DataSource implements JsonSerializable {
    * @thows RuntimeException if a field is not accessible through a set method
    */
   public void updateFields(Var ... fields) {
-    try {
-      for(Var field : fields) {
-        Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
-        if(setMethod != null) {
-          setMethod.invoke(getObject(), field.getObject());
-        }
-      }
-    }
-    catch(Exception ex) {
-      throw new RuntimeException(ex);
+    for(Var field : fields) {
+      updateField(field.getId(), field.getObject());
     }
   }
   
