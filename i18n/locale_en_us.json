@@ -178,6 +178,7 @@
 	"createDefaultModalParam7": "On close: statements executed when close button is clicked on modal",
 	"executeJavascriptNoReturnName": "Execute javascript",
 	"executeJavascriptNoReturnDescription": "Function that execute a javascript",
+	"executeJavascriptReturnDescription":"Function that execute a javascript and return the value",
 	"executeJavascriptNoReturnParam0": "Command:Command to be executed (example: alert('test');).",
 	"newXMLEmptyName": "Create XML",
 	"newXMLEmptyDescription": "Function that create a XML document",

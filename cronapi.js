@@ -420,12 +420,12 @@
   /**
    * @type function
    * @name {{executeJavascriptNoReturnName}}
-   * @nameTags executeJavascriptNoReturn
-   * @description {{executeJavascriptNoReturnDescription}}
+   * @nameTags executeJavascriptReturn
+   * @description {{executeJavascriptReturnDescription}}
    * @param {ObjectType.STRING} value {{executeJavascriptNoReturnParam0}}
    * @returns {ObjectType.STRING}
    */
-  this.cronapi.util.executeJavascriptNoReturn = function(value) {
+  this.cronapi.util.executeJavascriptReturn = function(value) {
     return eval( value );
   };
 
