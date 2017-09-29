@@ -1064,7 +1064,7 @@
     var dd = dateVar.getDate();
     var mm = dateVar.getMonth() + 1;
     var yyyy = dateVar.getFullYear();
-    var	separator = '';
+    var separator = '';
     var maskChars = 'dmy';
     for (var i = 0; i < format.length; i++) {
       if (!maskChars.includes(format.toLowerCase().charAt(i))) {
@@ -1507,7 +1507,128 @@
           cb(base64Data);
       };
   };
+  
+  /**
+ * @category CategoryType.OBJECT
+ * @categoryTags OBJECT|object
+ */
+this.cronapi.object = {};
 
+  /**
+ *  @type function
+  * @name {{getProperty}}
+  * @nameTags getProperty
+  * @param {ObjectType.OBJECT} object {{object}}
+  * @param {ObjectType.STRING} property {{property}}
+  * @description {{getPropertyDescription}}
+  * @returns {ObjectType.OBJECT}
+ */
+ this.cronapi.object.getProperty = function(object, property) {
+   var split = property.split('.');
+   for (var i = 0; i < split.length; i++){ 
+     object = object[split[i]];
+   }
+   return object;
+ }
+ 
+  /**
+ *  @type function
+  * @name {{setProperty}}
+  * @nameTags setProperty
+  * @param {ObjectType.OBJECT} object {{object}}
+  * @param {ObjectType.STRING} property {{property}}
+  * @param {ObjectType.OBJECT} value {{property}} 
+  * @description {{setPropertyDescription}}
+  * @returns {ObjectType.VOID}
+ */
+ this.cronapi.object.setProperty = function(object, property, value) {
+   var split = property.split('.');
+   for (var i = 0; i < split.length; i++){ 
+     object = object[split[i]];
+   }
+   object = value;
+ }  
+  
+ /**
+  * @category CategoryType.CORDOVA
+  * @categoryTags CORDOVA|cordova
+  */
+ this.cronapi.cordova = {};
+
+ /**
+  *  @type function
+   * @name {{vibrate}}
+   * @platform M
+   * @nameTags vibrate
+   * @param {ObjectType.LONG} value {{seconds}}
+   * @description {{vibrateDescription}}
+   * @returns {ObjectType.VOID}
+  */
+ this.cronapi.cordova.vibrate = function(value){
+   navigator.vibrate(value*1000);
+ }
+ 
+ this.cronapi.cordova.geolocation = {};
+ 
+   /**
+  *  @type function
+   * @platform M
+   * @name {{getCurrentPosition}}
+   * @nameTags geolocation|getCurrentPosition
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @description {{getCurrentPositionDescription}}
+   * @returns {ObjectType.VOID}
+  */
+ this.cronapi.cordova.geolocation.getCurrentPosition = function(success, error){
+   navigator.geolocation.getCurrentPosition(success, error);
+ }
+ 
+     /**
+  *  @type function
+   * @platform M
+   * @name {{watchPosition}}
+   * @nameTags geolocation|watchPosition
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @param {ObjectType.LONG} maximumAge {{maximumAge}}
+   * @param {ObjectType.LONG} timeout {{timeout}}
+   * @param {ObjectType.BOOLEAN} enableHighAccuracy {{enableHighAccuracy}}
+   * @description {{watchPositionDescription}}
+   * @returns {ObjectType.LONG}
+  */
+ this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
+  return navigator.geolocation.watchPosition(callbackSuccess, callbackError, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
+ }
+ 
+     /**
+  *  @type function
+   * @platform M
+   * @name {{clearWatch}}
+   * @nameTags geolocation|clearWatch
+   * @param {ObjectType.LONG} watchID {{watchID}}
+   * @description {{clearWatchDescription}}
+   * @returns {ObjectType.VOID}
+  */
+ this.cronapi.cordova.geolocation.clearWatch = function(watchID){
+   navigator.geolocation.clearWatch(watchID);
+ }
+ 
+ this.cronapi.cordova.camera = {};
+ 
+ /**
+   * @type function
+   * @platform M
+   * @name {{getPicture}}
+   * @nameTags geolocation|getPicture
+   * @description {{getPictureDescription}}
+   * @returns {ObjectType.VOID}
+  */
+  
+ this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description success */ success, /** @type {ObjectType.STATEMENTSENDER} @description error */  error, /** @type {ObjectType.LONG} @description destinationType @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description pictureSourceType @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
+   navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
+ } 
+ 
   //Private variables and functions
   var ptDate = function(varray) {
     var date;
