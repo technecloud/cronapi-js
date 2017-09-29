@@ -30,6 +30,7 @@ import cronapi.RestClient;
 import cronapi.SecurityBeanFilter;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
@@ -294,11 +295,33 @@ public class DataSource implements JsonSerializable {
     return save(true);
   }
   
+  private void processCloudFields() {
+    Object toSave;
+    if(this.insertedElement != null) 
+      toSave = this.insertedElement;
+    else
+      toSave = this.getObject();
+    
+    List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave, "dropbox");
+    List<String> fieldsIds = Utils.getFieldsWithAnnotationId(toSave);
+    if (fieldsAnnotationCloud.size() > 0) {
+      
+      String dropAppAccessToken = Utils.getAnnotationCloud(toSave, fieldsAnnotationCloud.get(0)).value();
+      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toFields(fieldsAnnotationCloud.toArray(new String[0]));
+      CloudFactory factory = cloudManager.byEntity(toSave).build();
+      factory.dropbox(dropAppAccessToken).upload();
+      factory.getFiles().forEach(f-> {
+        updateField(toSave, f.getFieldReference(), f.getFileDirectUrl());
+      });
+    }
+  }
+  
   /**
    * Saves the object in the current index or a new object when has insertedElement
    */
   public Object save(boolean returnCursorAfterInsert) {
     try {
+      processCloudFields();
       Object toSave;
       EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
@@ -317,14 +340,6 @@ public class DataSource implements JsonSerializable {
         toSave = this.getObject();
       
       Object saved = em.merge(toSave);
-      
-      List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(saved, "dropbox");
-      if (fieldsAnnotationCloud.size() > 0) {
-        String dropAppAccessToken = Utils.getAnnotationCloud(saved, fieldsAnnotationCloud.get(0)).value();
-        CloudManager cloudManager = CloudManager.newInstance().byID("id").toFields(fieldsAnnotationCloud.toArray(new String[0]));
-        cloudManager.byEntity(saved).build().dropbox(dropAppAccessToken).upload();
-      }
-      
       return saved;
       
     }

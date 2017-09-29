@@ -4,13 +4,15 @@
  */
 package cronapi.cloud;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLConnection;
 import java.util.ArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class CloudManager {
 
@@ -50,24 +52,59 @@ public final class CloudManager {
 			for (String fieldName : fieldNames) {
 				Field field = aClass.getDeclaredField(fieldName);
 				field.setAccessible(true);
-				Object value = field.get(sourceObject);
-				if (value instanceof byte[])
+				Object valueField = field.get(sourceObject);
+				Object value = null;
+				if (valueField instanceof String && isBase64Encoded((String)valueField))
+				  value = java.util.Base64.getDecoder().decode(((String) valueField).getBytes("UTF-8"));
+				else
+				  value = valueField;
+
+				if (value instanceof byte[]) {
 					fileContent = new ByteArrayInputStream((byte[]) value);
-				String filePath = aClass.getSimpleName().concat("/").concat(field.getName()).concat("/");
-				String identify = "";
-				for (String id : ids) {
-					if (!identify.isEmpty())
-						identify = identify.concat("-");
-					Field declaredId = aClass.getDeclaredField(id);
-					declaredId.setAccessible(true);
-					identify = identify.concat(id).concat("-").concat(String.valueOf(declaredId.get(sourceObject)));
+					String fileExtension = getExtensionFromContent(fileContent);
+
+					String filePath = aClass.getSimpleName().concat("/").concat(field.getName()).concat("/");
+					String identify = "";
+					for (String id : ids) {
+						if (!identify.isEmpty())
+							identify = identify.concat("-");
+						Field declaredId = aClass.getDeclaredField(id);
+						declaredId.setAccessible(true);
+						identify = identify.concat(id).concat("-").concat(String.valueOf(declaredId.get(sourceObject)));
+					}
+					identify = identify.concat(".").concat(fileExtension);
+					files.add(new FileObject("/".concat(filePath).concat(identify), fieldName, fileContent));
 				}
-				files.add(new FileObject("/".concat(filePath).concat(identify), fileContent));
+
+				// field.set(sourceObject, arg1))
 			}
-		} catch (NoSuchFieldException | IllegalAccessException e) {
+		} catch (NoSuchFieldException | IllegalAccessException | UnsupportedEncodingException e) {
 			log.error(e.getMessage());
 		}
 		return new CloudFactory(files);
 	}
+
+	private String getExtensionFromContent(InputStream fileContent) {
+		String contentType = "image/png";
+		try {
+			contentType = URLConnection.guessContentTypeFromStream(fileContent);
+		} catch (Exception e) {
+			//Não conseguiu identificar o tipo de arquivo
+		}
+		String fileExtension = "png";
+		if (contentType.contains("/"))
+			fileExtension = contentType.split("/")[1];
+		return fileExtension;
+	}
+	
+	private boolean isBase64Encoded(String value)
+    {
+        try {
+            byte[] decodedString = java.util.Base64.getDecoder().decode((value).getBytes("UTF-8"));
+            return (value.replace(" ","").length()  % 4 == 0);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }

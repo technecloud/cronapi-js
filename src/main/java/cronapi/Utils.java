@@ -184,9 +184,30 @@ public class Utils {
 				for (int i = 0; i < fieldAnnots.length; i++) {
 					if (fieldAnnots[i].toString().contains("CronapiCloud")) {
 						CronapiCloud ann = ((CronapiCloud) fieldAnnots[i]);
-						if (ann.type()!=null && "dropbox".equals(ann.type().toLowerCase().trim())) {
-						  fields.add(field.getName());
+						if (ann.type() != null && "dropbox".equals(ann.type().toLowerCase().trim())) {
+							fields.add(field.getName());
 						}
+					}
+				}
+			}
+		}
+		return fields;
+	}
+
+	public static List<String> getFieldsWithAnnotationId(Object obj) {
+		List<String> fields = new ArrayList<String>();
+		Class<?> c = obj.getClass();
+
+		Field[] fieldsArr = c.getDeclaredFields();
+		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
+
+		for (Field field : allFields) {
+			if (field.getDeclaredAnnotations().length > 0) {
+				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+
+				for (int i = 0; i < fieldAnnots.length; i++) {
+					if (fieldAnnots[i].toString().contains("@javax.persistence.Id(")) {
+						fields.add(field.getName());
 					}
 				}
 			}
@@ -215,7 +236,7 @@ public class Utils {
 
 	public static Object getFieldValue(Object obj, String fieldName) {
 		try {
-		  fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1); 
+			fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 			Method getMethod = findMethod(obj, "get" + fieldName);
 			Object result = getMethod.invoke(obj, new Object[] {});
 			return result;
