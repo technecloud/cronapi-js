@@ -236,7 +236,7 @@
 	"CategoryType.OBJECT" : "Object",
   "getProperty" : "Get Property",
   "getPropertyDescription" : "Function to get object property.",
-  "object" : "Object,
+  "object" : "Object",
   "property" : "Property",
   "setProperty" : "Set Value",
   "setPropertyDescription" : "Function to assign value to object.",

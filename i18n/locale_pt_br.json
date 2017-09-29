@@ -237,7 +237,7 @@
   "CategoryType.OBJECT" : "Objeto",
   "getProperty" : "Obter Propriedade",
   "getPropertyDescription" : "Função para obter a propriedade do objeto.",
-  "object" : "Objeto,
+  "object" : "Objeto",
   "property" : "Propriedade",
   "setProperty" : "Atribuir valor",
   "setPropertyDescription" : "Função para atribuir o valor ao objeto",
