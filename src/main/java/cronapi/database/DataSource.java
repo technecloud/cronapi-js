@@ -24,11 +24,14 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.ser.SerializerCache.TypeKey;
 
 import cronapi.RestClient;
 import cronapi.SecurityBeanFilter;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.cloud.CloudFactory;
+import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
 
@@ -292,11 +295,33 @@ public class DataSource implements JsonSerializable {
     return save(true);
   }
   
+  private void processCloudFields() {
+    Object toSave;
+    if(this.insertedElement != null) 
+      toSave = this.insertedElement;
+    else
+      toSave = this.getObject();
+    
+    List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave, "dropbox");
+    List<String> fieldsIds = Utils.getFieldsWithAnnotationId(toSave);
+    if (fieldsAnnotationCloud.size() > 0) {
+      
+      String dropAppAccessToken = Utils.getAnnotationCloud(toSave, fieldsAnnotationCloud.get(0)).value();
+      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toFields(fieldsAnnotationCloud.toArray(new String[0]));
+      CloudFactory factory = cloudManager.byEntity(toSave).build();
+      factory.dropbox(dropAppAccessToken).upload();
+      factory.getFiles().forEach(f-> {
+        updateField(toSave, f.getFieldReference(), f.getFileDirectUrl());
+      });
+    }
+  }
+  
   /**
    * Saves the object in the current index or a new object when has insertedElement
    */
   public Object save(boolean returnCursorAfterInsert) {
     try {
+      processCloudFields();
       Object toSave;
       EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
@@ -314,7 +339,9 @@ public class DataSource implements JsonSerializable {
       else
         toSave = this.getObject();
       
-      return em.merge(toSave);
+      Object saved = em.merge(toSave);
+      return saved;
+      
     }
     catch(Exception e) {
       throw new RuntimeException(e);
@@ -412,16 +439,8 @@ public class DataSource implements JsonSerializable {
    * @thows RuntimeException if a field is not accessible through a set method
    */
   public void updateFields(Var ... fields) {
-    try {
-      for(Var field : fields) {
-        Method setMethod = Utils.findMethod(getObject(), "set" + field.getId());
-        if(setMethod != null) {
-          setMethod.invoke(getObject(), field.getObject());
-        }
-      }
-    }
-    catch(Exception ex) {
-      throw new RuntimeException(ex);
+    for(Var field : fields) {
+      updateField(field.getId(), field.getObject());
     }
   }
   

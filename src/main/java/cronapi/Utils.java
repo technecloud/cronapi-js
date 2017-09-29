@@ -17,19 +17,21 @@ import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
 
-import cronapi.database.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -41,7 +43,9 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
+import org.hibernate.validator.internal.util.privilegedactions.GetDeclaredMethod;
 
 /**
  * Classe que representa ...
@@ -155,13 +159,88 @@ public class Utils {
 	}
 
 	public static Method findMethod(Object obj, String method) {
-		if(obj == null)
+		if (obj == null)
 			return null;
 		Method[] methods = obj instanceof Class ? ((Class) obj).getMethods() : obj.getClass().getMethods();
 		for (Method m : methods) {
 			if (m.getName().equalsIgnoreCase(method)) {
 				return m;
 			}
+		}
+		return null;
+	}
+
+	public static List<String> getFieldsWithAnnotationCloud(Object obj, String type) {
+		List<String> fields = new ArrayList<String>();
+		Class<?> c = obj.getClass();
+
+		Field[] fieldsArr = c.getDeclaredFields();
+		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
+
+		for (Field field : allFields) {
+			if (field.getDeclaredAnnotations().length > 0) {
+				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+
+				for (int i = 0; i < fieldAnnots.length; i++) {
+					if (fieldAnnots[i].toString().contains("CronapiCloud")) {
+						CronapiCloud ann = ((CronapiCloud) fieldAnnots[i]);
+						if (ann.type() != null && "dropbox".equals(ann.type().toLowerCase().trim())) {
+							fields.add(field.getName());
+						}
+					}
+				}
+			}
+		}
+		return fields;
+	}
+
+	public static List<String> getFieldsWithAnnotationId(Object obj) {
+		List<String> fields = new ArrayList<String>();
+		Class<?> c = obj.getClass();
+
+		Field[] fieldsArr = c.getDeclaredFields();
+		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
+
+		for (Field field : allFields) {
+			if (field.getDeclaredAnnotations().length > 0) {
+				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+
+				for (int i = 0; i < fieldAnnots.length; i++) {
+					if (fieldAnnots[i].toString().contains("@javax.persistence.Id(")) {
+						fields.add(field.getName());
+					}
+				}
+			}
+		}
+		return fields;
+	}
+
+	public static CronapiCloud getAnnotationCloud(Object obj, String fieldName) {
+		Class<?> c = obj.getClass();
+		CronapiCloud result = null;
+		try {
+			Field field = c.getDeclaredField(fieldName);
+			if (field.getDeclaredAnnotations().length > 0) {
+				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+				for (int i = 0; i < fieldAnnots.length; i++) {
+					if (fieldAnnots[i].toString().contains("CronapiCloud")) {
+						result = ((CronapiCloud) fieldAnnots[i]);
+						break;
+					}
+				}
+			}
+		} catch (Exception e) {
+		}
+		return result;
+	}
+
+	public static Object getFieldValue(Object obj, String fieldName) {
+		try {
+			fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+			Method getMethod = findMethod(obj, "get" + fieldName);
+			Object result = getMethod.invoke(obj, new Object[] {});
+			return result;
+		} catch (Exception e) {
 		}
 		return null;
 	}
@@ -273,15 +352,15 @@ public class Utils {
 	}
 
 	private static final Object getValueByKey(Object obj, String key) {
-	  if (key.equals("this"))
-	    return obj;
+		if (key.equals("this"))
+			return obj;
 
 		if (obj instanceof JsonObject)
 			return ((JsonObject) obj).get(key);
 		else if (obj instanceof java.util.Map)
 			return ((Map) obj).get(key);
-    else if (obj instanceof DataSource)
-      return ((DataSource) obj).getObject(key);
+		else if (obj instanceof DataSource)
+			return ((DataSource) obj).getObject(key);
 		else
 			return getFieldReflection(obj, key);
 	}
@@ -311,18 +390,19 @@ public class Utils {
 	}
 
 	private static final Object getValueByIndex(Object obj, int idx) {
-		try {
-			if (obj instanceof JsonArray)
-				return ((JsonArray) obj).get(idx);
-			else if (obj instanceof java.util.List)
-				return ((List) obj).get(idx);
-			else
-				return ((Object[]) obj)[idx];
-		} catch (Exception e) {
-			//Dont has index, return null
-			return null;
-		}
-	}
+    try {
+      if (obj instanceof JsonArray)
+        return ((JsonArray) obj).get(idx);
+      else if (obj instanceof java.util.List)
+        return ((List) obj).get(idx);
+      else if (obj.getClass().isArray())
+        return ((Object[]) obj)[idx];
+      else
+        return obj;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
 	private static final Object setValueByIndex(Object list, Object valueToSet, int idx) {
 
@@ -359,8 +439,7 @@ public class Utils {
 				else if (val instanceof String)
 					((JsonArray) list).add((String) val);
 			}
-		} 
-		else if (list instanceof java.util.List) {
+		} else if (list instanceof java.util.List) {
 			if (idx <= (((List) list).size() - 1))
 				((List) list).set(idx, val);
 			else {
@@ -370,26 +449,25 @@ public class Utils {
 				}
 				((List) list).add(val);
 			}
-		}
-		else {
-		  if (idx <= ((Object[]) list).length - 1)
-		    ((Object[]) list)[idx] = val;
-		  else {
-		    ArrayList<Object> tempToArray = new ArrayList<Object>();
-		    for (int i = 0; i < ((Object[]) list).length; i++)
-		      tempToArray.add(((Object[]) list)[i]);
-		      
-		    for (int i = 0; i < idx; i++) {
+		} else {
+			if (idx <= ((Object[]) list).length - 1)
+				((Object[]) list)[idx] = val;
+			else {
+				ArrayList<Object> tempToArray = new ArrayList<Object>();
+				for (int i = 0; i < ((Object[]) list).length; i++)
+					tempToArray.add(((Object[]) list)[i]);
+
+				for (int i = 0; i < idx; i++) {
 					if (i >= tempToArray.size())
 						tempToArray.add(null);
 				}
 				tempToArray.add(val);
-				Object newArray = java.lang.reflect.Array.newInstance( val.getClass(), tempToArray.size());
+				Object newArray = java.lang.reflect.Array.newInstance(val.getClass(), tempToArray.size());
 				for (int i = 0; i < tempToArray.size(); i++) {
-				  java.lang.reflect.Array.set(newArray, i, tempToArray.get(i)); 
+					java.lang.reflect.Array.set(newArray, i, tempToArray.get(i));
 				}
 				return newArray;
-		  }
+			}
 		}
 		return null;
 	}
@@ -417,12 +495,12 @@ public class Utils {
 		} else if (obj instanceof java.util.Map) {
 			((Map) obj).put(key, valueToSet);
 		} else if (obj instanceof DataSource) {
-      ((DataSource) obj).updateField(key, valueToSet);
+			((DataSource) obj).updateField(key, valueToSet);
 		} else {
 			setValueInObjByReflection(obj, key, valueToSet);
 		}
 	}
-	
+
 	private static final void setValueInObjByReflection(Object obj, String key, Object valueToSet) {
 		try {
 			String keyWithSet = String.format("set%s", Character.toUpperCase(key.charAt(0)));
@@ -564,9 +642,8 @@ public class Utils {
 				if (i == indexes.size() - 1) {
 					Object result = setValueByIndex(o, valueToSet, Integer.parseInt(idx));
 					if (result != null) //Se for array, irá gerar um novo array e retornar
-					  setValueInObj(obj, key, result);
-				}
-				else
+						setValueInObj(obj, key, result);
+				} else
 					value = getValueByIndex(o, Integer.parseInt(idx));
 			}
 		}

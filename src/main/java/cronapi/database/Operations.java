@@ -119,7 +119,7 @@ public class Operations {
               ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
   public static Var getField(@ParamMetaData(blockType = "variables_get", type = ObjectType.OBJECT, description = "{{datasource}}") Var ds,
                              @ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) {
-    return new Var(((DataSource)ds.getObject()).getObject(fieldName.getObjectAsString()));
+    return ds.getField(fieldName.getObjectAsString());
   }
   
   @CronapiMetaData(type = "function", name = "{{datasourceGetField}}", nameTags = { "getField",
