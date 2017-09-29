@@ -1633,8 +1633,8 @@ this.cronapi.object = {};
  }  
   
  /**
-  * @category CategoryType.CORDOVA
-  * @categoryTags CORDOVA|cordova
+  * @category CategoryType.DEVICE
+  * @categoryTags CORDOVA|cordova|Dispositivos|device|Device|Dispositivos
   */
  this.cronapi.cordova = {};
 

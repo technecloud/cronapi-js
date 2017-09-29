@@ -236,26 +236,25 @@
 	"disableComponentDesc":"Função que desabilita o uso do componente na tela",
   "CategoryType.OBJECT" : "Objeto",
   "getProperty" : "Obter Propriedade",
-  "getPropertyDescription" : "Função para obter a propriedade do objeto."
+  "getPropertyDescription" : "Função para obter a propriedade do objeto.",
   "object" : "Objeto,
   "property" : "Propriedade",
   "setProperty" : "Atribuir valor",
-  "setPropertyDescription" : "Função para atribuir o valor ao objeto"
-  "CategoryType.OBJECT" : "Cordova",
+  "setPropertyDescription" : "Função para atribuir o valor ao objeto",
+  "CategoryType.DEVICE" : "Dispositivos Móveis",
   "vibrate" : "Vibrar",
-  "vibrateDescription" : "Função para vibrar o dispositivo móvel."
+  "vibrateDescription" : "Função para vibrar o dispositivo móvel.",
   "getCurrentPosition" : "Obter Georreferenciamento",
-  "getCurrentPositionDescription" : "Função para obter a posição georreferenciada."
+  "getCurrentPositionDescription" : "Função para obter a posição georreferenciada.",
   "success" : "Sucesso",
   "error" : "Erro",
   "watchPosition" : "Observar Posição",
   "watchPositionDescription" : "Função para ficar observando a alteração da posição georreferenciada",
-  "maximumAge" : "maximumAge",
-  "timeout" : "timeout",
-  "enableHighAccuracy" : "enableHighAccuracy",
+  "maximumAge" : "Tempo Máximo",
+  "timeout" : "Intervalo",
+  "enableHighAccuracy" : "Habilitar Alta Precisão",
   "getPicture" : "Obter Imagem",
   "getPictureDescription" : "Função para obter uma imagem da Camera, Galeria, Album do dispositivo.",
   "destinationType" : "Tipo de destino",
   "pictureSourceType" : "Fonte da imagem"
-	
 }
