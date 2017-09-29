@@ -1567,7 +1567,7 @@
     
     var mediaConfig =  { video: true };
     var errBack = function(e) {
-    	console.log('An error has occurred!', e)
+      console.log('An error has occurred!', e)
     };
     var videoDOM = document.getElementById('cronapiVideoCapture');
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1585,9 +1585,9 @@
     canvas.height = 240;
     var context = canvas.getContext('2d');
     var videoDOM = document.getElementById('cronapiVideoCapture');
-		context.drawImage(videoDOM, 0, 0, 320, 240);
-		var base64 = canvas.toDataURL().substr(22);
-		cronapi.screen.changeValueOfField(field, base64);
+    context.drawImage(videoDOM, 0, 0, 320, 240);
+    var base64 = canvas.toDataURL().substr(22);
+    cronapi.screen.changeValueOfField(field, base64);
   };
   
   
@@ -1678,7 +1678,7 @@ this.cronapi.object = {};
    * @param {ObjectType.LONG} timeout {{timeout}}
    * @param {ObjectType.BOOLEAN} enableHighAccuracy {{enableHighAccuracy}}
    * @description {{watchPositionDescription}}
-   * @returns {ObjectType.LONG}
+   * @returns {ObjectType.STRING}
   */
  this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
   return navigator.geolocation.watchPosition(callbackSuccess, callbackError, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
@@ -1689,7 +1689,7 @@ this.cronapi.object = {};
    * @platform M
    * @name {{clearWatch}}
    * @nameTags geolocation|clearWatch
-   * @param {ObjectType.LONG} watchID {{watchID}}
+   * @param {ObjectType.STRING} watchID {{searchIds}}
    * @description {{clearWatchDescription}}
    * @returns {ObjectType.VOID}
   */
@@ -1708,7 +1708,7 @@ this.cronapi.object = {};
    * @returns {ObjectType.VOID}
   */
   
- this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description success */ success, /** @type {ObjectType.STATEMENTSENDER} @description error */  error, /** @type {ObjectType.LONG} @description destinationType @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description pictureSourceType @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
+ this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
    navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
  } 
  
