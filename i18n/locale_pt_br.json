@@ -258,5 +258,9 @@
   "destinationType" : "Tipo de destino",
   "pictureSourceType" : "Fonte da imagem",
   "seconds" : "Segundos",
-  "clearWatch" : "Parar Observador"
+  "clearWatch" : "Parar Observador",
+  "idsFromScreen":"Obter identificador: Identificador (id) a ser obtido do Formulário selecionado",
+  "attrName":"Nome do atributo: Nome do atributo contido no Identificador. Exemplo:  src='teste' retorna src",
+  "attrValue":"Valor do atributo: Valor do atributo contido no Identificador. Exemplo:  src='teste' retorna teste"
+  
 }

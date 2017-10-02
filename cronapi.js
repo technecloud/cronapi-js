@@ -836,7 +836,20 @@
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
     $.each( $('#input').find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
   };
-
+  
+  /**
+   * @type function
+   * @name {{changeAttrValueName}}
+   * @nameTags changeAttrValue
+   * @description {{changeAttrValueDesc}}
+   * @param {ObjectType.STRING} id {{idsFromScreen}}
+   * @param {ObjectType.STRING} attrName {{attrName}}
+   * @param {ObjectType.STRING} attrValue {{attrValue}}
+   * @multilayer true
+   */
+  this.cronapi.screen.changeAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName, /** @type {ObjectType.STRING} */ attrValue ) {
+    $('#'+id).attr(attrName , attrValue);
+  };
 
   /**
    * @category CategoryType.DATETIME
