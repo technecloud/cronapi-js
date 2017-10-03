@@ -99,12 +99,14 @@ public final class CloudManager {
 	
 	private boolean isBase64Encoded(String value)
     {
-        try {
-            byte[] decodedString = java.util.Base64.getDecoder().decode((value).getBytes("UTF-8"));
-            return (value.replace(" ","").length()  % 4 == 0);
-        } catch (Exception e) {
-            return false;
-        }
+      if (value == null || value.isEmpty())
+        return false;
+      try {
+          byte[] decodedString = java.util.Base64.getDecoder().decode((value).getBytes("UTF-8"));
+          return (value.replace(" ","").length()  % 4 == 0);
+      } catch (Exception e) {
+          return false;
+      }
     }
 
 }
