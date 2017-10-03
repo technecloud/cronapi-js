@@ -1631,125 +1631,311 @@
   
   
   /**
- * @category CategoryType.OBJECT
- * @categoryTags OBJECT|object
- */
+   * @category CategoryType.OBJECT
+   * @categoryTags OBJECT|object
+   */
   this.cronapi.object = {};
 
-  /**
- *  @type function
-  * @name {{getProperty}}
-  * @nameTags getProperty
-  * @param {ObjectType.OBJECT} object {{object}}
-  * @param {ObjectType.STRING} property {{property}}
-  * @description {{getPropertyDescription}}
-  * @returns {ObjectType.OBJECT}
- */
- this.cronapi.object.getProperty = function(object, property) {
-   var split = property.split('.');
-   for (var i = 0; i < split.length; i++){ 
-     object = object[split[i]];
-   }
-   return object;
- }
- 
-  /**
- *  @type function
-  * @name {{setProperty}}
-  * @nameTags setProperty
-  * @param {ObjectType.OBJECT} object {{object}}
-  * @param {ObjectType.STRING} property {{property}}
-  * @param {ObjectType.OBJECT} value {{property}} 
-  * @description {{setPropertyDescription}}
-  * @returns {ObjectType.VOID}
- */
- this.cronapi.object.setProperty = function(object, property, value) {
-   var split = property.split('.');
-   for (var i = 0; i < split.length; i++){ 
-     object = object[split[i]];
-   }
-   object = value;
- }  
-  
- /**
-  * @category CategoryType.DEVICE
-  * @categoryTags CORDOVA|cordova|Dispositivos|device|Device|Dispositivos
-  */
- this.cronapi.cordova = {};
-
- /**
-  *  @type function
-   * @name {{vibrate}}
-   * @platform M
-   * @nameTags vibrate
-   * @param {ObjectType.LONG} value {{seconds}}
-   * @description {{vibrateDescription}}
-   * @returns {ObjectType.VOID}
-  */
- this.cronapi.cordova.vibrate = function(value){
-   navigator.vibrate(value*1000);
- }
- 
- this.cronapi.cordova.geolocation = {};
- 
+    /**
+   *  @type function
+    * @name {{getProperty}}
+    * @nameTags getProperty
+    * @param {ObjectType.OBJECT} object {{object}}
+    * @param {ObjectType.STRING} property {{property}}
+    * @description {{getPropertyDescription}}
+    * @returns {ObjectType.OBJECT}
+   */
+   this.cronapi.object.getProperty = function(object, property) {
+     var split = property.split('.');
+     for (var i = 0; i < split.length; i++){ 
+       object = object[split[i]];
+     }
+     return object;
+   };
+   
+    /**
+   *  @type function
+    * @name {{setProperty}}
+    * @nameTags setProperty
+    * @param {ObjectType.OBJECT} object {{object}}
+    * @param {ObjectType.STRING} property {{property}}
+    * @param {ObjectType.OBJECT} value {{value}} 
+    * @description {{setPropertyDescription}}
+    * @returns {ObjectType.VOID}
+   */
+   this.cronapi.object.setProperty = function(object, property, value) {
+     var split = property.split('.');
+     for (var i = 0; i < split.length; i++){ 
+       object = object[split[i]];
+     }
+     object = value;
+   };  
+    
    /**
-  *  @type function
-   * @platform M
-   * @name {{getCurrentPosition}}
-   * @nameTags geolocation|getCurrentPosition
-   * @param {ObjectType.STATEMENTSENDER} success {{success}}
-   * @param {ObjectType.STATEMENTSENDER} error {{error}}
-   * @description {{getCurrentPositionDescription}}
-   * @returns {ObjectType.VOID}
-  */
- this.cronapi.cordova.geolocation.getCurrentPosition = function(success, error){
-   navigator.geolocation.getCurrentPosition(success, error);
- }
- 
+    * @category CategoryType.DEVICE
+    * @categoryTags CORDOVA|cordova|Dispositivos|device|Device
+    */
+   this.cronapi.cordova = {};
+
+   /**
+    *  @type function
+     * @name {{vibrate}}
+     * @platform M
+     * @nameTags vibrate
+     * @param {ObjectType.LONG} value {{seconds}}
+     * @description {{vibrateDescription}}
+     * @returns {ObjectType.VOID}
+    */
+   this.cronapi.cordova.vibrate = function(value){
+     navigator.vibrate(value*1000);
+   };
+   
+   this.cronapi.cordova.geolocation = {};
+   
      /**
-  *  @type function
-   * @platform M
-   * @name {{watchPosition}}
-   * @nameTags geolocation|watchPosition
-   * @param {ObjectType.STATEMENTSENDER} success {{success}}
-   * @param {ObjectType.STATEMENTSENDER} error {{error}}
-   * @param {ObjectType.LONG} maximumAge {{maximumAge}}
-   * @param {ObjectType.LONG} timeout {{timeout}}
-   * @param {ObjectType.BOOLEAN} enableHighAccuracy {{enableHighAccuracy}}
-   * @description {{watchPositionDescription}}
-   * @returns {ObjectType.STRING}
-  */
- this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
-  return navigator.geolocation.watchPosition(callbackSuccess, callbackError, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
- }
- 
+    *  @type function
+     * @platform M
+     * @name {{getCurrentPosition}}
+     * @nameTags geolocation|getCurrentPosition
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{getCurrentPositionDescription}}
+     * @returns {ObjectType.VOID}
+    */
+   this.cronapi.cordova.geolocation.getCurrentPosition = function(success, error){
+     navigator.geolocation.getCurrentPosition(success, error);
+   };
+   
+       /**
+    *  @type function
+     * @platform M
+     * @name {{watchPosition}}
+     * @nameTags geolocation|watchPosition
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @param {ObjectType.LONG} maximumAge {{maximumAge}}
+     * @param {ObjectType.LONG} timeout {{timeout}}
+     * @param {ObjectType.BOOLEAN} enableHighAccuracy {{enableHighAccuracy}}
+     * @description {{watchPositionDescription}}
+     * @returns {ObjectType.LONG}
+    */
+   this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
+    return navigator.geolocation.watchPosition(callbackSuccess, callbackError, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
+   };
+   
+       /**
+    *  @type function
+     * @platform M
+     * @name {{clearWatch}}
+     * @nameTags geolocation|clearWatch
+     * @param {ObjectType.LONG} watchID {{watchID}}
+     * @description {{clearWatchDescription}}
+     * @returns {ObjectType.VOID}
+    */
+   this.cronapi.cordova.geolocation.clearWatch = function(watchID){
+     navigator.geolocation.clearWatch(watchID);
+   };
+   
+   this.cronapi.cordova.camera = {};
+   
+   /**
+     * @type function
+     * @platform M
+     * @name {{getPicture}}
+     * @nameTags geolocation|getPicture
+     * @description {{getPictureDescription}}
+     * @returns {ObjectType.VOID}
+    */
+    
+   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description success {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description error {{error}} */  error, /** @type {ObjectType.LONG} @description destinationType {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description pictureSourceType {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
+     navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
+   };
+   
+   
+    this.cronapi.cordova.file = {};
+   
+    /**
+     * @type function
+     * @platform M
+     * @name {{getDirectory}}
+     * @nameTags file|arquivo|directory|diretorio
+     * @description {{getDirectoryDescription}}
+     * @returns {ObjectType.STRING}
+    */
+   this.cronapi.cordova.file.getDirectory = function(/** @type {ObjectType.LONG} @description type @blockType util_dropdown @keys 0|1 @values {{INTERNAL}}|{{EXTERNAL}}  */  type) {
+    var path;
+    if (type == '0') {
+      path = cordova.file.dataDirectory ;
+    } else {
+        path = cordova.file.externalApplicationStorageDirectory;
+        if (!path) {
+          path = cordova.file.externalDataDirectory;
+        }
+        if (!path) {
+          path = cordova.file.syncedDataDirectory;
+        }
+    }
+    return path;
+   };
+   
+   
+    /**
+     * @type function
+     * @platform M
+     * @name {{removeFile}}
+     * @nameTags file|arquivo|removeFile|remover
+     * @param {ObjectType.STRING} fileName {{fileName}}
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{removeFileDescription}}
+     * @returns {ObjectType.VOID}
+    */
+     this.cronapi.cordova.file.removeFile = function(fileName, success, error) {
+        window.resolveLocalFileSystemURL(fileName, function (fileEntry) { 
+          fileEntry.remove(function (entry) { 
+          if (success)
+            success(entry);
+          },error);
+        },error);
+     };
+   
      /**
-  *  @type function
-   * @platform M
-   * @name {{clearWatch}}
-   * @nameTags geolocation|clearWatch
-   * @param {ObjectType.STRING} watchID {{searchIds}}
-   * @description {{clearWatchDescription}}
-   * @returns {ObjectType.VOID}
-  */
- this.cronapi.cordova.geolocation.clearWatch = function(watchID){
-   navigator.geolocation.clearWatch(watchID);
- }
- 
- this.cronapi.cordova.camera = {};
- 
- /**
-   * @type function
-   * @platform M
-   * @name {{getPicture}}
-   * @nameTags geolocation|getPicture
-   * @description {{getPictureDescription}}
-   * @returns {ObjectType.VOID}
-  */
-  
- this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
-   navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
- } 
+     * @type function
+     * @platform M
+     * @name {{readFile}}
+     * @nameTags file|arquivo|readFile|lerarquivo
+     * @param {ObjectType.STRING} fileName {{fileName}}
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{readFileDescription}}
+     * @returns {ObjectType.VOID}
+    */
+     this.cronapi.cordova.file.readFile = function(fileName, success, error) {
+        window.resolveLocalFileSystemURL(fileName, function (fileEntry) { 
+          fileEntry.file(function (file) { 
+            var reader = new FileReader();
+            reader.onloadend = function (e) {
+                success(this.result);
+            };
+            reader.readAsText(file);
+          },error);
+        },error);
+     };
+   
+     /**
+     * @type function
+     * @platform M
+     * @name {{createFile}}
+     * @nameTags file|arquivo|createFile|criararquivo
+     * @param {ObjectType.STRING} dirEntry {{dirEntry}}
+     * @param {ObjectType.STRING} fileName {{fileName}}
+     * @param {ObjectType.STRING} content {{content}}
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{createFileDescription}}
+     * @returns {ObjectType.VOID}
+    */
+   this.cronapi.cordova.file.createFile = function(dirEntry, fileName, content, success, error) {
+     var path = (dirEntry || getDirectory(0));  
+    window.resolveLocalFileSystemURL(dirEntry,  function(directoryEntry) {
+      console.log(dirEntry);
+        directoryEntry.getFile(fileName, {create: true }, function (fileEntry) {
+           fileEntry.createWriter(function(fileWriter) {
+             fileWriter.onwriteend = function (e) {
+                  console.log('Write of file "' + fileName + '"" completed.');
+              };
+              fileWriter.onerror = function (e) {
+                  console.log('Write failed: ' + e.toString());
+              };
+              var data = new Blob([content], { type: 'text/plain' });
+              fileWriter.write(data);
+              if (success) {
+                setTimeout(function() {
+                  success();   
+                },500);
+              }
+           }, error);
+        }, error);
+    }, error);
+   };
+   
+      /**
+     * @type function
+     * @platform M
+     * @name {{createDirectory}}
+     * @nameTags file|arquivo|criardiretorio
+     * @param {ObjectType.STRING} dirParent {{dirParent}}
+     * @param {ObjectType.STRING} dirChildrenName {{dirChildrenName}}
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{createDirectoryDescription}}
+     * @returns {ObjectType.VOID}
+    */
+     this.cronapi.cordova.file.createDirectory = function(dirParent, dirChildrenName, success, error) {
+        window.resolveLocalFileSystemURL(dirParent,  function(directoryEntry) {
+          parentEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
+            if (success)
+                success(childrenEntry);
+          },error);
+        }, error);
+     };
+
+      this.cronapi.cordova.storage = {}; 
+
+      /**
+     * @type function
+     * @platform M
+     * @name {{setStorageItem}}
+     * @nameTags storage
+     * @param {ObjectType.STRING} key {{key}}
+     * @param {ObjectType.OBJECT} value {{value}}
+     * @description {{setStorageItemDescription}}
+     * @returns {ObjectType.VOID}
+    */
+     this.cronapi.cordova.storage.setStorageItem = function(key, value) {
+        var storage = window.localStorage;
+        if (storage) {
+          storage.setItem(key, value);
+        } else {
+          console.error('Local Storage not Found!');
+        }
+     };
+     
+      /**
+     * @type function
+     * @platform M
+     * @name {{getStorageItem}}
+     * @nameTags storage|getItem
+     * @param {ObjectType.STRING} key {{key}}
+     * @description {{getStorageItemDescription}}
+     * @returns {ObjectType.OBJECT}
+    */
+     this.cronapi.cordova.storage.getStorageItem = function(key) {
+        var storage = window.localStorage;
+        if (storage) {
+          return storage.getItem(key);
+        } else {
+          console.error('Local Storage not Found!');
+        }
+     };
+   
+       /**
+     * @type function
+     * @platform M
+     * @name {{removeStorageItem}}
+     * @nameTags storage|remove
+     * @param {ObjectType.STRING} key {{key}}
+     * @description {{removeStorageItemDescription}}
+     * @returns {ObjectType.VOID}
+    */
+     this.cronapi.cordova.storage.removeStorageItem = function(key) {
+        var storage = window.localStorage;
+        if (storage) {
+          storage.removeItem(key);
+        } else {
+          console.error('Local Storage not Found!');
+        }
+     };
  
   //Private variables and functions
   var ptDate = function(varray) {
