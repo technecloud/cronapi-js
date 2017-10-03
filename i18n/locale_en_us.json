@@ -296,5 +296,5 @@
   "CellGenericConnection" : "Cell generic connection",
   "NoNetworkConnection" : "No network connection",
   "type" : "Type",
-  "vibrateValue" : "Value: Parameter is Integer or Integer List."
+  "vibrateValue" : "Milliseconds: Parameter is Integer or Integer List."
 }

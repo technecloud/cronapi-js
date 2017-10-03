@@ -298,5 +298,5 @@
   "CellGenericConnection" : "Conexão celular genérico",
   "NoNetworkConnection" : "Nenhuma conexão de rede",
   "type" : "Tipo",
-  "vibrateValue" : "Valor : Parametro é do tipo Inteiro ou uma Lista de Inteiros."
+  "vibrateValue" : "Milissegundos : Parametro é do tipo Inteiro ou uma Lista de Inteiros."
 }

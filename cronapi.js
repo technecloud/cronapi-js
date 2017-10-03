@@ -1682,12 +1682,12 @@
      * @name {{vibrate}}
      * @platform M
      * @nameTags vibrate
-     * @param {ObjectType.LONG} value {{seconds}}
+     * @param {ObjectType.OBJECT} vibrateValue {{vibrateValue}}
      * @description {{vibrateDescription}}
      * @returns {ObjectType.VOID}
     */
-   this.cronapi.cordova.vibrate = function(value){
-     navigator.vibrate(value*1000);
+   this.cronapi.cordova.vibrate = function(vibrateValue){
+     navigator.vibrate(vibrateValue);
    };
    
    this.cronapi.cordova.geolocation = {};
