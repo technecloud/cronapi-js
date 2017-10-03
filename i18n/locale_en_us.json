@@ -282,5 +282,19 @@
   "getStorageItemDescription" : "Function to obtain value stored in 'Local Storage'.",
   "removeStorageItem" : "Remove Storage Item",
   "removeStorageItemDescription" : "Function to remove the value stored in the key in 'Local Storage'.",
-  "watchID" : "Observe Id"
+  "watchID" : "Observe Id",
+  "getConnection" : "Network Status",
+  "getConnectionDescription" : "Function to provides information about the device's cellular and wifi connection",
+  "verifyConnection" : "Check Network Status",
+  "verifyConnectionDescription" : "Function to check the status of the device connection.",
+  "UnknownConnection" : "Unknown connection",
+  "EthernetConnection" : "Ethernet connection",
+  "WiFiConnection" : "WiFi connection",
+  "Cell2GConnection" : "Cell 2G connection",
+  "Cell3GConnection" : "Cell 3G connection",
+  "Cell4GConnection" : "Cell 4G connection",
+  "CellGenericConnection" : "Cell generic connection",
+  "NoNetworkConnection" : "No network connection",
+  "type" : "Type",
+  "vibrateValue" : "Value: Parameter is Integer or Integer List."
 }

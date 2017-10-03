@@ -1936,6 +1936,30 @@
           console.error('Local Storage not Found!');
         }
      };
+     
+     /**
+      * @type function
+      * @platform M
+      * @name {{getConnection}}
+      * @nameTags connection
+      * @description {{getConnectionDescription}}
+      * @returns {ObjectType.BOOLEAN}
+     */
+     this.cronapi.cordova.connection.getConnection = function() {
+       return navigator.connection.type;
+     };
+     
+       /**
+      * @type function
+      * @platform M
+      * @name {{verifyConnection}}
+      * @nameTags connection
+      * @description {{verifyConnectionDescription}}
+      * @returns {ObjectType.BOOLEAN}
+     */
+     this.cronapi.cordova.connection.verifyConnection = function(/** @type {ObjectType.STRING} @description {{type}} @blockType util_dropdown @keys Connection.UNKNOWN|Connection.ETHERNET|Connection.WIFI|Connection.CELL_2G|Connection.CELL_3G|Connection.CELL_4G|Connection.CELL|Connection.NONE @values {{UnknownConnection}}|{{EthernetConnection}}|{{WiFiConnection}}|{{Cell2GConnection}}|{{Cell3GConnection}}|{{Cell4GConnection}}|{{CellGenericConnection}}|{{NoNetworkConnection}}  */  type) {
+       return (navigator.connection.type == type);
+     };
  
   //Private variables and functions
   var ptDate = function(varray) {
