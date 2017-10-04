@@ -305,5 +305,7 @@
 	"watchAccelerationDescription": "Function to monitor device acceleration.",
 	"clearWatchAcceleration": "Stop Acceleration Watcher",
 	"clearWatchAccelerationhDescription": "Function to cancel accelerometer monitoring.",
-	"clearWatchPositionDescription": "Function to cancel geo-referenced positioning monitoring."
+	"clearWatchPositionDescription": "Function to cancel geo-referenced positioning monitoring.",
+	"getAttrValueName": "Get attribute value",
+	"getAttrValueDesc": "Function that get an attribute value from an element"
 }

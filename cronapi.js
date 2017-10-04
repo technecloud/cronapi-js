@@ -851,6 +851,20 @@
   this.cronapi.screen.changeAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName, /** @type {ObjectType.STRING} */ attrValue ) {
     $('#'+id).attr(attrName , attrValue);
   };
+  
+  
+    /**
+   * @type function
+   * @name {{getAttrValueName}}
+   * @nameTags getAttrValue
+   * @description {{getAttrValueDesc}}
+   * @param {ObjectType.STRING} id {{idsFromScreen}}
+   * @param {ObjectType.STRING} attrName {{attrName}}
+   * @multilayer true
+   */
+  this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
+    $('#'+id).attr(attrName , attrValue);
+  };
 
   /**
    * @category CategoryType.DATETIME
@@ -1727,13 +1741,13 @@
        /**
     *  @type function
      * @platform M
-     * @name {{clearWatchPosition}}
+     * @name {{clearWatch}}
      * @nameTags geolocation|clearWatch
      * @param {ObjectType.LONG} watchID {{watchID}}
-     * @description {{clearWatchPositionDescription}}
+     * @description {{clearWatchDescription}}
      * @returns {ObjectType.VOID}
     */
-   this.cronapi.cordova.geolocation.clearWatchPosition = function(watchID){
+   this.cronapi.cordova.geolocation.clearWatch = function(watchID){
      navigator.geolocation.clearWatch(watchID);
    };
    
@@ -1748,7 +1762,7 @@
      * @returns {ObjectType.VOID}
     */
     
-   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
+   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description success {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description error {{error}} */  error, /** @type {ObjectType.LONG} @description destinationType {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description pictureSourceType {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
      navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
    };
    
@@ -1763,7 +1777,7 @@
      * @description {{getDirectoryDescription}}
      * @returns {ObjectType.STRING}
     */
-   this.cronapi.cordova.file.getDirectory = function(/** @type {ObjectType.LONG} @description {{type}} @blockType util_dropdown @keys 0|1 @values {{INTERNAL}}|{{EXTERNAL}}  */  type) {
+   this.cronapi.cordova.file.getDirectory = function(/** @type {ObjectType.LONG} @description type @blockType util_dropdown @keys 0|1 @values {{INTERNAL}}|{{EXTERNAL}}  */  type) {
     var path;
     if (type == '0') {
       path = cordova.file.dataDirectory ;
@@ -1938,9 +1952,6 @@
         }
      };
      
-     
-     this.cronapi.cordova.connection = {};
-     
      /**
       * @type function
       * @platform M
@@ -1965,52 +1976,6 @@
        return (navigator.connection.type == type);
      };
  
-     this.cronapi.cordova.acceleration = {};
-     
-       /**
-      *  @type function
-       * @platform M
-       * @name {{getCurrentAcceleration}}
-       * @nameTags acceleration|getCurrentAcceleration
-       * @param {ObjectType.STATEMENTSENDER} success {{success}}
-       * @param {ObjectType.STATEMENTSENDER} error {{error}}
-       * @description {{getCurrentAccelerationDescription}}
-       * @returns {ObjectType.VOID}
-      */
-     this.cronapi.cordova.acceleration.getCurrentAcceleration = function(success, error){
-       navigator.accelerometer.getCurrentAcceleration(success, error);
-     };
-     
-       /**
-       * @type function
-       * @platform M
-       * @name {{watchAcceleration}}
-       * @nameTags acceleration|watchAcceleration
-       * @param {ObjectType.STATEMENTSENDER} success {{success}}
-       * @param {ObjectType.STATEMENTSENDER} error {{error}}
-       * @param {ObjectType.LONG} frequency {{frequency}}
-       * @description {{watchAccelerationDescription}}
-       * @returns {ObjectType.LONG}
-      */
-     this.cronapi.cordova.acceleration.watchAcceleration = function(success, error, frequency){
-      return navigator.acceleration.watchAcceleration(callbackSuccess, callbackError, { frequency: frequency });
-     };
-     
-      /**
-       * @type function
-       * @platform M
-       * @name {{clearWatchAcceleration}}
-       * @nameTags acceleration|clearWatchAcceleration
-       * @param {ObjectType.LONG} watchID {{watchID}}
-       * @description {{clearWatchAccelerationhDescription}}
-       * @returns {ObjectType.VOID}
-      */
-     this.cronapi.cordova.acceleration.clearWatchAcceleration = function(watchID){
-       navigator.acceleration.clearWatch(watchID);
-     };
-   
-     
-     
   //Private variables and functions
   var ptDate = function(varray) {
     var date;
