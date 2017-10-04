@@ -1937,6 +1937,9 @@
         }
      };
      
+     
+     this.cronapi.cordova.connection = {};
+     
      /**
       * @type function
       * @platform M
