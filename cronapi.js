@@ -798,7 +798,8 @@
    * @multilayer true
    */
   this.cronapi.screen.showComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $('#'+id).show();
+    $("#"+id).get(0).style.setProperty("display", "block", "important");
+    
   };
   
   /**
@@ -810,7 +811,7 @@
    * @multilayer true
    */
   this.cronapi.screen.hideComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $('#'+id).hide();
+    $("#"+id).get(0).style.setProperty("display", "none", "important");
   };
   
   /**
