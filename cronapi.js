@@ -860,6 +860,7 @@
    * @description {{getAttrValueDesc}}
    * @param {ObjectType.STRING} id {{idsFromScreen}}
    * @param {ObjectType.STRING} attrName {{attrName}}
+   * @returns {ObjectType.STRING}
    * @multilayer true
    */
   this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
