@@ -300,5 +300,12 @@
 	"type": "Tipo",
 	"vibrateValue": "Milissegundos : Parametro é do tipo Inteiro ou uma Lista de Inteiros.",
 	"changeAttrValueName": "Definir valor do atributo",
-	"changeAttrValueDesc": "Função que define o valor do atributo de um elemento"
+	"changeAttrValueDesc": "Função que define o valor do atributo de um elemento",
+	"getCurrentAcceleration": "Obter Aceleração de Movimento",
+	"getCurrentAccelerationDescription": "Função que fornece acesso ao acelerômetro do dispositivo.",
+	"watchAcceleration": "Observar Aceleração",
+	"watchAccelerationDescription": "Função para monitorar a aceleração do dispositivo.",
+	"clearWatchAcceleration": "Parar Observador de Aceleração",
+	"clearWatchAccelerationhDescription": "Função para cancelar monitoramento do acelerômetro.",
+	"clearWatchPositionDescription": "Função para cancelar monitoramento do posicionamento georreferenciado."
 }
