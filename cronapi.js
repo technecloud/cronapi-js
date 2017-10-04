@@ -863,7 +863,7 @@
    * @multilayer true
    */
   this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
-    $('#'+id).attr(attrName , attrValue);
+   return $('#'+id).attr(attrName , attrValue);
   };
 
   /**
