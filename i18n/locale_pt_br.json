@@ -249,7 +249,7 @@
   "success" : "Sucesso",
   "error" : "Erro",
   "watchPosition" : "Observar Posição",
-  "watchPositionDescription" : "Função para ficar observando a alteração da posição georreferenciada",
+  "watchPositionDescription" : "Função para monitorar a posição georreferenciada",
   "maximumAge" : "Tempo Máximo",
   "timeout" : "Intervalo",
   "enableHighAccuracy" : "Habilitar Alta Precisão",
@@ -258,7 +258,7 @@
   "destinationType" : "Tipo de destino",
   "pictureSourceType" : "Fonte da imagem",
   "seconds" : "Segundos",
-  "clearWatch" : "Parar Observador",
+  "clearWatchPosition" : "Parar Observador de Posição",
   "idsFromScreen":"Obter identificador: Identificador (id) a ser obtido do Formulário selecionado",
   "attrName":"Nome do atributo: Nome do atributo contido no Identificador. Exemplo:  src='teste' retorna src",
   "attrValue":"Valor do atributo: Valor do atributo contido no Identificador. Exemplo:  src='teste' retorna teste",
@@ -298,5 +298,12 @@
   "CellGenericConnection" : "Conexão celular genérico",
   "NoNetworkConnection" : "Nenhuma conexão de rede",
   "type" : "Tipo",
-  "vibrateValue" : "Milissegundos : Parametro é do tipo Inteiro ou uma Lista de Inteiros."
+  "vibrateValue" : "Milissegundos : Parametro é do tipo Inteiro ou uma Lista de Inteiros.",
+  "getCurrentAcceleration" : "Obter Aceleração de Movimento" ,
+  "getCurrentAccelerationDescription" : "Função que fornece acesso ao acelerômetro do dispositivo.",
+  "watchAcceleration" : "Observar Aceleração" ,
+  "watchAccelerationDescription" : "Função para monitorar a aceleração do dispositivo.",
+  "clearWatchAcceleration" : "Parar Observador de Aceleração" ,
+  "clearWatchAccelerationhDescription" : "Função para cancelar monitoramento do acelerômetro.",
+  "clearWatchPositionDescription" : "Função para cancelar monitoramento do posicionamento georreferenciado."
 }
