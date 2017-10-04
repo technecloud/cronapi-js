@@ -296,5 +296,7 @@
   "CellGenericConnection" : "Cell generic connection",
   "NoNetworkConnection" : "No network connection",
   "type" : "Type",
-  "vibrateValue" : "Milliseconds: Parameter is Integer or Integer List."
+  "vibrateValue" : "Milliseconds: Parameter is Integer or Integer List.",
+  "changeAttrValueName":"Change attribute value",
+  "changeAttrValueDesc":"Function that change an attribute value from a element"
 }
