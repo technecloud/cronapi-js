@@ -296,12 +296,5 @@
   "CellGenericConnection" : "Cell generic connection",
   "NoNetworkConnection" : "No network connection",
   "type" : "Type",
-  "vibrateValue" : "Milliseconds: Parameter is Integer or Integer List.",
-  "getCurrentAcceleration" : "Get Current Acceleration" ,
-  "getCurrentAccelerationDescription" : "Function that provides access to device accelerometer.",
-  "watchAcceleration" : "Observe Acceleration" ,
-  "watchAccelerationDescription" : "Function to monitor device acceleration.",
-  "clearWatchAcceleration" : "Stop Acceleration Watcher" ,
-  "clearWatchAccelerationhDescription" : "Function to cancel accelerometer monitoring.",
-  "clearWatchPositionDescription" : "Function to cancel geo-referenced positioning monitoring."
+  "vibrateValue" : "Milliseconds: Parameter is Integer or Integer List."
 }
