@@ -23,5 +23,9 @@ public final class CloudFactory {
 		DbxClientV2 client = new DbxClientV2(requestConfig, accessToken);
 		return new DropboxService(client, files);
 	}
+	
+	public List<FileObject> getFiles() {
+	  return this.files;
+	}
 
 }
