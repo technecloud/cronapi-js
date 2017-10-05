@@ -852,6 +852,20 @@
     $('#'+id).attr(attrName , attrValue);
   };
 
+    /**
+   * @type function
+   * @name {{getAttrValueName}}
+   * @nameTags getAttrValue
+   * @description {{getAttrValueDesc}}
+   * @param {ObjectType.STRING} id {{idsFromScreen}}
+   * @param {ObjectType.STRING} attrName {{attrName}}
+   * @returns {ObjectType.STRING}
+   * @multilayer true
+   */
+  this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
+   return $('#'+id).attr(attrName , attrValue);
+  };
+
   /**
    * @category CategoryType.DATETIME
    * @categoryTags Date|Datetime|Data|Hora
@@ -1727,13 +1741,13 @@
        /**
     *  @type function
      * @platform M
-     * @name {{clearWatch}}
+     * @name {{clearWatchPosition}}
      * @nameTags geolocation|clearWatch
      * @param {ObjectType.LONG} watchID {{watchID}}
-     * @description {{clearWatchDescription}}
+     * @description {{clearWatchPositionDescription}}
      * @returns {ObjectType.VOID}
     */
-   this.cronapi.cordova.geolocation.clearWatch = function(watchID){
+   this.cronapi.cordova.geolocation.clearWatchPosition = function(watchID){
      navigator.geolocation.clearWatch(watchID);
    };
    
@@ -1748,7 +1762,7 @@
      * @returns {ObjectType.VOID}
     */
     
-   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description success {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description error {{error}} */  error, /** @type {ObjectType.LONG} @description destinationType {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description pictureSourceType {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
+   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
      navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
    };
    
@@ -1763,7 +1777,7 @@
      * @description {{getDirectoryDescription}}
      * @returns {ObjectType.STRING}
     */
-   this.cronapi.cordova.file.getDirectory = function(/** @type {ObjectType.LONG} @description type @blockType util_dropdown @keys 0|1 @values {{INTERNAL}}|{{EXTERNAL}}  */  type) {
+   this.cronapi.cordova.file.getDirectory = function(/** @type {ObjectType.LONG} @description {{type}} @blockType util_dropdown @keys 0|1 @values {{INTERNAL}}|{{EXTERNAL}}  */  type) {
     var path;
     if (type == '0') {
       path = cordova.file.dataDirectory ;
