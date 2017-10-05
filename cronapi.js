@@ -851,21 +851,6 @@
   this.cronapi.screen.changeAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName, /** @type {ObjectType.STRING} */ attrValue ) {
     $('#'+id).attr(attrName , attrValue);
   };
-  
-  
-    /**
-   * @type function
-   * @name {{getAttrValueName}}
-   * @nameTags getAttrValue
-   * @description {{getAttrValueDesc}}
-   * @param {ObjectType.STRING} id {{idsFromScreen}}
-   * @param {ObjectType.STRING} attrName {{attrName}}
-   * @returns {ObjectType.STRING}
-   * @multilayer true
-   */
-  this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
-   return $('#'+id).attr(attrName , attrValue);
-  };
 
   /**
    * @category CategoryType.DATETIME
@@ -1952,6 +1937,8 @@
           console.error('Local Storage not Found!');
         }
      };
+     
+     this.cronapi.cordova.connection = {};
      
      /**
       * @type function
