@@ -307,5 +307,6 @@
 	"watchAccelerationDescription": "Função para monitorar a aceleração do dispositivo.",
 	"clearWatchAcceleration": "Parar Observador de Aceleração",
 	"clearWatchAccelerationhDescription": "Função para cancelar monitoramento do acelerômetro.",
-	"clearWatchPositionDescription": "Função para cancelar monitoramento do posicionamento georreferenciado."
+	"clearWatchPositionDescription": "Função para cancelar monitoramento do posicionamento georreferenciado.",
+	 "clearWatchPosition" : "Parar Observador de Posição"
 }
