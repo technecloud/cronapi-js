@@ -823,7 +823,7 @@
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-   $.each( $('#input').find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
+   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
   };
   
   /**
@@ -835,7 +835,7 @@
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $.each( $('#input').find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
+    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
   };
   
   /**
