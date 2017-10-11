@@ -1644,6 +1644,127 @@
 		cronapi.screen.changeValueOfField(field, base64);
   };
   
+  this.cronapi.internal.castBase64ToByteArray = function(base64) {
+    var binary_string =  window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes;
+  };
+  
+  this.cronapi.internal.castByteArrayToString = function(bytes) {
+    return String.fromCharCode.apply(null, new Uint16Array(bytes));
+  };
+  
+  this.cronapi.internal.generatePreviewDescriptionByte = function(data) {
+    var json;
+    try {
+      json = JSON.parse(data);
+    }
+    catch (e) {
+      try {
+        json = JSON.parse(cronapi.internal.castByteArrayToString(cronapi.internal.castBase64ToByteArray(TesteDropBox.active.img_to_database)))
+      }
+      catch (e) {
+      }
+    }
+    if (json) {
+      if (json.name.length > 25)
+        json.name = json.name.substr(0,22)+'...';
+        
+      var result = "<b>Nome:</b> <br/>" + json.name +"<br/>";
+      result += "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>";
+      result += "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>";
+      return result;
+    }
+  };
+  
+  this.cronapi.internal.downloadFileEntity = function(datasource, field) {
+    var tempJsonFileUploaded = null;
+    //Verificando se é JSON Uploaded file
+    try {
+      var tempJsonFileUploaded = JSON.parse(datasource.active[field]);
+    }
+    catch(e) { }
+    
+    if (tempJsonFileUploaded) {
+      window.open('/api/cronapi/filePreview/'+tempJsonFileUploaded.path);
+    }
+    else {
+      var url = '/api/cronapi/downloadFile';
+      var splited = datasource.entity.split('/');
+      url += '/' + splited[splited.length-1];
+      url += '/' + field;
+      var _u = JSON.parse(sessionStorage.getItem('_u'));
+      var object = datasource.active;
+      this.$promise = cronapi.$scope.$http({
+          method: 'POST',
+          url: (window.hostApp || "") + url,
+          data: (object) ? JSON.stringify(object) : null,
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json', 
+            'X-AUTH-TOKEN': _u.token,
+          }
+      }).success(function(data, status, headers, config) {
+          var octetStreamMime = 'application/octet-stream';
+          headers = headers();
+          var filename = headers['x-filename'] || 'download.bin';
+          var contentType = headers['content-type'] || octetStreamMime;
+          var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;      
+          try
+          {
+            var link = document.createElement('a');
+            if('download' in link)
+            {
+              var url = urlCreator.createObjectURL(data);
+              link.setAttribute('href', url);
+              link.setAttribute("download", filename);
+              var event = document.createEvent('MouseEvents');
+              event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+              link.dispatchEvent(event);
+            }
+          } catch(ex) {
+            console.log('Error downloading file');
+            console.log(ex);
+          }
+      }).error(function(data, status, headers, config) {
+          console.log('Error downloading file');
+      });
+    }
+    
+  };
+  
+  this.cronapi.internal.uploadFile = function(field, file, progressId) {
+    var uploadUrl = '/api/cronapi/uploadFile';
+    var formData = new FormData();
+    formData.append("file", file);
+    var _u = JSON.parse(sessionStorage.getItem('_u'));
+    this.$promise = cronapi.$scope.$http({
+        method: 'POST',
+        url: (window.hostApp || "") + uploadUrl,
+        data: formData,
+        headers:  {
+          'Content-Type': undefined, 
+          'X-AUTH-TOKEN': _u.token 
+        },
+        onProgress: function(event) {
+  				if (event.lengthComputable) {
+            var complete = (event.loaded / event.total * 100 | 0);
+            if (progressId) {
+              var progress = document.getElementById(progressId);
+              progress.value = progress.innerHTML = complete;
+            }
+          }
+				}
+    }).success(function(data, status, headers, config) {
+        cronapi.screen.changeValueOfField(field, data.jsonString);
+    }).error(function(data, status, headers, config) {
+        alert('Error uploading file');
+    });
+  };
   
   /**
    * @category CategoryType.OBJECT
