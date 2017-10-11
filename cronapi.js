@@ -1661,13 +1661,26 @@
   this.cronapi.internal.generatePreviewDescriptionByte = function(data) {
     var json;
     try {
+      //Verificando se é JSON Uploaded file
       json = JSON.parse(data);
     }
     catch (e) {
       try {
+        //Tenta pegar do header
         json = JSON.parse(cronapi.internal.castByteArrayToString(cronapi.internal.castBase64ToByteArray(data)))
       }
       catch (e) {
+        //Verifica se é drpobox
+        if (data && data.indexOf('dropboxusercontent') > -1) {
+          json = {};
+          var urlSplited = data.split('/');
+          var fullName = urlSplited[urlSplited.length - 1].replace('?dl=0','');
+          var fullNameSplited = fullName.split('.')
+          var extension = '.' + fullNameSplited[fullNameSplited.length - 1];
+          json.fileExtension = extension;
+          json.name = fullName.replace(extension, '');
+          json.contentType = 'file/'+extension.replace('.','');
+        }
       }
     }
     if (json) {
@@ -1691,6 +1704,9 @@
     
     if (tempJsonFileUploaded) {
       window.open('/api/cronapi/filePreview/'+tempJsonFileUploaded.path);
+    }
+    else if (datasource.active[field].indexOf('dropboxusercontent') > -1) {
+      window.open(datasource.active[field]);
     }
     else {
       var url = '/api/cronapi/downloadFile';
@@ -1734,7 +1750,6 @@
           console.log('Error downloading file');
       });
     }
-    
   };
   
   this.cronapi.internal.uploadFile = function(field, file, progressId) {
