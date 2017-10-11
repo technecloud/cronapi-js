@@ -184,9 +184,30 @@ public class Utils {
 				for (int i = 0; i < fieldAnnots.length; i++) {
 					if (fieldAnnots[i].toString().contains("CronapiCloud")) {
 						CronapiCloud ann = ((CronapiCloud) fieldAnnots[i]);
-						if (ann.type() != null && "dropbox".equals(ann.type().toLowerCase().trim())) {
-							fields.add(field.getName());
+						if (ann.type()!=null && type.equals(ann.type().toLowerCase().trim())) {
+						  fields.add(field.getName());
 						}
+					}
+				}
+			}
+		}
+		return fields;
+	}
+	
+	public static List<String> getFieldsWithAnnotationByteHeaderSignature(Object obj) {
+		List<String> fields = new ArrayList<String>();
+		Class<?> c = obj.getClass();
+
+		Field[] fieldsArr = c.getDeclaredFields();
+		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
+
+		for (Field field : allFields) {
+			if (field.getDeclaredAnnotations().length > 0) {
+				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+
+				for (int i = 0; i < fieldAnnots.length; i++) {
+					if (fieldAnnots[i].toString().contains("CronapiByteHeaderSignature")) {
+						  fields.add(field.getName());
 					}
 				}
 			}
@@ -244,6 +265,28 @@ public class Utils {
 		}
 		return null;
 	}
+	
+	public static void updateField(Object obj, String fieldName, Object fieldValue) {
+    try {
+      Method setMethod = Utils.findMethod(obj, "set" + fieldName);
+      if(setMethod != null) {
+        if(fieldValue instanceof Var) {
+          fieldValue = ((Var)fieldValue).getObject(setMethod.getParameterTypes()[0]);
+        }
+        else {
+          Var tVar = Var.valueOf(fieldValue);
+          fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
+        }
+        setMethod.invoke(obj, fieldValue);
+      }
+      else {
+        throw new RuntimeException("Field " + fieldName + " not found");
+      }
+    }
+    catch(Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
 	public static Calendar toGenericCalendar(String value) {
 		Date date = null;

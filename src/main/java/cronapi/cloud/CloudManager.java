@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cronapi.util.StorageService;
+import cronapi.util.StorageServiceFileObject;
+
 public final class CloudManager {
 
 	private static final Logger log = LoggerFactory.getLogger(CloudManager.class);
@@ -54,14 +57,22 @@ public final class CloudManager {
 				field.setAccessible(true);
 				Object valueField = field.get(sourceObject);
 				Object value = null;
+				
+				String fileExtension = null;
 				if (valueField instanceof String && isBase64Encoded((String)valueField))
 				  value = java.util.Base64.getDecoder().decode(((String) valueField).getBytes("UTF-8"));
+				else if (valueField instanceof String && cronapi.util.StorageService.isTempFileJson(valueField.toString())) {
+				  StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(valueField.toString());
+				  value = fileObject.bytes; 
+				  fileExtension = fileObject.extension.substring(1);
+				}
 				else
 				  value = valueField;
 
 				if (value instanceof byte[]) {
 					fileContent = new ByteArrayInputStream((byte[]) value);
-					String fileExtension = getExtensionFromContent(fileContent);
+					if (fileExtension == null)
+					  fileExtension = getExtensionFromContent(fileContent);
 
 					String filePath = aClass.getSimpleName().concat("/").concat(field.getName()).concat("/");
 					String identify = "";
@@ -76,7 +87,6 @@ public final class CloudManager {
 					files.add(new FileObject("/".concat(filePath).concat(identify), fieldName, fileContent));
 				}
 
-				// field.set(sourceObject, arg1))
 			}
 		} catch (NoSuchFieldException | IllegalAccessException | UnsupportedEncodingException e) {
 			log.error(e.getMessage());
@@ -92,7 +102,7 @@ public final class CloudManager {
 			//Não conseguiu identificar o tipo de arquivo
 		}
 		String fileExtension = "png";
-		if (contentType.contains("/"))
+		if (contentType!=null && contentType.contains("/"))
 			fileExtension = contentType.split("/")[1];
 		return fileExtension;
 	}

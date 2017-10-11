@@ -1,14 +1,17 @@
 package cronapi.rest;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import cronapi.database.*;
-import cronapi.util.SecurityUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,11 +20,34 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.JsonObject;
 
-import cronapi.*;
+import cronapi.ErrorResponse;
+import cronapi.QueryManager;
+import cronapi.RestBody;
+import cronapi.RestClient;
+import cronapi.RestResult;
+import cronapi.Utils;
+import cronapi.Var;
+import cronapi.database.DataSource;
+import cronapi.database.DataSourceFilter;
+import cronapi.database.EntityMetadata;
+import cronapi.database.TenantService;
+import cronapi.database.TransactionManager;
+import cronapi.rest.CronapiREST.TranslationPath;
+import cronapi.util.SecurityUtil;
+import cronapi.util.StorageService;
+import cronapi.util.StorageServiceFileObject;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -31,6 +57,9 @@ public class CronapiREST {
 
   @Autowired
   private HttpServletRequest request;
+  
+  @Autowired
+	private HttpServletResponse response;
 
   @Autowired
   private TenantService tenantService;
@@ -440,6 +469,42 @@ public class CronapiREST {
     return SecurityUtil.getRoles();
   }
   //Fim Api de Segurança
+
+  //Api upload e visualização de arquivo
+	@RequestMapping(method = RequestMethod.GET, value = "/filePreview/{fileName}/**")
+	public void filePreview(@PathVariable("fileName") String fileName) throws Exception {
+		StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(fileName);
+		response.setContentType(fileObject.contentType);
+
+		ServletOutputStream responseOutputStream = response.getOutputStream();
+		responseOutputStream.write(fileObject.bytes);
+		responseOutputStream.flush();
+		responseOutputStream.close();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/downloadFile/{entity}/{field}/**")
+	public void downloadFile(@PathVariable("entity") String entity, @PathVariable("field") String field,
+			@RequestBody final Var data) throws Exception {
+		DataSource ds = new DataSource(entity);
+		ds.checkRESTSecurity("GET");
+		ds.filter(data, null);
+		Object obj = ds.getObject();
+		byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
+		StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
+		response.setContentType(fileObject.contentType);
+		response.addHeader("x-filename", fileObject.name + fileObject.extension);
+
+		ServletOutputStream responseOutputStream = response.getOutputStream();
+		responseOutputStream.write(fileObject.bytes);
+		responseOutputStream.flush();
+		responseOutputStream.close();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/uploadFile")
+	public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile[] uploadfiles) throws Exception {
+		return new ResponseEntity<Object>(StorageService.saveUploadFiles(uploadfiles), HttpStatus.OK);
+	}
+	//Fim Api upload e visualizaão de arquivo
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);

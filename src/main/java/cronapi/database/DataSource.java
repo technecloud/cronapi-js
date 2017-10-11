@@ -479,16 +479,45 @@ public class DataSource implements JsonSerializable {
   
   public void update(Var data) {
     try {
+      List<String> fieldsByteHeaderSignature = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(getObject());
       LinkedList<String> fields = data.keySet();
       for(String key : fields) {
-        if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
-          this.updateField(key, data.getField(key));
+        if (!fieldsByteHeaderSignature.contains(key) || isFieldByteWithoutHeader(key, data.getField(key))) {
+          if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
+            this.updateField(key, data.getField(key));
+          }
         }
       }
     }
     catch(Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private boolean isFieldByteWithoutHeader(String fieldName, Object fieldValue) {
+    //Verificando se não tem o header, se não tiver o header, houve alteração, então tem que atualizar.
+    boolean result = false;
+    
+    
+    if(fieldValue instanceof Var) {
+      if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
+        return true;
+    }
+    
+    Method setMethod = Utils.findMethod(getObject(), "set" + fieldName);
+    if (setMethod!=null) {
+      if(fieldValue instanceof Var) {
+        fieldValue = ((Var)fieldValue).getObject(setMethod.getParameterTypes()[0]);
+      }
+      else {
+        Var tVar = Var.valueOf(fieldValue);
+        fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
+      }
+      Object header = cronapi.util.StorageService.getFileBytesMetadata((byte[])fieldValue);
+      result = (header == null);
+    }
+    
+    return result;
   }
   
   /**

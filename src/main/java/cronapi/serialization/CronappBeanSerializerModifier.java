@@ -1,11 +1,19 @@
 package cronapi.serialization;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
@@ -16,6 +24,7 @@ import cronapi.QueryManager;
 import cronapi.RestClient;
 import cronapi.SecurityBeanFilter;
 import cronapi.Var;
+import cronapi.serialization.CronappBeanSerializerModifier.UserEventDeserializer;
 
 public class CronappBeanSerializerModifier extends BeanSerializerModifier {
   
@@ -38,6 +47,16 @@ public class CronappBeanSerializerModifier extends BeanSerializerModifier {
     protected void serializeFieldsFiltered(Object bean, JsonGenerator gen, SerializerProvider provider)
             throws IOException {
       serializeFields(bean, gen, provider);
+    }
+    
+    private void processByteHeaderSignatueFields(Object bean) {
+      List<String> fields = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(bean);
+      for (String field: fields) {
+        Object value = cronapi.Utils.getFieldValue(bean, field);
+        Object header = cronapi.util.StorageService.getFileBytesMetadata((byte[])value);
+        if (header != null)
+          cronapi.Utils.updateField(bean, field, header);
+      }
     }
     
     @Override
@@ -98,6 +117,7 @@ public class CronappBeanSerializerModifier extends BeanSerializerModifier {
         props = _props;
       }
       
+      processByteHeaderSignatueFields(bean);
       int i = 0;
       try {
         for(final int len = props.length; i < len; ++i) {
