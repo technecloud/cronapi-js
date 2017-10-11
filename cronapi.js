@@ -1665,7 +1665,7 @@
     }
     catch (e) {
       try {
-        json = JSON.parse(cronapi.internal.castByteArrayToString(cronapi.internal.castBase64ToByteArray(TesteDropBox.active.img_to_database)))
+        json = JSON.parse(cronapi.internal.castByteArrayToString(cronapi.internal.castBase64ToByteArray(data)))
       }
       catch (e) {
       }
