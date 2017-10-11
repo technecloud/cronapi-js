@@ -1694,19 +1694,29 @@
     }
   };
   
-  this.cronapi.internal.downloadFileEntity = function(datasource, field) {
+  this.cronapi.internal.downloadFileEntity = function(datasource, field, indexData) {
     var tempJsonFileUploaded = null;
+    var valueContent;
+    var itemActive;
+    if (indexData) {
+      valueContent = datasource.data[indexData][field];
+      itemActive = datasource.data[indexData];
+    }
+    else {
+      valueContent = datasource.active[field]; 
+      itemActive = datasource.active;
+    }
     //Verificando se é JSON Uploaded file
     try {
-      var tempJsonFileUploaded = JSON.parse(datasource.active[field]);
+      var tempJsonFileUploaded = JSON.parse(valueContent);
     }
     catch(e) { }
     
     if (tempJsonFileUploaded) {
       window.open('/api/cronapi/filePreview/'+tempJsonFileUploaded.path);
     }
-    else if (datasource.active[field].indexOf('dropboxusercontent') > -1) {
-      window.open(datasource.active[field]);
+    else if (valueContent.indexOf('dropboxusercontent') > -1) {
+      window.open(valueContent);
     }
     else {
       var url = '/api/cronapi/downloadFile';
@@ -1714,7 +1724,7 @@
       url += '/' + splited[splited.length-1];
       url += '/' + field;
       var _u = JSON.parse(sessionStorage.getItem('_u'));
-      var object = datasource.active;
+      var object = itemActive;
       this.$promise = cronapi.$scope.$http({
           method: 'POST',
           url: (window.hostApp || "") + url,
@@ -1750,6 +1760,7 @@
           console.log('Error downloading file');
       });
     }
+    
   };
   
   this.cronapi.internal.uploadFile = function(field, file, progressId) {
