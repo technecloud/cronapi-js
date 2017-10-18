@@ -776,6 +776,18 @@
    $('#modalTemplate').modal('show');
    
   };
+  
+  /**
+   * @type function
+   * @name {{showModal}}
+   * @nameTags Show| Modal| Exibir| Mostrar
+   * @description {{showModalDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+        $('#'+id).modal('show');
+  };
 
   /**
    * @type function
