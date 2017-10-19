@@ -250,6 +250,9 @@ public class CronapiREST {
         QueryManager.checkFilterSecurity(query, translationPath.filter);
 
         DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        if (query.get("multiTenant") != null && !query.get("multiTenant").isJsonNull() && !query.get("multiTenant").getAsBoolean()) {
+          ds.disableMultiTenant();
+        }
         String jpql = QueryManager.getJPQL(query);
 
         ds.setDataSourceFilter(translationPath.filter);
@@ -468,7 +471,7 @@ public class CronapiREST {
       var = callable.call();
       TransactionManager.commit();
     }
-    catch(Exception e) {
+    catch(Exception e) {e.printStackTrace();
       TransactionManager.rollback();
       throw e;
     }

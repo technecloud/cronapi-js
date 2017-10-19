@@ -166,6 +166,11 @@ public class JPQLConverter {
     String orderBy = getOrder(jsonObject.get("rulesOrderBy").getAsJsonArray()).trim();
     
     sqlBase = String.format(sqlBase, fields, entityWithAlias, where, groupBy, having, orderBy);
+
+    if(jsonObject.get("multiTenant") != null && !jsonObject.get("multiTenant").isJsonNull() && !jsonObject.get("multiTenant").getAsBoolean()) {
+      sqlBase = sqlBase.trim() + " /*notenant*/";
+    }
+
     return sqlBase.trim();
   }
   
