@@ -21,13 +21,14 @@ import cronapi.Var;
 public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{createObjectWithMapName}}", nameTags = {
-			"createObjectWithMap" }, description = "{{createObjectWithMapDescription}}", wizard = "maps_create_with" , returnType = ObjectType.MAP)
+			"createObjectWithMap" }, description = "{{createObjectWithMapDescription}}", wizard = "maps_create_with", returnType = ObjectType.MAP)
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
-		LinkedHashMap<Var, Var> mapObject = new LinkedHashMap<>();
+		HashMap<Var, Var> mapObject = new HashMap<>();
 		for (int i = 0; i < map.length; i++) {
-			mapObject.put(new Var(map[i].getId()), new Var(map[i].getObject()) );
+			Operations.setMapField(Var.valueOf(mapObject), Var.valueOf(map[i].getId()),
+					Var.valueOf(map[i].getObject()));
 		}
 		return new Var(mapObject);
 	}

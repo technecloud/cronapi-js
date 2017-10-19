@@ -32,6 +32,7 @@ import cronapi.RestClient;
 import cronapi.SecurityBeanFilter;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
@@ -323,11 +324,33 @@ public class DataSource implements JsonSerializable {
     return save(true);
   }
   
+  private void processCloudFields() {
+    Object toSave;
+    if(this.insertedElement != null) 
+      toSave = this.insertedElement;
+    else
+      toSave = this.getObject();
+    
+    List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave, "dropbox");
+    List<String> fieldsIds = Utils.getFieldsWithAnnotationId(toSave);
+    if (fieldsAnnotationCloud.size() > 0) {
+      
+      String dropAppAccessToken = Utils.getAnnotationCloud(toSave, fieldsAnnotationCloud.get(0)).value();
+      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toFields(fieldsAnnotationCloud.toArray(new String[0]));
+      CloudFactory factory = cloudManager.byEntity(toSave).build();
+      factory.dropbox(dropAppAccessToken).upload();
+      factory.getFiles().forEach(f-> {
+        updateField(toSave, f.getFieldReference(), f.getFileDirectUrl());
+      });
+    }
+  }
+  
   /**
    * Saves the object in the current index or a new object when has insertedElement
    */
   public Object save(boolean returnCursorAfterInsert) {
     try {
+      processCloudFields();
       Object toSave;
       EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
@@ -346,14 +369,6 @@ public class DataSource implements JsonSerializable {
         toSave = this.getObject();
       
       Object saved = em.merge(toSave);
-      
-      List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(saved, "dropbox");
-      if (fieldsAnnotationCloud.size() > 0) {
-        String dropAppAccessToken = Utils.getAnnotationCloud(saved, fieldsAnnotationCloud.get(0)).value();
-        CloudManager cloudManager = CloudManager.newInstance().byID("id").toFields(fieldsAnnotationCloud.toArray(new String[0]));
-        cloudManager.byEntity(saved).build().dropbox(dropAppAccessToken).upload();
-      }
-      
       return saved;
       
     }
@@ -493,16 +508,45 @@ public class DataSource implements JsonSerializable {
   
   public void update(Var data) {
     try {
+      List<String> fieldsByteHeaderSignature = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(getObject());
       LinkedList<String> fields = data.keySet();
       for(String key : fields) {
-        if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
-          this.updateField(key, data.getField(key));
+        if (!fieldsByteHeaderSignature.contains(key) || isFieldByteWithoutHeader(key, data.getField(key))) {
+          if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
+            this.updateField(key, data.getField(key));
+          }
         }
       }
     }
     catch(Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private boolean isFieldByteWithoutHeader(String fieldName, Object fieldValue) {
+    //Verificando se não tem o header, se não tiver o header, houve alteração, então tem que atualizar.
+    boolean result = false;
+    
+    
+    if(fieldValue instanceof Var) {
+      if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
+        return true;
+    }
+    
+    Method setMethod = Utils.findMethod(getObject(), "set" + fieldName);
+    if (setMethod!=null) {
+      if(fieldValue instanceof Var) {
+        fieldValue = ((Var)fieldValue).getObject(setMethod.getParameterTypes()[0]);
+      }
+      else {
+        Var tVar = Var.valueOf(fieldValue);
+        fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
+      }
+      Object header = cronapi.util.StorageService.getFileBytesMetadata((byte[])fieldValue);
+      result = (header == null);
+    }
+    
+    return result;
   }
   
   /**

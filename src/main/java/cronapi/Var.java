@@ -29,6 +29,7 @@ import cronapi.Var.Type;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
+import cronapi.util.StorageService;
 
 public class Var implements Comparable<Var>, JsonSerializable {
 
@@ -407,7 +408,12 @@ public class Var implements Comparable<Var>, JsonSerializable {
 		try {
 			switch (getType()) {
 			case STRING:
+			  if ( cronapi.util.StorageService.isTempFileJson(((String) getObject()))) {
+			    return StorageService.getFileBytesWithMetadata((String) getObject());
+			  }
 				return java.util.Base64.getDecoder().decode(((String) getObject()).getBytes("UTF-8"));
+			case UNKNOWN:
+			  return (byte[]) getObject();
 			default:
 				// has no meaning
 				break;

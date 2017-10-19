@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface CronapiMetaData {
   String type() default "function";
   
+  String platform() default "";
+  
   boolean external() default true;
   
   CategoryType category() default CategoryType.OTHER;
