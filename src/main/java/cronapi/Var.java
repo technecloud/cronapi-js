@@ -204,7 +204,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
 			return getObjectAsLong();
 		} else if (type == Integer.class) {
 			return getObjectAsInt();
-		} else if (type == Double.class) {
+		} else if (type == Double.class || type == double.class) { 
 			return getObjectAsDouble();
 		} else if (type == Float.class) {
 			return getObjectAsDouble().floatValue();

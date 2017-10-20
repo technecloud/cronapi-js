@@ -255,6 +255,7 @@ public class DataSourceFilter {
       }
       int i = params.length;
       boolean add = false;
+      setTypeBasedOnItemsValue();
       for(DataSourceFilterItem item : items) {
         if(add) {
           jpql += " " + type + " ";
@@ -294,6 +295,24 @@ public class DataSourceFilter {
     }
     
     this.appliedJpql = jpql;
+  }
+  
+  private void setTypeBasedOnItemsValue() {
+    boolean isSameValue = true;
+    for(DataSourceFilterItem item : items) {
+      for(DataSourceFilterItem itemToCheck : items) {
+        if (!item.value.getObjectAsString().equals(itemToCheck.value.getObjectAsString())) {
+          isSameValue = false;
+          break;
+        }
+      }
+      break;
+    }
+    if (isSameValue)
+      this.type = "or";
+    else
+      this.type = "and";
+    
   }
   
   public static class DataSourceFilterItem {
