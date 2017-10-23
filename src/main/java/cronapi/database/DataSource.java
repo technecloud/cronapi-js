@@ -529,7 +529,9 @@ public class DataSource implements JsonSerializable {
     
     
     if(fieldValue instanceof Var) {
-      if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
+      if (((Var)fieldValue).getObject() == null)
+        return true;
+      else if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
         return true;
     }
     
