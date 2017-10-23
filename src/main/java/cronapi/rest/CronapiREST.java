@@ -478,6 +478,7 @@ public class CronapiREST {
 	public void filePreview(@PathVariable("fileName") String fileName) throws Exception {
 		StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(fileName);
 		response.setContentType(fileObject.contentType);
+		response.setHeader("Content-disposition", "attachment; filename="+ fileObject.name + fileObject.extension);
 
 		ServletOutputStream responseOutputStream = response.getOutputStream();
 		responseOutputStream.write(fileObject.bytes);
