@@ -14,6 +14,8 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.eclipse.persistence.descriptors.DescriptorQueryManager;
+import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -60,6 +62,7 @@ public class DataSource implements JsonSerializable {
   private Object insertedElement = null;
   private EntityManager customEntityManager;
   private DataSourceFilter dsFilter;
+  private boolean multiTenant = true;
   
   /**
    * Init a datasource with a page size equals 100
@@ -186,7 +189,16 @@ public class DataSource implements JsonSerializable {
     if(jpql == null) {
       jpql = "select e from " + simpleEntity + " e";
     }
-    
+
+    boolean containsNoTenant = jpql.contains("/*notenant*/");
+    jpql = jpql.replace("/*notenant*/", "");
+
+    boolean disableMT = false;
+
+    if (!multiTenant || containsNoTenant) {
+      disableMT = true;
+    }
+
     if(dsFilter != null) {
       dsFilter.applyTo(domainClass, jpql, params);
       params = dsFilter.getAppliedParams();
@@ -195,8 +207,20 @@ public class DataSource implements JsonSerializable {
     
     try {
       EntityManager em = getEntityManager(domainClass);
+
+      for(EntityType type: em.getMetamodel().getEntities()) {
+        DescriptorQueryManager old = ((EntityTypeImpl) type).getDescriptor().getQueryManager();
+        if (CronappDescriptorQueryManager.needProxy(old)) {
+          ((EntityTypeImpl) type).getDescriptor().setQueryManager(CronappDescriptorQueryManager.build(old));
+        }
+      }
+
+      if (disableMT) {
+        CronappDescriptorQueryManager.disableMultitenant();
+      }
+
       TypedQuery<?> query = em.createQuery(jpql, domainClass);
-      
+
       int i = 0;
       List<String> parsedParams = parseParams(jpql);
       
@@ -228,6 +252,11 @@ public class DataSource implements JsonSerializable {
     }
     catch(Exception ex) {
       throw new RuntimeException(ex);
+    }
+    finally {
+      if (disableMT) {
+        CronappDescriptorQueryManager.enableMultitenant();
+      }
     }
     
     // has data, moves cursor to first position
@@ -500,7 +529,9 @@ public class DataSource implements JsonSerializable {
     
     
     if(fieldValue instanceof Var) {
-      if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
+      if (((Var)fieldValue).getObject() == null)
+        return true;
+      else if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
         return true;
     }
     
@@ -1029,5 +1060,13 @@ public class DataSource implements JsonSerializable {
     if(!authorized) {
       throw new RuntimeException(Messages.getString("notAllowed"));
     }
+  }
+
+  public void disableMultiTenant() {
+    this.multiTenant = false;
+  }
+
+  public void enableMultiTenant() {
+    this.multiTenant = true;
   }
 }

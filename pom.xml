@@ -5,7 +5,7 @@
     <artifactId>cronapi-java</artifactId>
     <packaging>jar</packaging>
     <name>cronapi-java</name>
-    <version>0.0.63-develop</version>
+    <version>0.0.65-develop</version>
     <description>Public Java library for CronApp's users</description>
     <url>https://github.com/technecloud/cronapi-java</url>
     <build>
@@ -148,6 +148,16 @@
             <artifactId>dropbox-core-sdk</artifactId>
             <version>2.1.2</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.22.0-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.6.0</version>
         </dependency>
     </dependencies>
     <distributionManagement>
