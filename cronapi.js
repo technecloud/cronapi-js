@@ -1721,7 +1721,19 @@
     else {
       var url = '/api/cronapi/downloadFile';
       var splited = datasource.entity.split('/');
-      url += '/' + splited[splited.length-1];
+      
+      var entity = splited[splited.length-1];
+      if (entity.indexOf(":") > -1) {
+        //Siginifica que é relacionamento, pega a entidade do relacionamento
+        var entityRelation = '';
+        var splitedDomainBase = splited[3].split('.');
+        for (var i=0; i<splitedDomainBase.length-1;i++)
+          entityRelation += splitedDomainBase[i]+'.';
+        var entityRelationSplited = entity.split(':');
+        entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
+      }
+      
+      url += '/' + entity;
       url += '/' + field;
       var _u = JSON.parse(sessionStorage.getItem('_u'));
       var object = itemActive;
