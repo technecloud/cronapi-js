@@ -306,5 +306,7 @@
 	"clearWatchAcceleration": "Stop Acceleration Watcher",
 	"clearWatchAccelerationhDescription": "Function to cancel accelerometer monitoring.",
 	"clearWatchPositionDescription": "Function to cancel geo-referenced positioning monitoring.",
-	"clearWatchPosition" : "Stop Postion Watcher"
+	"clearWatchPosition": "Stop Postion Watcher",
+	"showModal": "Show modal",
+	"showModalDesc": "Function that show a modal"
 }

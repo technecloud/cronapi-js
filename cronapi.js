@@ -776,6 +776,18 @@
    $('#modalTemplate').modal('show');
    
   };
+  
+  /**
+   * @type function
+   * @name {{showModal}}
+   * @nameTags Show| Modal| Exibir| Mostrar
+   * @description {{showModalDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+        $('#'+id).modal('show');
+  };
 
   /**
    * @type function
@@ -850,20 +862,6 @@
    */
   this.cronapi.screen.changeAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName, /** @type {ObjectType.STRING} */ attrValue ) {
     $('#'+id).attr(attrName , attrValue);
-  };
-
-    /**
-   * @type function
-   * @name {{getAttrValueName}}
-   * @nameTags getAttrValue
-   * @description {{getAttrValueDesc}}
-   * @param {ObjectType.STRING} id {{idsFromScreen}}
-   * @param {ObjectType.STRING} attrName {{attrName}}
-   * @returns {ObjectType.STRING}
-   * @multilayer true
-   */
-  this.cronapi.screen.getAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName) {
-   return $('#'+id).attr(attrName , attrValue);
   };
 
   /**
