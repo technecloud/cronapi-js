@@ -186,10 +186,22 @@ public class CronapiREST {
       throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
-      ds.checkRESTSecurity("PUT");
-      ds.filter(data, null);
-      ds.update(data);
-      return Var.valueOf(ds.save());
+      TranslationPath translationPath = translatePathVars(entity);
+      
+      if(translationPath.relationClass == null) {
+        ds.checkRESTSecurity("PUT");
+        ds.filter(data, null);
+        ds.update(data);
+        return Var.valueOf(ds.save());
+      }
+      else {
+        ds.checkRESTSecurity(translationPath.refId, "PUT");
+        String entityRelation = ds.getRelationEntity(translationPath.refId);
+        ds = new DataSource(entityRelation);
+        ds.filter(data, null);
+        ds.update(data);
+        return Var.valueOf(ds.save());
+      }
     });
 
     return new ResponseEntity<Object>(result.getValue().getObject(), HttpStatus.OK);

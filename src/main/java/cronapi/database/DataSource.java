@@ -324,9 +324,11 @@ public class DataSource implements JsonSerializable {
     return save(true);
   }
   
-  private void processCloudFields() {
+  private void processCloudFields(Object toSaveParam) {
     Object toSave;
-    if(this.insertedElement != null) 
+    if (toSaveParam != null)
+      toSave = toSaveParam;
+    else if(this.insertedElement != null) 
       toSave = this.insertedElement;
     else
       toSave = this.getObject();
@@ -350,7 +352,7 @@ public class DataSource implements JsonSerializable {
    */
   public Object save(boolean returnCursorAfterInsert) {
     try {
-      processCloudFields();
+      processCloudFields(null);
       Object toSave;
       EntityManager em = getEntityManager(domainClass);
       em.getMetamodel().entity(domainClass);
@@ -877,7 +879,8 @@ public class DataSource implements JsonSerializable {
       updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
       result = insertion;
     }
-    
+
+    processCloudFields(insertion);    
     if(!em.getTransaction().isActive()) {
       em.getTransaction().begin();
     }
@@ -1016,6 +1019,12 @@ public class DataSource implements JsonSerializable {
     RelationMetadata relationMetadata = metadata.getRelations().get(relationId);
     
     checkRESTSecurity(Class.forName(relationMetadata.getName()), method);
+  }
+  
+  public String getRelationEntity(String relationId) throws Exception {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(relationId);
+    return relationMetadata.getName();
   }
   
   private void checkRESTSecurity(Class clazz, String method) throws Exception {
