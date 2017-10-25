@@ -169,8 +169,9 @@ public class Operations {
 		callBlockly(classNameWithMethod, params);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{callClienteFunctionName}}", nameTags = {
-			"callClienteFunction" }, description = "{{callClienteFunctionDescription}}", returnType = ObjectType.VOID, arbitraryParams = true)
+// Internal function
+// 	@CronapiMetaData(type = "function", name = "{{callClienteFunctionName}}", nameTags = {
+// 			"callClienteFunction" }, description = "{{callClienteFunctionDescription}}", returnType = ObjectType.VOID, arbitraryParams = true)
 	public static final void callClientFunction(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam0}}") Var function,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{callClienteFunctionParam1}}") Var... params)
