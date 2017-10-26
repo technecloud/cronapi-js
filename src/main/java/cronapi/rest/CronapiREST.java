@@ -187,10 +187,22 @@ public class CronapiREST {
       throws Exception {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
-      ds.checkRESTSecurity("PUT");
-      ds.filter(data, null);
-      ds.update(data);
-      return Var.valueOf(ds.save());
+      TranslationPath translationPath = translatePathVars(entity);
+      
+      if(translationPath.relationClass == null) {
+        ds.checkRESTSecurity("PUT");
+        ds.filter(data, null);
+        ds.update(data);
+        return Var.valueOf(ds.save());
+      }
+      else {
+        ds.checkRESTSecurity(translationPath.refId, "PUT");
+        String entityRelation = ds.getRelationEntity(translationPath.refId);
+        ds = new DataSource(entityRelation);
+        ds.filter(data, null);
+        ds.update(data);
+        return Var.valueOf(ds.save());
+      }
     });
 
     return new ResponseEntity<Object>(result.getValue().getObject(), HttpStatus.OK);
@@ -477,6 +489,7 @@ public class CronapiREST {
 	public void filePreview(@PathVariable("fileName") String fileName) throws Exception {
 		StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(fileName);
 		response.setContentType(fileObject.contentType);
+		response.setHeader("Content-disposition", "attachment; filename="+ fileObject.name + fileObject.extension);
 
 		ServletOutputStream responseOutputStream = response.getOutputStream();
 		responseOutputStream.write(fileObject.bytes);

@@ -219,6 +219,21 @@ public class Var implements Comparable<Var>, JsonSerializable {
 			if (_object instanceof Map && type != Map.class) {
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				
+				try {
+  				List<String> fieldsByteHeaderSignature = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(type.newInstance());
+  				for (String fieldToGetByteContent: fieldsByteHeaderSignature) {
+    				Var content = cronapi.json.Operations.getJsonOrMapField(Var.valueOf(_object), Var.valueOf(fieldToGetByteContent));
+    				if ( cronapi.util.StorageService.isTempFileJson(content.getObjectAsString())) {
+    			    byte[] contentByte = StorageService.getFileBytesWithMetadata(content.getObjectAsString());
+    			    cronapi.json.Operations.setJsonOrMapField(Var.valueOf(_object), Var.valueOf(fieldToGetByteContent), Var.valueOf(contentByte));
+    			  }
+  				}
+				}
+				catch(Exception e) {
+				  throw new RuntimeException(e);
+				}
+				
 				return mapper.convertValue(_object, type);
 			}
 
