@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,7 +30,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -37,15 +37,15 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import cronapi.ClientCommand;
 import cronapi.CronapiMetaData;
-import cronapi.ParamMetaData;
-import cronapi.RestClient;
-import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
+import cronapi.RestClient;
+import cronapi.TokenUtils;
+import cronapi.Var;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.BlocklySecurity;
-import java.util.UUID;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
 public class Operations {
@@ -66,6 +66,23 @@ public class Operations {
 		IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 	}
 
+  @CronapiMetaData(type = "function", name = "{{getCurrentUserName}}", nameTags = {
+  "getCurrentUser" }, description = "{{getCurrentUserNameDescription}}" , returnType = ObjectType.STRING)
+  public static final Var getCurrentUserName() throws Exception {
+  HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+  .getRequest();
+  String username = null;
+  if (request.getSession().getValue("username") != null) {
+    username = request.getSession().getValue("username").toString();
+  }
+  if (username == null || username.isEmpty()) {
+    String authToken = request.getHeader(TokenUtils.AUTH_HEADER_NAME);
+    username = TokenUtils.getUsernameFromToken(authToken);
+  }
+  
+  return new Var(username);
+  }
+	
 	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
 			"copyTextToTransferArea" }, description = "{{copyTextToTransferAreaDescription}}", params = {
 					"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
