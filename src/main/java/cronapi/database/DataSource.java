@@ -364,9 +364,11 @@ public class DataSource implements JsonSerializable {
     return save(true);
   }
   
-  private void processCloudFields() {
+  private void processCloudFields(Object toSaveParam) {
     Object toSave;
-    if(this.insertedElement != null) 
+    if (toSaveParam != null)
+      toSave = toSaveParam;
+    else if(this.insertedElement != null)
       toSave = this.insertedElement;
     else
       toSave = this.getObject();
@@ -390,7 +392,7 @@ public class DataSource implements JsonSerializable {
    */
   public Object save(boolean returnCursorAfterInsert) {
     try {
-      processCloudFields();
+      processCloudFields(null);
       Object toSave;
       Object saved;
 
@@ -589,7 +591,9 @@ public class DataSource implements JsonSerializable {
     
     
     if(fieldValue instanceof Var) {
-      if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
+      if (((Var)fieldValue).getObject() == null)
+        return true;
+      else if (cronapi.util.StorageService.isTempFileJson(((Var)fieldValue).getObject().toString()))
         return true;
     }
     
@@ -938,6 +942,7 @@ public class DataSource implements JsonSerializable {
         result = insertion;
       }
 
+    processCloudFields(insertion);
       if (!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
@@ -1086,6 +1091,12 @@ public class DataSource implements JsonSerializable {
     checkRESTSecurity(Class.forName(relationMetadata.getName()), method);
   }
   
+  public String getRelationEntity(String relationId) throws Exception {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(relationId);
+    return relationMetadata.getName();
+  }
+
   private void checkRESTSecurity(Class clazz, String method) throws Exception {
     Annotation security = clazz.getAnnotation(CronappSecurity.class);
     boolean authorized = false;
