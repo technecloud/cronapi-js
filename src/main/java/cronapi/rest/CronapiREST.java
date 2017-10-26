@@ -141,6 +141,7 @@ public class CronapiREST {
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
+    ex.printStackTrace();;
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -244,7 +245,7 @@ public class CronapiREST {
       QueryManager.checkSecurity(query, "GET");
 
       if (!QueryManager.getType(query).equals("blockly")) {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
 
         ds.insert();
 
@@ -278,10 +279,8 @@ public class CronapiREST {
 
         QueryManager.checkFilterSecurity(query, translationPath.filter);
 
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
-        if (query.get("multiTenant") != null && !query.get("multiTenant").isJsonNull() && !query.get("multiTenant").getAsBoolean()) {
-          ds.disableMultiTenant();
-        }
+        DataSource ds = new DataSource(query);
+
         String jpql = QueryManager.getJPQL(query);
 
         ds.setDataSourceFilter(translationPath.filter);
@@ -325,7 +324,7 @@ public class CronapiREST {
 
         return inserted.getPOJO();
       } else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
 
         ds.insert((Map<?, ?>) data.getObject());
 
@@ -365,7 +364,7 @@ public class CronapiREST {
 
         return modified.getPOJO();
       } else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
 
         ds.filter(data, null);
         QueryManager.executeEvent(query, ds, "beforeUpdate");
@@ -397,8 +396,8 @@ public class CronapiREST {
       } else {
         TranslationPath translationPath = translatePathVars(id, query.getAsJsonArray("queryParamsValues").size(), -1);
 
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
-        ds.filter(null, new PageRequest(1, 1), translationPath.params);
+        DataSource ds = new DataSource(query);
+        ds.filter(null, null, translationPath.params);
         QueryManager.executeEvent(query, ds, "beforeDelete");
         ds.delete();
         QueryManager.executeEvent(query, ds, "afterDelete");

@@ -13,6 +13,10 @@ public class CronappDescriptorQueryManager {
   
   private static ThreadLocal<Boolean> DISABLED = new ThreadLocal<>();
   
+  public static boolean isDisabled() {
+    return DISABLED.get() != null && DISABLED.get();
+  }
+  
   public static void disableMultitenant() {
     DISABLED.set(true);
   }
@@ -21,7 +25,7 @@ public class CronappDescriptorQueryManager {
     DISABLED.remove();
   }
   
-  public static boolean needProxy(DescriptorQueryManager obj) {
+  public static boolean needProxy(Object obj) {
     if(obj == null)
       return false;
     
@@ -41,6 +45,12 @@ public class CronappDescriptorQueryManager {
         if(overridden.getName().equals("getAdditionalJoinExpression")) {
           if(DISABLED.get() != null && DISABLED.get()) {
             return null;
+          }
+        }
+        
+        if(overridden.getName().equals("hasReadObjectQuery")) {
+          if(DISABLED.get() != null && DISABLED.get()) {
+            return false;
           }
         }
         return overridden.invoke(toWrap, args);

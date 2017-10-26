@@ -14,8 +14,14 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.eclipse.persistence.annotations.Multitenant;
+import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorQueryManager;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
+import org.eclipse.persistence.queries.DatabaseQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,12 +32,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import com.fasterxml.jackson.databind.ser.SerializerCache.TypeKey;
+import com.google.gson.JsonObject;
 
-import cronapi.RestClient;
-import cronapi.SecurityBeanFilter;
-import cronapi.Utils;
-import cronapi.Var;
+import cronapi.*;
 import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
@@ -73,6 +76,11 @@ public class DataSource implements JsonSerializable {
   public DataSource(String entity) {
     this(entity, 100);
   }
+
+  public DataSource(JsonObject query) {
+    this(query.get("entityFullName").getAsString(), 100);
+    QueryManager.checkMultiTenant(query, this);
+  }
   
   /**
    * Init a datasource with a page size equals 100, and custom entity manager
@@ -96,6 +104,7 @@ public class DataSource implements JsonSerializable {
    *          - page size of a Pageable object retrieved from repository
    */
   public DataSource(String entity, int pageSize) {
+    CronappDescriptorQueryManager.enableMultitenant();
     this.entity = entity;
     this.simpleEntity = entity.substring(entity.lastIndexOf(".") + 1);
     this.pageSize = pageSize;
@@ -106,10 +115,15 @@ public class DataSource implements JsonSerializable {
   }
   
   private EntityManager getEntityManager(Class domainClass) {
+    EntityManager em;
     if(customEntityManager != null)
-      return customEntityManager;
+      em = customEntityManager;
     else
-      return TransactionManager.getEntityManager(domainClass);
+      em = TransactionManager.getEntityManager(domainClass);
+
+    enableTenantToogle(em);
+
+    return em;
   }
   
   public Class getDomainClass() {
@@ -173,6 +187,40 @@ public class DataSource implements JsonSerializable {
     
     return tokens;
   }
+
+  private void enableTenantToogle(EntityManager em) {
+    try {
+      for(EntityType type : em.getMetamodel().getEntities()) {
+        DescriptorQueryManager old = ((EntityTypeImpl)type).getDescriptor().getQueryManager();
+
+        ClassDescriptor desc = ((EntityTypeImpl)type).getDescriptor();
+
+        if (desc.getMultitenantPolicy() != null && !(desc.getMultitenantPolicy() instanceof CronappMultitenantPolicy)) {
+          desc.setMultitenantPolicy(new CronappMultitenantPolicy(desc.getMultitenantPolicy()));
+        }
+
+        if(CronappDescriptorQueryManager.needProxy(old)) {
+          desc.setQueryManager(CronappDescriptorQueryManager.build(old));
+        }
+
+
+      }
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void startMultitenant(EntityManager em) {
+    if (!multiTenant) {
+      CronappDescriptorQueryManager.disableMultitenant();
+    }
+  }
+
+  private void endMultitetant() {
+    if (!multiTenant) {
+      CronappDescriptorQueryManager.enableMultitenant();
+    }
+  }
   
   /**
    * Retrieve objects from database using repository when filter is null or empty,
@@ -193,10 +241,8 @@ public class DataSource implements JsonSerializable {
     boolean containsNoTenant = jpql.contains("/*notenant*/");
     jpql = jpql.replace("/*notenant*/", "");
 
-    boolean disableMT = false;
-
-    if (!multiTenant || containsNoTenant) {
-      disableMT = true;
+    if (containsNoTenant) {
+      multiTenant = false;
     }
 
     if(dsFilter != null) {
@@ -208,18 +254,12 @@ public class DataSource implements JsonSerializable {
     try {
       EntityManager em = getEntityManager(domainClass);
 
-      for(EntityType type: em.getMetamodel().getEntities()) {
-        DescriptorQueryManager old = ((EntityTypeImpl) type).getDescriptor().getQueryManager();
-        if (CronappDescriptorQueryManager.needProxy(old)) {
-          ((EntityTypeImpl) type).getDescriptor().setQueryManager(CronappDescriptorQueryManager.build(old));
-        }
-      }
+      startMultitenant(em);
 
-      if (disableMT) {
-        CronappDescriptorQueryManager.disableMultitenant();
-      }
+      AbstractSession session = (AbstractSession)((EntityManagerImpl) em.getDelegate()).getActiveSession();
+      DatabaseQuery dbQuery = EJBQueryImpl.buildEJBQLDatabaseQuery("customQuery", jpql, session, (Enum)null, (Map)null, session.getDatasourcePlatform().getConversionManager().getLoader());
 
-      TypedQuery<?> query = em.createQuery(jpql, domainClass);
+      TypedQuery<?> query = new EJBQueryImpl(dbQuery, (EntityManagerImpl) em.getDelegate());
 
       int i = 0;
       List<String> parsedParams = parseParams(jpql);
@@ -242,9 +282,11 @@ public class DataSource implements JsonSerializable {
         }
         i++;
       }
-      
-      query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
-      query.setMaxResults(this.pageRequest.getPageSize());
+
+      if (this.pageRequest != null) {
+        query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
+        query.setMaxResults(this.pageRequest.getPageSize());
+      }
       
       List<?> resultsInPage = query.getResultList();
       
@@ -254,9 +296,7 @@ public class DataSource implements JsonSerializable {
       throw new RuntimeException(ex);
     }
     finally {
-      if (disableMT) {
-        CronappDescriptorQueryManager.enableMultitenant();
-      }
+      enableMultiTenant();
     }
     
     // has data, moves cursor to first position
@@ -352,23 +392,35 @@ public class DataSource implements JsonSerializable {
     try {
       processCloudFields();
       Object toSave;
+      Object saved;
+
       EntityManager em = getEntityManager(domainClass);
-      em.getMetamodel().entity(domainClass);
-      
-      if(!em.getTransaction().isActive()) {
-        em.getTransaction().begin();
+      try {
+        startMultitenant(em);
+
+        if (!em.getTransaction().isActive()) {
+          em.getTransaction().begin();
+        }
+
+        if (this.insertedElement != null) {
+          toSave = this.insertedElement;
+          if (returnCursorAfterInsert)
+            this.insertedElement = null;
+          em.persist(toSave);
+        } else
+          toSave = this.getObject();
+
+        saved = em.merge(toSave);
+
+        if (toSave.getClass().getAnnotation(Multitenant.class) != null) {
+          em.flush();
+          if (multiTenant) {
+            em.refresh(toSave);
+          }
+        }
+      } finally {
+        endMultitetant();
       }
-      
-      if(this.insertedElement != null) {
-        toSave = this.insertedElement;
-        if(returnCursorAfterInsert)
-          this.insertedElement = null;
-        em.persist(toSave);
-      }
-      else
-        toSave = this.getObject();
-      
-      Object saved = em.merge(toSave);
       return saved;
       
     }
@@ -401,18 +453,26 @@ public class DataSource implements JsonSerializable {
    * Removes the object in the current index
    */
   public void delete() {
+    EntityManager em = getEntityManager(domainClass);
     try {
       Object toRemove = this.getObject();
-      EntityManager em = getEntityManager(domainClass);
+
+      startMultitenant(em);
+
       if(!em.getTransaction().isActive()) {
         em.getTransaction().begin();
       }
       // returns managed instance
       toRemove = em.merge(toRemove);
       em.remove(toRemove);
+      if (!multiTenant) {
+        em.flush();
+      }
     }
     catch(Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      endMultitetant();
     }
   }
   
@@ -508,7 +568,7 @@ public class DataSource implements JsonSerializable {
   
   public void update(Var data) {
     try {
-      List<String> fieldsByteHeaderSignature = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(getObject());
+      List<String> fieldsByteHeaderSignature = cronapi.Utils.getFieldsWithAnnotationByteHeaderSignature(domainClass);
       LinkedList<String> fields = data.keySet();
       for(String key : fields) {
         if (!fieldsByteHeaderSignature.contains(key) || isFieldByteWithoutHeader(key, data.getField(key))) {
@@ -859,28 +919,36 @@ public class DataSource implements JsonSerializable {
     RelationMetadata relationMetadata = metadata.getRelations().get(refId);
     
     EntityManager em = getEntityManager(domainClass);
-    
-    filter(null, new PageRequest(0, 100), primaryKeys);
-    Object insertion = null;
+
     Object result = null;
-    if(relationMetadata.getAssossiationName() != null) {
-      insertion = this.newInstance(relationMetadata.getAssossiationName());
-      updateField(insertion, relationMetadata.getAttribute().getName(),
-              Var.valueOf(data).getObject(forName(relationMetadata.getName())));
-      updateField(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
-      result = getObject();
+    try {
+      startMultitenant(em);
+
+      filter(null, new PageRequest(0, 100), primaryKeys);
+      Object insertion = null;
+      if (relationMetadata.getAssossiationName() != null) {
+        insertion = this.newInstance(relationMetadata.getAssossiationName());
+        updateField(insertion, relationMetadata.getAttribute().getName(),
+            Var.valueOf(data).getObject(forName(relationMetadata.getName())));
+        updateField(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
+        result = getObject();
+      } else {
+        insertion = Var.valueOf(data).getObject(forName(relationMetadata.getName()));
+        updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
+        result = insertion;
+      }
+
+      if (!em.getTransaction().isActive()) {
+        em.getTransaction().begin();
+      }
+
+      em.persist(insertion);
+      if (!multiTenant) {
+        em.flush();
+      }
+    } finally {
+      endMultitetant();
     }
-    else {
-      insertion = Var.valueOf(data).getObject(forName(relationMetadata.getName()));
-      updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
-      result = insertion;
-    }
-    
-    if(!em.getTransaction().isActive()) {
-      em.getTransaction().begin();
-    }
-    
-    em.persist(insertion);
     return result;
   }
   
@@ -955,28 +1023,30 @@ public class DataSource implements JsonSerializable {
    *          - Bidimentional array with params name and params value
    */
   public void execute(String query, Var ... params) {
+    EntityManager em = getEntityManager(domainClass);
     try {
-      
-      EntityManager em = getEntityManager(domainClass);
-      TypedQuery<?> strQuery = em.createQuery(query, domainClass);
-      
-      for(Var p : params) {
-        strQuery.setParameter(p.getId(), p.getObject());
-      }
-      
+      startMultitenant(em);
       try {
-        if(!em.getTransaction().isActive()) {
-          em.getTransaction().begin();
+        TypedQuery<?> strQuery = em.createQuery(query, domainClass);
+
+        for (Var p : params) {
+          strQuery.setParameter(p.getId(), p.getObject());
         }
-        strQuery.executeUpdate();
+
+        try {
+          if (!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+          }
+          strQuery.executeUpdate();
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
       }
-      catch(Exception e) {
-        throw new RuntimeException(e);
-      }
-      
-    }
-    catch(Exception ex) {
-      throw new RuntimeException(ex);
+    } finally {
+      endMultitetant();
     }
   }
   

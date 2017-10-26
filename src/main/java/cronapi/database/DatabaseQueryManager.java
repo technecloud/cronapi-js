@@ -58,7 +58,7 @@ public class DatabaseQueryManager {
         return QueryManager.executeBlockly(query, "GET", params);
       }
       else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
         String jpql = QueryManager.getJPQL(query);
         
         ds.filter(jpql, page, params);
@@ -85,7 +85,7 @@ public class DatabaseQueryManager {
         return inserted;
       }
       else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
         
         ds.insert(data.getObject());
         
@@ -115,7 +115,7 @@ public class DatabaseQueryManager {
         return modified;
       }
       else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
         
         ds.filter(data, null);
         QueryManager.executeEvent(query, ds, "beforeUpdate");
@@ -138,7 +138,7 @@ public class DatabaseQueryManager {
         QueryManager.executeEvent(query, "afterDelete", extraParams);
       }
       else {
-        DataSource ds = new DataSource(query.get("entityFullName").getAsString());
+        DataSource ds = new DataSource(query);
         ds.filter(null, new PageRequest(1, 1), extraParams);
         QueryManager.executeEvent(query, ds, "beforeDelete");
         ds.delete();

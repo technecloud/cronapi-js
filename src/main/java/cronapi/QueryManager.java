@@ -414,4 +414,29 @@ public class QueryManager {
       }
     }
   }
+
+  public static void checkMultiTenant(JsonObject query, DataSource ds) {
+    if (!isNull(query.get("multiTenant")) && !query.get("multiTenant").getAsBoolean()) {
+      ds.disableMultiTenant();
+    }
+
+    if(!isNull(query.get("query"))) {
+      if(query.get("query").isJsonObject()) {
+        JsonObject obj = query.get("query").getAsJsonObject();
+
+        if (!isNull(obj.get("multiTenant")) && !obj.get("multiTenant").getAsBoolean()) {
+          ds.disableMultiTenant();
+        }
+      }
+      else {
+        String jpql = query.get("query").getAsString();
+        boolean containsNoTenant = jpql.contains("/*notenant*/");
+        if (containsNoTenant) {
+          ds.disableMultiTenant();
+          jpql = jpql.replace("/*notenant*/", "");
+          query.addProperty("query", jpql);
+        }
+      }
+    }
+  }
 }

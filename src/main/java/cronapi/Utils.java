@@ -16,18 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
@@ -195,23 +184,30 @@ public class Utils {
 	}
 	
 	public static List<String> getFieldsWithAnnotationByteHeaderSignature(Object obj) {
-		List<String> fields = new ArrayList<String>();
-		Class<?> c = obj.getClass();
+    List<String> fields = new LinkedList<>();
+    if (obj != null) {
 
-		Field[] fieldsArr = c.getDeclaredFields();
-		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
+      Class<?> c ;
+      if (obj instanceof Class)
+        c = (Class)obj;
+      else
+        c = obj.getClass();
 
-		for (Field field : allFields) {
-			if (field.getDeclaredAnnotations().length > 0) {
-				Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+      Field[] fieldsArr = c.getDeclaredFields();
+      List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
 
-				for (int i = 0; i < fieldAnnots.length; i++) {
-					if (fieldAnnots[i].toString().contains("CronapiByteHeaderSignature")) {
-						  fields.add(field.getName());
-					}
-				}
-			}
-		}
+      for (Field field : allFields) {
+        if (field.getDeclaredAnnotations().length > 0) {
+          Annotation[] fieldAnnots = field.getDeclaredAnnotations();
+
+          for (int i = 0; i < fieldAnnots.length; i++) {
+            if (fieldAnnots[i].toString().contains("CronapiByteHeaderSignature")) {
+              fields.add(field.getName());
+            }
+          }
+        }
+      }
+    }
 		return fields;
 	}
 
