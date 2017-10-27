@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
@@ -532,7 +534,14 @@ public class Var implements Comparable<Var>, JsonSerializable {
 			for (Var obj : ((LinkedList<Var>) getObject())) {
 				myList.add(obj.getPOJO());
 			}
-		} else {
+		} else if(getObject() instanceof JsonArray){
+		  myList = new LinkedList<>();
+		  JsonArray jsarray = (JsonArray)getObject();
+		  for (JsonElement jselement :  jsarray) {
+       	myList.add(Var.valueOf(jselement).getPOJO());
+      }
+		  
+		  }else {
 			myList = getSingleList(getPOJO());
 		}
 
