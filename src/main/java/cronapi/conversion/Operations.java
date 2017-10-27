@@ -6,10 +6,10 @@ import java.util.Base64;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
-import cronapi.Utils;
-import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.Utils;
+import cronapi.Var;
 
 /**
  * Classe que representa ...
@@ -24,10 +24,10 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{TextToBase64Name}}", nameTags = {
 			"TextToBase64" }, description = "{{TextToBase64Description}}", params = {
-					"{{TextToConvert}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.OBJECT)
+					"{{TextToConvert}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var StringToBase64(Var text) throws Exception {
-		byte[] encodedBytes = Base64.getEncoder().encode(text.getObjectAsString().getBytes());
-		return new Var(encodedBytes);
+		String base64 = Base64.getEncoder().encodeToString(text.getObjectAsString().getBytes());
+		return new Var(base64);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{base64ToText}}", nameTags = {
