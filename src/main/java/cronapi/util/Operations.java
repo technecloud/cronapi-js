@@ -83,16 +83,6 @@ public class Operations {
   return new Var(username);
   }
 	
-	@CronapiMetaData(type = "function", name = "{{copyTextToTransferAreaName}}", nameTags = {
-			"copyTextToTransferArea" }, description = "{{copyTextToTransferAreaDescription}}", params = {
-					"{{copyTextToTransferAreaParam0}}" }, paramsType = { ObjectType.STRING })
-	public static final void copyTextToTransferArea(Var strVar) throws Exception {
-		String str = strVar.getObjectAsString();
-		java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
-		java.awt.datatransfer.StringSelection selection = new java.awt.datatransfer.StringSelection(str);
-		clipboard.setContents(selection, null);
-	}
-
 	@CronapiMetaData(type = "function", name = "{{shellExecuteName}}", nameTags = {
 			"shellExecute" }, description = "{{shellExecuteDescription}}", params = { "{{shellExecuteParam0}}",
 					"{{shellExecuteParam1}}" }, paramsType = { ObjectType.STRING,
