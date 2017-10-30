@@ -1701,8 +1701,14 @@
       itemActive = datasource.data[indexData];
     }
     else {
-      valueContent = datasource.active[field]; 
-      itemActive = datasource.active;
+      try {
+        valueContent = datasource.active[field]; 
+        itemActive = datasource.active;
+      }
+      catch (e) {
+        valueContent = datasource[field]; 
+        itemActive = datasource;
+      }
     }
     //Verificando se é JSON Uploaded file
     try {
