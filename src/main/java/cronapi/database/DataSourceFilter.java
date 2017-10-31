@@ -124,18 +124,29 @@ public class DataSourceFilter {
   }
   
   public List<String> findSearchables(Object obj, boolean filterWithAnnotation) {
-    Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
     List<String> searchable = new ArrayList<>();
-
+    String baseDomain = obj instanceof Class ? ((Class)obj).getName() : obj.getClass().getName();
+    return findSearchables(obj, filterWithAnnotation, searchable, baseDomain, null);
+  }
+  
+  public List<String> findSearchables(Object obj, boolean filterWithAnnotation, List<String> searchable, String baseDomain, String baseAttribute) {
+    if (baseAttribute == null)
+      baseAttribute = "";
+      
+    Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
     EntityManager em = TransactionManager.getEntityManager((Class)obj);
     EntityType type = em.getMetamodel().entity((Class)obj);
 
+    
+    
     for(Field f : fields) {
       boolean contains = false;
+      SingularAttribute attrCurrent = null;
       for (Object attrObj : type.getAttributes()) {
         SingularAttribute attr = (SingularAttribute) attrObj;
         if (attr.getName().equalsIgnoreCase(f.getName())) {
           contains = true;
+          attrCurrent = attr;
           continue;
         }
       }
@@ -175,13 +186,25 @@ public class DataSourceFilter {
       if(authorized) {
         if (filterWithAnnotation) {
           if (f.getAnnotation(CronappSecurity.class) != null)
-            searchable.add(f.getName());
+            searchable.add(getNameWithBaseAttribute(baseAttribute, f.getName()));
         } else {
-          searchable.add(f.getName());
+          searchable.add(getNameWithBaseAttribute(baseAttribute, f.getName()));
+        }
+        
+        if (attrCurrent.isAssociation()) {
+          Object association = attrCurrent.getType().getJavaType();
+          if (!((Class)association).getName().equalsIgnoreCase(baseDomain))
+            findSearchables(association, filterWithAnnotation, searchable, baseDomain, getNameWithBaseAttribute(baseAttribute, f.getName()));
         }
       }
     }
     return searchable;
+  }
+  
+  public String getNameWithBaseAttribute(String baseAttribute, String attribute) {
+    if (baseAttribute!=null && baseAttribute.length() > 0)
+      return String.format("%s.%s", baseAttribute, attribute);
+    return attribute;
   }
   
   public void applyTo(Class domainClass, String jpql, Var[] params) {
