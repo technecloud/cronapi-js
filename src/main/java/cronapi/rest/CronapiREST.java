@@ -424,7 +424,7 @@ public class CronapiREST {
   public RestResult postBody(@RequestBody RestBody body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       RestClient.getRestClient().setBody(body);
-      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), body.getInputs());
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, "execute", body.getInputs());
     });
   }
 
@@ -432,7 +432,7 @@ public class CronapiREST {
   public RestResult getParam(@PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
       TranslationPath translationPath = translatePathVars(clazz);
-      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, "execute", translationPath.params);
     });
   }
 

@@ -24,5 +24,7 @@ public @interface CronappSecurity {
   String delete() default "";
 
   String filter() default "";
+
+  String execute() default "";
   
 }
