@@ -314,5 +314,7 @@
 	"openDatabase" : "Criar banco de dados",
 	"openDatabaseDescription" : "Função para criar um banco de dados no dispositivo móvel. Caso não seja passado um nome , será criado com um nome default.",
 	"executeSql" : "Executar Comando SQL" ,
-	"executeSqlDescription" : "Função para executar comando SQL."
+	"executeSqlDescription" : "Função para executar comando SQL.",
+	"text" : "Texto",
+  "array" : "Lista de parâmetros"
 }
