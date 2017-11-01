@@ -308,5 +308,9 @@
 	"clearWatchPositionDescription": "Function to cancel geo-referenced positioning monitoring.",
 	"clearWatchPosition": "Stop Postion Watcher",
 	"showModal": "Show modal",
-	"showModalDesc": "Function that show a modal"
+	"showModalDesc": "Function that show a modal",
+	"openDatabase" : "Create Database",
+  "openDatabaseDescription" : "Function to create a database on the mobile device. If no name is given, it will be created with a default name.",
+  "executeSql" : "Run Command SQL" ,
+  "executeSqlDescription" : "Function to execute command SQL."
 }
