@@ -2141,6 +2141,59 @@
        return (navigator.connection.type == type);
      };
  
+     this.cronapi.cordova.database = {};
+     this.cronapi.cordova.database.nameDefault = "cronappDB";
+
+     /**
+      * @type function
+      * @platform M
+      * @name {{openDatabase}}
+      * @nameTags openDatabase
+      * @param {ObjectType.STRING} name {{name}}
+      * @description {{openDatabaseDescription}}
+      * @returns {ObjectType.VOID}
+     */
+     this.cronapi.cordova.database.openDatabase = function(dbName) {
+       if (!dbName) {
+         this.cronapi.cordova.database.name = this.cronapi.cordova.database.nameDefault;
+         if (window.BuildInfo) {
+           this.cronapi.cordova.database.name = BuildInfo.packageName;
+         }
+       } 
+       this.cronapi.cordova.database.object = window.openDatabase({ name : this.cronapi.cordova.database.name });
+     };
+     
+     /**
+      * @type function
+      * @platform M
+      * @name {{executeSql}}
+      * @nameTags executesql
+      * @param {ObjectType.STRING} text {{text}}
+      * @param {ObjectType.OBJECT} array {{array}}
+      * @param {ObjectType.STATEMENTSENDER} success {{success}}
+      * @param {ObjectType.STATEMENTSENDER} error {{error}}
+      * @description {{executeSqlDescription}}
+      * @returns {ObjectType.VOID}
+     */
+     this.cronapi.cordova.database.executeSql = function(text, array, success , error){
+       
+       // exist DB
+       if (!this.cronapi.cordova.database.object)
+         this.cronapi.cordova.database.openDatabase(); // create DB
+       
+       // open transaction
+       this.cronapi.cordova.database.object.transaction(function(connect){
+         // execute SQL
+         connect.executeSql(text,array, success);
+       }.bind(this), function(e){
+         // error
+         console.log(e);
+         error(e);
+       }.bind(this));
+       
+     };
+     
+     
   //Private variables and functions
   var ptDate = function(varray) {
     var date;
