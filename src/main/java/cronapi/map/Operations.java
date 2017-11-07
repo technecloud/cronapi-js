@@ -1,6 +1,5 @@
 package cronapi.map;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import cronapi.CronapiMetaData;
@@ -25,7 +24,7 @@ public class Operations {
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
-		HashMap<Var, Var> mapObject = new HashMap<>();
+    LinkedHashMap<Var, Var> mapObject = new LinkedHashMap<>();
 		for (int i = 0; i < map.length; i++) {
 			Operations.setMapField(Var.valueOf(mapObject), Var.valueOf(map[i].getId()),
 					Var.valueOf(map[i].getObject()));
@@ -36,7 +35,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{createObjectMapName}}", nameTags = {
 			"createObjectMap" }, description = "{{createObjectMapDescription}}", returnType = ObjectType.OBJECT)
 	public static final Var createObjectMap() throws Exception {
-		Var value = new Var(new HashMap<>());
+		Var value = new Var(new LinkedHashMap<>());
 		return value;
 	}
 
