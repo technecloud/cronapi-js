@@ -1,7 +1,6 @@
 package cronapi.json;
 
 import java.io.FileInputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,11 +9,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 import cronapi.database.DataSource;
 
 @CronapiMetaData(category = CategoryType.JSON, categoryTags = { "Json" })
@@ -66,18 +65,21 @@ public class Operations {
     if (obj instanceof DataSource) {
       obj = ((DataSource) obj).getObject();
     }
-
-		String[] path = key.toString().split("\\.");
-		for (int i = 0; i < path.length; i++) {
-			String k = path[i];
-			if (obj != null) {
-				if (i == path.length - 1) {
-					Utils.mapSetObject(obj, k, value);
-				} else {
-					obj = Utils.mapGetObjectPathExtractElement(obj, k, true);
-				}
-			}
-		}
+    else if (obj instanceof Map) {
+      Utils.mapSetObject(obj, key.toString(), value);
+    } else {
+      String[] path = key.toString().split("\\.");
+      for (int i = 0; i < path.length; i++) {
+        String k = path[i];
+        if (obj != null) {
+          if (i == path.length - 1) {
+            Utils.mapSetObject(obj, k, value);
+          } else {
+            obj = Utils.mapGetObjectPathExtractElement(obj, k, true);
+          }
+        }
+      }
+    }
 	}
 
 	@CronapiMetaData(type = "function", name = "{{toJson}}", nameTags = {
