@@ -63,6 +63,8 @@ public class CronapiREST {
 
   @Autowired
   private TenantService tenantService;
+  
+  private int paramBlockly;
 
   public class TranslationPath {
     public Var[] params;
@@ -101,14 +103,16 @@ public class CronapiREST {
     if(!paths.isEmpty()) {
       for(int i = 0; i < strParams.length; i++) {
 
-        Matcher matcher = RELATION_PARAM.matcher(strParams[i]);
-        if(matcher.matches()) {
-          translationPath.relationClass = matcher.group(2);
-          translationPath.field = matcher.group(1);
-          translationPath.refId = strParams[i];
-          isParam = false;
-          isRelationParam = true;
-          continue;
+        if (strParams[i] != null) {
+          Matcher matcher = RELATION_PARAM.matcher(strParams[i]);
+          if(matcher.matches()) {
+            translationPath.relationClass = matcher.group(2);
+            translationPath.field = matcher.group(1);
+            translationPath.refId = strParams[i];
+            isParam = false;
+            isRelationParam = true;
+            continue;
+          }
         }
 
         if(isParam) {
@@ -295,8 +299,24 @@ public class CronapiREST {
 
         String jpql = QueryManager.getJPQL(query);
 
+        this.paramBlockly = 0;
+        List<Var> params = new LinkedList<Var>();
+        query.get("queryParamsValues").getAsJsonArray().forEach(param-> {
+          JsonObject paramObj = param.getAsJsonObject();
+          if (paramObj.get("fieldValue").isJsonObject()) {
+            JsonObject jsonCallBlockly = new JsonObject();
+            jsonCallBlockly.add("blockly", paramObj.get("fieldValue").getAsJsonObject());
+            Var result = QueryManager.executeBlockly(jsonCallBlockly, "GET", null).getObjectAsPOJOList();
+            params.add(result.getObjectAsList().getFirst().getField("value"));
+            paramBlockly++;
+          }
+          else {
+            params.add(translationPath.params[params.size() - paramBlockly]);
+          }
+        });
+
         ds.setDataSourceFilter(translationPath.filter);
-        ds.filter(jpql, page, translationPath.params);
+        ds.filter(jpql, page, params.toArray(new Var[0]));
 
         QueryManager.addCalcFields(query, ds);
         QueryManager.executeNavigateEvent(query, ds);
