@@ -26,8 +26,10 @@ public class Operations {
 			throws Exception {
     LinkedHashMap<Var, Var> mapObject = new LinkedHashMap<>();
 		for (int i = 0; i < map.length; i++) {
-			Operations.setMapField(Var.valueOf(mapObject), Var.valueOf(map[i].getId()),
-					Var.valueOf(map[i].getObject()));
+		    mapObject.put(new Var(map[i].getId()), new Var(map[i].getObject()));
+		    //TODO Verificar a implementação abaixo, pois para criação de Mapa está inserindo os dados errado.
+        // Operations.setMapField(Var.valueOf(mapObject), Var.valueOf(map[i].getId()),
+        //  Var.valueOf(map[i].getObject()));
 		}
 		return new Var(mapObject);
 	}
