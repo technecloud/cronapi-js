@@ -1019,6 +1019,35 @@ public class DataSource implements JsonSerializable {
     this.page = null;
   }
   
+  private Object createAndSetFieldsDomain(List<String> parsedParams, TypedQuery<?> strQuery, Var ... params) {
+    try {
+      Object instanceForUpdate = this.domainClass.newInstance();
+      int i = 0;
+      for(String param : parsedParams) {
+        Var p = null;
+        if(i <= params.length - 1) {
+          p = params[i];
+        }
+        if(p != null) {
+          if(p.getId() != null) {
+            Utils.updateField(instanceForUpdate, p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
+          }
+          else {
+            Utils.updateField(instanceForUpdate, param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
+          }
+        }
+        else {
+          Utils.updateField(instanceForUpdate, param, null);
+        }
+        i++;
+      }
+      return instanceForUpdate;
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   /**
    * Execute Query
    *
@@ -1034,8 +1063,30 @@ public class DataSource implements JsonSerializable {
       try {
         TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
-        for (Var p : params) {
-          strQuery.setParameter(p.getId(), p.getObject());
+        int i = 0;
+        List<String> parsedParams = parseParams(query);
+        Object instanceForUpdate = createAndSetFieldsDomain(parsedParams, strQuery, params);
+        processCloudFields(instanceForUpdate);
+        
+        for(String param : parsedParams) {
+          Var p = null;
+          if(i <= params.length - 1) {
+            p = params[i];
+          }
+          if(p != null) {
+            if(p.getId() != null) {
+              //strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
+              strQuery.setParameter(p.getId(), Utils.getFieldValue(instanceForUpdate, p.getId()));
+            }
+            else {
+              // strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
+              strQuery.setParameter(param, Utils.getFieldValue(instanceForUpdate, parsedParams.get(i)));
+            }
+          }
+          else {
+            strQuery.setParameter(param, null);
+          }
+          i++;
         }
 
         try {

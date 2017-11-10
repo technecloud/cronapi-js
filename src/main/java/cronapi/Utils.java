@@ -161,7 +161,11 @@ public class Utils {
 
 	public static List<String> getFieldsWithAnnotationCloud(Object obj, String type) {
 		List<String> fields = new ArrayList<String>();
-		Class<?> c = obj.getClass();
+		Class<?> c;
+    if (obj instanceof Class)
+      c = (Class)obj;
+    else
+      c = obj.getClass();
 
 		Field[] fieldsArr = c.getDeclaredFields();
 		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
@@ -213,7 +217,11 @@ public class Utils {
 
 	public static List<String> getFieldsWithAnnotationId(Object obj) {
 		List<String> fields = new ArrayList<String>();
-		Class<?> c = obj.getClass();
+		Class<?> c;
+    if (obj instanceof Class)
+      c = (Class)obj;
+    else
+      c = obj.getClass();
 
 		Field[] fieldsArr = c.getDeclaredFields();
 		List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
@@ -233,7 +241,11 @@ public class Utils {
 	}
 
 	public static CronapiCloud getAnnotationCloud(Object obj, String fieldName) {
-		Class<?> c = obj.getClass();
+		Class<?> c;
+    if (obj instanceof Class)
+      c = (Class)obj;
+    else
+      c = obj.getClass();
 		CronapiCloud result = null;
 		try {
 			Field field = c.getDeclaredField(fieldName);
