@@ -17,6 +17,9 @@ import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -54,6 +57,7 @@ public class Operations {
   
   public static boolean IS_WINDOWS;
   public static boolean IS_LINUX;
+  private static int THREAD_POOLSIZE = 50;
   
   static {
     String SO = System.getProperty("os.name");
@@ -550,36 +554,87 @@ public class Operations {
   public static final Var generateUUID() throws Exception {
     return new Var(UUID.randomUUID());
   }
-  
-  private final static ExecutorService threadPool = Executors.newFixedThreadPool(100);
-  
+
+  // Poolsize ExecutorService
+  private final static ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOLSIZE);
+
   @CronapiMetaData(type = "function", name = "{{executeAsync}}", nameTags = {
       "executeAsync" }, description = "{{executeAsyncDescription}}", returnType = ObjectType.VOID, params = {
           "{{cmd}}" }, paramsType = { ObjectType.STATEMENT })
-  public static final void executeAsync(Runnable run) throws Exception {
+  public static final void executeAsync(Runnable cmd) throws Exception {
     final RestClient client = RestClient.getRestClient();
     final Locale locale;
-    if(client.getRequest() != null) {
+    if (client.getRequest() != null) {
       locale = client.getRequest().getLocale();
-    }
-    else {
+    } else {
       locale = null;
     }
     threadPool.execute(() -> {
-      if(locale != null) {
+      if (locale != null) {
         Messages.set(locale);
         AppMessages.set(locale);
       }
       RestClient.setRestClient(client);
       try {
-        contextExecute(run);
-      }
-      finally {
+        contextExecute(cmd);
+      } finally {
         RestClient.removeClient();
         Messages.remove();
         AppMessages.remove();
       }
     });
+  }
+
+  
+  // Poolsize ScheduledExecutorService
+  private static final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(THREAD_POOLSIZE);
+  
+  @CronapiMetaData(type = "function", name = "{{scheduleExecution}}", nameTags = {
+      "scheduleExecution" }, description = "{{scheduleExecutionDescription}}", returnType = ObjectType.VOID)
+  public static final void scheduleExecution(
+      @ParamMetaData(type = ObjectType.STATEMENT, description = "{{cmd}}") Runnable cmd,
+      @ParamMetaData(type = ObjectType.LONG, description = "{{initialTime}}") Var initialTime,
+      @ParamMetaData(type = ObjectType.LONG, description = "{{updateTime}}") Var updateTime,
+      @ParamMetaData(type = ObjectType.OBJECT, description = "{{timeUnit}}", blockType = "util_dropdown", keys = {
+          "{{MILLISECONDS}}", "{{MINUTES}}",
+          "{{HOURS}}" }, values = { "MILLISECONDS", "MINUTES", "HOURS" }) Var unit)
+      throws Exception {
+
+    final RestClient client = RestClient.getRestClient();
+    final Locale locale;
+
+    if (client.getRequest() != null) {
+      locale = client.getRequest().getLocale();
+    } else {
+      locale = null;
+    }
+
+    TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+
+    if ("MILLISECONDS".equalsIgnoreCase(unit.getObjectAsString()))
+      timeUnit = TimeUnit.MILLISECONDS;
+    if ("MINUTES".equalsIgnoreCase(unit.getObjectAsString()))
+      timeUnit = TimeUnit.MINUTES;
+    if ("HOURS".equalsIgnoreCase(unit.getObjectAsString()))
+      timeUnit = TimeUnit.HOURS;
+
+    long init = (initialTime.isNull() ? 0 : initialTime.getObjectAsLong());
+    long update = (updateTime.isNull() ? 0 : updateTime.getObjectAsLong());
+
+    executor.scheduleWithFixedDelay(() -> {
+      if (locale != null) {
+        Messages.set(locale);
+        AppMessages.set(locale);
+      }
+      RestClient.setRestClient(client);
+      try {
+        contextExecute(cmd);
+      } finally {
+        RestClient.removeClient();
+        Messages.remove();
+        AppMessages.remove();
+      }
+    }, init, update, timeUnit);
   }
   
   private static void contextExecute(Runnable runnable) {
