@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +26,8 @@ public class RestClient {
 	private LinkedList<ClientCommand> commands = new LinkedList<>();
 	private HttpServletResponse response = CronapiFilter.RESPONSE.get();
 	private HttpServletRequest request = CronapiFilter.REQUEST.get();
+	private HttpSession session;
+	private User user;
 	private JsonObject query = null;
 	private boolean filteredEnabled = false;
 
@@ -40,6 +43,21 @@ public class RestClient {
 	private Var rawBody;
 
 	private TenantService tenantService;
+	
+	private RestClient() {
+	  if (request != null) {
+	    session = request.getSession();
+	    Object localUser = null;
+
+	    if (SecurityContextHolder.getContext() != null
+	        && SecurityContextHolder.getContext().getAuthentication() != null)
+	      localUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+	    if (localUser instanceof User)
+	      user = (User) localUser;
+	  }
+	  
+	}
 
 	public static RestClient getRestClient() {
 		RestClient restClient = REST_CLIENT.get();
@@ -50,6 +68,13 @@ public class RestClient {
 
 		return restClient;
 	}
+	
+	public static void setRestClient(RestClient client) {
+    RestClient restClient = REST_CLIENT.get();
+    if (restClient == null) {
+      REST_CLIENT.set(client);
+    }
+  }
 
 	public static void removeClient() {
 		REST_CLIENT.set(null);
@@ -116,17 +141,7 @@ public class RestClient {
 	}
 
 	public User getUser() {
-
-		Object user = null;
-
-		if (SecurityContextHolder.getContext() != null
-				&& SecurityContextHolder.getContext().getAuthentication() != null)
-			user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-		if (user instanceof User)
-			return (User) user;
-		else
-			return null;
+    return user;
 	}
 
 	public Collection<GrantedAuthority> getAuthorities() {
@@ -151,5 +166,13 @@ public class RestClient {
 
 	public void setTenantService(TenantService tenantService) {
 		this.tenantService = tenantService;
+	}
+	
+	public void updateSessionValue(String name, Object value) {
+	  session.setAttribute(name, value);
+	}
+	
+	public Object getSessionValue(String name) {
+	  return session.getAttribute(name);
 	}
 }
