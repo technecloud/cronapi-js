@@ -532,6 +532,7 @@
   /**
    * @type function
    * @name {{screenNotifyName}}
+   * @platform W
    * @description {{screenNotifyDescription}}
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
