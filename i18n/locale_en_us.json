@@ -314,5 +314,8 @@
   "executeSql" : "Run Command SQL" ,
   "executeSqlDescription" : "Function to execute command SQL.",
   "text" : "Text",
-  "array" : "List of parameters"
+  "array" : "List of parameters",
+  "downloadFileName": "Start file download",
+  "downloadFileDescription": "Starts downloading a file from a url",
+  "downloadFileParam0": "URL: Url for download"
 }

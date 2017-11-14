@@ -423,10 +423,10 @@
 
   /**
    * @type function
-   * @name Iniciar download de arquivo
+   * @name {{downloadFileName}}
    * @nameTags downloadFile
-   * @description Inicia o download de um arquivo de uma url
-   * @param {ObjectType.STRING} url URL: Url para download
+   * @description {{downloadFileDescription}}
+   * @param {ObjectType.STRING} url {{downloadFileParam0}}
    * @multilayer true
    */
   this.cronapi.util.downloadFile = function(url) {
