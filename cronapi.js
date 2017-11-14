@@ -274,13 +274,15 @@
    * @param {ObjectType.STRING} callbackBlocklySuccess {{callbackBlocklySuccess}}
    * @param {ObjectType.STRING} callbackBlocklyError {{callbackBlocklyError}}
    * @param {ObjectType.OBJECT} params {{params}}
-   * @arbitraryParams true
+   * @arbitraryParams   if (window.event.target && window.event.target) {
+      window.cronapi.$scope = angular.element(window.event.target).scope();
+    }true
    */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
     if (window.event.target && window.event.target) {
       window.cronapi.$scope = angular.element(window.event.target).scope();
     }
-    
+
     var fields = this.getScreenFields();
 
     var paramsApply = [];
