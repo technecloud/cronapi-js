@@ -558,39 +558,7 @@ public class Operations {
 			"executeAsync" }, description = "{{executeAsyncDescription}}", returnType = ObjectType.VOID, params = {
 					"{{cmd}}" }, paramsType = { ObjectType.STATEMENT })
 	public static final void executeAsync(Runnable cmd) throws Exception {
-
-		final Locale locale;
-		final RestClient client = RestClient.getRestClient();
-		final TenantService tenantService = RestClient.getRestClient().getTenantService();
-		final TenantService tenant = new TenantService();
-		
-		if (tenantService != null) {
-			tenant.getContextIds().putAll(tenantService.getContextIds());
-		}
-		
-		if (client.getRequest() != null) {
-			locale = client.getRequest().getLocale();
-		} else {
-			locale = null;
-		}
-
-		threadPool.execute(() -> {
-			if (locale != null) {
-				Messages.set(locale);
-				AppMessages.set(locale);
-			}
-
-			RestClient.setRestClient(client);
-			RestClient.getRestClient().setTenantService(tenant);
-			
-			try {
-				contextExecute(cmd);
-			} finally {
-				RestClient.removeClient();
-				Messages.remove();
-				AppMessages.remove();
-			}
-		});
+		threadPool.execute(RestClient.getContextRunnable(cmd, true));
 	}
 
 	// Poolsize ScheduledExecutorService
@@ -607,21 +575,6 @@ public class Operations {
 					"HOURS" }, values = { "{{SECONDS}}", "{{MILLISECONDS}}", "{{MINUTES}}", "{{HOURS}}" }) Var unit)
 			throws Exception {
 
-		final Locale locale;
-		final RestClient client = RestClient.getRestClient();
-		final TenantService tenantService = RestClient.getRestClient().getTenantService();
-		final TenantService tenant = new TenantService();
-		
-		if (tenantService != null) {
-			tenant.getContextIds().putAll(tenantService.getContextIds());
-		}
-
-		if (client.getRequest() != null) {
-			locale = client.getRequest().getLocale();
-		} else {
-			locale = null;
-		}
-
 		TimeUnit timeUnit = TimeUnit.SECONDS;
 
 		if ("SECONDS".equalsIgnoreCase(unit.getObjectAsString()))
@@ -636,24 +589,7 @@ public class Operations {
 		long init = (initialTime.isNull() ? 0 : initialTime.getObjectAsLong());
 		long update = (updateTime.isNull() ? 0 : updateTime.getObjectAsLong());
 
-		Runnable run = () -> {
-			
-			if (locale != null) {
-				Messages.set(locale);
-				AppMessages.set(locale);
-			}
-			
-			RestClient.setRestClient(client);
-			RestClient.getRestClient().setTenantService(tenant);
-			
-			try {
-				contextExecute(cmd);
-			} finally {
-				RestClient.removeClient();
-				Messages.remove();
-				AppMessages.remove();
-			}
-		};
+		Runnable run = RestClient.getContextRunnable(cmd, true);
 
 		if (update == 0) {
 			executor.schedule(run, init, timeUnit);
@@ -661,20 +597,6 @@ public class Operations {
 			executor.scheduleWithFixedDelay(run, init, update, timeUnit);
 		}
 
-	}
-
-	private static void contextExecute(Runnable runnable) {
-
-		try {
-			runnable.run();
-			TransactionManager.commit();
-		} catch (Exception e) {
-			TransactionManager.rollback();
-			throw new RuntimeException(e);
-		} finally {
-			TransactionManager.close();
-			TransactionManager.clear();
-		}
 	}
 
 }

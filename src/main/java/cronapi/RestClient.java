@@ -1,15 +1,14 @@
 package cronapi;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import cronapi.database.TransactionManager;
+import cronapi.i18n.AppMessages;
+import cronapi.i18n.Messages;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +29,7 @@ public class RestClient {
 	private User user;
 	private JsonObject query = null;
 	private boolean filteredEnabled = false;
+	private Locale locale;
 
 	private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
 
@@ -43,21 +43,54 @@ public class RestClient {
 	private Var rawBody;
 
 	private TenantService tenantService;
-	
-	private RestClient() {
-	  if (request != null) {
-	    session = request.getSession();
-	    Object localUser = null;
 
-	    if (SecurityContextHolder.getContext() != null
-	        && SecurityContextHolder.getContext().getAuthentication() != null)
-	      localUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	public RestClient clone() {
+    TenantService newTenant = new TenantService();
 
-	    if (localUser instanceof User)
-	      user = (User) localUser;
-	  }
-	  
-	}
+    if (tenantService != null) {
+      newTenant.getContextIds().putAll(tenantService.getContextIds());
+    }
+
+    RestClient newClient = new RestClient();
+    newClient.setUser(getUser());
+    newClient.setTenantService(newTenant);
+    newClient.setSession(getSession());
+    newClient.setLocale(getLocale());
+    newClient.setFilteredEnabled(filteredEnabled);
+
+    return newClient;
+  }
+
+  public static Runnable getContextRunnable(final Runnable runnable, final boolean transactional) {
+	  final RestClient client = getRestClient().clone();
+	  return () -> {
+	    RestClient.setRestClient(client);
+	    try {
+	      if (transactional)
+	        contextExecute(runnable);
+	      else
+          runnable.run();
+      } finally {
+        RestClient.removeClient();
+        Messages.remove();
+        AppMessages.remove();
+      }
+    };
+  }
+
+  private static void contextExecute(Runnable runnable) {
+
+    try {
+      runnable.run();
+      TransactionManager.commit();
+    } catch (Exception e) {
+      TransactionManager.rollback();
+      throw new RuntimeException(e);
+    } finally {
+      TransactionManager.close();
+      TransactionManager.clear();
+    }
+  }
 
 	public static RestClient getRestClient() {
 		RestClient restClient = REST_CLIENT.get();
@@ -70,9 +103,11 @@ public class RestClient {
 	}
 	
 	public static void setRestClient(RestClient client) {
-    RestClient restClient = REST_CLIENT.get();
-    if (restClient == null) {
-      REST_CLIENT.set(client);
+    REST_CLIENT.set(client);
+
+    if (client.getLocale() != null) {
+      Messages.set(client.getLocale());
+      AppMessages.set(client.getLocale());
     }
   }
 
@@ -141,8 +176,25 @@ public class RestClient {
 	}
 
 	public User getUser() {
-    return user;
+	  if (user != null)
+      return user;
+	  else {
+      Object localUser = null;
+
+      if (SecurityContextHolder.getContext() != null
+          && SecurityContextHolder.getContext().getAuthentication() != null)
+        localUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+      if (localUser instanceof User)
+        user = (User) localUser;
+
+      return user;
+    }
 	}
+
+	public void setUser(User user) {
+	  this.user = user;
+  }
 
 	public Collection<GrantedAuthority> getAuthorities() {
 		User user = getUser();
@@ -167,12 +219,42 @@ public class RestClient {
 	public void setTenantService(TenantService tenantService) {
 		this.tenantService = tenantService;
 	}
-	
-	public void updateSessionValue(String name, Object value) {
-	  session.setAttribute(name, value);
+
+  public HttpSession getSession() {
+	  if (session != null) {
+      return session;
+    } else {
+	    if (request != null)
+	      return request.getSession();
+    }
+
+    return null;
+  }
+
+  public void setSession(HttpSession session) {
+	  this.session = session;
+  }
+
+  public void updateSessionValue(String name, Object value) {
+    getSession().setAttribute(name, value);
 	}
-	
-	public Object getSessionValue(String name) {
-	  return session.getAttribute(name);
+
+  public Locale getLocale() {
+	  if (locale != null)
+      return locale;
+    else {
+      if (request != null)
+        return request.getLocale();
+    }
+
+    return Messages.DEFAUL_LOCALE;
+  }
+
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  public Object getSessionValue(String name) {
+	  return getSession().getAttribute(name);
 	}
 }

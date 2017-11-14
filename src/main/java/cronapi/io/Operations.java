@@ -14,12 +14,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import cronapi.CronapiMetaData;
+import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.ParamMetaData;
-import cronapi.Utils;
-import cronapi.Var;
+import cronapi.rest.DownloadREST;
 import cronapi.util.Callback;
 
 /**
@@ -328,6 +326,37 @@ public class Operations {
 	public static final Var fileAppDir() throws Exception {
 		return new Var(APP_FOLDER);
 	}
+
+  /**
+   * Diretorio temporário da aplicação reciclável
+   */
+  @CronapiMetaData(type = "function", name = "{{applicationRecycleFolder}}", nameTags = {
+      "fileTempDir" }, description = "{{functionToReturnApplicationRecycleFolder}}", params = {}, returnType = ObjectType.STRING)
+  public static final Var fileAppReclycleDir() throws Exception {
+    return new Var(DownloadREST.TEMP_FOLDER.getAbsolutePath());
+  }
+
+  /**
+   * Download de arquivo
+   */
+  @CronapiMetaData(type = "function", name = "Iniciar download de arquivo", nameTags = {
+      "fileTempDir" }, description = "Função que abre o processo de download do arquivo do parâmetro para o usuário", params = {"Arquivo: Arquivo que será feito o download"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.VOID)
+  public static final Var fileDownload(Var varFile) throws Exception {
+    File file;
+    if (varFile.getObject() instanceof File)
+      file = (File) varFile.getObject();
+    else
+      file = new File(varFile.toString());
+
+    String url = DownloadREST.getDownloadUrl(file);
+
+    ClientCommand command = new ClientCommand("cronapi.util.downloadFile");
+    command.addParam(url);
+
+    RestClient.getRestClient().addCommand(command);
+
+    return new Var(url);
+  }
 
 	/**
 	 * Ler todo conteudo do arquivo

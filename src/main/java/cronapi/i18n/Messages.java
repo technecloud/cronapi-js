@@ -12,10 +12,12 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 public class Messages {
+
+  public static final Locale DEFAUL_LOCALE = new Locale("pt", "BR");
   
   private static final String BUNDLE_NAME = "cronapi.i18n.Messages";
   
-  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("pt", "BR"),
+  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME,DEFAUL_LOCALE,
           new UTF8Control());
   
   public static final ThreadLocal<ResourceBundle> RESOURCE_BUNDLE = new ThreadLocal<>();
