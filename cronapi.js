@@ -277,6 +277,10 @@
    * @arbitraryParams true
    */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
+    if (window.event.target && window.event.target) {
+      window.cronapi.$scope = angular.element(window.event.target).scope();
+    }
+    
     var fields = this.getScreenFields();
 
     var paramsApply = [];
