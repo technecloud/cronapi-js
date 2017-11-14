@@ -340,22 +340,9 @@ public class Operations {
    * Download de arquivo
    */
   @CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
-      "fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.VOID)
-  public static final Var fileDownload(Var varFile) throws Exception {
-    File file;
-    if (varFile.getObject() instanceof File)
-      file = (File) varFile.getObject();
-    else
-      file = new File(varFile.toString());
-
-    String url = DownloadREST.getDownloadUrl(file);
-
-    ClientCommand command = new ClientCommand("cronapi.util.downloadFile");
-    command.addParam(url);
-
-    RestClient.getRestClient().addCommand(command);
-
-    return new Var(url);
+      "fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}"}, paramsType = { ObjectType.OBJECT })
+  public static final void fileDownload(Var varFile) throws Exception {
+    RestClient.getRestClient().downloadURL(DownloadREST.getDownloadUrl(varFile.getObjectAsFile()));
   }
 
 	/**

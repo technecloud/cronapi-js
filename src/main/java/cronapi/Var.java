@@ -1,10 +1,12 @@
 package cronapi;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
@@ -333,6 +335,17 @@ public class Var implements Comparable<Var>, JsonSerializable {
     }
     
     return 0L;
+  }
+
+  public File getObjectAsFile() {
+    if (_object instanceof File)
+      return (File) _object;
+
+    else if (_object instanceof Path)
+        return ((Path) _object).toFile();
+
+    else
+      return new File(toString());
   }
   
   /**

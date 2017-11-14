@@ -6,9 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import cronapi.database.TransactionManager;
-import cronapi.i18n.AppMessages;
-import cronapi.i18n.Messages;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +14,9 @@ import org.springframework.security.core.userdetails.User;
 import com.google.gson.JsonObject;
 
 import cronapi.database.TenantService;
+import cronapi.database.TransactionManager;
+import cronapi.i18n.AppMessages;
+import cronapi.i18n.Messages;
 
 public class RestClient {
 
@@ -101,6 +101,13 @@ public class RestClient {
 
 		return restClient;
 	}
+
+	public void downloadURL(String url) {
+    ClientCommand command = new ClientCommand("cronapi.util.downloadFile");
+    command.addParam(url);
+
+    addCommand(command);
+  }
 	
 	public static void setRestClient(RestClient client) {
     REST_CLIENT.set(client);
