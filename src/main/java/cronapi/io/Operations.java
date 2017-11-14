@@ -339,8 +339,8 @@ public class Operations {
   /**
    * Download de arquivo
    */
-  @CronapiMetaData(type = "function", name = "Iniciar download de arquivo", nameTags = {
-      "fileTempDir" }, description = "Função que abre o processo de download do arquivo do parâmetro para o usuário", params = {"Arquivo: Arquivo que será feito o download"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.VOID)
+  @CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
+      "fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}"}, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.VOID)
   public static final Var fileDownload(Var varFile) throws Exception {
     File file;
     if (varFile.getObject() instanceof File)
