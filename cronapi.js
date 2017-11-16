@@ -1566,7 +1566,7 @@
   this.cronapi.internal = {};
   
   this.cronapi.internal.setFile = function(field, file) {
-    this.cronapi.internal.fileToBase64(file, function(base64) { this.cronapi.screen.changeValueOfField(field, base64); });
+    this.cronapi.internal.fileToBase64(file, function(base64) { this.cronapi.screen.changeValueOfField(field, base64); }.bind(this));
   };
   
   this.cronapi.internal.fileToBase64 = function(file, cb) {
