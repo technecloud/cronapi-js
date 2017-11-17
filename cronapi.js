@@ -252,19 +252,6 @@
     return fields;
   }
 
-  this.cronapi.internal.getErrorMessage = function(data, message) {
-    try {
-      var json = JSON.parse(data);
-      if (json && json.error) {
-        return json.error;
-      }
-    } catch(e) {
-      //Abafa
-    }
-
-    return message;
-  }
-
   /**
    * @type internal
    * @name {{makeCallServerBlocklyAsync}}
@@ -1573,7 +1560,6 @@
       var fileReader = new FileReader();
       fileReader.readAsDataURL(file);
       fileReader.onload = function(e) {
-          debugger;
           var base64Data = e.target.result.substr(e.target.result.indexOf('base64,') + 'base64,'.length);
           cb(base64Data);
       };
@@ -2381,6 +2367,19 @@
 
   this.cronapi.internal.stringToJs = function(str) {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+  };
+  
+  this.cronapi.internal.getErrorMessage = function(data, message) {
+    try {
+      var json = JSON.parse(data);
+      if (json && json.error) {
+        return json.error;
+      }
+    } catch(e) {
+      //Abafa
+    }
+
+    return message;
   };
 
 }).bind(window)();
