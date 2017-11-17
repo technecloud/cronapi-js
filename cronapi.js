@@ -191,7 +191,7 @@
     var params = [];
     $(arguments).each(function() {
       params.push(this);
-    });
+    }.bind(this));
 
     var token = "";
     if (window.uToken)
@@ -278,7 +278,7 @@
    */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
     
-    var fields = this.getScreenFields();
+    var fields = this.cronapi.util.getScreenFields();
 
     var paramsApply = [];
     paramsApply.push(blocklyWithFunction);
@@ -290,7 +290,7 @@
       } else if (callbackSuccess) {
         callbackSuccess(result);
       }
-    });
+    }.bind(this));
     paramsApply.push(function(data, status, errorThrown) {
       var message = getErrorMessage(data.responseText, errorThrown);
       if (typeof callbackError == "string") {
@@ -302,11 +302,11 @@
       else {
         this.cronapi.$scope.Notification.error(message);
       }
-    });
+    }.bind(this));
     $(arguments).each(function(idx) {
       if (idx >= 3)
         paramsApply.push(this);
-    });
+    }.bind(this));
     this.cronapi.util.callServerBlocklyAsync.apply(this, paramsApply);
   };
 
@@ -364,7 +364,7 @@
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
 
-    var fields = this.getScreenFields();
+    var fields = this.cronapi.util.getScreenFields();
 
     var dataCall = {
       "fields": fields,
@@ -716,7 +716,7 @@
       $(params).each(function(idx) {
         for (var key in this)
           queryString += template.replace('#key#', Url.encode(key)).replace('#value#', Url.encode(this[key]));
-      });
+      }.bind(this));
       window.location.hash = view + queryString;
     }
     catch (e) {
@@ -868,7 +868,7 @@
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
+   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); }.bind(this));
   };
   
   /**
@@ -880,7 +880,7 @@
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
+    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); }.bind(this));
   };
   
   /**
@@ -1295,7 +1295,7 @@
     }
     if($(xml).size() > 1 ){
       var __v = '';
-      $.each($(xml).toArray() , function(key , value){  __v += $($(value)[0].outerHTML).removeAttr('xmlns')[0].outerHTML  } );
+      $.each($(xml).toArray() , function(key , value){  __v += $($(value)[0].outerHTML).removeAttr('xmlns')[0].outerHTML  }.bind(this) );
       return __v;
     }
     return $($($(xml).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
@@ -1445,11 +1445,11 @@
             {  
             if(value.localName == element)
             value.remove();
-            });
+            }.bind(this));
         }
         }else
         {
-      $.each( $(parent.firstElementChild.children), function( key , currentObject ){  currentObject.remove() });
+      $.each( $(parent.firstElementChild.children), function( key , currentObject ){  currentObject.remove() }.bind(this));
         }
       }else
       {
@@ -1463,11 +1463,11 @@
             {  
             if(value.localName == element)
             value.remove();
-            });
+            }.bind(this));
         }
         }else
         {
-      $.each( $(parent.children), function( key , currentObject ){  currentObject.remove() });
+      $.each( $(parent.children), function( key , currentObject ){  currentObject.remove() }.bind(this));
         }
       }
       
@@ -1660,7 +1660,7 @@
           
           videoDOM.src = window.URL.createObjectURL(stream);
           videoDOM.play();
-        });
+        }.bind(this));
     }
   }; 
    
@@ -1805,9 +1805,9 @@
             console.log('Error downloading file');
             console.log(ex);
           }
-      }).error(function(data, status, headers, config) {
+      }.bind(this)).error(function(data, status, headers, config) {
           console.log('Error downloading file');
-      });
+      }.bind(this));
     }
     
   };
@@ -1836,9 +1836,9 @@
 				}
     }).success(function(data, status, headers, config) {
         this.cronapi.screen.changeValueOfField(field, data.jsonString);
-    }).error(function(data, status, headers, config) {
+    }.bind(this)).error(function(data, status, headers, config) {
         alert('Error uploading file');
-    });
+    }.bind(this));
   };
   
   /**
@@ -2006,8 +2006,8 @@
           fileEntry.remove(function (entry) { 
           if (success)
             success(entry);
-          },error);
-        },error);
+          }.bind(this),error);
+        }.bind(this),error);
      };
    
      /**
@@ -2029,8 +2029,8 @@
                 success(this.result);
             };
             reader.readAsText(file);
-          },error);
-        },error);
+          }.bind(this),error);
+        }.bind(this),error);
      };
    
      /**
@@ -2063,11 +2063,11 @@
               if (success) {
                 setTimeout(function() {
                   success();   
-                },500);
+                }.bind(this),500);
               }
-           }, error);
-        }, error);
-    }, error);
+           }.bind(this), error);
+        }.bind(this), error);
+    }.bind(this), error);
    };
    
       /**
@@ -2087,8 +2087,8 @@
           parentEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
             if (success)
                 success(childrenEntry);
-          },error);
-        }, error);
+          }.bind(this),error);
+        }.bind(this), error);
      };
 
       this.cronapi.cordova.storage = {}; 
