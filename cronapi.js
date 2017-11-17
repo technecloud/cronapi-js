@@ -3,12 +3,12 @@
 
   this.cronapi = {};
 
-  this.doEval = function(arg) {
+  this.cronapi.doEval = function(arg) {
     return arg;
   }
 
-  this.evalInContext = function(js) {
-    var result = eval('doEval('+js+')');
+  this.cronapi.evalInContext = function(js) {
+    var result = eval('this.cronapi.doEval('+js+')');
     if (result && result.commands) {
       for (var i=0;i<result.commands.length;i++) {
         var func = eval(result.commands[i].function);
@@ -56,7 +56,7 @@
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.conversion.toBoolean = function(value) {
-    return parseBoolean(value);
+    return this.cronapi.internal.parseBoolean(value);
   };
 
   /**
@@ -96,7 +96,7 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.conversion.stringToJs = function(value) {
-    return stringToJs(value);
+    return this.cronapi.internal.stringToJs(value);
   };
 
   /**
@@ -191,7 +191,7 @@
     var params = [];
     $(arguments).each(function() {
       params.push(this);
-    }.bind(this));
+    });
 
     var token = "";
     if (window.uToken)
@@ -284,7 +284,7 @@
     paramsApply.push(blocklyWithFunction);
     paramsApply.push(fields);
     paramsApply.push(function(data) {
-      var result = evalInContext(data);
+      var result = this.cronapi.evalInContext(data);
       if (typeof callbackSuccess == "string") {
         eval(callbackSuccess)(result);
       } else if (callbackSuccess) {
@@ -306,7 +306,7 @@
     $(arguments).each(function(idx) {
       if (idx >= 3)
         paramsApply.push(this);
-    }.bind(this));
+    });
     this.cronapi.util.callServerBlocklyAsync.apply(this, paramsApply);
   };
 
@@ -396,7 +396,7 @@
       if (resultData.responseJSON)
         result = resultData.responseJSON;
       else
-        result = evalInContext(resultData.responseText);
+        result = this.cronapi.evalInContext(resultData.responseText);
     }
     else {
       var message = getErrorMessage(resultData.responseText, resultData.statusText);
@@ -715,8 +715,8 @@
       var template = '#key#=#value#&';
       $(params).each(function(idx) {
         for (var key in this)
-          queryString += template.replace('#key#', Url.encode(key)).replace('#value#', Url.encode(this[key]));
-      }.bind(this));
+          queryString += template.replace('#key#', this.cronapi.internal.Url.encode(key)).replace('#value#', this.cronapi.internal.Url.encode(this[key]));
+      });
       window.location.hash = view + queryString;
     }
     catch (e) {
@@ -868,7 +868,7 @@
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); }.bind(this));
+   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
   };
   
   /**
@@ -880,7 +880,7 @@
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); }.bind(this));
+    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
   };
   
   /**
@@ -1140,7 +1140,7 @@
     for (var i = 0; i < format.length; i++) {
       if (!maskChars.includes(format.toLowerCase().charAt(i))) {
         separator = format.toLowerCase().charAt(i);
-        var formatLower = replaceAll(format.toLowerCase(), separator, '+separator+');
+        var formatLower = this.cronapi.internal.replaceAll(format.toLowerCase(), separator, '+separator+');
         return eval(formatLower);
       }
     }
@@ -1295,7 +1295,7 @@
     }
     if($(xml).size() > 1 ){
       var __v = '';
-      $.each($(xml).toArray() , function(key , value){  __v += $($(value)[0].outerHTML).removeAttr('xmlns')[0].outerHTML  }.bind(this) );
+      $.each($(xml).toArray() , function(key , value){  __v += $($(value)[0].outerHTML).removeAttr('xmlns')[0].outerHTML  } );
       return __v;
     }
     return $($($(xml).context.outerHTML).removeAttr('xmlns'))[0].outerHTML ;
@@ -1445,11 +1445,11 @@
             {  
             if(value.localName == element)
             value.remove();
-            }.bind(this));
+            });
         }
         }else
         {
-      $.each( $(parent.firstElementChild.children), function( key , currentObject ){  currentObject.remove() }.bind(this));
+      $.each( $(parent.firstElementChild.children), function( key , currentObject ){  currentObject.remove() });
         }
       }else
       {
@@ -1463,11 +1463,11 @@
             {  
             if(value.localName == element)
             value.remove();
-            }.bind(this));
+            });
         }
         }else
         {
-      $.each( $(parent.children), function( key , currentObject ){  currentObject.remove() }.bind(this));
+      $.each( $(parent.children), function( key , currentObject ){  currentObject.remove() });
         }
       }
       
@@ -1649,14 +1649,14 @@
              if (streaming!= null && streaming.getTracks().length > 0)
                 streaming.getTracks()[0].stop();
              $(cronapiVideoCapture).remove();
-          });
+          }.bind(this));
         
           cronapiVideoCapture.find('#cronapiVideoCaptureOk').on('click',function() {
              this.cronapi.internal.captureFromCamera(field, res.width, res.height);
              if (streaming!= null && streaming.getTracks().length > 0)
                 streaming.getTracks()[0].stop();
              $(cronapiVideoCapture).remove();
-          });
+          }.bind(this));
           
           videoDOM.src = window.URL.createObjectURL(stream);
           videoDOM.play();
@@ -1672,7 +1672,7 @@
     var videoDOM = document.getElementById('cronapiVideoCapture');
 		context.drawImage(videoDOM, 0, 0, width, height);
 		var base64 = canvas.toDataURL().substr(22);
-		cronapi.screen.changeValueOfField(field, base64);
+		this.cronapi.screen.changeValueOfField(field, base64);
   };
   
   this.cronapi.internal.castBase64ToByteArray = function(base64) {
@@ -2228,7 +2228,7 @@
      
      
   //Private variables and functions
-  var ptDate = function(varray) {
+  this.cronapi.internal.ptDate = function(varray) {
     var date;
     var day = varray[1];
     var month = varray[2];
@@ -2243,7 +2243,7 @@
     return date;
   };
 
-  var enDate = function(varray) {
+  this.cronapi.internal.enDate = function(varray) {
     var date;
     var month = varray[1];
     var day = varray[2];
@@ -2258,7 +2258,7 @@
     return date;
   };
 
-  var parseBoolean = function(value) {
+  this.cronapi.internal.parseBoolean = function(value) {
     if (!value)
       return false;
     if (typeof value == "boolean")
@@ -2267,7 +2267,7 @@
     return value == "1" || value == "true";
   };
 
-  var removeAccents = function(value) {
+  this.cronapi.internal.removeAccents = function(value) {
     withAccents = 'áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ';
     withoutAccents = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
     newValue = '';
@@ -2282,14 +2282,14 @@
     return newValue;
   };
 
-  var arrayRemove = function(array, value) {
-    var i = arrayIndexOf(array, value);
+  this.cronapi.internal.arrayRemove = function(array, value) {
+    var i = this.cronapi.internal.arrayIndexOf(array, value);
     if (i != -1) {
       array.splice(i, 1);
     }
   };
 
-  var arrayIndexOf = function(array, value) {
+  this.cronapi.internal.arrayIndexOf = function(array, value) {
     var index = -1;
     $(array).each(function(idx) {
       if (value == this) {
@@ -2299,15 +2299,15 @@
     return index;
   };
 
-  var replaceAll = function(str, value, newValue) {
+  this.cronapi.internal.replaceAll = function(str, value, newValue) {
     return str.toString().split(value).join(newValue);
   };
 
-  var getWindowHeight = function() {
+  this.cronapi.internal.getWindowHeight = function() {
     $(window).height();
   };
 
-  var getWindowWidth = function() {
+  this.cronapi.internal.getWindowWidth = function() {
     $(window).width();
   };
 
@@ -2318,7 +2318,7 @@
    *
    **/
 
-  var Url = {
+  this.cronapi.internal.Url = {
     // public method for url encoding
     encode : function (string) {
       if (string)
@@ -2379,7 +2379,7 @@
     }
   };
 
-  var stringToJs = function(str) {
+  this.cronapi.internal.stringToJs = function(str) {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
   };
 
