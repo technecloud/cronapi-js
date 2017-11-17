@@ -17,14 +17,16 @@ import cronapi.database.TenantService;
 import cronapi.database.TransactionManager;
 import cronapi.i18n.AppMessages;
 import cronapi.i18n.Messages;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class RestClient {
 
 	private static ThreadLocal<RestClient> REST_CLIENT = new ThreadLocal<RestClient>();
 
 	private LinkedList<ClientCommand> commands = new LinkedList<>();
-	private HttpServletResponse response = CronapiFilter.RESPONSE.get();
-	private HttpServletRequest request = CronapiFilter.REQUEST.get();
+	private HttpServletResponse response;
+	private HttpServletRequest request;
 	private HttpSession session;
 	private User user;
 	private JsonObject query = null;
@@ -57,6 +59,8 @@ public class RestClient {
     newClient.setSession(getSession());
     newClient.setLocale(getLocale());
     newClient.setFilteredEnabled(filteredEnabled);
+    newClient.setRequest(getRequest());
+    newClient.setResponse(getResponse());
 
     return newClient;
   }
@@ -156,22 +160,38 @@ public class RestClient {
 		this.rawBody = rawBody;
 	}
 
+  public void setRequest(HttpServletRequest request) {
+	  this.request = request;
+  }
+
 	public HttpServletRequest getRequest() {
-		return request;
+		if (request != null) {
+		  return request;
+    } else {
+      return((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+    }
 	}
 
+  public void setResponse(HttpServletResponse response) {
+    this.response = response;
+  }
+
 	public HttpServletResponse getResponse() {
-		return response;
+    if (response != null) {
+      return response;
+    } else {
+      return((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+    }
 	}
 
 	public String getParameter(String key) {
-		return request.getParameter(key);
+		return getRequest().getParameter(key);
 	}
 
 	public String getMethod() {
-	   if (request == null)
-	      request = CronapiFilter.REQUEST.get();
-		return request.getMethod();
+	   if (getRequest() == null)
+	     return "";
+		return getRequest().getMethod();
 	}
 
 	public JsonObject getQuery() {
@@ -193,10 +213,10 @@ public class RestClient {
         localUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
       if (localUser instanceof User)
-        user = (User) localUser;
-
-      return user;
+        return (User) localUser;
     }
+
+    return null;
 	}
 
 	public void setUser(User user) {
@@ -231,8 +251,8 @@ public class RestClient {
 	  if (session != null) {
       return session;
     } else {
-	    if (request != null)
-	      return request.getSession();
+	    if (getRequest() != null)
+	      return getRequest().getSession();
     }
 
     return null;
@@ -250,8 +270,8 @@ public class RestClient {
 	  if (locale != null)
       return locale;
     else {
-      if (request != null)
-        return request.getLocale();
+      if (getRequest() != null)
+        return getRequest().getLocale();
     }
 
     return Messages.DEFAUL_LOCALE;
