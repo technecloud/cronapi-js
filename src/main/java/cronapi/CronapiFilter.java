@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import cronapi.i18n.Messages;
 
-@Component
 public class CronapiFilter implements Filter {
     public static ThreadLocal<HttpServletRequest> REQUEST = new ThreadLocal<>();
     public static ThreadLocal<HttpServletResponse> RESPONSE = new ThreadLocal<>();

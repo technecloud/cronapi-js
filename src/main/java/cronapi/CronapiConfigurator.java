@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import cronapi.serialization.CronappModule;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ConversionServiceFactoryBean;
@@ -31,6 +32,14 @@ import com.google.gson.JsonElement;
 public class CronapiConfigurator {
   
   public static String ENCODING = "UTF-8";
+
+  @Bean
+  public FilterRegistrationBean userInsertingMdcFilterRegistrationBean() {
+    FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+    registrationBean.setFilter(new CronapiFilter());
+    registrationBean.setOrder(-1 * Integer.MAX_VALUE);
+    return registrationBean;
+  }
 
   @Bean
   public Jackson2ObjectMapperBuilder objectMapperBuilder() {
