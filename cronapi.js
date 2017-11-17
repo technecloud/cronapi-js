@@ -252,7 +252,7 @@
     return fields;
   }
 
-  function getErrorMessage(data, message) {
+  this.cronapi.internal.getErrorMessage = function(data, message) {
     try {
       var json = JSON.parse(data);
       if (json && json.error) {
@@ -292,7 +292,7 @@
       }
     }.bind(this));
     paramsApply.push(function(data, status, errorThrown) {
-      var message = getErrorMessage(data.responseText, errorThrown);
+      var message = this.cronapi.internal.getErrorMessage(data.responseText, errorThrown);
       if (typeof callbackError == "string") {
         eval(callbackError)(message);
       }
@@ -399,7 +399,7 @@
         result = this.cronapi.evalInContext(resultData.responseText);
     }
     else {
-      var message = getErrorMessage(resultData.responseText, resultData.statusText);
+      var message = this.cronapi.internal.getErrorMessage(resultData.responseText, resultData.statusText);
       this.cronapi.$scope.Notification.error(message);
       throw message;
     }
