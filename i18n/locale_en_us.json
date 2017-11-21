@@ -320,5 +320,6 @@
 	"downloadFileParam0": "URL: Url for download",
 	"qrCodeScanner": "Read QR CODE",
 	"formatQRCode": "Format: Format to be searched",
-	"messageQRCode": "Message: Message displayed when camera is openned"
+	"messageQRCode": "Message: Message displayed when camera is openned",
+	"qrCodeScannerDescription":"Function that read know formats. Example: QR_CODE."
 }
