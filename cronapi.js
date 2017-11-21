@@ -1948,6 +1948,40 @@
      navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
    };
    
+    /**
+     * @type function
+     * @platform M
+     * @name {{qrCodeScanner}}
+     * @nameTags QRCODE|QR|BAR|Scanner|BARCODE
+     * @param {ObjectType.STRING} format {{formatQRCode}}
+     * @param {ObjectType.STRING} message {{messageQRCode}}
+     * @description {{qrCodeScannerDescription}}
+     * @returns {ObjectType.VOID}
+    */
+   this.cronapi.cordova.camera.qrCodeScanner = function(/** @type {ObjectType.STRING} @description {{formatQRCode}} @blockType util_dropdown @keys QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128 @values QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128  */  format,/** @type {ObjectType.STRING} @description {{messageQRCode}} */ message, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
+    cordova.plugins.barcodeScanner.scan(
+	  function (result) {
+		  success(result.text);
+	  },
+	  function (errorMsg) {
+		  error(errorMsg);
+	  },
+	  {
+		  preferFrontCamera : false, 
+		  showFlipCameraButton : true, 
+		  showTorchButton : true, 
+		  torchOn: true, 
+		  saveHistory: true, 
+		  prompt : message, 
+		  resultDisplayDuration: 500, 
+		  formats : format, 
+		  orientation : "portrait", 
+		  disableAnimations : true, 
+		  disableSuccessBeep: false 
+	  }
+	);
+   };
+   
    
     this.cronapi.cordova.file = {};
    
