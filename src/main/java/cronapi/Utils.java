@@ -16,7 +16,17 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.persistence.Id;
 import javax.xml.bind.DatatypeConverter;
@@ -34,7 +44,7 @@ import com.google.gson.JsonPrimitive;
 
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
-import org.hibernate.validator.internal.util.privilegedactions.GetDeclaredMethod;
+import cronapi.rest.CronapiREST.TranslationPath;
 
 /**
  * Classe que representa ...
@@ -706,6 +716,26 @@ public class Utils {
 			setValueInArray(obj, key, valueToSet);
 		} else
 			setValueInObj(obj, key, valueToSet);
+	}
+	
+	public static final List<Var> getParamsAndExecuteBlockParams(JsonObject query, TranslationPath translationPath) {
+	  int paramBlockly = 0;
+    List<Var> params = new LinkedList<Var>();
+    JsonArray array = query.get("queryParamsValues").getAsJsonArray();
+    for (int i = 0; i < array.size(); i++ ) {
+      JsonObject paramObj = array.get(i).getAsJsonObject();
+      if (paramObj.get("fieldValue").isJsonObject()) {
+        JsonObject jsonCallBlockly = new JsonObject();
+        jsonCallBlockly.add("blockly", paramObj.get("fieldValue").getAsJsonObject());
+        Var result = QueryManager.executeBlockly(jsonCallBlockly, "GET", null).getObjectAsPOJOList();
+        params.add(result.getObjectAsList().getFirst().getField("value"));
+        paramBlockly++;
+      }
+      else {
+        params.add(translationPath.params[params.size() - paramBlockly]);
+      }
+    }
+    return params;
 	}
 
 }

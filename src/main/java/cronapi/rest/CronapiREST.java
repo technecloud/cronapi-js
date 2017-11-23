@@ -299,22 +299,7 @@ public class CronapiREST {
 
         String jpql = QueryManager.getJPQL(query);
 
-        this.paramBlockly = 0;
-        List<Var> params = new LinkedList<Var>();
-        query.get("queryParamsValues").getAsJsonArray().forEach(param-> {
-          JsonObject paramObj = param.getAsJsonObject();
-          if (paramObj.get("fieldValue").isJsonObject()) {
-            JsonObject jsonCallBlockly = new JsonObject();
-            jsonCallBlockly.add("blockly", paramObj.get("fieldValue").getAsJsonObject());
-            Var result = QueryManager.executeBlockly(jsonCallBlockly, "GET", null).getObjectAsPOJOList();
-            params.add(result.getObjectAsList().getFirst().getField("value"));
-            paramBlockly++;
-          }
-          else {
-            params.add(translationPath.params[params.size() - paramBlockly]);
-          }
-        });
-
+        List<Var> params = Utils.getParamsAndExecuteBlockParams(query, translationPath);
         ds.setDataSourceFilter(translationPath.filter);
         ds.filter(jpql, page, params.toArray(new Var[0]));
 
