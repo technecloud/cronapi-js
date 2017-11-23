@@ -1065,28 +1065,50 @@ public class DataSource implements JsonSerializable {
 
         int i = 0;
         List<String> parsedParams = parseParams(query);
-        Object instanceForUpdate = createAndSetFieldsDomain(parsedParams, strQuery, params);
-        processCloudFields(instanceForUpdate);
-        
-        for(String param : parsedParams) {
-          Var p = null;
-          if(i <= params.length - 1) {
-            p = params[i];
-          }
-          if(p != null) {
-            if(p.getId() != null) {
-              //strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
-              strQuery.setParameter(p.getId(), Utils.getFieldValue(instanceForUpdate, p.getId()));
+        if (!query.trim().startsWith("DELETE")) {
+          Object instanceForUpdate = createAndSetFieldsDomain(parsedParams, strQuery, params);
+          processCloudFields(instanceForUpdate);
+          
+          for(String param : parsedParams) {
+            Var p = null;
+            if(i <= params.length - 1) {
+              p = params[i];
+            }
+            if(p != null) {
+              if(p.getId() != null) {
+                //strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
+                strQuery.setParameter(p.getId(), Utils.getFieldValue(instanceForUpdate, p.getId()));
+              }
+              else {
+                // strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
+                strQuery.setParameter(param, Utils.getFieldValue(instanceForUpdate, parsedParams.get(i)));
+              }
             }
             else {
-              // strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
-              strQuery.setParameter(param, Utils.getFieldValue(instanceForUpdate, parsedParams.get(i)));
+              strQuery.setParameter(param, null);
             }
+            i++;
           }
-          else {
-            strQuery.setParameter(param, null);
+        }
+        else {
+          for(String param : parsedParams) {
+            Var p = null;
+            if(i <= params.length - 1) {
+              p = params[i];
+            }
+            if(p != null) {
+              if(p.getId() != null) {
+                strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
+              }
+              else {
+                strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
+              }
+            }
+            else {
+              strQuery.setParameter(param, null);
+            }
+            i++;
           }
-          i++;
         }
 
         try {
