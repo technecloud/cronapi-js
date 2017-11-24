@@ -575,7 +575,12 @@ public class DataSource implements JsonSerializable {
       for(String key : fields) {
         if (!fieldsByteHeaderSignature.contains(key) || isFieldByteWithoutHeader(key, data.getField(key))) {
           if(!key.equalsIgnoreCase(Class.class.getSimpleName())) {
-            this.updateField(key, data.getField(key));
+            try {
+              this.updateField(key, data.getField(key));
+            }
+            catch (Exception e) {
+              //NoCommand 
+            }
           }
         }
       }
