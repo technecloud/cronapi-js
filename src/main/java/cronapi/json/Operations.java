@@ -97,7 +97,7 @@ public class Operations {
 		return Var.valueOf(json);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{toList}}", nameTags = { "toList",
+	@CronapiMetaData(type = "function", name = "{{JSONtoList}}", nameTags = { "toList",
 			"Para Lista" }, description = "{{functionToList}}", returnType = ObjectType.LIST)
 	public static final Var toList(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead)
