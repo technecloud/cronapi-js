@@ -234,8 +234,22 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return getObjectAsByteArray();
     }
     else {
-      
-      if(_object instanceof Map && type != Map.class) {
+      //create instance for Entity class 
+      if (Utils.isEntityClass(type) && !(_object instanceof java.util.LinkedHashMap) 
+          && !type.equals(_object.getClass()) ) {
+        try {
+          List<String> ids = Utils.getFieldsWithAnnotationId(type);
+          Object instanceClass = type.newInstance();
+          for (String id: ids) 
+            Utils.updateField(instanceClass, id, _object);
+          return instanceClass;
+        }
+        catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+      //end create instance for Entity class 
+      else if(_object instanceof Map && type != Map.class) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         

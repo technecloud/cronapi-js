@@ -737,5 +737,35 @@ public class Utils {
     }
     return params;
 	}
+	
+	public static final Field getFieldOfClass(Object obj, String field) {
+	  try {
+				Object o = null;
+				Class c = obj.getClass();
+				Field f = c.getDeclaredField(field);
+				f.setAccessible(true);
+				return f;
+		} catch (Exception e1) {
+		}
+		return null;	
+	}
+	
+	public static boolean isEntityClass(Object obj) {
+		Boolean isEntity = false;
+		Class<?> c;
+    if (obj instanceof Class)
+      c = (Class)obj;
+    else
+      c = obj.getClass();
+      
+    Annotation[] fieldAnnots = c.getDeclaredAnnotations();
+    for (int i = 0; i < fieldAnnots.length; i++) {
+			if (fieldAnnots[i].toString().contains("@javax.persistence.Entity(")) {
+				isEntity = true;
+				break;
+			}
+		}
+		return isEntity;
+	}
 
 }
