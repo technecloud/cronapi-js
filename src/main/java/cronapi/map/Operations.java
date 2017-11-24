@@ -60,7 +60,7 @@ public class Operations {
 		cronapi.json.Operations.setJsonOrMapField(mapVar, keyVar, value);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{toJson}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{MapToJson}}", nameTags = {
 			"toJson" }, description = "{{functionToJson}}", returnType = ObjectType.JSON)
 	public static final Var toJson(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead)
@@ -68,7 +68,7 @@ public class Operations {
 		return cronapi.json.Operations.toJson(valueToBeRead);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{toList}}", nameTags = { "toList",
+	@CronapiMetaData(type = "function", name = "{{MapToList}}", nameTags = { "toList","Map",
 			"Para Lista" }, description = "{{functionToList}}", returnType = ObjectType.LIST)
 	public static final Var toList(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead)
