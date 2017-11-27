@@ -6,12 +6,12 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -39,15 +40,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import cronapi.ClientCommand;
 import cronapi.CronapiMetaData;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
-import cronapi.database.TenantService;
-import cronapi.database.TransactionManager;
-import cronapi.i18n.AppMessages;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.BlocklySecurity;
 
@@ -332,6 +330,18 @@ public class Operations {
 					httpGet.addHeader(entry.getKey().getObjectAsString(),
 							new Var(entry.getValue()).getObjectAsString());
 				});
+
+				if (params != Var.VAR_NULL) {
+
+					Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
+					List<NameValuePair> params2 = new LinkedList<>();
+					mapObject.entrySet().stream().forEach((entry) -> {
+						params2.add(new BasicNameValuePair(new Var(entry.getKey()).getObjectAsString(),
+								new Var(entry.getValue()).getObjectAsString()));
+					});
+					URI uri = new URIBuilder(httpGet.getURI()).addParameters(params2).build();
+					httpGet.setURI(uri);
+				}
 
 				Var toReturn;
 				HttpResponse httpResponse = httpClient.execute(httpGet);
