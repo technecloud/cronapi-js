@@ -235,7 +235,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
     }
     else {
       //create instance for Entity class 
-      if (Utils.isEntityClass(type) && !(_object instanceof java.util.LinkedHashMap) 
+      if (Utils.isEntityClass(type) && _object != null && !(_object instanceof java.util.LinkedHashMap) 
           && !type.equals(_object.getClass()) ) {
         try {
           List<String> ids = Utils.getFieldsWithAnnotationId(type);
