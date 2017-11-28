@@ -321,5 +321,8 @@
 	"qrCodeScanner": "Read QR CODE",
 	"formatQRCode": "Format: Format to be searched",
 	"messageQRCode": "Message: Message displayed when camera is openned",
-	"qrCodeScannerDescription":"Function that read know formats. Example: QR_CODE."
+	"qrCodeScannerDescription":"Function that read know formats. Example: QR_CODE.",
+  "openReport" : "Open Report",
+  "openReportDescription" : "Function responsible for opening a report.",
+  "report" : "Report"
 }

@@ -459,6 +459,19 @@
   this.cronapi.util.executeJavascriptReturn = function(value) {
     return eval( value );
   };
+  
+  /**
+   * @type function
+   * @name {{openReport}}
+   * @nameTags openReport|abrirrelatorio
+   * @description {{openReportDescription}}
+   * @param {ObjectType.STRING} value {{report}}
+   * @multilayer true
+   * @returns {ObjectType.VOID}
+   */  
+  this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
+    this.cronapi.$scope.getReport(name);
+  };
 
   /**
    * @category CategoryType.SCREEN

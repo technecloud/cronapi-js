@@ -323,5 +323,8 @@
 	"qrCodeScanner": "Ler QR CODE",
 	"formatQRCode": "Formato: Formato a ser buscado",
 	"messageQRCode": "Mensagem: Mensagem exibida enquanto a camera esta aberta",
-	"qrCodeScannerDescription":"Função que lê alguns formatos conhecidos e retorna o conteúdo. Exemplo: QR_CODE"
+	"qrCodeScannerDescription":"Função que lê alguns formatos conhecidos e retorna o conteúdo. Exemplo: QR_CODE",
+  "openReport" : "Abrir Relatório",
+  "openReportDescription" : "Função responsavel por abrir um relatório.",
+  "report" : "Relatório"
 }
