@@ -174,6 +174,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
     
     return new Var(id, val);
   }
+
+  public static Var newMap() {
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    return Var.valueOf(map);
+  }
   
   /**
    * Get the type of the underlying object

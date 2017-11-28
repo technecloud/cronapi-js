@@ -143,7 +143,7 @@ public class QueryManager {
     return value == null || value.isJsonNull();
   }
   
-  public static void addDefaultValues(JsonObject query, DataSource ds, boolean onlyNull) {
+  public static void addDefaultValues(JsonObject query, Var ds, boolean onlyNull) {
     if(!isNull(query.get("defaultValues"))) {
       for(Map.Entry<String, JsonElement> entry : query.get("defaultValues").getAsJsonObject().entrySet()) {
         if(!entry.getValue().isJsonNull()) {
@@ -164,11 +164,11 @@ public class QueryManager {
           }
           
           if(onlyNull) {
-            if(ds.getObject(entry.getKey()) == null)
-              ds.updateField(entry.getKey(), value);
+            if(ds.getField(entry.getKey()) == null)
+              ds.setField(entry.getKey(), value);
           }
           else {
-            ds.updateField(entry.getKey(), value);
+            ds.setField(entry.getKey(), value);
           }
         }
       }
@@ -359,8 +359,12 @@ public class QueryManager {
       }
     }
   }
-  
+
   public static void addCalcFields(JsonObject query, DataSource ds) {
+    addCalcFields(query, ds, true);
+  }
+  
+  public static void addCalcFields(JsonObject query, Object ds, boolean post) {
     if(!isNull(query.get("calcFields")) && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
       for(Map.Entry<String, JsonElement> entry : query.get("calcFields").getAsJsonObject().entrySet()) {
         LinkedHashMap<String, JsonElement> newProperties = (LinkedHashMap<String, JsonElement>)RestClient.getRestClient().getRequest()
@@ -409,8 +413,20 @@ public class QueryManager {
           }
         }
 
-        if (authorized)
-          newProperties.put(ds.getEntity() + "." + entry.getKey(), entry.getValue());
+        if (authorized) {
+          if (post) {
+            if (ds instanceof DataSource) {
+              newProperties.put(((DataSource) ds).getEntity() + "." + entry.getKey(), entry.getValue());
+            }
+          } else {
+            try {
+              cronapi.json.Operations.setJsonOrMapField(Var.valueOf(ds), Var.valueOf(entry.getKey()), Var.valueOf(entry.getValue()));
+            }
+            catch(Exception e) {
+              // Abafa
+            }
+          }
+        }
       }
     }
   }

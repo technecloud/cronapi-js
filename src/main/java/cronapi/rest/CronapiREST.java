@@ -265,15 +265,17 @@ public class CronapiREST {
 
         ds.insert();
 
-        QueryManager.addDefaultValues(query, ds, false);
+        QueryManager.addDefaultValues(query, Var.valueOf(ds), false);
 
         QueryManager.executeNavigateEvent(query, ds);
         QueryManager.checkFieldSecurity(query, ds, "GET");
 
         return Var.valueOf(ds.getObject());
+      } else {
+        Var empty = Var.newMap();
+        QueryManager.addDefaultValues(query, empty, false);
+        return empty;
       }
-
-      return Var.VAR_NULL;
     });
 
     return new ResponseEntity<Var>(data.getValue(), HttpStatus.OK);
@@ -345,7 +347,7 @@ public class CronapiREST {
 
         ds.insert((Map<?, ?>) data.getObject());
 
-        QueryManager.addDefaultValues(query, ds, true);
+        QueryManager.addDefaultValues(query, Var.valueOf(ds), true);
 
         QueryManager.executeEvent(query, ds, "beforeInsert");
         Object inserted = ds.save(false);

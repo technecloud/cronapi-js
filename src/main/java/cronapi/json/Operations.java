@@ -65,7 +65,8 @@ public class Operations {
     if (obj instanceof DataSource) {
       obj = ((DataSource) obj).getObject();
     }
-    else if (obj instanceof Map) {
+
+    if (obj instanceof Map) {
       Utils.mapSetObject(obj, key.toString(), value);
     } else {
       String[] path = key.toString().split("\\.");
