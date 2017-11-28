@@ -1,5 +1,8 @@
 package cronapi;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -1054,11 +1057,17 @@ public class Var implements Comparable<Var>, JsonSerializable {
         ((JsonObject)getObject()).entrySet().stream().forEach(c -> keys.add(c.getKey()));
       }
       else {
-        Method[] methods = getObject().getClass().getMethods();
-        for(Method m : methods) {
-          if(m.getName().startsWith("get") && Modifier.isPublic(m.getModifiers()) && m.getName().length() >= 4) {
-            keys.add(m.getName().substring(3, 4).toLowerCase() + m.getName().substring(4));
+        try {
+          Class<?> clazz = getObject().getClass();
+          BeanInfo info = Introspector.getBeanInfo(clazz);
+          PropertyDescriptor[] props = info.getPropertyDescriptors();
+
+          for (PropertyDescriptor pd : props) {
+            if (!pd.getName().equals("class") )
+              keys.add(pd.getName());
           }
+        } catch (Exception e) {
+          throw new RuntimeException(e);
         }
       }
     }
@@ -1087,6 +1096,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
     }
     catch(Exception e) {
       // Abafa
+    }
+  }
+
+  public void updateWith(Object obj) {
+    Var varObj = Var.valueOf(obj);
+    for (String key: varObj.keySet()) {
+      this.setField(key, varObj.getField(key));
     }
   }
   

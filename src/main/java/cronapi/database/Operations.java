@@ -84,7 +84,8 @@ public class Operations {
     if(!object.equals(Var.VAR_NULL)) {
       DataSource ds = new DataSource(entity.getObjectAsString());
       ds.insert(object.getObjectAsMap());
-      ds.save();
+      Object saved = ds.save();
+      object.updateWith(saved);
     }
   }
   
@@ -97,7 +98,8 @@ public class Operations {
       DataSource ds = new DataSource(entity.getObjectAsString());
       ds.filter(object, null);
       ds.update(new Var(object.getObjectAsMap()));
-      ds.save();
+      Object saved = ds.save();
+      object.updateWith(saved);
     }
   }
   
