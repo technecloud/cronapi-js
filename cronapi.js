@@ -469,9 +469,9 @@
    * @multilayer true
    * @returns {ObjectType.VOID}
    */  
-  this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
-    this.cronapi.$scope.getReport(name);
-  };
+//  this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
+//    this.cronapi.$scope.getReport(name);
+//  };
 
   /**
    * @category CategoryType.SCREEN
