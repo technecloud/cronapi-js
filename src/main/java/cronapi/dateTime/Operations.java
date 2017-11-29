@@ -191,10 +191,22 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getNow}}", nameTags = { "getNow", "now",
-			"getDate" }, description = "{{functionToGetNow}}", returnType = ObjectType.DATETIME)
-	public static final Var getNow() throws Exception {
-		return new Var(new Date());
-	}
+      "getDate" }, description = "{{functionToGetNow}}", returnType = ObjectType.DATETIME)
+  public static final Var getNow() throws Exception {
+    return new Var(new Date());
+  }
+
+  @CronapiMetaData(type = "function", name = "{{getNowNoHour}}", nameTags = { "getNow", "now",
+      "getDate" }, description = "{{functionToGetNowNoHour}}", returnType = ObjectType.DATETIME)
+  public static final Var getNowNoHour() throws Exception {
+    Calendar cal = Calendar.getInstance();
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
+
+    return new Var(cal);
+  }
 
 	@CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {
 			"formatDateTime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
