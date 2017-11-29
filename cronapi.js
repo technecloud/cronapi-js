@@ -762,11 +762,24 @@
    */
   this.cronapi.screen.getParam = function(paramName) {
     try {
-      return this.cronapi.$scope.params[paramName];
+      
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+      
+      if (vars[paramName] !== undefined)
+        return decodeURIComponent(vars[paramName]);
     }
     catch (e) {
-      alert(e);
+      //
     }
+    
+    return null;
   };
 
 
