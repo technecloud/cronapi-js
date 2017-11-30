@@ -468,11 +468,18 @@
    * @param {ObjectType.STRING} value {{report}}
    * @multilayer true
    * @returns {ObjectType.VOID}
+   * @wizard procedures_openreport_callnoreturn
    */  
-//  this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
-//    this.cronapi.$scope.getReport(name);
-//  };
-
+  this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
+    this.cronapi.$scope.getReport(name);
+  };
+  /**
+   * @type internal
+   */  
+  this.cronapi.util.openReport = function(name, params) {
+    this.cronapi.$scope.getReport(name, params);
+  };
+  
   /**
    * @category CategoryType.SCREEN
    * @categoryTags Screen|Tela
