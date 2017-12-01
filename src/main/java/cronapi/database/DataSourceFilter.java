@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import cronapi.i18n.Messages;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+
 import org.eclipse.persistence.internal.jpa.parsing.DotNode;
 import org.eclipse.persistence.internal.jpa.parsing.SelectNode;
 import org.eclipse.persistence.internal.jpa.parsing.VariableNode;
@@ -15,130 +18,142 @@ import org.springframework.security.core.GrantedAuthority;
 
 import cronapi.RestClient;
 import cronapi.Var;
+import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.Attribute;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-
 public class DataSourceFilter {
-  
+
   private LinkedList<DataSourceFilterItem> items = new LinkedList<>();
   private LinkedList<DataSourceOrderItem> orders = new LinkedList<>();
   private String type = "AND";
-  
+
   private String appliedJpql;
   private Var[] appliedParams;
-  
+
   private DataSourceFilter(String filter, String order) {
     if(filter != null && !filter.trim().isEmpty()) {
-      
+
       String[] values = filter.trim().split(";");
       if(values.length > 0) {
         for(String v : values) {
           String[] pair = null;
-          String type;
+          String operation;
           if(v.contains("@=")) {
             pair = v.trim().split("@=");
-            type = "LIKE";
+            operation = "LIKE";
+          }
+          else if(v.contains("<=")) {
+            pair = v.trim().split("<=");
+            operation = "<=";
+          }
+          else if(v.contains(">=")) {
+            pair = v.trim().split(">=");
+            operation = ">=";
+          }
+          else if(v.contains(">")) {
+            pair = v.trim().split(">");
+            operation = ">";
+          }
+          else if(v.contains("<")) {
+            pair = v.trim().split("<");
+            operation = "<";
           }
           else {
             pair = v.trim().split("=");
-            type = "=";
+            operation = "=";
           }
-          
+
           if(values.length == 1 && pair.length == 1) {
-            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(pair[0]), "LIKE"));
+            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(Var.deserialize(pair[0])), "LIKE", Var.deserializeType(pair[0])));
             break;
           }
-          
+
           if(pair.length > 0 && !pair[0].trim().isEmpty()) {
             if(pair.length == 1) {
-              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.VAR_NULL, type));
+              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.VAR_NULL, operation, "text"));
             }
             if(pair.length > 1) {
-              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.valueOf(pair[1]), type));
+              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.valueOf(Var.deserialize(pair[1])), operation, Var.deserializeType(pair[1])));
             }
           }
         }
       }
     }
-    
+
     if(order != null && !order.trim().isEmpty()) {
-      
+
       String[] values = order.trim().split(";");
       if(values.length > 0) {
         for(String v : values) {
           String[] pair = v.trim().split("\\|");
-          
+
           if(pair.length == 1) {
             orders.add(new DataSourceFilter.DataSourceOrderItem(pair[0], "ASC"));
           }
-          
+
           if(pair.length == 2) {
             orders.add(new DataSourceFilter.DataSourceOrderItem(pair[0], pair[1]));
           }
         }
       }
     }
-    
+
   }
-  
+
   public static DataSourceFilter getInstance(String filter, String order, String filterType) {
     if((filter != null && !filter.trim().isEmpty()) || (order != null && !order.trim().isEmpty())) {
       DataSourceFilter dsFilter = new DataSourceFilter(filter, order);
       if(filterType != null)
         dsFilter.setType(filterType);
-      
+
       return dsFilter;
     }
-    
+
     return null;
   }
-  
+
   public LinkedList<DataSourceFilterItem> getItems() {
     return items;
   }
-  
+
   public void setItems(LinkedList<DataSourceFilterItem> items) {
     this.items = items;
   }
-  
+
   public String getType() {
     return type;
   }
-  
+
   public void setType(String type) {
     if(type.equalsIgnoreCase("or") || type.equalsIgnoreCase("and")) {
       this.type = type;
     }
   }
-  
+
   public String getAppliedJpql() {
     return appliedJpql;
   }
-  
+
   public Var[] getAppliedParams() {
     return appliedParams;
   }
-  
+
   public List<String> findSearchables(Object obj, boolean filterWithAnnotation) {
     List<String> searchable = new ArrayList<>();
     String baseDomain = obj instanceof Class ? ((Class)obj).getName() : obj.getClass().getName();
     return findSearchables(obj, filterWithAnnotation, searchable, baseDomain, null);
   }
-  
+
   public List<String> findSearchables(Object obj, boolean filterWithAnnotation, List<String> searchable, String baseDomain, String baseAttribute) {
     if (baseAttribute == null)
       baseAttribute = "";
-      
+
     Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
     EntityManager em = TransactionManager.getEntityManager((Class)obj);
     EntityType type = em.getMetamodel().entity((Class)obj);
 
-    
-    
+
+
     for(Field f : fields) {
       boolean contains = false;
       SingularAttribute attrCurrent = null;
@@ -179,7 +194,7 @@ public class DataSourceFilter {
                 break;
               }
             }
-            
+
           }
         }
       }
@@ -190,7 +205,7 @@ public class DataSourceFilter {
         } else {
           searchable.add(getNameWithBaseAttribute(baseAttribute, f.getName()));
         }
-        
+
         if (attrCurrent.isAssociation()) {
           Object association = attrCurrent.getType().getJavaType();
           if (!((Class)association).getName().equalsIgnoreCase(baseDomain))
@@ -200,21 +215,21 @@ public class DataSourceFilter {
     }
     return searchable;
   }
-  
+
   public String getNameWithBaseAttribute(String baseAttribute, String attribute) {
     if (baseAttribute!=null && baseAttribute.length() > 0)
       return String.format("%s.%s", baseAttribute, attribute);
     return attribute;
   }
-  
+
   public void applyTo(Class domainClass, String jpql, Var[] params) {
     this.appliedParams = params;
     this.appliedJpql = jpql;
-    
+
     if(items.size() == 0 && orders.size() == 0) {
       return;
     }
-    
+
     String alias = "e";
     boolean hasWhere = false;
     boolean hasOrder = false;
@@ -227,24 +242,24 @@ public class DataSourceFilter {
           DotNode dotNode = (DotNode)selectNode.getSelectExpressions().get(0);
           alias = dotNode.getAsString();
         }
-        
+
         if(selectNode.getSelectExpressions().get(0) instanceof VariableNode) {
           VariableNode dotNode = (VariableNode)selectNode.getSelectExpressions().get(0);
           alias = dotNode.getAsString();
         }
       }
     }
-    
+
     if(parser.getParseTree().getWhereNode() != null) {
       hasWhere = true;
     }
-    
+
     if(parser.getParseTree().getOrderByNode() != null) {
       hasOrder = true;
     }
-    
+
     List<String> searchables = null;
-    
+
     if(items.size() == 1 && items.get(0).key == "*") {
       searchables = findSearchables(domainClass, true);
 
@@ -253,17 +268,17 @@ public class DataSourceFilter {
       }
       else {
         Var value = items.get(0).value;
-        String type = items.get(0).type;
+        String operation = items.get(0).operation;
         items = new LinkedList<>();
         this.type = "OR";
         for(String f : searchables) {
-          items.add(new DataSourceFilterItem(f, value, type));
+          items.add(new DataSourceFilterItem(f, value, type, operation));
         }
       }
     } else {
       searchables = findSearchables(domainClass, false);
     }
-    
+
     if(items.size() > 0) {
       if(!hasWhere) {
         jpql += " where (";
@@ -271,7 +286,7 @@ public class DataSourceFilter {
       else {
         jpql += " AND (";
       }
-      
+
       Var[] newParams = new Var[params.length + items.size()];
       for(int j = 0; j < params.length; j++) {
         newParams[j] = params[j];
@@ -284,21 +299,26 @@ public class DataSourceFilter {
           jpql += " " + type + " ";
         }
         add = true;
-        
-        jpql += alias + "." + item.key + " " + item.type + " :p" + i;
+
+        if (item.dataType != null && item.dataType.equals("date")) {
+          jpql += "CAST("+alias + "." + item.key + " as date) " + item.operation + " CAST(:p" + i +" as date)";
+        } else {
+          jpql += alias + "." + item.key +  item.operation + " :p" + i;
+        }
+
         newParams[i] = item.value;
         i++;
-        
+
         if(!searchables.contains(item.key)) {
           throw new RuntimeException(Messages.getString("notAllowed"));
         }
       }
-      
+
       jpql += ")";
-      
+
       this.appliedParams = newParams;
     }
-    
+
     if(orders.size() > 0) {
       if(!hasOrder) {
         jpql += " ORDER BY ";
@@ -306,7 +326,7 @@ public class DataSourceFilter {
       else {
         jpql += ", ";
       }
-      
+
       boolean add = false;
       for(DataSourceOrderItem order : orders) {
         if(add) {
@@ -316,10 +336,10 @@ public class DataSourceFilter {
         jpql += alias + "." + order.key + " " + order.type;
       }
     }
-    
+
     this.appliedJpql = jpql;
   }
-  
+
   private void setTypeBasedOnItemsValue() {
     boolean isSameValue = true;
     for(DataSourceFilterItem item : items) {
@@ -335,26 +355,30 @@ public class DataSourceFilter {
       this.type = "or";
     else
       this.type = "and";
-    
+
   }
-  
+
   public static class DataSourceFilterItem {
     public String key;
     public Var value;
-    public String type = "=";
-    
-    public DataSourceFilterItem(String key, Var value, String type) {
+    public String operation = "=";
+    public String dataType = "text";
+
+    public DataSourceFilterItem(String key, Var value, String operation, String dataType) {
       this.key = key;
       this.value = value;
-      if(type.equalsIgnoreCase("=") || type.equalsIgnoreCase("like"))
-        this.type = type;
+      if(operation.equalsIgnoreCase("=") || operation.equalsIgnoreCase("like") || operation.equalsIgnoreCase(">")
+          || operation.equalsIgnoreCase("<")  || operation.equalsIgnoreCase(">=")  || operation.equalsIgnoreCase("<=")) {
+        this.operation = operation;
+      }
+      this.dataType = dataType;
     }
   }
-  
+
   public static class DataSourceOrderItem {
     public String key;
     public String type = "ASC";
-    
+
     public DataSourceOrderItem(String key, String type) {
       this.key = key;
       if(type.equalsIgnoreCase("asc") || type.equalsIgnoreCase("desc"))

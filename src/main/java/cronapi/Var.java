@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -49,7 +50,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
   private boolean modifiable = true;
   private boolean created = false;
   private static final NumberFormat _formatter = new DecimalFormat("0.00000");
-  
+  public static final Pattern ISO_PATTERN = Pattern.compile("(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))");
   public static final Object[] EMPTY_OBJ_ARRAY = new Object[0];
   
   public static final Var VAR_NULL = new Var(null, false);
@@ -173,6 +174,43 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return (Var)val;
     
     return new Var(id, val);
+  }
+
+  public static String[] ALLOWED_TYPES = { "text", "datetime", "date", "number", "integer", "boolean" };
+  public static Class[] MAPPED_TYPES = { java.lang.String.class, java.util.Date.class, java.util.Date.class,
+      java.lang.Double.class, java.lang.Long.class, java.lang.Boolean.class };
+
+  public static String deserializeType(String value) {
+    for(int i = 0; i < ALLOWED_TYPES.length; i++) {
+      if(value.endsWith("@@" + ALLOWED_TYPES[i])) {
+        return ALLOWED_TYPES[i];
+      }
+    }
+
+    return ALLOWED_TYPES[0];
+  }
+
+  public static Object deserialize(String value) {
+    if(value == null)
+      return null;
+    
+    int type = 0;
+    for(int i = 0; i < ALLOWED_TYPES.length; i++) {
+      if(value.endsWith("@@" + ALLOWED_TYPES[i])) {
+        type = i;
+        value =  value.substring(0, value.indexOf("@@"));
+        break;
+      }
+    }
+
+    Var var = null;
+    if(type == 0 && ISO_PATTERN.matcher(value).matches()) {
+      var = Var.valueOf(Var.valueOf(value).getObjectAsDateTime());
+    } else {
+      var = Var.valueOf(value);
+    }
+
+    return var.getObject(MAPPED_TYPES[type]);
   }
 
   public static Var newMap() {

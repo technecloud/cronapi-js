@@ -1,12 +1,9 @@
 package cronapi;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.node.*;
-import jdk.nashorn.internal.runtime.regexp.joni.ast.StringNode;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -16,18 +13,26 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.NumericNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import jdk.nashorn.internal.runtime.regexp.joni.ast.StringNode;
 
 @Component
 public class VarDeserializer extends StdDeserializer<Var> {
-  
+
   private JsonDeserializer objectDeserializer = JsonNodeDeserializer.getDeserializer(Object.class);
-  
+
   private ObjectMapper mapper = new ObjectMapper();
-  
+
   public VarDeserializer() {
     super(Var.class);
   }
-  
+
   @Override
   public Var deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
     Object o = objectDeserializer.deserialize(p, ctxt);
@@ -40,6 +45,7 @@ public class VarDeserializer extends StdDeserializer<Var> {
     }
     else if(o instanceof StringNode || o instanceof TextNode) {
       o = mapper.convertValue(o, String.class);
+      o = Var.deserialize((String)o);
     }
     else if(o instanceof BooleanNode) {
       o = mapper.convertValue(o, Boolean.class);
@@ -50,7 +56,7 @@ public class VarDeserializer extends StdDeserializer<Var> {
     else if(o instanceof ArrayNode) {
       o = mapper.convertValue(o, List.class);
     }
-    
+
     return new Var(o);
   }
 }
