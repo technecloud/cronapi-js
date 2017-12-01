@@ -72,13 +72,16 @@ public class QueryManager {
   public static String getJPQL(JsonObject query) {
     if(!isNull(query.get("query"))) {
       if(query.get("query").isJsonObject()) {
-        return JPQLConverter.sqlFromJson(query.get("query").getAsJsonObject());
+        JsonObject queryObj = query.get("query").getAsJsonObject();
+        if (queryObj.get("isRawSql") != null && !queryObj.get("isRawSql").isJsonNull() && queryObj.get("isRawSql").getAsBoolean())
+          return queryObj.get("sqlContent").getAsString();
+        else
+          return JPQLConverter.sqlFromJson(queryObj);
       }
       else {
         return query.get("query").getAsString();
       }
     }
-    
     return null;
   }
   
