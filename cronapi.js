@@ -264,7 +264,6 @@
    * @arbitraryParams true
    */
   this.cronapi.util.makeCallServerBlocklyAsync = function(blocklyWithFunction, callbackSuccess, callbackError) {
-    
     var fields = this.cronapi.util.getScreenFields();
 
     var paramsApply = [];
@@ -717,12 +716,14 @@
    */
   this.cronapi.screen.changeView = function(view, params) {
     try {
+      debugger;
       var queryString = '?';
       var template = '#key#=#value#&';
-      $(params).each(function(idx) {
-        for (var key in this)
-          queryString += template.replace('#key#', this.cronapi.internal.Url.encode(key)).replace('#value#', this.cronapi.internal.Url.encode(this[key]));
-      });
+      for (var i in Object.keys(params)) {
+          var k = Object.keys(params[i])[0];
+          var v = String(Object.values(params[i])[0]);
+           queryString += template.replace('#key#', this.cronapi.internal.Url.encode(k)).replace('#value#', this.cronapi.internal.Url.encode(v));
+      }
       window.location.hash = view + queryString;
     }
     catch (e) {
@@ -1636,7 +1637,7 @@
     var streaming = null;
     var mediaConfig =  { video: true };
     var errBack = function(e) {
-    	console.log('An error has occurred!', e)
+      console.log('An error has occurred!', e)
     };
     
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1688,9 +1689,9 @@
     canvas.height = height;
     var context = canvas.getContext('2d');
     var videoDOM = document.getElementById('cronapiVideoCapture');
-		context.drawImage(videoDOM, 0, 0, width, height);
-		var base64 = canvas.toDataURL().substr(22);
-		this.cronapi.screen.changeValueOfField(field, base64);
+    context.drawImage(videoDOM, 0, 0, width, height);
+    var base64 = canvas.toDataURL().substr(22);
+    this.cronapi.screen.changeValueOfField(field, base64);
   };
   
   this.cronapi.internal.castBase64ToByteArray = function(base64) {
@@ -1844,14 +1845,14 @@
           'X-AUTH-TOKEN': _u.token 
         },
         onProgress: function(event) {
-  				if (event.lengthComputable) {
+          if (event.lengthComputable) {
             var complete = (event.loaded / event.total * 100 | 0);
             if (progressId) {
               var progress = document.getElementById(progressId);
               progress.value = progress.innerHTML = complete;
             }
           }
-				}
+        }
     }).success(function(data, status, headers, config) {
         this.cronapi.screen.changeValueOfField(field, data.jsonString);
     }.bind(this)).error(function(data, status, headers, config) {
@@ -1992,26 +1993,26 @@
     */
    this.cronapi.cordova.camera.qrCodeScanner = function(/** @type {ObjectType.STRING} @description {{formatQRCode}} @blockType util_dropdown @keys QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128 @values QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128  */  format,/** @type {ObjectType.STRING} @description {{messageQRCode}} */ message, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
     cordova.plugins.barcodeScanner.scan(
-	  function (result) {
-		  success(result.text);
-	  },
-	  function (errorMsg) {
-		  error(errorMsg);
-	  },
-	  {
-		  preferFrontCamera : false, 
-		  showFlipCameraButton : true, 
-		  showTorchButton : true, 
-		  torchOn: true, 
-		  saveHistory: true, 
-		  prompt : message, 
-		  resultDisplayDuration: 500, 
-		  formats : format, 
-		  orientation : "portrait", 
-		  disableAnimations : true, 
-		  disableSuccessBeep: false 
-	  }
-	);
+    function (result) {
+      success(result.text);
+    },
+    function (errorMsg) {
+      error(errorMsg);
+    },
+    {
+      preferFrontCamera : false, 
+      showFlipCameraButton : true, 
+      showTorchButton : true, 
+      torchOn: true, 
+      saveHistory: true, 
+      prompt : message, 
+      resultDisplayDuration: 500, 
+      formats : format, 
+      orientation : "portrait", 
+      disableAnimations : true, 
+      disableSuccessBeep: false 
+    }
+  );
    };
    
    
@@ -2374,13 +2375,13 @@
     // public method for url encoding
     encode : function (string) {
       if (string)
-        return escape(this._utf8_encode(string));
+        return escape(this.cronapi.internal.Url._utf8_encode(string));
       return '';
     },
     // public method for url decoding
     decode : function (string) {
       if (string)
-        return this._utf8_decode(unescape(string));
+        return this.cronapi.internal.Url._utf8_decode(unescape(string));
       return '';
     },
     // private method for UTF-8 encoding
