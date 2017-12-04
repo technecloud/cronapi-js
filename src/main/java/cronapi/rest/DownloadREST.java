@@ -30,6 +30,14 @@ import org.springframework.web.bind.annotation.*;
 
 import cronapi.util.LRUCache;
 import org.springframework.web.multipart.MultipartFile;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import cronapi.Var;
+import cronapi.util.Callback;
+import javax.servlet.ServletException;
+import java.lang.RuntimeException;
+import java.util.LinkedList;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -37,8 +45,9 @@ public class DownloadREST {
 
   private static int INTERVAL = 1000 * 60 * 10;
   private static LRUCache<String, File> FILES = new LRUCache<>(1000, INTERVAL);
+  private static LRUCache<String, Callback> AFTER_UPLOAD = new LRUCache<>(1000, INTERVAL);
   private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-          .indexOf("-agentlib:jdwp") > 0;
+      .indexOf("-agentlib:jdwp") > 0;
   public static SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
   public static File TEMP_FOLDER;
 
@@ -58,7 +67,11 @@ public class DownloadREST {
 
           if (millis > INTERVAL) {
             synchronized (file.getAbsolutePath().intern()) {
-              file.delete();
+              if (file.isDirectory()) {
+                FileUtils.deleteDirectory(file);
+              } else {
+                file.delete();
+              }
             }
           }
 
@@ -73,14 +86,21 @@ public class DownloadREST {
   public static File getTempFile(String name) {
     return new File(TEMP_FOLDER, name);
   }
-  
+
   public static String getDownloadUrl(File file) {
     String id = UUID.randomUUID().toString();
     FILES.put(id, file);
-    
+
     return "api/cronapi/download/" + id;
   }
-  
+
+  public static String authorizeUpload(Callback callback) {
+    String id = UUID.randomUUID().toString();
+    AFTER_UPLOAD.put(id, callback);
+
+    return id;
+  }
+
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
@@ -89,12 +109,32 @@ public class DownloadREST {
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/upload")
-  public String upload(HttpServletResponse response, @RequestParam("file") MultipartFile[] uploadfiles) {
-    String savedFiles = "";
-    String name = "";
-    String fileExtension = "";
-    String contentType = "";
+  @RequestMapping(method = RequestMethod.POST, value = "/upload/**")
+  public String upload(HttpServletResponse response, HttpServletRequest request, @RequestParam("file") MultipartFile[] uploadfiles) {
+
+    String path = request.getServletPath();
+    String id = "";
+
+    if (path.indexOf("/upload/") != -1) {
+      id = path.substring(path.indexOf("/upload") + 8).trim();
+    }
+
+    Callback callback = null;
+
+    if (id.isEmpty()) {
+      id = UUID.randomUUID().toString();
+    } else {
+      callback = AFTER_UPLOAD.get(id);
+
+      if (callback == null) {
+        throw new RuntimeException("Not Authorized");
+      }
+    }
+
+    File uploadedFolder = new File(TEMP_FOLDER, id);
+    JsonArray array = new JsonArray();
+
+    LinkedList<Var> files = new LinkedList<>();
 
     for (MultipartFile file : uploadfiles) {
       if (file.isEmpty()) {
@@ -104,39 +144,46 @@ public class DownloadREST {
       try {
         String randomUUIDString = UUID.randomUUID().toString();
 
-        Path moveTo = Paths.get(TEMP_FOLDER + File.separator + randomUUIDString + ".bin");
-        file.transferTo(moveTo.toFile());
+        File moveTo = new File(uploadedFolder, file.getName());
+        file.transferTo(moveTo);
 
-        Path metadata = Paths.get(TEMP_FOLDER + File.separator + randomUUIDString + ".md");
-        Files.write(metadata, StorageService.generateMetadata(file));
+        File metadata = new File(uploadedFolder, file.getName()+".md");
+        Files.write(metadata.toPath(), StorageService.generateMetadata(file));
 
-        fileExtension = "";
-        if (file.getOriginalFilename().indexOf(".") > -1)
-          fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf("."))
-              .trim();
-        name = file.getOriginalFilename().replace(fileExtension, "");
-        contentType = file.getContentType();
-        savedFiles = String.format("%s", Paths.get(randomUUIDString + ".bin").toString());
+        JsonObject json = new JsonObject();
+        json.addProperty("name", file.getName());
+        json.addProperty("id", randomUUIDString);
+        json.addProperty("contentType", file.getContentType());
+        json.addProperty("size", file.getSize());
 
-        FILES.put(randomUUIDString, moveTo.toFile());
+        array.add(json);
+
+        FILES.put(randomUUIDString, moveTo);
+
+        files.add(Var.valueOf(moveTo));
 
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
-    String json = String.format(
-        "{\"type\": \"tempFile\", \"path\": \"%s\", \"name\": \"%s\", \"fileExtension\": \"%s\", \"contentType\": \"%s\"}",
-        savedFiles, name, fileExtension, contentType);
 
-    return json;
+    if (callback != null) {
+      try {
+        callback.call(Var.valueOf(files));
+      } catch(Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return array.toString();
   }
 
 
   @RequestMapping(method = RequestMethod.GET, value = "/download/{id}")
   public void download(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
-          throws Exception {
+      throws Exception {
     File resourceFile = FILES.get(id);
-    
+
     if(resourceFile == null || !resourceFile.exists()) {
       throw new Exception("File not found!");
     }
@@ -189,5 +236,5 @@ public class DownloadREST {
       }
     }
   }
-  
+
 }
