@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.Semaphore;
@@ -22,11 +22,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import cronapi.ErrorResponse;
 import cronapi.util.DataType;
+import cronapi.util.StorageService;
+import cronapi.util.StorageServiceResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import cronapi.util.LRUCache;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -85,9 +88,52 @@ public class DownloadREST {
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
-  
+
+  @RequestMapping(method = RequestMethod.GET, value = "/upload")
+  public String upload(HttpServletResponse response, @RequestParam("file") MultipartFile[] uploadfiles) {
+    String savedFiles = "";
+    String name = "";
+    String fileExtension = "";
+    String contentType = "";
+
+    for (MultipartFile file : uploadfiles) {
+      if (file.isEmpty()) {
+        continue;
+      }
+
+      try {
+        String randomUUIDString = UUID.randomUUID().toString();
+
+        Path moveTo = Paths.get(TEMP_FOLDER + File.separator + randomUUIDString + ".bin");
+        file.transferTo(moveTo.toFile());
+
+        Path metadata = Paths.get(TEMP_FOLDER + File.separator + randomUUIDString + ".md");
+        Files.write(metadata, StorageService.generateMetadata(file));
+
+        fileExtension = "";
+        if (file.getOriginalFilename().indexOf(".") > -1)
+          fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf("."))
+              .trim();
+        name = file.getOriginalFilename().replace(fileExtension, "");
+        contentType = file.getContentType();
+        savedFiles = String.format("%s", Paths.get(randomUUIDString + ".bin").toString());
+
+        FILES.put(randomUUIDString, moveTo.toFile());
+
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    String json = String.format(
+        "{\"type\": \"tempFile\", \"path\": \"%s\", \"name\": \"%s\", \"fileExtension\": \"%s\", \"contentType\": \"%s\"}",
+        savedFiles, name, fileExtension, contentType);
+
+    return json;
+  }
+
+
   @RequestMapping(method = RequestMethod.GET, value = "/download/{id}")
-  public void listBlockly(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
+  public void download(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
           throws Exception {
     File resourceFile = FILES.get(id);
     
