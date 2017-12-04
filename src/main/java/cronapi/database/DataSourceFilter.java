@@ -303,7 +303,7 @@ public class DataSourceFilter {
         if (item.dataType != null && item.dataType.equals("date")) {
           jpql += "CAST("+alias + "." + item.key + " as date) " + item.operation + " CAST(:p" + i +" as date)";
         } else {
-          jpql += alias + "." + item.key +  item.operation + " :p" + i;
+          jpql += alias + "." + item.key + " " +  item.operation + " :p" + i;
         }
 
         newParams[i] = item.value;
