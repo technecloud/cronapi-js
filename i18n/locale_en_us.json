@@ -318,7 +318,7 @@
 	"downloadFileName": "Start file download",
 	"downloadFileDescription": "Starts downloading a file from a url",
 	"downloadFileParam0": "URL: Url for download",
-	"qrCodeScanner": "Read QR CODE",
+	"qrCodeScanner": "Read barcode",
 	"formatQRCode": "Format: Format to be searched",
 	"messageQRCode": "Message: Message displayed when camera is openned",
 	"qrCodeScannerDescription":"Function that read know formats. Example: QR_CODE.",

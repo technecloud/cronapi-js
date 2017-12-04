@@ -320,7 +320,7 @@
 	"downloadFileName": "Iniciar download de arquivo",
 	"downloadFileDescription": "Inicia o download de um arquivo de uma url",
 	"downloadFileParam0": "URL: Url para download",
-	"qrCodeScanner": "Ler QR CODE",
+	"qrCodeScanner": "Ler código de barras",
 	"formatQRCode": "Formato: Formato a ser buscado",
 	"messageQRCode": "Mensagem: Mensagem exibida enquanto a camera esta aberta",
 	"qrCodeScannerDescription":"Função que lê alguns formatos conhecidos e retorna o conteúdo. Exemplo: QR_CODE",
