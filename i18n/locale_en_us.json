@@ -333,7 +333,7 @@
 	"scheduleExecutionParam1": "Initial Delay: Initial delay to execute the statements at first time",
 	"scheduleExecutionParam2": "Schedule Time: Update time between execute the statements",
 	"scheduleExecutionParam3": "Measurement Time: Measurement time used to quantify the others parameters",
-	"milliseconds": "Milliseconds",
+	"millisecondss": "Milliseconds",
 	"hours": "Hours",
 	"minutes": "Minutes"
 }

@@ -335,7 +335,7 @@
   "scheduleExecutionParam1":"Tempo inicial: Tempo inicial necessário até que a função execute pela primeira o(s) comando(s) definido(s)",
   "scheduleExecutionParam2":"Tempo para Atualização: Tempo de espera entre as execuções do(s) comandos(s)",
   "scheduleExecutionParam3":"Unidade de Tempo: Unidade de medida do tempo passado como parâmetro",
-  "milliseconds":"Milissegundos",
+  "millisecondss":"Milissegundos",
   "hours":"Horas",
   "minutes":"Minutos"
 }
