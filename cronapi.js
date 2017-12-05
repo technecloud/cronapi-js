@@ -472,6 +472,18 @@
   this.cronapi.util.openReport = function(/** @type {ObjectType.STRING} @blockType util_report_list */ name) {
     this.cronapi.$scope.getReport(name);
   };
+  
+   /**
+   * @type function
+   * @name {{executeAsynchronousName}}
+   * @nameTags Executar|Assíncrono|Execute| Asynchronous
+   * @description {{executeAsynchronousDescription}}
+   * @param {ObjectType.STATEMENT} statement {{statement}}
+   *
+   */
+  this.cronapi.util.executeAsynchronous = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statement) {
+    setTimeout(statement , 0 );
+  };
   /**
    * @type internal
    */  

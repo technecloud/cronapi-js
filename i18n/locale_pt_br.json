@@ -326,5 +326,8 @@
 	"qrCodeScannerDescription":"Função que lê alguns formatos conhecidos e retorna o conteúdo. Exemplo: QR_CODE",
   "openReport" : "Abrir Relatório",
   "openReportDescription" : "Função responsavel por abrir um relatório.",
-  "report" : "Relatório"
+  "report" : "Relatório",
+  "statement":"Comandos: Comandos a serem executados",
+  "executeAsynchronousName":"Executar Assíncrono",
+  "executeAsynchronousDescription":"Função que executa comandos do clientes de forma assíncrona"
 }

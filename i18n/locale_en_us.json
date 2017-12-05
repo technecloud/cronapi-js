@@ -321,8 +321,11 @@
 	"qrCodeScanner": "Read barcode",
 	"formatQRCode": "Format: Format to be searched",
 	"messageQRCode": "Message: Message displayed when camera is openned",
-	"qrCodeScannerDescription":"Function that read know formats. Example: QR_CODE.",
-  "openReport" : "Open Report",
-  "openReportDescription" : "Function responsible for opening a report.",
-  "report" : "Report"
+	"qrCodeScannerDescription": "Function that read know formats. Example: QR_CODE.",
+	"openReport": "Open Report",
+	"openReportDescription": "Function responsible for opening a report.",
+	"report": "Report",
+	"statement": "Statements: Statements to be executed",
+	"executeAsynchronousName": "Execute asynchronous",
+	"executeAsynchronousDescription": "Function that execute statement asynchronously"
 }
