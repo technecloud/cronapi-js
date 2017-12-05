@@ -484,6 +484,42 @@
   this.cronapi.util.executeAsynchronous = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statement) {
     setTimeout(statement , 0 );
   };
+  
+  /**
+   * @type function
+   * @name {{scheduleExecutionName}}
+   * @nameTags Executar|Agenda|Agendar|Agendamento|Execução|Execute|Execution|Schedule|Scheduled
+   * @description {{scheduleExecutionDescription}}
+   * @param {ObjectType.STATEMENT} statements {{statement}}
+   * @param {ObjectType.LONG} initial_time {{scheduleExecutionParam1}}
+   * @param {ObjectType.LONG} interval_time {{scheduleExecutionParam2}}
+   * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
+   */
+  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statements}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{destinationType}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values seconds|milliseconds|minutes|hours  */ measurement_unit ) {
+    if(measurement_unit == 'seconds'){
+      if(initial_time > 0){
+        setTimeout( setInterval(statements , interval_time * 1000 ) , initial_time * 1000 );
+      }else
+        setInterval(statements , interval_time * 1000 );
+    }else if(measurement_unit =='milliseconds'){
+       if(initial_time > 0){
+        setTimeout( setInterval(statements , interval_time ) , initial_time );
+       }else
+       setInterval(statements , interval_time  );
+    }else if(measurement_unit =='minutes'){
+      if(initial_time > 0){
+        setTimeout( setInterval(statements , interval_time * 60000 ) , initial_time * 60000);
+       }else
+       setInterval(statements , interval_time * 60000  );
+    }else if(measurement_unit =='hours'){
+      
+      if(initial_time > 0){
+        setTimeout( setInterval(statements , interval_time * 3600000 ) , initial_time * 3600000);
+       }else
+       setInterval(statements , interval_time * 3600000 );
+    }
+  };
+  
   /**
    * @type internal
    */  

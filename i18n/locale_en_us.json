@@ -327,5 +327,10 @@
 	"report": "Report",
 	"statement": "Statements: Statements to be executed",
 	"executeAsynchronousName": "Execute asynchronous",
-	"executeAsynchronousDescription": "Function that execute statement asynchronously"
+	"executeAsynchronousDescription": "Function that execute statement asynchronously",
+	"scheduleExecutionName": "Schedule execution",
+	"scheduleExecutionDescription": "Function that schedule statements to be executed after a delay",
+	"scheduleExecutionParam1": "Initial Delay: Initial delay to execute the statements at first time",
+	"scheduleExecutionParam2": "Schedule Time: Update time between execute the statements",
+	"scheduleExecutionParam3": "Measurement Time: Measurement time used to quantify the others parameters"
 }
