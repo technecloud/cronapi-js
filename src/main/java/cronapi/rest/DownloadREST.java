@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.Semaphore;
@@ -22,11 +22,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import cronapi.ErrorResponse;
 import cronapi.util.DataType;
+import cronapi.util.StorageService;
+import cronapi.util.StorageServiceResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import cronapi.util.LRUCache;
+import org.springframework.web.multipart.MultipartFile;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import cronapi.Var;
+import cronapi.util.Callback;
+import javax.servlet.ServletException;
+import java.lang.RuntimeException;
+import java.util.LinkedList;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -34,8 +45,9 @@ public class DownloadREST {
 
   private static int INTERVAL = 1000 * 60 * 10;
   private static LRUCache<String, File> FILES = new LRUCache<>(1000, INTERVAL);
+  private static LRUCache<String, Callback> AFTER_UPLOAD = new LRUCache<>(1000, INTERVAL);
   private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-          .indexOf("-agentlib:jdwp") > 0;
+      .indexOf("-agentlib:jdwp") > 0;
   public static SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
   public static File TEMP_FOLDER;
 
@@ -55,7 +67,11 @@ public class DownloadREST {
 
           if (millis > INTERVAL) {
             synchronized (file.getAbsolutePath().intern()) {
-              file.delete();
+              if (file.isDirectory()) {
+                FileUtils.deleteDirectory(file);
+              } else {
+                file.delete();
+              }
             }
           }
 
@@ -70,14 +86,21 @@ public class DownloadREST {
   public static File getTempFile(String name) {
     return new File(TEMP_FOLDER, name);
   }
-  
+
   public static String getDownloadUrl(File file) {
     String id = UUID.randomUUID().toString();
     FILES.put(id, file);
-    
+
     return "api/cronapi/download/" + id;
   }
-  
+
+  public static String authorizeUpload(Callback callback) {
+    String id = UUID.randomUUID().toString();
+    AFTER_UPLOAD.put(id, callback);
+
+    return id;
+  }
+
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
@@ -85,12 +108,82 @@ public class DownloadREST {
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
-  
+
+  @RequestMapping(method = RequestMethod.POST, value = "/upload/**")
+  public String upload(HttpServletResponse response, HttpServletRequest request, @RequestParam("file") MultipartFile[] uploadfiles) {
+
+    String path = request.getServletPath();
+    String id = "";
+
+    if (path.indexOf("/upload/") != -1) {
+      id = path.substring(path.indexOf("/upload") + 8).trim();
+    }
+
+    Callback callback = null;
+
+    if (id.isEmpty()) {
+      id = UUID.randomUUID().toString();
+    } else {
+      callback = AFTER_UPLOAD.get(id);
+
+      if (callback == null) {
+        throw new RuntimeException("Not Authorized");
+      }
+    }
+
+    File uploadedFolder = new File(TEMP_FOLDER, id);
+    JsonArray array = new JsonArray();
+
+    LinkedList<Var> files = new LinkedList<>();
+
+    for (MultipartFile file : uploadfiles) {
+      if (file.isEmpty()) {
+        continue;
+      }
+
+      try {
+        String randomUUIDString = UUID.randomUUID().toString();
+
+        File moveTo = new File(uploadedFolder, file.getName());
+        file.transferTo(moveTo);
+
+        File metadata = new File(uploadedFolder, file.getName()+".md");
+        Files.write(metadata.toPath(), StorageService.generateMetadata(file));
+
+        JsonObject json = new JsonObject();
+        json.addProperty("name", file.getName());
+        json.addProperty("id", randomUUIDString);
+        json.addProperty("contentType", file.getContentType());
+        json.addProperty("size", file.getSize());
+
+        array.add(json);
+
+        FILES.put(randomUUIDString, moveTo);
+
+        files.add(Var.valueOf(moveTo));
+
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    if (callback != null) {
+      try {
+        callback.call(Var.valueOf(files));
+      } catch(Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return array.toString();
+  }
+
+
   @RequestMapping(method = RequestMethod.GET, value = "/download/{id}")
-  public void listBlockly(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
-          throws Exception {
+  public void download(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
+      throws Exception {
     File resourceFile = FILES.get(id);
-    
+
     if(resourceFile == null || !resourceFile.exists()) {
       throw new Exception("File not found!");
     }
@@ -143,5 +236,5 @@ public class DownloadREST {
       }
     }
   }
-  
+
 }

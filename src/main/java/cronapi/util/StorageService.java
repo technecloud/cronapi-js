@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
+import cronapi.rest.DownloadREST;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.JsonObject;
@@ -25,26 +26,12 @@ import com.google.gson.JsonParser;
 
 public class StorageService {
 
-	private ServletContext servletContext;
-	private static String UPLOADED_FOLDER;
-	private static String UPLOADED_FOLDER_GUID;
-	private static String UPLOADED_FOLDER_FULLPATH;
+  private static String UPLOADED_FOLDER_FULLPATH;
+
+  private ServletContext servletContext;
 
 	static {
-		try {
-			UPLOADED_FOLDER = "tempFilesUploads";
-			UPLOADED_FOLDER_GUID = UUID.randomUUID().toString().replace("-", "");
-
-			final File temp;
-			temp = File.createTempFile(UPLOADED_FOLDER, UPLOADED_FOLDER_GUID);
-			temp.delete();
-			temp.mkdir();
-
-			UPLOADED_FOLDER_FULLPATH = temp.getAbsolutePath();
-
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+    UPLOADED_FOLDER_FULLPATH = DownloadREST.TEMP_FOLDER.getAbsolutePath();
 	}
 
 	public static StorageServiceResult saveUploadFiles(MultipartFile[] files) {
@@ -61,9 +48,7 @@ public class StorageService {
 				UUID uuid = UUID.randomUUID();
 				String randomUUIDString = uuid.toString().replace("-", "");
 
-				// path = Paths.get(UPLOADED_FOLDER + File.separator + randomUUIDString + fileExtension);
 				Path moveTo = Paths.get(UPLOADED_FOLDER_FULLPATH + File.separator + randomUUIDString + ".bin");
-				// path.toFile().createNewFile();
 				file.transferTo(moveTo.toFile());
 
 				Path metadata = Paths.get(UPLOADED_FOLDER_FULLPATH + File.separator + randomUUIDString + ".md");
@@ -87,7 +72,7 @@ public class StorageService {
 		return new StorageServiceResult(json);
 	}
 
-	private static byte[] generateMetadata(MultipartFile file) {
+	public static byte[] generateMetadata(MultipartFile file) {
 		String fileExtension = "";
 		if (file.getOriginalFilename().indexOf(".") > -1)
 			fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf(".")).trim();
@@ -156,16 +141,6 @@ public class StorageService {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		// try {
-		// 	if (path.contains("file://"))
-		// 		path = path.replace("file://", "").replace(";", "");
-		// 	byte[] result = Files.readAllBytes(Paths.get(path));
-		// 	byte[] fileBytes = new byte[result.length - 256];
-		// 	System.arraycopy(result, 256, fileBytes, 0, result.length - 256);
-		// 	return fileBytes;
-		// } catch (Exception e) {
-		// 	throw new RuntimeException(e);
-		// }
 	}
 
 	public static StorageServiceFileObject getFileObjectFromTempDirectory(String name) {

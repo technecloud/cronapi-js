@@ -7,11 +7,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletRequest;
 
 import cronapi.serialization.CronappModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
+import org.springframework.boot.context.embedded.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ConversionServiceFactoryBean;
@@ -88,5 +90,13 @@ public class CronapiConfigurator {
     
     bean.setConverters(converters);
     return bean.getObject();
+  }
+
+  @Bean
+  public MultipartConfigElement multipartConfigElement() {
+    MultipartConfigFactory factory = new MultipartConfigFactory();
+    factory.setMaxFileSize("102400MB");
+    factory.setMaxRequestSize("102400MB");
+    return factory.createMultipartConfig();
   }
 }
