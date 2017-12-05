@@ -38,6 +38,14 @@ import cronapi.util.Callback;
 import javax.servlet.ServletException;
 import java.lang.RuntimeException;
 import java.util.LinkedList;
+import cronapi.RestResult;
+import java.util.concurrent.Callable;
+import cronapi.RestClient;
+import cronapi.database.TenantService;
+import org.springframework.beans.factory.annotation.Autowired;
+import cronapi.database.TransactionManager;
+import cronapi.ClientCommand;
+import cronapi.i18n.Messages;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -52,6 +60,9 @@ public class DownloadREST {
   public static File TEMP_FOLDER;
 
   private static ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+
+  @Autowired
+  private TenantService tenantService;
 
   static {
     TEMP_FOLDER =  new File(System.getProperty("java.io.tmpdir"), "CRONAPI_RECYCLE_FILES");
@@ -109,73 +120,100 @@ public class DownloadREST {
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/upload/**")
-  public String upload(HttpServletResponse response, HttpServletRequest request, @RequestParam("file") MultipartFile[] uploadfiles) {
+  @RequestMapping(method = RequestMethod.POST, value = "/upload/{id}")
+  public RestResult upload(HttpServletResponse response, HttpServletRequest request, @PathVariable("id") String id, @RequestParam("file") MultipartFile[] uploadfiles) {
 
-    String path = request.getServletPath();
-    String id = "";
-
-    if (path.indexOf("/upload/") != -1) {
-      id = path.substring(path.indexOf("/upload") + 8).trim();
+    if (AFTER_UPLOAD.get(id) == null) {
+      throw new RuntimeException(Messages.getString("notAllowed"));
     }
 
-    Callback callback = null;
-
-    if (id.isEmpty()) {
-      id = UUID.randomUUID().toString();
-    } else {
-      callback = AFTER_UPLOAD.get(id);
-
-      if (callback == null) {
-        throw new RuntimeException("Not Authorized");
-      }
-    }
+    Callback callback = AFTER_UPLOAD.get(id);
 
     File uploadedFolder = new File(TEMP_FOLDER, id);
+    uploadedFolder.mkdirs();
     JsonArray array = new JsonArray();
 
     LinkedList<Var> files = new LinkedList<>();
+    LinkedList<File> deleteFiles = new LinkedList<>();
 
-    for (MultipartFile file : uploadfiles) {
-      if (file.isEmpty()) {
-        continue;
+    try {
+      for (MultipartFile file : uploadfiles) {
+        if (file.isEmpty()) {
+          continue;
+        }
+
+        try {
+          String randomUUIDString = UUID.randomUUID().toString();
+
+          File moveTo = new File(uploadedFolder, file.getOriginalFilename());
+          file.transferTo(moveTo);
+
+          File metadata = new File(uploadedFolder, file.getName()+".md");
+          Files.write(metadata.toPath(), StorageService.generateMetadata(file));
+
+          JsonObject json = new JsonObject();
+          json.addProperty("name", file.getName());
+          json.addProperty("id", randomUUIDString);
+          json.addProperty("contentType", file.getContentType());
+          json.addProperty("size", file.getSize());
+
+          array.add(json);
+
+          files.add(Var.valueOf(moveTo));
+
+          deleteFiles.add(moveTo);
+
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      if (callback != null) {
+        try {
+          RestResult result = runIntoTransaction(callback, Var.valueOf(files));
+          result.setValue(Var.valueOf(array));
+
+          return result;
+        } catch(Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      RestResult result = new RestResult(Var.valueOf(array), new LinkedList<ClientCommand>());
+      return result;
+    } finally {
+      for (File file: deleteFiles) {
+        try {
+          file.delete();
+        } catch(Exception e) {
+          //Abafa
+        }
       }
 
       try {
-        String randomUUIDString = UUID.randomUUID().toString();
-
-        File moveTo = new File(uploadedFolder, file.getName());
-        file.transferTo(moveTo);
-
-        File metadata = new File(uploadedFolder, file.getName()+".md");
-        Files.write(metadata.toPath(), StorageService.generateMetadata(file));
-
-        JsonObject json = new JsonObject();
-        json.addProperty("name", file.getName());
-        json.addProperty("id", randomUUIDString);
-        json.addProperty("contentType", file.getContentType());
-        json.addProperty("size", file.getSize());
-
-        array.add(json);
-
-        FILES.put(randomUUIDString, moveTo);
-
-        files.add(Var.valueOf(moveTo));
-
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    if (callback != null) {
-      try {
-        callback.call(Var.valueOf(files));
+        FileUtils.deleteDirectory(uploadedFolder);
       } catch(Exception e) {
-        throw new RuntimeException(e);
+        //Abafa
       }
     }
+  }
 
-    return array.toString();
+  private RestResult runIntoTransaction(Callback cb, Var param) throws Exception {
+    RestClient.getRestClient().setFilteredEnabled(true);
+    RestClient.getRestClient().setTenantService(tenantService);
+    try {
+      cb.call(param);
+      TransactionManager.commit();
+    }
+    catch(Exception e) {
+      TransactionManager.rollback();
+      throw e;
+    }
+    finally {
+      TransactionManager.close();
+      TransactionManager.clear();
+    }
+    return new RestResult(Var.VAR_NULL, RestClient.getRestClient().getCommands());
   }
 
 

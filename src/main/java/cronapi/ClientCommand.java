@@ -10,9 +10,11 @@ public class ClientCommand {
   public ClientCommand(String function) {
     this.function = Var.valueOf(function);
   }
-  
-  public void addParam(Object value) {
-    params.add(Var.valueOf(value));
+
+  public void addParam(Object...values) {
+    for (Object o: values) {
+      params.add(Var.valueOf(o));
+    }
   }
   
   public Var getFunction() {

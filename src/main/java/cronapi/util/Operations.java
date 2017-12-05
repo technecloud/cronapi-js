@@ -21,6 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import cronapi.rest.DownloadREST;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -608,5 +609,18 @@ public class Operations {
 		}
 
 	}
+
+  @CronapiMetaData(type = "function", name = "Upload", nameTags = { "upload" }, description = "Upload")
+  public static final void upload(
+      @ParamMetaData(type = ObjectType.STRING, defaultValue = "*", description = "Filtros: arquivos permitidos Ex: image/*.") Var filter,
+      @ParamMetaData(type = ObjectType.STRING, defaultValue = "20MB", description = "Tamanho máximo: tamanho máximo permitido no arquivo em bytes.") Var maxSize,
+      @ParamMetaData(type = ObjectType.OBJECT, description = "Múltiplos: permite múltiplos arquivos?",
+          blockType = "util_dropdown", keys = {"true", "false" },
+          values = { "Sim", "Não" }) Var multiple,
+      @ParamMetaData(type = ObjectType.STATEMENTSENDER, description = "Após Upload") cronapi.util.Callback callback
+  ) throws Exception {
+    String id = DownloadREST.authorizeUpload(callback);
+    RestClient.getRestClient().addCommand("cronapi.util.upload").addParam(id, filter, maxSize, multiple);
+  }
 
 }
