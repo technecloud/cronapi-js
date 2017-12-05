@@ -490,12 +490,12 @@
    * @name {{scheduleExecutionName}}
    * @nameTags Executar|Agenda|Agendar|Agendamento|Execução|Execute|Execution|Schedule|Scheduled
    * @description {{scheduleExecutionDescription}}
-   * @param {ObjectType.STATEMENT} statements {{statement}}
+   * @param {ObjectType.STATEMENT} statement {{statement}}
    * @param {ObjectType.LONG} initial_time {{scheduleExecutionParam1}}
    * @param {ObjectType.LONG} interval_time {{scheduleExecutionParam2}}
    * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
    */
-  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statements}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{destinationType}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values seconds|milliseconds|minutes|hours  */ measurement_unit ) {
+  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{destinationType}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{milliseconds}}|{{minutes}}|{{hours}}  */ measurement_unit ) {
     if(measurement_unit == 'seconds'){
       if(initial_time > 0){
         setTimeout( setInterval(statements , interval_time * 1000 ) , initial_time * 1000 );
