@@ -610,17 +610,18 @@ public class Operations {
 
 	}
 
-  @CronapiMetaData(type = "function", name = "Upload", nameTags = { "upload" }, description = "Upload")
+  @CronapiMetaData(type = "function", name = "{{uploadName}}", nameTags = { "upload","enviar" }, description = "{{uploadDescription}}")
   public static final void upload(
-      @ParamMetaData(type = ObjectType.STRING, defaultValue = "*", description = "Filtros: arquivos permitidos Ex: image/*.") Var filter,
-      @ParamMetaData(type = ObjectType.STRING, defaultValue = "20MB", description = "Tamanho máximo: tamanho máximo permitido no arquivo em bytes.") Var maxSize,
-      @ParamMetaData(type = ObjectType.OBJECT, description = "Múltiplos: permite múltiplos arquivos?",
+      @ParamMetaData(type = ObjectType.STRING, description = "{{uploadParam}}") Var description,
+      @ParamMetaData(type = ObjectType.STRING, defaultValue = "*", description = "{{uploadParam0}}") Var filter,
+      @ParamMetaData(type = ObjectType.STRING, defaultValue = "20MB", description = "{{uploadParam1}}") Var maxSize,
+      @ParamMetaData(type = ObjectType.OBJECT, description = "{{uploadParam2}}",
           blockType = "util_dropdown", keys = {"true", "false" },
-          values = { "Sim", "Não" }) Var multiple,
-      @ParamMetaData(type = ObjectType.STATEMENTSENDER, description = "Após Upload") cronapi.util.Callback callback
+          values = { "{{yes}}", "{{no}}" }) Var multiple,
+      @ParamMetaData(type = ObjectType.STATEMENTSENDER, description = "{{uploadParam3}}") cronapi.util.Callback callback
   ) throws Exception {
     String id = DownloadREST.authorizeUpload(callback);
-    RestClient.getRestClient().addCommand("cronapi.util.upload").addParam(id, filter, maxSize, multiple);
+    RestClient.getRestClient().addCommand("cronapi.util.upload").addParam(id, description, filter, maxSize, multiple);
   }
 
 }
