@@ -53,6 +53,18 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+            <id>libs-release</id>
+            <name>artifactory-cronapp-release</name>
+            <url>https://artifactory.cronapp.io/libs-release</url>
+        </repository>
+        <repository>
+            <id>libs-snapshot</id>
+            <name>artifactory-cronapp-snapshot</name>
+            <url>https://artifactory.cronapp.io/libs-snapshot</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
