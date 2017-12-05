@@ -5,7 +5,7 @@
     <artifactId>cronapi-java</artifactId>
     <packaging>jar</packaging>
     <name>cronapi-java</name>
-    <version>0.0.90-d-s-b</version>
+    <version>0.0.91-d</version>
     <description>Public Java library for CronApp's users</description>
     <url>https://github.com/technecloud/cronapi-java</url>
     <build>
@@ -167,7 +167,7 @@
         <dependency>
             <groupId>io.cronapp</groupId>
             <artifactId>cronapp-reports-exec</artifactId>
-            <version>0.0.1-report</version>
+            <version>0.0.14-develop</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
