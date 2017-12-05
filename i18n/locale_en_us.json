@@ -315,7 +315,7 @@
 	"executeSqlDescription": "Function to execute command SQL.",
 	"text": "Text",
 	"array": "List of parameters",
-	"downloadFileName": "Start file download",
+	"downloadFileName": "Start file download on URL",
 	"downloadFileDescription": "Starts downloading a file from a url",
 	"downloadFileParam0": "URL: Url for download",
 	"qrCodeScanner": "Read barcode",
