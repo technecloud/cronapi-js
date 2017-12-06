@@ -5,10 +5,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -182,18 +179,21 @@ public class Operations {
 		return new Var(from.renameTo(to));
 	}
 
-	/**
-	 * Mover Arquivo
-	 */
-	@CronapiMetaData(type = "function", name = "{{moveFile}}", nameTags = {
-			"fileMove" }, description = "{{functionToMoveFile}}", params = { "{{pathOfSourceFile}}",
-					"{{pathOfDestinationFile}}" }, paramsType = { ObjectType.STRING,
-							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
-	public static final Var fileMove(Var pathFrom, Var pathTo) throws Exception {
-		File from = new File(pathFrom.getObjectAsString().trim());
-		File to = new File(pathTo.getObjectAsString().trim());
-		return new Var(from.renameTo(to));
-	}
+  /**
+   * Mover Arquivo
+   */
+  @CronapiMetaData(type = "function", name = "{{moveFile}}", nameTags = {
+      "fileMove" }, description = "{{functionToMoveFile}}", params = { "{{pathOfSourceFile}}",
+      "{{pathOfDestinationFile}}" }, paramsType = { ObjectType.STRING,
+      ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
+  public static final Var fileMove(Var pathFrom, Var pathTo) throws Exception {
+    File from = new File(pathFrom.getObjectAsString().trim());
+    File to = new File(pathTo.getObjectAsString().trim());
+
+    Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+    return Var.VAR_TRUE;
+  }
 
 	/**
 	 * Abrir arquivo para escrita
