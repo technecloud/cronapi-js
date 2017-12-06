@@ -563,7 +563,7 @@
       this.safeApply(func.bind(this));
     }
     catch (e) {
-      alert(e);
+      // NO COMMAND
     }
   };
 
