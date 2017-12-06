@@ -7,6 +7,8 @@
 # Bower
 ######################
 bower_components/
+.project
+package-lock.json
 
 ######################
 # Node
@@ -14,8 +16,6 @@ bower_components/
 /node/**
 /node_tmp/**
 /node_modules/**
-.project
-package-lock.json
 
 
 # Locally stored "Eclipse launch configurations"
