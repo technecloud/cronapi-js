@@ -484,7 +484,7 @@
   this.cronapi.util.executeAsynchronous = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statement) {
     setTimeout(statement , 0 );
   };
-  
+
   /**
    * @type function
    * @name {{scheduleExecutionName}}
@@ -496,28 +496,31 @@
    * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
    */
   this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit ) {
-    if(measurement_unit == 'seconds'){
-      if(initial_time > 0){
-        setTimeout( setInterval(statements , interval_time * 1000 ) , initial_time * 1000 );
-      }else
-        setInterval(statements , interval_time * 1000 );
-    }else if(measurement_unit =='milliseconds'){
-       if(initial_time > 0){
-        setTimeout( setInterval(statements , interval_time ) , initial_time );
-       }else
-       setInterval(statements , interval_time  );
-    }else if(measurement_unit =='minutes'){
-      if(initial_time > 0){
-        setTimeout( setInterval(statements , interval_time * 60000 ) , initial_time * 60000);
-       }else
-       setInterval(statements , interval_time * 60000  );
-    }else if(measurement_unit =='hours'){
-      
-      if(initial_time > 0){
-        setTimeout( setInterval(statements , interval_time * 3600000 ) , initial_time * 3600000);
-       }else
-       setInterval(statements , interval_time * 3600000 );
+    var factor = 1;
+
+    if (measurement_unit == 'seconds') {
+      factor = 1000;
+    } else if(measurement_unit =='minutes') {
+      factor = 60000;
+    } else if(measurement_unit =='hours') {
+      factor = 3600000;
     }
+
+    initial_time = initial_time * factor;
+    interval_time = interval_time * factor;
+
+    var intervalId = -1;
+
+    var timeoutId = setTimeout(function() {
+      statements();
+      intervalId = setInterval(statements , interval_time) ;
+    }.bind(this), initial_time);
+
+    this.$on('$destroy', function() {
+      try { clearTimeout(timeoutId); } catch(e) {}
+      try { clearInterval(intervalId); } catch(e) {}
+    });
+
   };
   
   /**
