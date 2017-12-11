@@ -1883,6 +1883,8 @@
   };
   
   this.cronapi.internal.uploadFile = function(field, file, progressId) {
+    if (!file)
+      return;
     var uploadUrl = '/api/cronapi/uploadFile';
     var formData = new FormData();
     formData.append("file", file);
@@ -1898,10 +1900,24 @@
         onProgress: function(event) {
           if (event.lengthComputable) {
             var complete = (event.loaded / event.total * 100 | 0);
-            if (progressId) {
-              var progress = document.getElementById(progressId);
-              progress.value = progress.innerHTML = complete;
+            var $progressId = $('#'+progressId);
+            if ($progressId.length > 0) {
+              if ($progressId.data('type') == 'bootstrapProgress') {
+                if (complete < 100) {
+                  $progressId.show();
+                  $progressId.find('.progress-bar').css('width', complete+'%');
+                }
+                else {
+                  $progressId.hide();
+                  $progressId.find('.progress-bar').css('width', '0%');
+                }
+              }
+              else {
+                var progress = document.getElementById(progressId);
+                progress.value = progress.innerHTML = complete;
+              }
             }
+            
           }
         }
     }).success(function(data, status, headers, config) {

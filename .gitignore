@@ -68,3 +68,4 @@ pom.xml
 .history*
 .settings*
 .classpath*
+/node_modules
