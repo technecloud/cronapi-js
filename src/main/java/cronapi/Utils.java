@@ -1,10 +1,6 @@
 package cronapi;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -87,13 +83,42 @@ public class Utils {
 		return dir.delete();
 	}
 
-	public static String MD5AsStringFromFile(File file) throws Exception {
-		String filename = file.getPath();
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		md.update(Files.readAllBytes(Paths.get(filename)));
-		byte[] digest = md.digest();
-		String myChecksum = DatatypeConverter.printHexBinary(digest).toUpperCase();
-		return myChecksum;
+  public static String encodeMD5(String string) throws Exception {
+    return encodeMD5(string.getBytes(CronapiConfigurator.ENCODING));
+  }
+
+  public static String encodeMD5(byte[] bytes) throws Exception {
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    md.update(bytes);
+    byte[] digest = md.digest();
+    String myChecksum = DatatypeConverter.printHexBinary(digest).toUpperCase();
+    return myChecksum;
+  }
+
+	public static String encodeMD5(File file) throws Exception {
+    DataInputStream in = null;
+    FileInputStream fstream = null;
+
+    try {
+      MessageDigest md5 = MessageDigest.getInstance("MD5");
+
+      fstream = new FileInputStream(file);
+      in = new DataInputStream(fstream);
+      byte[] bin = new byte[254];
+      while (in.available() != 0) {
+        int bytes = in.read(bin);
+        md5.update(bin, 0, bytes);
+      }
+
+      byte[] digest = md5.digest();
+
+      return DatatypeConverter.printHexBinary(digest).toUpperCase();
+    } finally {
+      if (in != null)
+        in.close();
+      if (fstream != null)
+        fstream.close();
+    }
 	}
 
 	public static void copyFileTo(File src, File dst) throws Exception {

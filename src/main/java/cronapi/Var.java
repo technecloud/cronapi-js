@@ -482,6 +482,20 @@ public class Var implements Comparable<Var>, JsonSerializable {
     }
     return false;
   }
+
+  public String getMD5() {
+    try {
+      if (_object instanceof File) {
+        return Utils.encodeMD5((File) _object);
+      } else if (_object instanceof byte[]) {
+        return Utils.encodeMD5((byte[]) _object);
+      } else {
+        return Utils.encodeMD5(getObjectAsString());
+      }
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
   
   /**
    * Get object as a double. Does not make sense for a "LIST" type object.

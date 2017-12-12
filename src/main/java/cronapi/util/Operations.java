@@ -270,6 +270,13 @@ public class Operations {
 		return new Var(passwordEncoder.encode(password.getObjectAsString()));
 	}
 
+  @CronapiMetaData(type = "function", name = "{{MD5OfVar}}", nameTags = {
+      "string md5", "bytes md5", "md5" }, description = "{{functionToReturnMD5OfVar}}", params = {
+      "{{MD5OfVarParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.STRING)
+  public static Var encodeMD5(Var value) throws Exception {
+    return Var.valueOf(value.getMD5());
+  }
+
 	@CronapiMetaData(type = "function", name = "{{matchesencryptPasswordName}}", nameTags = {
 			"matchesencryptPassword" }, description = "{{matchesencryptPasswordDescription}}", params = {
 					"{{matchesencryptPasswordParam0}}", "{{matchesencryptPasswordParam1}}" }, paramsType = {

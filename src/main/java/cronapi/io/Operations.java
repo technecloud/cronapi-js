@@ -70,7 +70,7 @@ public class Operations {
 			"fileMD5" }, description = "{{functionToReturnMD5OfFile}}", params = {
 					"{{pathOfFile}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.STRING)
 	public static final Var fileMD5(Var path) throws Exception {
-		return new Var(Utils.MD5AsStringFromFile(new File(path.getObjectAsString().trim())));
+		return new Var(Utils.encodeMD5(new File(path.getObjectAsString().trim())));
 	}
 
 	/**

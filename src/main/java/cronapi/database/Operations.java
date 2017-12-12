@@ -31,7 +31,7 @@ public class Operations {
     Var varDs = new Var(ds);
     return varDs;
   }
-  
+
   @CronapiMetaData(type = "function", name = "{{datasourceNext}}", nameTags = { "next", "avançar",
       "proximo" }, description = "{{functionToMoveCursorToNextPosition}}", params = {
           "{{datasource}}" }, paramsType = { ObjectType.DATASET }, returnType = ObjectType.VOID, displayInline = true)
