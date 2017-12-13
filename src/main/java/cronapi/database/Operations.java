@@ -1,10 +1,13 @@
 package cronapi.database;
 
+import org.springframework.data.domain.PageRequest;
+
 import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
+import cronapi.RestClient;
+import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.ParamMetaData;
-import cronapi.Var;
 
 /**
  * Classe que representa operações de acesso ao banco
@@ -27,6 +30,28 @@ public class Operations {
       ds.fetch();
     else {
       ds.filter(query.getObjectAsString(), params);
+    }
+    Var varDs = new Var(ds);
+    return varDs;
+  }
+  
+  public static Var queryPaged(Var entity, Var query, Var useRestPagination, Var ... params) {
+    DataSource ds = new DataSource(entity.getObjectAsString());
+    
+    PageRequest page = null;
+    if (useRestPagination.getObjectAsBoolean()) {
+      int pageNumber = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("page"));
+      int pageSize = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("size"));
+      page = new PageRequest(pageNumber, pageSize);
+    }
+    
+    if(query == Var.VAR_NULL)
+      ds.fetch();
+    else {
+      if (page != null)
+        ds.filter(query.getObjectAsString(), page, params);
+      else
+        ds.filter(query.getObjectAsString(), params);
     }
     Var varDs = new Var(ds);
     return varDs;
