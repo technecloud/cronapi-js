@@ -5,6 +5,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -37,6 +38,8 @@ import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
 import cronapi.util.StorageService;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 public class Var implements Comparable<Var>, JsonSerializable {
   
@@ -537,18 +540,21 @@ public class Var implements Comparable<Var>, JsonSerializable {
             return StorageService.getFileBytesWithMetadata((String)getObject());
           }
           return java.util.Base64.getDecoder().decode(((String)getObject()).getBytes("UTF-8"));
-        case UNKNOWN:
-          return (byte[])getObject();
         default:
-          // has no meaning
-          break;
+          if (_object instanceof File) {
+            return FileUtils.readFileToByteArray((File) _object);
+          }
+          else if (_object instanceof InputStream) {
+            return IOUtils.toByteArray((InputStream) _object);
+          }
+
+          return (byte[])getObject();
       }
       
     }
     catch(Exception e) {
       throw new RuntimeException(e);
     }
-    return null;
   }
   
   /**
