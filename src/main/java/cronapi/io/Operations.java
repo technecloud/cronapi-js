@@ -188,7 +188,11 @@ public class Operations {
       ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
   public static final Var fileMove(Var pathFrom, Var pathTo) throws Exception {
     File from = new File(pathFrom.getObjectAsString().trim());
-    File to = new File(pathTo.getObjectAsString().trim());
+    File toFolder = new File(pathTo.getObjectAsString().trim());
+    File to = toFolder;
+    if (toFolder.isDirectory()) {
+      to = new File(toFolder, from.getName());
+    }
 
     Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
