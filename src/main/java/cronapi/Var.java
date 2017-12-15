@@ -542,7 +542,10 @@ public class Var implements Comparable<Var>, JsonSerializable {
           return java.util.Base64.getDecoder().decode(((String)getObject()).getBytes("UTF-8"));
         default:
           if (_object instanceof File) {
-            return FileUtils.readFileToByteArray((File) _object);
+            if (StorageService.isFileImage(_object))
+              return FileUtils.readFileToByteArray((File)_object);
+            else
+              return StorageService.getFileBytesWithMetadata((File)_object);
           }
           else if (_object instanceof InputStream) {
             return IOUtils.toByteArray((InputStream) _object);
