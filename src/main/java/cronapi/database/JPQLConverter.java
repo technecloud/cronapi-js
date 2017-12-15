@@ -304,7 +304,7 @@ public class JPQLConverter {
   private static String getValue(JsonElement jsonValue, String operator, String type) {
     if(jsonValue instanceof JsonArray) {
       StringBuilder values = new StringBuilder();
-      String join = "integer".equals(type) ? " AND " : ", ";
+      String join = "integer".equals(type) || "date".equals(type) || "datetime".equals(type) ? " AND " : ", ";
       jsonValue.getAsJsonArray().forEach(value -> {
         values.append(String.format("%s%s", getParameter(value.getAsString(), operator, type), join));
       });
