@@ -337,5 +337,20 @@
   "scheduleExecutionParam3":"Unidade de Tempo: Unidade de medida do tempo passado como parâmetro",
   "millisecondss":"Milissegundos",
   "hours":"Horas",
-  "minutes":"Minutos"
+  "minutes":"Minutos",
+  "incSecond": "Incrementar segundo na data",
+	"functionToIncSecond": "Função para incrementar segundo na data",
+	"secondsToIncrement": "Segundos a incrementar",
+	"incMinute": "Incrementar minuto na data",
+	"functionToIncMinute": "Função para incrementar minuto na data",
+	"minutesToIncrement": "Minutos a incrementar",
+	"incHour": "Incrementar hora na data",
+	"functionToIncHour": "Função para incrementar hora na data",
+	"hoursToIncrement": "Horas a incrementar",
+	"getHoursBetweenDates": "Obter total de horas entre datas",
+	"functionToGetHoursBetweenDates": "Função para obter total de horas entre datas",
+	"getMinutesBetweenDates": "Obter total de minutos entre datas",
+	"functionToGetMinutesBetweenDates": "Função para obter total de minutos entre datas",
+	"getSecondsBetweenDates": "Obter total de segundos entre datas",
+	"functionToGetSecondsBetweenDates": "Função para obter total de segundos entre datas"
 }

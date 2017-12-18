@@ -335,5 +335,20 @@
 	"scheduleExecutionParam3": "Measurement Time: Measurement time used to quantify the others parameters",
 	"millisecondss": "Milliseconds",
 	"hours": "Hours",
-	"minutes": "Minutes"
+	"minutes": "Minutes",
+	"incSecond": "Increment second on date",
+	"functionToIncSecond": "Function to increment second in date",
+	"secondsToIncrement": "Seconds to increase",
+	"incMinute": "Increment minute on date",
+	"functionToIncMinute": "Function to increment minute in date",
+	"minutesToIncrement": "Minutes to increase",
+	"incHour": "Increment hour on date",
+	"functionToIncHour": "Function to increment hour in date",
+	"hoursToIncrement": "Hours to increase",
+	"getHoursBetweenDates": "Get hours total between dates",
+	"functionToGetHoursBetweenDates": "Function to get hours total between dates",
+	"getMinutesBetweenDates": "Get minutes total between dates",
+	"functionToGetMinutesBetweenDates": "Function to get minutes total between dates",
+	"getSecondsBetweenDates": "Get seconds total between dates",
+	"functionToGetSecondsBetweenDates": "Function to get seconds total between dates"
 }
