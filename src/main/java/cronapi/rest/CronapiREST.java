@@ -159,7 +159,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/crud/{entity}/**")
-  public HttpEntity<List> crudGet(@PathVariable("entity") String entity, Pageable pageable) throws Exception {
+  public HttpEntity<Object> crudGet(@PathVariable("entity") String entity, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
 
       TranslationPath translationPath = translatePathVars(entity);
@@ -169,21 +169,30 @@ public class CronapiREST {
       DataSource ds = new DataSource(entity);
       if(translationPath.relationClass == null) {
         ds.checkRESTSecurity("GET");
-        ds.setDataSourceFilter(translationPath.filter);
-        ds.filter(null, page, translationPath.params);
+        if (translationPath.params.length > 0 && translationPath.params[0].equals("__new__")) {
+          ds.insert();
+          return Var.valueOf(ds.getObject());
+        } else {
+          ds.setDataSourceFilter(translationPath.filter);
+          ds.filter(null, page, translationPath.params);
+        }
       }
       else {
         ds.checkRESTSecurity(translationPath.refId, "GET");
-        ds.setDataSourceFilter(translationPath.filter);
-        ds.filterByRelation(translationPath.refId, page, translationPath.params);
+        if (translationPath.relationParams.length > 0 && translationPath.relationParams[0].equals("__new__")) {
+          ds.resolveRelation(translationPath.refId);
+          ds.insert();
+          return Var.valueOf(ds.getObject());
+        } else {
+          ds.setDataSourceFilter(translationPath.filter);
+          ds.filterByRelation(translationPath.refId, page, translationPath.params);
+        }
       }
 
-      return Var.valueOf(ds.getPage());
+      return Var.valueOf(ds.getPage().getContent());
     });
 
-    Page page = (Page)data.getValue().getObject();
-
-    return new ResponseEntity<List>(page.getContent(), HttpStatus.OK);
+    return new ResponseEntity<Object>(data.getValue().getObject(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/crud/{entity}/**")

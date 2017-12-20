@@ -535,6 +535,10 @@ public class DataSource implements JsonSerializable {
       updateField(field.getId(), field.getObject());
     }
   }
+
+  public void filterByPk(Var[] params) {
+    filter(null, null, params);
+  }
   
   public void filter(Var data, Var[] extraParams) {
     
@@ -791,6 +795,7 @@ public class DataSource implements JsonSerializable {
             }
             jpql += "e." + field.getName() + " = :p" + i;
             params[i].setId("p" + i);
+            i++;
           }
         }
         jpql += ")";
@@ -962,6 +967,29 @@ public class DataSource implements JsonSerializable {
     }
     return result;
   }
+
+  public void resolveRelation(String refId) {
+    EntityMetadata metadata = getMetadata();
+    RelationMetadata relationMetadata = metadata.getRelations().get(refId);
+
+    if(relationMetadata.getAssossiationName() != null) {
+      try {
+        domainClass = Class.forName(relationMetadata.getAttribute().getJavaType().getName());
+      }
+      catch(ClassNotFoundException e) {
+        //
+      }
+
+    }
+    else {
+      try {
+        domainClass = Class.forName(relationMetadata.getName());
+      }
+      catch(ClassNotFoundException e) {
+        //
+      }
+    }
+  }
   
   public void filterByRelation(String refId, PageRequest pageRequest, Var ... primaryKeys) {
     EntityMetadata metadata = getMetadata();
@@ -992,7 +1020,7 @@ public class DataSource implements JsonSerializable {
       name = relationMetadata.getSimpleName();
       
       try {
-        domainClass = Class.forName(name);
+        domainClass = Class.forName(relationMetadata.getName());
       }
       catch(ClassNotFoundException e) {
         //
