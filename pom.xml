@@ -5,11 +5,14 @@
     <artifactId>cronapi-java</artifactId>
     <packaging>jar</packaging>
     <name>cronapi-java</name>
-    <version>0.0.106-d-s</version>
+    <version>0.0.107-d-s</version>
     <description>Public Java library for CronApp's users</description>
     <url>https://github.com/technecloud/cronapi-java</url>
     <build>
         <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
             <resource>
                 <directory>src/test/java</directory>
                 <includes>
@@ -18,9 +21,6 @@
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
             </resource>
         </resources>
         <plugins>
@@ -200,8 +200,8 @@
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
         <project.cronospass.resource mimetype="folder/libs">lib</project.cronospass.resource>
         <project.cronospass.resource mimetype="folder/src">src/main/java</project.cronospass.resource>
+        <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
     </properties>
 </project>

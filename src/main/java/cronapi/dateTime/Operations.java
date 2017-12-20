@@ -104,6 +104,42 @@ public class Operations {
 		date.set(y, m, d, h, min, s);
 		return new Var(date.getTime());
 	}
+	
+	@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
+			"getSecondsDiffDate", "diffDatesSeconds" }, description = "{{functionToGetSecondsBetweenDates}}", params = {
+					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
+							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
+	public static final Var getSecondsBetweenDates(Var dateVar, Var date2Var) throws Exception {
+		final long SECOND_IN_MILLIS = 1000;
+		Date date = ((Calendar) dateVar.getObject()).getTime();
+		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		int resultBetween = (int) ((date.getTime() - date2.getTime()) / SECOND_IN_MILLIS);
+		return new Var(resultBetween);
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{getMinutesBetweenDates}}", nameTags = { "getMinutesBetweenDates",
+			"getMinutesDiffDate", "diffDatesMinutes" }, description = "{{functionToGetMinutesBetweenDates}}", params = {
+					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
+							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
+	public static final Var getMinutesBetweenDates(Var dateVar, Var date2Var) throws Exception {
+		final long MINUTE_IN_MILLIS = 1000 * 60;
+		Date date = ((Calendar) dateVar.getObject()).getTime();
+		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		int resultBetween = (int) ((date.getTime() - date2.getTime()) / MINUTE_IN_MILLIS);
+		return new Var(resultBetween);
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{getHoursBetweenDates}}", nameTags = { "getHoursBetweenDates",
+			"getHoursDiffDate", "diffDatesHours" }, description = "{{functionToGetHoursBetweenDates}}", params = {
+					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
+							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
+	public static final Var getHoursBetweenDates(Var dateVar, Var date2Var) throws Exception {
+		final long HOUR_IN_MILLIS = 1000 * 60 * 60;
+		Date date = ((Calendar) dateVar.getObject()).getTime();
+		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		int resultBetween = (int) ((date.getTime() - date2.getTime()) / HOUR_IN_MILLIS);
+		return new Var(resultBetween);
+	}
 
 	@CronapiMetaData(type = "function", name = "{{getDaysBetweenDates}}", nameTags = { "getDaysBetweenDates",
 			"getDaysDiffDate", "diffDatesDays" }, description = "{{functionToGetDaysBetweenDates}}", params = {
@@ -155,6 +191,39 @@ public class Operations {
 			} else {
 				return new Var((int) result);
 			}
+	}
+
+  @CronapiMetaData(type = "function", name = "{{incSecond}}", nameTags = { "incSecond",
+			"increaseSecond" }, description = "{{functionToIncSecond}}", params = { "{{date}}",
+					"{{secondsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
+	public static final Var incSeconds(Var value, Var second) throws Exception {
+		Calendar d = Calendar.getInstance();
+		d.setTime(((Calendar) value.getObject()).getTime());
+		d.add(Calendar.SECOND , second.getObjectAsInt());
+		return new Var(d.getTime());
+	}
+
+  @CronapiMetaData(type = "function", name = "{{incMinute}}", nameTags = { "incMinute",
+			"increaseMinute" }, description = "{{functionToIncMinute}}", params = { "{{date}}",
+					"{{minutesToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
+	public static final Var incMinute(Var value, Var minute) throws Exception {
+		Calendar d = Calendar.getInstance();
+		d.setTime(((Calendar) value.getObject()).getTime());
+		d.add(Calendar.MINUTE , minute.getObjectAsInt());
+		return new Var(d.getTime());
+	}
+
+  @CronapiMetaData(type = "function", name = "{{incHour}}", nameTags = { "incHour",
+			"increaseHour" }, description = "{{functionToIncHour}}", params = { "{{date}}",
+					"{{hoursToIncrement}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.LONG }, returnType = ObjectType.DATETIME)
+	public static final Var incHour(Var value, Var hour) throws Exception {
+		Calendar d = Calendar.getInstance();
+		d.setTime(((Calendar) value.getObject()).getTime());
+		d.add(Calendar.HOUR_OF_DAY , hour.getObjectAsInt());
+		return new Var(d.getTime());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{incDay}}", nameTags = { "incDay",
