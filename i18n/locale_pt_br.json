@@ -352,5 +352,8 @@
 	"getMinutesBetweenDates": "Obter total de minutos entre datas",
 	"functionToGetMinutesBetweenDates": "Função para obter total de minutos entre datas",
 	"getSecondsBetweenDates": "Obter total de segundos entre datas",
-	"functionToGetSecondsBetweenDates": "Função para obter total de segundos entre datas"
+	"functionToGetSecondsBetweenDates": "Função para obter total de segundos entre datas",
+	"refreshActiveRecordName": "Atualizar registro corrente",
+	"refreshActiveRecordDescription": "Função que atualiza o registro corrente",
+	"refreshActiveRecordParam0": "Fonte de dados"
 }

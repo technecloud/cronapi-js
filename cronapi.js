@@ -705,6 +705,16 @@
     window[datasource].$apply( new function(){window[datasource].remove();} );
   };
 
+  /**
+   * @type function
+   * @name {{refreshActiveRecordName}}
+   * @nameTags hasNextRecord
+   * @description {{refreshActiveRecordDescription}}
+   * @param {ObjectType.STRING} datasource {{refreshActiveRecordParam0}}
+   */
+  this.cronapi.screen.refreshActiveRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    window[datasource].refreshActive();
+  };
 
   /**
    * @type function

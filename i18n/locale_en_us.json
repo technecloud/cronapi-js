@@ -350,5 +350,8 @@
 	"getMinutesBetweenDates": "Get minutes total between dates",
 	"functionToGetMinutesBetweenDates": "Function to get minutes total between dates",
 	"getSecondsBetweenDates": "Get seconds total between dates",
-	"functionToGetSecondsBetweenDates": "Function to get seconds total between dates"
+	"functionToGetSecondsBetweenDates": "Function to get seconds total between dates",
+	"refreshActiveRecordName": "Exists next record?",
+	"refreshActiveRecordDescription": "Function that return if exists a next record",
+	"refreshActiveRecordParam0": "Datasource"
 }
