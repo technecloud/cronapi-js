@@ -711,6 +711,7 @@
    * @nameTags hasNextRecord
    * @description {{refreshActiveRecordDescription}}
    * @param {ObjectType.STRING} datasource {{refreshActiveRecordParam0}}
+   * @multilayer true
    */
   this.cronapi.screen.refreshActiveRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
     window[datasource].refreshActive();
