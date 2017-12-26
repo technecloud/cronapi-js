@@ -263,6 +263,10 @@ public class JPQLConverter {
   }
   
   private static String getCondition(JsonObject cond) {
+    return getCondition(cond, true);
+  }
+  
+  private static String getCondition(JsonObject cond, boolean canAddWhere) {
     StringBuilder sbRules = new StringBuilder();
     String rules = "";
     if(cond.get("condition") != null) {
@@ -279,15 +283,16 @@ public class JPQLConverter {
         if(not)
           rules = String.format("NOT (%s)", rules);
         
-        rules = String.format("where %s", rules);
       }
     }
+    if(rules.length() > 0 && canAddWhere)
+      rules = String.format("where %s", rules);
     return rules;
   }
   
   private static String getRule(JsonObject ru) {
     if(ru.get("condition") != null && !ru.get("condition").isJsonNull())
-      return String.format("(%s)", getCondition(ru));
+      return String.format("(%s)", getCondition(ru, false));
     else {
       String rule = String.format("%s %s", ru.get("field").getAsString(),
               operators.get(ru.get("operator").getAsString()));
