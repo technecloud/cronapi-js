@@ -1,5 +1,8 @@
 package cronapi.database;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.springframework.data.domain.PageRequest;
 
 import cronapi.CronapiMetaData;
@@ -37,9 +40,25 @@ public class Operations {
   
   public static Var queryPaged(Var entity, Var query, Var useRestPagination, Var ... params) {
     DataSource ds = new DataSource(entity.getObjectAsString());
+    List<Var> finalParams = new LinkedList<>();
+    for (Var p : params) 
+      finalParams.add(p);
     
     PageRequest page = null;
     if (useRestPagination.getObjectAsBoolean()) {
+      if(query != Var.VAR_NULL) {
+        String queryString = RestClient.getRestClient().getRequest().getServletPath();
+        if (queryString.indexOf("/api/cronapi/query/") > -1) {
+          queryString = queryString.replace("/api/cronapi/query/", "");
+          String[] splitedQueryString = queryString.split("/");
+          if (splitedQueryString.length > 1) {
+            for (int ix = 1; ix < splitedQueryString.length; ix++) {
+              Var param = Var.valueOf("id"+(ix-1), splitedQueryString[ix]);
+              finalParams.add(param);
+            }
+          }
+        }
+      }
       int pageNumber = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("page"));
       int pageSize = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("size"));
       page = new PageRequest(pageNumber, pageSize);
@@ -49,9 +68,9 @@ public class Operations {
       ds.fetch();
     else {
       if (page != null)
-        ds.filter(query.getObjectAsString(), page, params);
+        ds.filter(query.getObjectAsString(), page, finalParams.toArray(new Var[0]));
       else
-        ds.filter(query.getObjectAsString(), params);
+        ds.filter(query.getObjectAsString(), finalParams.toArray(new Var[0]));
     }
     Var varDs = new Var(ds);
     return varDs;
