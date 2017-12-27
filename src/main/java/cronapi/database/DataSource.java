@@ -806,6 +806,32 @@ public class DataSource implements JsonSerializable {
         filter = "Select e from " + simpleEntity + " e ";
       }
     }
+    else {
+      //Verificar se existe parametros que são ID´s
+      List<String> parsedParams = parseParams(filter);
+      if (params.length > parsedParams.size() && domainClass != null ) {
+        String alias = JPQLConverter.getAliasFromSql(filter);
+        EntityManager em = getEntityManager(domainClass);
+        EntityType type = em.getMetamodel().entity(domainClass);
+        int i = 0;
+        String filterForId = " (";
+        for(Object obj : type.getAttributes()) {
+          SingularAttribute field = (SingularAttribute)obj;
+          if(field.isId()) {
+            if(i > 0) {
+              filterForId += " and ";
+            }
+            filterForId += alias + "." + field.getName() + " = :id" + i;
+            i++;
+          }
+        }
+        filterForId += ")";
+        if (filter.toLowerCase().indexOf("where") > -1)
+          filter += " and " + filterForId;
+        else
+          filter += " where " + filterForId;
+      }
+    }
     
     this.params = params;
     this.filter = filter;

@@ -745,6 +745,7 @@ public class Utils {
 	
 	public static final List<Var> getParamsAndExecuteBlockParams(JsonObject query, TranslationPath translationPath) {
 	  int paramBlockly = 0;
+	  int paramTranslationPath = 0;
     List<Var> params = new LinkedList<Var>();
     JsonArray array = query.get("queryParamsValues").getAsJsonArray();
     for (int i = 0; i < array.size(); i++ ) {
@@ -756,10 +757,24 @@ public class Utils {
         params.add(result.getObjectAsList().getFirst().getField("value"));
         paramBlockly++;
       }
+      else if (paramObj.get("fieldValue").isJsonPrimitive() && paramObj.get("fieldValue").getAsString().trim().length()  > 0) {
+        params.add(Var.valueOf(paramObj.get("fieldValue").getAsString()));
+        paramBlockly++;
+      }
       else {
-        params.add(translationPath.params[params.size() - paramBlockly]);
+        if (translationPath.params.length > (params.size() - paramBlockly) ) {
+          params.add(translationPath.params[params.size() - paramBlockly]);
+          paramTranslationPath++;
+        }
       }
     }
+    
+    if (paramTranslationPath <  translationPath.params.length) {
+      Arrays.stream(translationPath.params).forEach(p -> {
+        params.add(p);
+      }); 
+    }
+    
     return params;
 	}
 	
