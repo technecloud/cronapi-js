@@ -807,5 +807,29 @@ public class Utils {
 		}
 		return isEntity;
 	}
+	
+	public static String addFilterInSQLClause(String sql, String filter) {
+	  int indexGroupBy = -1;
+	  int indexOrderBy = -1;
+	  String result = "";
+	  String sqlLower = sql.toLowerCase();
+	  indexGroupBy = sqlLower.indexOf("group by");
+	  indexOrderBy = sqlLower.indexOf("order by");
+	  
+	  if (indexGroupBy > -1) {
+	    result = sql.substring(0, indexGroupBy);
+	    result += " " + filter + " ";
+	    result += sql.substring(indexGroupBy);
+	  }
+	  else if (indexOrderBy > -1) {
+	    result = sql.substring(0, indexOrderBy);
+	    result += " " + filter + " ";
+	    result += sql.substring(indexOrderBy);
+	  }
+	  else
+	    result += sql + " " + filter;
+	  
+	  return result;
+	}
 
 }

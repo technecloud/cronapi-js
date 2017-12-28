@@ -827,9 +827,10 @@ public class DataSource implements JsonSerializable {
         }
         filterForId += ")";
         if (filter.toLowerCase().indexOf("where") > -1)
-          filter += " and " + filterForId;
+          filterForId = " and " + filterForId;
         else
-          filter += " where " + filterForId;
+          filterForId = " where " + filterForId;
+        filter = Utils.addFilterInSQLClause(filter, filterForId);
       }
     }
     
