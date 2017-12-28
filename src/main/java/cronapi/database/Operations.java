@@ -40,6 +40,7 @@ public class Operations {
   
   public static Var queryPaged(Var entity, Var query, Var useRestPagination, Var ... params) {
     DataSource ds = new DataSource(entity.getObjectAsString());
+    
     List<Var> finalParams = new LinkedList<>();
     for (Var p : params) 
       finalParams.add(p);
@@ -58,9 +59,16 @@ public class Operations {
             }
           }
         }
+        
       }
-      int pageNumber = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("page"));
-      int pageSize = Integer.parseInt(RestClient.getRestClient().getRequest().getParameter("size"));
+      String pageFromRequest = RestClient.getRestClient().getRequest().getParameter("page");
+      if (pageFromRequest == null || pageFromRequest.isEmpty())
+        pageFromRequest = "0";
+      String pageSizeFromRequest = RestClient.getRestClient().getRequest().getParameter("size");
+      if (pageSizeFromRequest == null || pageSizeFromRequest.isEmpty())
+        pageSizeFromRequest = "100";
+      int pageNumber = Integer.parseInt(pageFromRequest);
+      int pageSize = Integer.parseInt(pageSizeFromRequest);
       page = new PageRequest(pageNumber, pageSize);
     }
     
