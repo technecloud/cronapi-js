@@ -14,7 +14,11 @@ public class Operations {
 			"getValueOfField" }, description = "{{getValueOfFieldDescription}}", returnType = ObjectType.JSON)
 	public static final Var getValueOfField(
 			@ParamMetaData(blockType = "field_from_screen", type = ObjectType.STRING, description="{{getValueOfFieldParam0}}") Var field) throws Exception {
-		return cronapi.map.Operations.getJsonOrMapField(Var.valueOf(RestClient.getRestClient().getBody().getFields()),
-				field);
+		Var fields;
+		if (RestClient.getRestClient().getBody().getFields() != null)
+		  fields = Var.valueOf(RestClient.getRestClient().getBody().getFields());
+		else
+		  fields = RestClient.getRestClient().getRawBody();
+		return cronapi.map.Operations.getJsonOrMapField(fields, field);
 	}
 }

@@ -354,14 +354,17 @@ public class CronapiREST {
         return inserted.getPOJO();
       } else {
         DataSource ds = new DataSource(query);
+        
+        Var body = Var.valueOf((Map<?, ?>) data.getObject());
+        RestClient.getRestClient().setRawBody(body);
 
         ds.insert((Map<?, ?>) data.getObject());
 
         QueryManager.addDefaultValues(query, Var.valueOf(ds), true);
 
-        QueryManager.executeEvent(query, ds, "beforeInsert");
+        QueryManager.executeEvent(query, ds.getObject(), "beforeInsert");
         Object inserted = ds.save(false);
-        QueryManager.executeEvent(query, ds, "afterInsert");
+        QueryManager.executeEvent(query, ds.getObject(), "afterInsert");
         QueryManager.checkFieldSecurity(query, ds, "GET");
         QueryManager.addCalcFields(query, ds);
 
@@ -395,11 +398,14 @@ public class CronapiREST {
       } else {
         DataSource ds = new DataSource(query);
 
+        Var body = Var.valueOf((Map<?, ?>) data.getObject());
+        RestClient.getRestClient().setRawBody(body);
+
         ds.filter(data, null);
-        QueryManager.executeEvent(query, ds, "beforeUpdate");
+        QueryManager.executeEvent(query, ds.getObject(), "beforeUpdate");
         ds.update(data);
         Var saved = Var.valueOf(ds.save());
-        QueryManager.executeEvent(query, ds, "afterUpdate");
+        QueryManager.executeEvent(query, ds.getObject(), "afterUpdate");
         QueryManager.checkFieldSecurity(query, ds, "GET");
         QueryManager.addCalcFields(query, ds);
         return saved;
@@ -427,9 +433,9 @@ public class CronapiREST {
 
         DataSource ds = new DataSource(query);
         ds.filter(null, null, translationPath.params);
-        QueryManager.executeEvent(query, ds, "beforeDelete");
+        QueryManager.executeEvent(query, ds.getObject(), "beforeDelete");
         ds.delete();
-        QueryManager.executeEvent(query, ds, "afterDelete");
+        QueryManager.executeEvent(query, ds.getObject(), "afterDelete");
       }
       return null;
     });
