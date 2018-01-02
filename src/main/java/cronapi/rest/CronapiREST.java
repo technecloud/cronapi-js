@@ -333,8 +333,8 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
-  public HttpEntity<Var> queryPost(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
-    RestResult restResult = runIntoTransaction(() -> {
+  public RestResult queryPost(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
+    return runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "POST");
@@ -371,13 +371,11 @@ public class CronapiREST {
         return Var.valueOf(inserted);
       }
     });
-
-    return new ResponseEntity<Var>(restResult.getValue(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/query/{id}/**")
-  public HttpEntity<Var> queryPut(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
-    RestResult restResult = runIntoTransaction(() -> {
+  public RestResult queryPut(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
+    return runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "PUT");
@@ -410,13 +408,11 @@ public class CronapiREST {
         return saved;
       }
     });
-
-    return new ResponseEntity<Var>(restResult.getValue(), HttpStatus.OK);
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/query/{id}/**")
-  public void queryDelete(@PathVariable("id") String id) throws Exception {
-    runIntoTransaction(() -> {
+  public RestResult queryDelete(@PathVariable("id") String id) throws Exception {
+    return runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "DELETE");
@@ -436,7 +432,7 @@ public class CronapiREST {
         ds.delete();
         QueryManager.executeEvent(query, ds.getObject(), "afterDelete");
       }
-      return null;
+      return Var.VAR_NULL;
     });
   }
   //Fim de api de Fonte de Dados
