@@ -558,7 +558,7 @@ public class DataSource implements JsonSerializable {
     int i = 0;
     String jpql = " select e FROM " + entity.substring(entity.lastIndexOf(".") + 1) + " e WHERE ";
     Vector<Var> params = new Vector<>();
-    for(Object obj : type.getAttributes()) {
+    for(Object obj : getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute)obj;
       if(field.isId()) {
         if(i > 0) {
@@ -797,7 +797,7 @@ public class DataSource implements JsonSerializable {
         
         int i = 0;
         String jpql = "Select e from " + simpleEntity + " e where (";
-        for(Object obj : type.getAttributes()) {
+        for(Object obj : getAjustedAttributes(type)) {
           SingularAttribute field = (SingularAttribute)obj;
           if(field.isId()) {
             if(i > 0) {
@@ -825,7 +825,7 @@ public class DataSource implements JsonSerializable {
         EntityType type = em.getMetamodel().entity(domainClass);
         int i = 0;
         String filterForId = " (";
-        for(Object obj : type.getAttributes()) {
+        for(Object obj : getAjustedAttributes(type)) {
           SingularAttribute field = (SingularAttribute)obj;
           if(field.isId()) {
             if(i > 0) {
@@ -1082,7 +1082,7 @@ public class DataSource implements JsonSerializable {
     
     int i = 0;
     String jpql = "Select e" + selectAttr + " from " + name + " e where ";
-    for(Object obj : type.getAttributes()) {
+    for(Object obj : getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute)obj;
       if(field.isId()) {
         if(i > 0) {
