@@ -342,6 +342,9 @@ public class DataSource implements JsonSerializable {
   
   public void insert(Object value) {
     try {
+      if (value instanceof Var)
+        value = ((Var) value).getObject();
+
       if(value instanceof Map) {
         this.insertedElement = this.domainClass.newInstance();
         Map<?, ?> values = (Map<?, ?>)value;

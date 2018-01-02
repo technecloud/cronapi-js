@@ -333,7 +333,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
-  public HttpEntity<Var> queryPost(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+  public HttpEntity<Var> queryPost(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -341,24 +341,24 @@ public class CronapiREST {
 
       QueryManager.checkFieldSecurity(query, data, "POST");
 
+      Var entity =  Var.valueOf(data.getEntityData());
+
+      RestClient.getRestClient().setRawBody(entity);
+      RestClient.getRestClient().setBody(data);
+
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
 
-        Var body =  Var.valueOf((Map<?, ?>) data.getObject());
-        RestClient.getRestClient().setRawBody(body);
-        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {body}, translationPath.params);
-        QueryManager.executeEvent(query, body, "beforeInsert");
+        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {entity}, translationPath.params);
+        QueryManager.executeEvent(query, entity, "beforeInsert");
         Var inserted = QueryManager.executeBlockly(query, "POST", params);
-        QueryManager.executeEvent(query, body, "afterInsert");
+        QueryManager.executeEvent(query, entity, "afterInsert");
 
         return inserted.getPOJO();
       } else {
         DataSource ds = new DataSource(query);
         
-        Var body = Var.valueOf((Map<?, ?>) data.getObject());
-        RestClient.getRestClient().setRawBody(body);
-
-        ds.insert((Map<?, ?>) data.getObject());
+        ds.insert(entity.getObject());
 
         QueryManager.addDefaultValues(query, Var.valueOf(ds), true);
 
@@ -376,7 +376,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/query/{id}/**")
-  public HttpEntity<Var> queryPut(@PathVariable("id") String id, @RequestBody final Var data) throws Exception {
+  public HttpEntity<Var> queryPut(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
     RestResult restResult = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -384,26 +384,25 @@ public class CronapiREST {
 
       QueryManager.checkFieldSecurity(query, data, "PUT");
 
+      Var entity =  Var.valueOf(data.getEntityData());
+      RestClient.getRestClient().setRawBody(entity);
+      RestClient.getRestClient().setBody(data);
+
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
 
-        Var body =  Var.valueOf((Map<?, ?>) data.getObject());
-        RestClient.getRestClient().setRawBody(body);
-        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {body}, translationPath.params);
-        QueryManager.executeEvent(query, body, "beforeUpdate");
+        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {entity}, translationPath.params);
+        QueryManager.executeEvent(query, entity, "beforeUpdate");
         Var modified = QueryManager.executeBlockly(query, "PUT", params);
-        QueryManager.executeEvent(query, body, "beforeUpdate");
+        QueryManager.executeEvent(query, entity, "beforeUpdate");
 
         return modified.getPOJO();
       } else {
         DataSource ds = new DataSource(query);
 
-        Var body = Var.valueOf((Map<?, ?>) data.getObject());
-        RestClient.getRestClient().setRawBody(body);
-
-        ds.filter(data, null);
+        ds.filter(entity, null);
         QueryManager.executeEvent(query, ds.getObject(), "beforeUpdate");
-        ds.update(data);
+        ds.update(entity);
         Var saved = Var.valueOf(ds.save());
         QueryManager.executeEvent(query, ds.getObject(), "afterUpdate");
         QueryManager.checkFieldSecurity(query, ds, "GET");
