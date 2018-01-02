@@ -40,6 +40,8 @@ import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -442,8 +444,13 @@ public class DataSource implements JsonSerializable {
     
     String jpql = " DELETE FROM " + entity.substring(entity.lastIndexOf(".") + 1) + " WHERE ";
     List<TypeKey> keys = getKeys(type);
-
+	
+	boolean first = true;
     for(TypeKey key : keys) {
+      if (!first) {
+        jpql += " AND ";
+      }
+      first = false;
       jpql += "" + key.name + " = :p" + i;
       params[i] = Var.valueOf("p" + i, primaryKeys[i].getObject(key.field.getType().getJavaType()));
       i++;
@@ -864,8 +871,24 @@ public class DataSource implements JsonSerializable {
     SingularAttribute field;
   }
   
+  private Set getAjustedAttributes(EntityType type){
+    Set<SingularAttribute> attributes = type.getAttributes();
+    Set<SingularAttribute> attrs = new LinkedHashSet<SingularAttribute>();
+    
+    for (int i = 0; i < type.getJavaType().getDeclaredFields().length; i++) {
+      for (SingularAttribute attr : attributes) {
+        if (attr.getName().equalsIgnoreCase(type.getJavaType().getDeclaredFields()[i].getName())) {
+          attrs.add(attr);
+          break;
+        }  
+      };
+    }
+    
+    return attrs;
+  }
+  
   private void addKeys(EntityManager em, EntityType type, String parent, List<TypeKey> keys) {
-    for(Object obj : type.getAttributes()) {
+    for (Object obj : getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute)obj;
       if(field.isId()) {
         if(field.getType().getPersistenceType() == Type.PersistenceType.BASIC) {
