@@ -1,12 +1,13 @@
 package cronapi.map;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import cronapi.CronapiMetaData;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Var;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa ...
@@ -24,9 +25,9 @@ public class Operations {
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
-    LinkedHashMap mapObject = new LinkedHashMap<>();
+		LinkedHashMap mapObject = new LinkedHashMap<String, Var>();
 		for (int i = 0; i < map.length; i++) {
-      mapObject.put(map[i].getId(), new Var(map[i].getObject()));
+			mapObject.put(map[i].getId(), new Var(map[i].getObject()));
 		}
 		return new Var(mapObject);
 	}
@@ -47,6 +48,18 @@ public class Operations {
 		return cronapi.json.Operations.getJsonOrMapField(mapVar, keyVar);
 	}
 
+	@CronapiMetaData(type = "function", name = "{{getMapFieldNames}}", nameTags = {
+			"getMapFieldName" }, description = "{{getMapFieldDescriptions}}", returnType = ObjectType.OBJECT)
+	public static final Var getMapField(
+			@ParamMetaData(type = ObjectType.OBJECT, description = "{{getMapFieldParam0}}") Var mapVar,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{getMapFieldParams1}}") Var keyVar)
+			throws Exception {
+		if (mapVar.getObject() instanceof Map) {
+			return Var.valueOf(mapVar.getObjectAsMap().get(keyVar.getObjectAsString()));
+		}
+		return cronapi.json.Operations.getJsonOrMapField(mapVar, keyVar);
+	}
+
 	@CronapiMetaData(type = "function", name = "{{setMapFieldName}}", nameTags = {
 			"setMapField" }, description = "{{setMapFieldDescription}}", returnType = ObjectType.VOID)
 	public static final void setMapField(
@@ -54,8 +67,22 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{setMapFieldParam1}}") Var keyVar,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{setMapFieldParam2}}") Var value)
 			throws Exception {
-    mapVar.getObjectAsMap().put(keyVar.toString(), value);
+		mapVar.getObjectAsMap().put(keyVar.toString(), value);
 		cronapi.json.Operations.setJsonOrMapField(mapVar, keyVar, value);
+	}
+
+	@CronapiMetaData(type = "function", name = "{{setMapFieldByKeyName}}", nameTags = {
+			"setMapFieldByKey" }, description = "{{setMapFieldByKeyDescription}}", returnType = ObjectType.VOID)
+	public static final void setMapFieldByKey(
+			@ParamMetaData(type = ObjectType.OBJECT, description = "{{setMapFieldByKeyParam0}}") Var mapVar,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{setMapFieldByKeyParam1}}") Var keyVar,
+			@ParamMetaData(type = ObjectType.OBJECT, description = "{{setMapFieldByKeyParam2}}") Var value)
+			throws Exception {
+		if (mapVar.getObject() instanceof Map) {
+			mapVar.getObjectAsMap().put(keyVar.getObjectAsString(), value);
+		} else {
+			cronapi.json.Operations.setJsonOrMapField(mapVar, keyVar, value);
+		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{MapToJson}}", nameTags = {
@@ -66,7 +93,7 @@ public class Operations {
 		return cronapi.json.Operations.toJson(valueToBeRead);
 	}
 
-	@CronapiMetaData(type = "function", name = "{{MapToList}}", nameTags = { "toList","Map",
+	@CronapiMetaData(type = "function", name = "{{MapToList}}", nameTags = { "toList", "Map",
 			"Para Lista" }, description = "{{functionToList}}", returnType = ObjectType.LIST)
 	public static final Var toList(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead)

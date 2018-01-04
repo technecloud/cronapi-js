@@ -36,8 +36,8 @@ public class Operations {
 		Object key = keyVar.getObject();
 
 		if (obj instanceof DataSource) {
-		  obj = ((DataSource) obj).getObject();
-    }
+			obj = ((DataSource) obj).getObject();
+		}
 
 		String[] path = key.toString().split("\\.");
 		for (int i = 0; i < path.length; i++) {
@@ -62,25 +62,21 @@ public class Operations {
 		Object obj = mapVar.getObject();
 		Object key = keyVar.getObject();
 
-    if (obj instanceof DataSource) {
-      obj = ((DataSource) obj).getObject();
-    }
+		if (obj instanceof DataSource) {
+			obj = ((DataSource) obj).getObject();
+		}
 
-    if (obj instanceof Map) {
-      Utils.mapSetObject(obj, key.toString(), value);
-    } else {
-      String[] path = key.toString().split("\\.");
-      for (int i = 0; i < path.length; i++) {
-        String k = path[i];
-        if (obj != null) {
-          if (i == path.length - 1) {
-            Utils.mapSetObject(obj, k, value);
-          } else {
-            obj = Utils.mapGetObjectPathExtractElement(obj, k, true);
-          }
-        }
-      }
-    }
+		String[] path = key.toString().split("\\.");
+		for (int i = 0; i < path.length; i++) {
+			String k = path[i];
+			if (obj != null) {
+				if (i == path.length - 1) {
+					Utils.mapSetObject(obj, k, value);
+				} else {
+					obj = Utils.mapGetObjectPathExtractElement(obj, k, true);
+				}
+			}
+		}
 	}
 
 	@CronapiMetaData(type = "function", name = "{{toJson}}", nameTags = {
