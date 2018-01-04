@@ -96,7 +96,11 @@ public class Operations {
           "{{datasource}}" }, paramsType = {
               ObjectType.DATASET }, returnType = ObjectType.BOOLEAN, displayInline = true)
   public static Var hasElement(Var ds) {
-    return new Var(((DataSource)ds.getObject()).getObject() != null);
+    if (ds.getObject() != null) {
+      return Var.valueOf(((DataSource) ds.getObject()).getObject() != null);
+    }
+
+    return Var.VAR_FALSE;
   }
   
   @CronapiMetaData(type = "function", name = "{{datasourceClose}}", nameTags = { "close", "fechar", "limpar",

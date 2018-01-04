@@ -24,12 +24,9 @@ public class Operations {
 	public static final Var createObjectMapWith(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createObjectWithMapParam0}}") Var... map)
 			throws Exception {
-    LinkedHashMap<Var, Var> mapObject = new LinkedHashMap<>();
+    LinkedHashMap mapObject = new LinkedHashMap<>();
 		for (int i = 0; i < map.length; i++) {
-		    mapObject.put(new Var(map[i].getId()), new Var(map[i].getObject()));
-		    //TODO Verificar a implementação abaixo, pois para criação de Mapa está inserindo os dados errado.
-        // Operations.setMapField(Var.valueOf(mapObject), Var.valueOf(map[i].getId()),
-        //  Var.valueOf(map[i].getObject()));
+      mapObject.put(map[i].getId(), new Var(map[i].getObject()));
 		}
 		return new Var(mapObject);
 	}
@@ -57,6 +54,7 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{setMapFieldParam1}}") Var keyVar,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{setMapFieldParam2}}") Var value)
 			throws Exception {
+    mapVar.getObjectAsMap().put(keyVar.toString(), value);
 		cronapi.json.Operations.setJsonOrMapField(mapVar, keyVar, value);
 	}
 
