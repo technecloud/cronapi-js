@@ -24,12 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/js/system-events.js")
 public class ImportEventsREST {
-
+  
   private static JsonObject JSON;
   private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-      .indexOf("-agentlib:jdwp") > 0;
-
-
+          .indexOf("-agentlib:jdwp") > 0;
+  
   private static JsonObject loadJSON() {
     ClassLoader classLoader = QueryManager.class.getClassLoader();
     try (InputStream stream = classLoader.getResourceAsStream("META-INF/events.json")) {
@@ -41,7 +40,7 @@ public class ImportEventsREST {
       return new JsonObject();
     }
   }
-
+  
   private static JsonObject getJSON() {
     if(Operations.IS_DEBUG) {
       return loadJSON();
@@ -50,11 +49,11 @@ public class ImportEventsREST {
       return JSON;
     }
   }
-
+  
   private static boolean isNull(JsonElement value) {
     return value == null || value.isJsonNull();
   }
-
+  
   @RequestMapping(method = RequestMethod.GET)
   public void listEvents(HttpServletRequest request, HttpServletResponse response) throws Exception {
     response.setContentType("application/javascript");
@@ -62,19 +61,20 @@ public class ImportEventsREST {
     out.println("window.blockly = window.blockly || {};");
     out.println("window.blockly.events = window.blockly.events || {};");
     for(Map.Entry<String, JsonElement> entry : getJSON().entrySet()) {
-      if (!isNull(entry.getValue())) {
+      if(!isNull(entry.getValue())) {
         JsonObject customObj = entry.getValue().getAsJsonObject();
-        if (customObj.get("type").getAsString().equals("client")) {
+        if(customObj.get("type").getAsString().equals("client")) {
           write(out, entry.getKey(), customObj);
         }
       }
     }
   }
-
+  
   private void write(PrintWriter out, String eventName, JsonObject eventObj) {
-    String namespace = "window.blockly.events."+eventName;
-    if (!isNull(eventObj.get("blockly"))) {
-      out.println(namespace + " = blockly." + eventObj.get("blockly").getAsJsonObject().get("blocklyClass").getAsString()+";");
+    String namespace = "window.blockly.events." + eventName;
+    if(!isNull(eventObj.get("blockly"))) {
+      out.println(namespace + " = blockly." + eventObj.get("blockly").getAsJsonObject().get("namespace").getAsString() +
+              "." + eventObj.get("blocklyMethod").getAsString() + ";");
     }
   }
 }
