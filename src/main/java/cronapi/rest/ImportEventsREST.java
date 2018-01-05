@@ -26,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImportEventsREST {
   
   private static JsonObject JSON;
-  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-          .indexOf("-agentlib:jdwp") > 0;
-  
+
+  static {
+    JSON = loadJSON();
+  }
+
   private static JsonObject loadJSON() {
     ClassLoader classLoader = QueryManager.class.getClassLoader();
     try (InputStream stream = classLoader.getResourceAsStream("META-INF/events.json")) {
