@@ -1,16 +1,18 @@
 package cronapi.database;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.PageRequest;
 
 import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa operações de acesso ao banco
@@ -208,6 +210,22 @@ public class Operations {
               ObjectType.MAP }, returnType = ObjectType.OBJECT, arbitraryParams = true, wizard = "procedures_createnewobject_callreturn")
   public static final Var newEntity(Var object, Var ... params) throws Exception {
     return cronapi.object.Operations.newObject(object, params);
+  }
+  
+  @CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceQuery",
+      "openConnection", "abrirConsulta" }, description = "{{functionToQueryInDatasource}}", params = {
+          "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING,
+              ObjectType.STRING,
+              ObjectType.MAP }, returnType = ObjectType.DATASET)
+  public static Var executeQuery(Var entity, Var query, Var params) {
+    Var[] vars = new Var[params.length()];
+    LinkedHashMap<String, Var> map = (LinkedHashMap<String, Var>) params.getObject();  
+    int i = 0;
+    for (Map.Entry<String, Var> entry : map.entrySet()) {
+      vars[i] = new Var(entry.getKey(), entry.getValue());
+      i++;
+    }
+    return query(entity, query, vars);
   }
   
 }
