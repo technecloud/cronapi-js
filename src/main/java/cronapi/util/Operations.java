@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cronapi.rest.DownloadREST;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -45,13 +44,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import cronapi.ClientCommand;
 import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
+import cronapi.rest.DownloadREST;
 import cronapi.rest.security.BlocklySecurity;
 
 @CronapiMetaData(category = CategoryType.UTIL, categoryTags = { "Util" })
@@ -74,6 +74,12 @@ public class Operations {
 		IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 	}
 
+ @CronapiMetaData(type = "function", name = "{{setReturn}}", nameTags = {
+      "return", "retorno" }, description = "{{setReturnDescription}}" , wizard = "procedures_return_callnoreturn" )
+  public static final void setReturn(Var param) throws Exception {
+    
+  }
+	
 	@CronapiMetaData(type = "function", name = "{{getCurrentUserName}}", nameTags = {
 			"getCurrentUser" }, description = "{{getCurrentUserNameDescription}}", returnType = ObjectType.STRING)
 	public static final Var getCurrentUserName() throws Exception {
