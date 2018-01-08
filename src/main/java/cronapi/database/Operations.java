@@ -212,7 +212,7 @@ public class Operations {
     return cronapi.object.Operations.newObject(object, params);
   }
   
-  @CronapiMetaData(type = "function", name = "{{datasourceExecuteQuery}}", nameTags = { "datasourceQuery",
+  @CronapiMetaData(type = "function", name = "{{datasourceExecuteJQPLQuery}}", nameTags = { "datasourceQuery",
       "openConnection", "abrirConsulta" }, description = "{{functionToQueryInDatasource}}", params = {
           "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING,
               ObjectType.STRING,
