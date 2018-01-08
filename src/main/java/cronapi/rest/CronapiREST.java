@@ -566,7 +566,7 @@ public class CronapiREST {
       var = callable.call();
       TransactionManager.commit();
     }
-    catch(Exception e) {e.printStackTrace();
+    catch(Exception e) {
       TransactionManager.rollback();
       throw e;
     }

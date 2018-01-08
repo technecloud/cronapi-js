@@ -22,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cronapi.rest.DownloadREST;
 import org.apache.http.Header;
@@ -226,14 +228,42 @@ public class Operations {
 			className = className.substring(0, className.indexOf(":"));
 		}
 
-		final Class clazz;
+		Class clazz = null;
 
-		if (IS_DEBUG) {
-			CronapiClassLoader loader = new CronapiClassLoader();
-			clazz = loader.findClass(className);
-		} else {
-			clazz = Class.forName(className);
-		}
+		try {
+      if (IS_DEBUG) {
+        CronapiClassLoader loader = new CronapiClassLoader();
+        clazz = loader.findClass(className);
+      } else {
+        clazz = Class.forName(className);
+      }
+    } catch(Exception e) {
+      String[] parts = className.split("\\.");
+      String simpleName = parts[parts.length-1];
+      className = "";
+      for (int i=0;i<parts.length-1;i++) {
+        if (!className.isEmpty())
+          className += ".";
+        className += parts[i];
+      }
+
+      if (!className.isEmpty())
+        className += ".";
+
+      className += reduceVariable(simpleName, false);
+
+      try {
+        if (IS_DEBUG) {
+          CronapiClassLoader loader = new CronapiClassLoader();
+          clazz = loader.findClass(className);
+        } else {
+          clazz = Class.forName(className);
+        }
+      } catch(Exception e2) {
+        throw new Exception(Messages.getString("blocklyNotFound"), e2);
+      }
+
+    }
 
 		if (checkSecurity) {
 			BlocklySecurity.checkSecurity(clazz, restMethod);
@@ -652,6 +682,85 @@ public class Operations {
   ) throws Exception {
     String id = DownloadREST.authorizeUpload(callback);
     RestClient.getRestClient().addCommand("cronapi.util.upload").addParam(id, description, filter, maxSize, multiple);
+  }
+
+  @CronapiMetaData(type = "internal")
+  public static String translateAcentos(String aValue) {
+    final String CHR_ACENTUADA = "àèìòùáéíóúâêîôûãõçñäëïöüÀÈÌÒÙÁÉÍÓÚÂÊÎÔÛÃÕÇÑÄËÏÖÜ";
+    final String CHR_NAO_ACENTUADA = "aeiouaeiouaeiouaocnaeiouAEIOUAEIOUAEIOUAOCNAEIOU";
+    int idx, idxpos;
+    StringBuilder result = new StringBuilder();
+    for(idx = 0; idx < aValue.length(); idx++) {
+      idxpos = CHR_ACENTUADA.indexOf(aValue.charAt(idx));
+      if(idxpos != -1) {
+        result.append(CHR_NAO_ACENTUADA.charAt(idxpos));
+      }
+      else {
+        result.append(aValue.charAt(idx));
+      }
+    }
+    return result.toString();
+  }
+
+  @CronapiMetaData(type = "internal")
+  public static String reduceVariable(String var, boolean notClassName) {
+    String reducedVariable = null;
+
+    if(var != null) {
+      // Retira acentos
+      if(notClassName) {
+        reducedVariable = translateAcentos(var.toUpperCase()).trim().replaceAll("\\s", "_");
+
+        // Troca os caracteres especiais por "_"
+        Pattern pattern = Pattern.compile("^\\d+|\\W");
+        Matcher matcher = pattern.matcher(reducedVariable);
+        reducedVariable = matcher.replaceAll("_");
+      }
+      else {
+        reducedVariable = translateAcentos(var);
+
+        // Troca os caracteres especiais por " "
+        Pattern pattern = Pattern.compile("\\W");
+        Matcher matcher = pattern.matcher(reducedVariable);
+        reducedVariable = matcher.replaceAll(" ").trim();
+
+        pattern = Pattern.compile("^[\\d\\W]+");
+        matcher = pattern.matcher(reducedVariable);
+        reducedVariable = matcher.replaceAll(" ").trim();
+
+        // Troca 2 ou mais espaços por 1 espaço e "_" por 1 espaço,
+        // depois um trim()
+        reducedVariable = reducedVariable.replaceAll("\\s{2,}", " ").replaceAll("_", " ").trim();
+
+        if(reducedVariable.length() > 1) {
+          reducedVariable = reducedVariable.substring(0, 1).toUpperCase() + reducedVariable.substring(1);
+        }
+
+        // Após os espaços deve-se colocar a letra maiúscula
+        int spacePosition;
+        while((spacePosition = reducedVariable.indexOf(" ")) != -1) {
+          String aux = reducedVariable.substring(spacePosition + 1);
+
+          reducedVariable = reducedVariable.substring(0, spacePosition) + firstToUpper(aux);
+        }
+      }
+    }
+
+    if(reducedVariable == null || reducedVariable.trim().length() == 0) {
+      return reduceVariable((notClassName ? "Identifier" : "Class") + var, notClassName);
+    }
+    else
+      return reducedVariable;
+  }
+
+  @CronapiMetaData(type = "internal")
+  public static String firstToUpper(String text) {
+    if(text.length() >= 2) {
+      return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
+    }
+    else {
+      return text.toUpperCase();
+    }
   }
 
 }
