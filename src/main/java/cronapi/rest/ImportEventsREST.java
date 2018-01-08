@@ -76,7 +76,7 @@ public class ImportEventsREST {
     String namespace = "window.blockly.events." + eventName;
     if(!isNull(eventObj.get("blockly"))) {
       out.println(namespace + " = blockly." + eventObj.get("blockly").getAsJsonObject().get("namespace").getAsString() +
-              "." + eventObj.get("blocklyMethod").getAsString() + ";");
+              "." + Operations.safeNameForMethodBlockly(eventObj.get("blocklyMethod").getAsString()) + ";");
     }
   }
 }
