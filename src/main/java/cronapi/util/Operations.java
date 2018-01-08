@@ -3,10 +3,12 @@ package cronapi.util;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -196,6 +198,23 @@ public class Operations {
 		return callBlockly(classNameWithMethod, false, "", params);
 	}
 
+  @CronapiMetaData(type = "internal")
+  public static String safeNameForMethodBlockly(String s) {
+    String result;
+    if(s == null || s.isEmpty())
+      return "unnamed";
+    s = s.replace(" ", "_");
+    try {
+      result = URLEncoder.encode(s, "UTF-8").replaceAll("[^\\w]", "_");
+      if("0123456789".indexOf(result.substring(0, 1)) > -1)
+        result = "my_" + result;
+    }
+    catch(UnsupportedEncodingException e) {
+      result = s;
+    }
+    return result;
+  }
+
 	@CronapiMetaData(type = "internal")
 	public static final Var callBlockly(Var classNameWithMethod, boolean checkSecurity, String restMethod,
 			Var... params) throws Exception {
@@ -203,7 +222,7 @@ public class Operations {
 		String className = classNameWithMethod.getObjectAsString();
 		String method = null;
 		if (className.indexOf(":") > -1) {
-			method = className.substring(className.indexOf(":") + 1);
+			method = safeNameForMethodBlockly(className.substring(className.indexOf(":") + 1));
 			className = className.substring(0, className.indexOf(":"));
 		}
 
@@ -220,13 +239,17 @@ public class Operations {
 			BlocklySecurity.checkSecurity(clazz, restMethod);
 		}
 
-		Method methodToCall = clazz.getMethods()[0];
+		Method methodToCall = method==null?clazz.getMethods()[0]:null;
 		for (Method m : clazz.getMethods()) {
 			if (m.getName().equalsIgnoreCase(method)) {
 				methodToCall = m;
 				break;
 			}
 		}
+
+		if (methodToCall == null) {
+		  throw new Exception(Messages.getString("methodNotFound"));
+    }
 
 		if (params == null)
 			params = new Var[0];
