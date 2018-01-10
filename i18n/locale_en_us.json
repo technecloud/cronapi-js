@@ -353,5 +353,7 @@
 	"functionToGetSecondsBetweenDates": "Function to get seconds total between dates",
 	"refreshActiveRecordName": "Exists next record?",
 	"refreshActiveRecordDescription": "Function that return if exists a next record",
-	"refreshActiveRecordParam0": "Datasource"
+	"refreshActiveRecordParam0": "Datasource",
+	"logoutName": "Logout",
+	"logoutDescription":"Function that logout an user"
 }

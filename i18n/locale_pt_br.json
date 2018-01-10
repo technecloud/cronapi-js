@@ -355,5 +355,7 @@
 	"functionToGetSecondsBetweenDates": "Função para obter total de segundos entre datas",
 	"refreshActiveRecordName": "Atualizar registro corrente",
 	"refreshActiveRecordDescription": "Função que atualiza o registro corrente",
-	"refreshActiveRecordParam0": "Fonte de dados"
+	"refreshActiveRecordParam0": "Fonte de dados",
+	"logoutName": "Logout",
+	"logoutDescription":"Função que faz o logout do usuário"
 }

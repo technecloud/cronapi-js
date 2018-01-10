@@ -978,6 +978,19 @@
   this.cronapi.screen.changeAttrValue = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ attrName, /** @type {ObjectType.STRING} */ attrValue ) {
     $('#'+id).attr(attrName , attrValue);
   };
+  
+  
+     /**
+   * @type function
+   * @name {{logoutName}}
+   * @nameTags logout
+   * @description {{logoutDescription}}
+   * @multilayer true
+   */
+  this.cronapi.screen.logout = function() {
+    if(this.cronapi.$scope.logout != undefined)
+    this.cronapi.$scope.logout();
+  };
 
   /**
    * @category CategoryType.DATETIME
