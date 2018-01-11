@@ -459,6 +459,7 @@ public class Operations {
 
 						StringEntity params2 = new StringEntity(params.getObjectAsString(),
 								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+						params2.setContentType(APPLICATION_JSON);
 						httpPost.setEntity(params2);
 					}
 				}
