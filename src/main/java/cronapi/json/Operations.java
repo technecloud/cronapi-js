@@ -84,14 +84,7 @@ public class Operations {
 	public static final Var toJson(
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{valueToBeRead}}") Var valueToBeRead)
 			throws Exception {
-		Object obj = valueToBeRead.getObject();
-		Gson c = new Gson();
-		JsonElement json = null;
-		if (obj instanceof String)
-			json = c.fromJson(valueToBeRead.getObjectAsString(), JsonElement.class);
-		else if (obj instanceof FileInputStream)
-			json = c.fromJson(cronapi.io.Operations.fileReadAll(valueToBeRead).getObjectAsString(), JsonElement.class);
-		return Var.valueOf(json);
+	  return Var.valueOf(valueToBeRead.getObject(JsonElement.class));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{JSONtoList}}", nameTags = { "toList",

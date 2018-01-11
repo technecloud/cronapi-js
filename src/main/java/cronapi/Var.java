@@ -6,8 +6,10 @@ import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
@@ -30,11 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 
+import com.google.gson.reflect.TypeToken;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
@@ -249,12 +249,15 @@ public class Var implements Comparable<Var>, JsonSerializable {
   }
   
   public Object getObject(Class type) {
-    
+
     if(type == String.class || type == StringBuilder.class || type == StringBuffer.class || type == Character.class) {
       return getObjectAsString();
     }
     else if(type == Boolean.class) {
       return getObjectAsBoolean();
+    }
+    else if(type == JsonElement.class) {
+      return new Gson().fromJson(getObjectAsString(), JsonElement.class);
     }
     else if(type == Date.class) {
       return getObjectAsDateTime().getTime();
@@ -309,7 +312,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
         
         try {
           List<String> fieldsByteHeaderSignature = cronapi.Utils
-                  .getFieldsWithAnnotationByteHeaderSignature(type.newInstance());
+                  .getFieldsWithAnnotationByteHeaderSignature(type);
           for(String fieldToGetByteContent : fieldsByteHeaderSignature) {
             Var content = cronapi.json.Operations.getJsonOrMapField(Var.valueOf(_object),
                     Var.valueOf(fieldToGetByteContent));
@@ -321,7 +324,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
           }
         }
         catch(Exception e) {
-          throw new RuntimeException(e);
+          //Abafa
         }
         
         return mapper.convertValue(_object, type);
@@ -572,6 +575,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
    *         comma separated list of the form {x,y,z,...}
    */
   public String getObjectAsString() {
+    if (getObject() instanceof InputStream) {
+      try {
+        return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
     return this.toString();
   }
   
@@ -999,7 +1009,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
       default:
         if(getObject() == null)
           return "";
-        return getObject().toString();
+        else if (getObject() instanceof Map) {
+          java.lang.reflect.Type gsonType = new TypeToken<Map<String ,Object>>(){}.getType();
+          return new Gson().toJson((Map)getObject(), gsonType);
+        }
+        else {
+          return getObject().toString();
+        }
     }
   }
   
