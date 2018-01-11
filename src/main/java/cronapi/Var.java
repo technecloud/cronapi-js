@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -301,6 +302,10 @@ public class Var implements Comparable<Var>, JsonSerializable {
       else if(_object instanceof Map && type != Map.class) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Var.class, new VarDeserializer());
+        mapper.registerModule(module);
         
         try {
           List<String> fieldsByteHeaderSignature = cronapi.Utils

@@ -20,14 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.JsonObject;
@@ -333,11 +326,13 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
-  public RestResult queryPost(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
-    return runIntoTransaction(() -> {
+  public Object queryPost(@PathVariable("id") String id, @RequestBody final Map<?,?> rawData, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+    RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "POST");
+
+      RestBody data = RestBody.parseBody(rawData, isFromDataSource);
 
       QueryManager.checkFieldSecurity(query, data, "POST");
 
@@ -371,14 +366,22 @@ public class CronapiREST {
         return Var.valueOf(inserted);
       }
     });
+
+    if (isFromDataSource) {
+      return result;
+    } else {
+      return result.getValue();
+    }
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/query/{id}/**")
-  public RestResult queryPut(@PathVariable("id") String id, @RequestBody final RestBody data) throws Exception {
-    return runIntoTransaction(() -> {
+  public Object queryPut(@PathVariable("id") String id, @RequestBody final Map<?, ?> rawData, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+    RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "PUT");
+
+      RestBody data = RestBody.parseBody(rawData, isFromDataSource);
 
       QueryManager.checkFieldSecurity(query, data, "PUT");
 
@@ -408,11 +411,17 @@ public class CronapiREST {
         return saved;
       }
     });
+
+    if (isFromDataSource) {
+      return result;
+    } else {
+      return result.getValue();
+    }
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/query/{id}/**")
-  public RestResult queryDelete(@PathVariable("id") String id) throws Exception {
-    return runIntoTransaction(() -> {
+  public Object queryDelete(@PathVariable("id") String id, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+    RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "DELETE");
@@ -434,6 +443,12 @@ public class CronapiREST {
       }
       return Var.VAR_NULL;
     });
+
+    if (isFromDataSource) {
+      return result;
+    } else {
+      return result.getValue();
+    }
   }
   //Fim de api de Fonte de Dados
 

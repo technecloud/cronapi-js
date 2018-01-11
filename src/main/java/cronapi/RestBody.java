@@ -1,6 +1,6 @@
 package cronapi;
 
-import java.util.Map;
+import java.util.*;
 
 public class RestBody {
   private Var[] inputs;
@@ -30,5 +30,22 @@ public class RestBody {
   
   public void setFields(Map<String, Var> fields) {
     this.fields = fields;
+  }
+
+  public static RestBody parseBody(Map rawData) {
+    return parseBody(rawData, (rawData.containsKey("inputs") && rawData.containsKey("fields")));
+  }
+
+  public static RestBody parseBody(Map rawData, boolean isFromDataSource) {
+    if (!isFromDataSource) {
+      Map map = rawData;
+      rawData = new LinkedHashMap<>();
+      rawData.put("fields", new LinkedHashMap<>());
+      List list = new LinkedList();
+      list.add(map);
+      rawData.put("inputs", list);
+    }
+
+    return (RestBody) Var.valueOf(rawData).getObject(RestBody.class);
   }
 }
