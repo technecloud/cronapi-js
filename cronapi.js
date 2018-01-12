@@ -913,7 +913,7 @@
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @multilayer true
    */
-    this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    this.cronapi.screen.hideModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
         $('#'+id).hide();
   };
 
