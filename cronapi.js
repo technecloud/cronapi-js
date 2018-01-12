@@ -888,7 +888,7 @@
    $('#modalTemplateCancel').click(onError);
    $( "#modalTemplateSave").unbind( "click" );   
    $('#modalTemplateSave').click(onSuccess);
-   $('#modalTemplate').modal('show');
+   $('#modalTemplate').show();
    
   };
   
@@ -901,8 +901,22 @@
    * @multilayer true
    */
     this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-        $('#'+id).modal('show');
+        $('#'+id).show();
   };
+  
+  
+    /**
+   * @type function
+   * @name {{hideModal}}
+   * @nameTags Hide| Modal| Esconder | Fechar
+   * @description {{hideModalDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+        $('#'+id).hide();
+  };
+
 
   /**
    * @type function

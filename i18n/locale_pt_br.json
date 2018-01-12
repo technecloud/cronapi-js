@@ -357,5 +357,7 @@
 	"refreshActiveRecordDescription": "Função que atualiza o registro corrente",
 	"refreshActiveRecordParam0": "Fonte de dados",
 	"logoutName": "Logout",
-	"logoutDescription":"Função que faz o logout do usuário"
+	"logoutDescription":"Função que faz o logout do usuário",
+	"hideModal": "Esconder modal",
+	"hideModalDesc": "Função que esconde um modal"
 }
