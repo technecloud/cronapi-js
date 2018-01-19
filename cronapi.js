@@ -2669,5 +2669,174 @@
   this.cronapi.util.upload = function(id, description, filter, maxSize, multiple) {
     this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple});
   };
+  
+  
+  
+  
+  /**
+   * @category CategoryType.CHART
+   * @categoryTags Gráficos|Charts
+   */
+  this.cronapi.chart = {};
+
+  /**
+   * @type function
+   * @name {{createChartName}}
+   * @nameTags chart|series|serie
+   * @description {{createChartDescription}}
+   * @multilayer true
+   * @arbitraryParams true
+   */
+  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|doughnut|pie  @values line|bar|doughnut|pie  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
+  
+  var CSS_COLOR_NAMES = ["#FF5C00","#0E53A7","#48DD00","#FFD500","#7309AA","#CD0074","#00AF64","#BF8230","#F16D95","#A65000","#A65000","#AF66D5"];
+  var colorIndex = 0;
+  
+  function nextColor(){
+    if(colorIndex < CSS_COLOR_NAMES.length )
+    colorIndex++;
+    else  colorIndex = 0;
+    return colorIndex;
+  }
+
+function getColumn(position, datasets){
+    var column = [];
+    $.each(datasets , function(index,value){
+      if(value.data[position] != undefined) column.push(value.data[position]); 
+    });
+  return column;
+}
+
+function getDataset(args){
+  var ds = [];
+  for(var size = 4 ; size <  args.length ; size++){
+   if(args[size].label){
+     if(args[size].options){
+       if(args[size].data) ds.push(cronapi.chart.createDataset(args[size].label,args[size].data,args[size].options) );
+       else  ds.push(cronapi.chart.createDataset(args[size].label,args[size],null) );
+       ds.push(cronapi.chart.createDataset(args[size].label,args[size].data,args[size].options) );
+     }else{
+        ds.push(cronapi.chart.createDataset(args[size].label,args[size].data,null) );
+      }
+   }else
+   {
+     if(args[size].options){
+        if(args[size].data)  ds.push(cronapi.chart.createDataset(null,args[size].data, args[size].options) );
+       else   ds.push(cronapi.chart.createDataset(null,args[size], args[size].options) );
+       ds.push(cronapi.chart.createDataset(null,args[size].data, args[size].options) );
+     }else{
+       if(args[size].data)  ds.push(cronapi.chart.createDataset(null,args[size].data, null) );
+       else   ds.push(cronapi.chart.createDataset(null,args[size], null) );
+      }
+    }
+  }
+  return ds;
+}
+function beginAtZero(){
+  if(json.options == undefined){ json.options = {};
+  json.options.scales={};
+  json.options.scales.yAxes = [{ticks: {beginAtZero:true}}];
+  }else if(json.options.scales == undefined) { json.options.scales= {}; json.options.scales.yAxes = [{ticks: {beginAtZero:true}}] };
+}
+
+    var ctx = document.getElementById(chartId);
+  if (ctx._chart) {
+    ctx._chart.destroy();
+  }
+  ctx.getContext('2d');
+  var json = {};
+  json.type = type;
+  json.data = [];
+  json.options= [];
+  if(Array.isArray(chartLegends)){
+   json.data.labels = chartLegends;
+  }else
+  json.data.labels = JSON.parse(chartLegends);
+  json.data.datasets = [];
+  if(Array.isArray(options)) json.options = options; else if(options != "" || options != null) try {json.options = JSON.parse(options);}catch(e){console.log(e);}
+  
+  switch(type){
+    case 'line':{
+     json.data.datasets = getDataset(arguments);
+        //Applying configs in Datasets
+        $.each(json.data.datasets, function(index,value){
+          value.fill = false;
+          value.backgroundColor = CSS_COLOR_NAMES[nextColor()]; 
+          value.borderColor = value.backgroundColor;
+          beginAtZero();
+        });
+          
+      break;
+    }
+    case 'bar':{
+      json.data.datasets = getDataset(arguments);
+        //Applying configs in Datasets
+        $.each(json.data.datasets, function(index,value){
+          value.backgroundColor = CSS_COLOR_NAMES[nextColor()];
+          value.borderColor = value.backgroundColor;
+        });
+        beginAtZero();
+      break;
+    }
+    
+    
+    case 'doughnut':{
+      var ds = getDataset(arguments);
+        $.each(ds, function(index, value){
+          var dtset = {};
+           dtset = ds[index];
+          dtset.backgroundColor = [];
+          dtset.borderColor = [];
+          $.each(dtset.data, function(indexx,valuee){
+             dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
+         
+          });
+            dtset.borderColor =  dtset.backgroundColor;
+             json.data.datasets.push(dtset);
+            colorIndex = 0;
+        });
+      break;
+      
+    }
+    case 'pie':{
+      var ds = getDataset(arguments);
+        $.each(ds, function(index, value){
+          var dtset = {};
+           dtset = ds[index];
+          dtset.backgroundColor = [];
+          dtset.borderColor = [];
+          $.each(dtset.data, function(indexx,valuee){
+             dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
+         
+          });
+            dtset.borderColor =  dtset.backgroundColor;
+             json.data.datasets.push(dtset);
+            colorIndex = 0;
+        });
+      break;
+    }
+    
+    default :{
+    }
+  }
+  var chart = new Chart(ctx, json);
+  ctx._chart = chart;
+  
+  }
+
+  /**
+   * @type function
+   * @name {{createSerieName}}
+   * @nameTags chart|graficos|series|serie|dados
+   * @description {{createSerieDescription}}
+   * @returns {ObjectType.LIST}
+   */
+  this.cronapi.chart.createDataset = function(/** @type {ObjectType.STRING} @description {{createSerieParamName}} */ name, /** @type {ObjectType.LIST}  @description {{createSerieParamData}} */ data , /** @type {ObjectType.LIST}  @description {{createSerieParamOptions}} */ options  ) {
+  var dataset = {};
+  if(name)  dataset.label = name;  else  dataset.label ="";
+  if(Array.isArray(data))  dataset.data = data;  else {   if(data){ dataset.data = JSON.parse(data);}else dataset.data = [];}
+  if(Array.isArray(options)){   dataset.options = options;} else  dataset.options = JSON.parse(options);
+  return dataset;
+  }
 
 }).bind(window)();
