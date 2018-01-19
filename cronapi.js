@@ -2675,7 +2675,7 @@
   
   /**
    * @category CategoryType.CHART
-   * @categoryTags Gráficos|Charts
+   * @categoryTags Gráfico|Chart
    */
   this.cronapi.chart = {};
 

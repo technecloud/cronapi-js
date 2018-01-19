@@ -365,5 +365,6 @@
 	"createChartId":"Id: Chart id (canvas)",
 	"createChartType":"Chart type: Chart type to be created",
 	"createChartSeries":"Chart series",
-	"createChartLegends":"Subtitle: Chart Subtitle"
+	"createChartLegends":"Subtitle: Chart Subtitle",
+	"CategoryType.CHART":"Chart"
 }

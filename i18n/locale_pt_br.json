@@ -373,5 +373,6 @@
 	"createChartId":"Id: Id do gráfico (canvas)",
 	"createChartType":"Tipo de gráfico: Tipo de gráfico a ser criado",
 	"createChartSeries":"Série(s) do gráfico: Conjunto de séries do gráfico",
-	"createChartLegends":"Legenda: Legenda do gráfico"
+	"createChartLegends":"Legenda: Legenda do gráfico",
+	"CategoryType.CHART":"Gráfico"
 }
