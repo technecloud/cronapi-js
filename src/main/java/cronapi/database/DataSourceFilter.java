@@ -71,10 +71,6 @@ public class DataSourceFilter {
             pair[0] = pair[0].substring(0, pair[0].length()-2);
           }
 
-          if (cs) {
-            pair[1] = pair[1].toLowerCase();
-          }
-
           if(values.length == 1 && pair.length == 1) {
             items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(Var.deserialize(pair[0])), "LIKE", Var.deserializeType(pair[0]), cs));
             break;
@@ -384,7 +380,12 @@ public class DataSourceFilter {
     public DataSourceFilterItem(String key, Var value, String operation, String dataType, boolean caseInsensitive) {
       this.key = key;
       this.value = value;
-      this.caseInsensitive = caseInsensitive;
+
+      if (dataType.equals("text") && caseInsensitive) {
+        this.value = Var.valueOf(this.value.getObjectAsString().toLowerCase());
+        this.caseInsensitive = true;
+      }
+
       if(operation.equalsIgnoreCase("=") || operation.equalsIgnoreCase("like") || operation.equalsIgnoreCase(">")
           || operation.equalsIgnoreCase("<")  || operation.equalsIgnoreCase(">=")  || operation.equalsIgnoreCase("<=")) {
         this.operation = operation;
