@@ -120,8 +120,12 @@ public class CronapiREST {
     translationPath.params = params.toArray(new Var[params.size()]);
     translationPath.relationParams = relationParams.toArray(new Var[relationParams.size()]);
 
+    boolean caseInsensitive = false;
+    if (request.getParameter("filterCaseInsensitive") != null && !request.getParameter("filterCaseInsensitive").isEmpty()) {
+      caseInsensitive = "true".equalsIgnoreCase(request.getParameter("filterCaseInsensitive"));
+    }
     translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
-            request.getParameter("filterType"));
+            request.getParameter("filterType"), caseInsensitive);
 
     return translationPath;
   }

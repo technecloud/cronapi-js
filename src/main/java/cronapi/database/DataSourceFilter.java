@@ -30,12 +30,13 @@ public class DataSourceFilter {
   private String appliedJpql;
   private Var[] appliedParams;
 
-  private DataSourceFilter(String filter, String order) {
+  private DataSourceFilter(String filter, String order, boolean caseInsensitive) {
     if(filter != null && !filter.trim().isEmpty()) {
 
       String[] values = filter.trim().split(";");
       if(values.length > 0) {
         for(String v : values) {
+          boolean cs = caseInsensitive;
           String[] pair = null;
           String operation;
           if(v.contains("@=")) {
@@ -63,17 +64,28 @@ public class DataSourceFilter {
             operation = "=";
           }
 
+          pair[0] = pair[0].trim();
+
+          if (pair[0].endsWith("/i")) {
+            cs = true;
+            pair[0] = pair[0].substring(0, pair[0].length()-2);
+          }
+
+          if (cs) {
+            pair[1] = pair[1].toLowerCase();
+          }
+
           if(values.length == 1 && pair.length == 1) {
-            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(Var.deserialize(pair[0])), "LIKE", Var.deserializeType(pair[0])));
+            items.add(new DataSourceFilter.DataSourceFilterItem("*", Var.valueOf(Var.deserialize(pair[0])), "LIKE", Var.deserializeType(pair[0]), cs));
             break;
           }
 
           if(pair.length > 0 && !pair[0].trim().isEmpty()) {
             if(pair.length == 1) {
-              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.VAR_NULL, operation, "text"));
+              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.VAR_NULL, operation, "text", cs));
             }
             if(pair.length > 1) {
-              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.valueOf(Var.deserialize(pair[1])), operation, Var.deserializeType(pair[1])));
+              items.add(new DataSourceFilter.DataSourceFilterItem(pair[0], Var.valueOf(Var.deserialize(pair[1])), operation, Var.deserializeType(pair[1]), cs));
             }
           }
         }
@@ -100,9 +112,9 @@ public class DataSourceFilter {
 
   }
 
-  public static DataSourceFilter getInstance(String filter, String order, String filterType) {
+  public static DataSourceFilter getInstance(String filter, String order, String filterType, boolean caseInsensitive) {
     if((filter != null && !filter.trim().isEmpty()) || (order != null && !order.trim().isEmpty())) {
-      DataSourceFilter dsFilter = new DataSourceFilter(filter, order);
+      DataSourceFilter dsFilter = new DataSourceFilter(filter, order, caseInsensitive);
       if(filterType != null)
         dsFilter.setType(filterType);
 
@@ -272,7 +284,7 @@ public class DataSourceFilter {
         items = new LinkedList<>();
         this.type = "OR";
         for(String f : searchables) {
-          items.add(new DataSourceFilterItem(f, value, type, operation));
+          items.add(new DataSourceFilterItem(f, value, type, operation, false));
         }
       }
     } else {
@@ -303,7 +315,11 @@ public class DataSourceFilter {
         if (item.dataType != null && item.dataType.equals("date")) {
           jpql += "CAST("+alias + "." + item.key + " as date) " + item.operation + " CAST(:p" + i +" as date)";
         } else {
-          jpql += alias + "." + item.key + " " +  item.operation + " :p" + i;
+          if (item.caseInsensitive) {
+            jpql += "LOWER(" + alias + "." + item.key + ") " + item.operation + " :p" + i;
+          } else {
+            jpql += alias + "." + item.key + " " + item.operation + " :p" + i;
+          }
         }
 
         newParams[i] = item.value;
@@ -363,10 +379,12 @@ public class DataSourceFilter {
     public Var value;
     public String operation = "=";
     public String dataType = "text";
+    public boolean caseInsensitive = false;
 
-    public DataSourceFilterItem(String key, Var value, String operation, String dataType) {
+    public DataSourceFilterItem(String key, Var value, String operation, String dataType, boolean caseInsensitive) {
       this.key = key;
       this.value = value;
+      this.caseInsensitive = caseInsensitive;
       if(operation.equalsIgnoreCase("=") || operation.equalsIgnoreCase("like") || operation.equalsIgnoreCase(">")
           || operation.equalsIgnoreCase("<")  || operation.equalsIgnoreCase(">=")  || operation.equalsIgnoreCase("<=")) {
         this.operation = operation;
