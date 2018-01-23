@@ -247,6 +247,10 @@ public class Var implements Comparable<Var>, JsonSerializable {
   public Object getObject() {
     return _object;
   }
+
+  public <T extends Object> T getTypedObject(Class<T> type) {
+    return type.cast(getObject(type));
+  }
   
   public Object getObject(Class type) {
 
