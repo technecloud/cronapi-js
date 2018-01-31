@@ -769,5 +769,12 @@ public class Operations {
       return text.toUpperCase();
     }
   }
+  
+  @CronapiMetaData(type = "function", name = "{{redirect}}", nameTags = { "redirecionar", "redirect" }, description = "{{redirectDescription}}")
+  public static final void redirect(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{location}}") Var location
+  ) throws Exception {
+    RestClient.getRestClient().getResponse().sendRedirect(location.getObjectAsString());
+  }
 
 }
