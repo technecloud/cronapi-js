@@ -2684,7 +2684,6 @@
    * @name {{createChartName}}
    * @nameTags chart|series|serie
    * @description {{createChartDescription}}
-   * @multilayer true
    * @arbitraryParams true
    */
   this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|doughnut|pie  @values line|bar|doughnut|pie  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
