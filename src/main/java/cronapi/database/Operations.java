@@ -228,4 +228,28 @@ public class Operations {
     return query(entity, query, vars);
   }
   
+  	@CronapiMetaData(type = "function", name = "{{datasourceGetColumnName}}", nameTags = { "GetColumn",
+			"obterColuna","datasource","dados" }, description = "{{datasourceGetColumnDescription}}", params = {
+					"{{datasource}}", "{{fieldName}}" }, paramsType = { ObjectType.DATASET,
+							ObjectType.STRING }, returnType = ObjectType.OBJECT, wizard = "procedures_get_field")
+	public static Var getColumn(
+			@ParamMetaData(blockType = "variables_get", type = ObjectType.OBJECT, description = "{{datasource}}") Var ds,
+			@ParamMetaData(blockType = "procedures_get_field_datasource", type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName) {
+		Object obj = ds.getObject();
+
+		List<Object> dst = new LinkedList<Object>();
+		if (obj instanceof DataSource) {
+			DataSource datasource = (DataSource) obj;
+
+			while (datasource.hasNext()) {
+				dst.add(ds.getField(fieldName.getObjectAsString()));
+				datasource.next();
+			}
+			dst.add(ds.getField(fieldName.getObjectAsString()));
+			datasource.setCurrent(0);
+			return Var.valueOf(dst);
+		}
+		return Var.valueOf(dst);
+	}
+  
 }

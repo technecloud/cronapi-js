@@ -1308,4 +1308,7 @@ public class DataSource implements JsonSerializable {
   public void enableMultiTenant() {
     this.multiTenant = true;
   }
+    public String getFilter(){
+    return this.filter;
+  }
 }
