@@ -1798,11 +1798,11 @@
   
   this.cronapi.internal.startCamera = function(field) {
     var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
-                                    <div class="btn btn-success" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
-                                        <span class="glyphicon glyphicon-ok"></span>\
+                                    <div class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
                                     </div>\
-                                    <div class="btn btn-danger" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
-                                        <span class="glyphicon glyphicon-remove"></span>\
+                                    <div class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
                                     </div>\
                                     <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
                             </div>';
@@ -1880,6 +1880,66 @@
         }.bind(this));
     }
   }; 
+  
+  this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData) {
+    var tempJsonFileUploaded = null;
+    var valueContent;
+    var itemActive;
+    if (indexData) {
+      valueContent = datasource.data[indexData][field];
+      itemActive = datasource.data[indexData];
+    }
+    else {
+      try {
+        valueContent = datasource.active[field]; 
+        itemActive = datasource.active;
+      }
+      catch (e) {
+        valueContent = datasource[field]; 
+        itemActive = datasource;
+      }
+    }
+    //Verificando se é JSON Uploaded file
+    try {
+      var tempJsonFileUploaded = JSON.parse(valueContent);
+    }
+    catch(e) { }
+    
+    if (tempJsonFileUploaded) {
+      window.open(window.hostApp + '/api/cronapi/filePreview/' + tempJsonFileUploaded.path, '_system');
+    }
+    else if (valueContent.indexOf('dropboxusercontent') > -1) {
+      window.open(valueContent, '_system');
+    }
+    else {
+      var url = '/api/cronapi/downloadFile';
+      var splited = datasource.entity.split('/');
+      
+      var entity = splited[splited.length-1];
+      if (entity.indexOf(":") > -1) {
+        //Siginifica que é relacionamento, pega a entidade do relacionamento
+        var entityRelation = '';
+        var splitedDomainBase = splited[3].split('.');
+        for (var i=0; i<splitedDomainBase.length-1;i++)
+          entityRelation += splitedDomainBase[i]+'.';
+        var entityRelationSplited = entity.split(':');
+        entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
+      }
+      url += '/' + entity;
+      url += '/' + field;
+      var object = itemActive;
+      var ids = datasource.getKeyValues(object);
+      var currentIdxId = 0;
+      for (var attr in ids) { 
+        if (currentIdxId == 0)
+          url  = url + '/' + object[attr];
+        else
+          url  = url + ':' + object[attr];
+        currentIdxId++;
+      }
+      window.open(window.hostApp + url, '_system');
+    }
+  };
    
   this.cronapi.internal.captureFromCamera = function(field, width, height) {
     var canvas = document.createElement("canvas"); // create img tag
