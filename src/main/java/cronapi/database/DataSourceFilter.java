@@ -18,6 +18,8 @@ import org.springframework.security.core.GrantedAuthority;
 
 import cronapi.RestClient;
 import cronapi.Var;
+import cronapi.database.DataSourceFilter.DataSourceFilterItem;
+import cronapi.database.DataSourceFilter.DataSourceOrderItem;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
 
@@ -288,8 +290,20 @@ public class DataSourceFilter {
     }
 
     if(items.size() > 0) {
+      StringBuilder jpqlText = new StringBuilder();
+      
       if(!hasWhere) {
-        jpql += " where (";
+        if (hasOrder) {
+          int pos = jpql.indexOf("order");
+          if (pos > -1){
+            jpqlText.append(jpql.substring(0, pos -1));
+            jpqlText.append(" %s ");
+            jpqlText.append(jpql.substring(pos,jpql.length()));
+            jpql = " where (";
+          }
+        } else {
+          jpql += " where (";
+        }
       }
       else {
         jpql += " AND (";
@@ -328,6 +342,10 @@ public class DataSourceFilter {
 
       jpql += ")";
 
+      if ((!hasWhere) && (hasOrder) && (jpqlText != null)) {
+        jpql = String.format(jpqlText.toString(), jpql);
+      }
+      
       this.appliedParams = newParams;
     }
 
