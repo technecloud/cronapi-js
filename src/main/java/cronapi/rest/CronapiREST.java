@@ -551,6 +551,33 @@ public class CronapiREST {
 		responseOutputStream.flush();
 		responseOutputStream.close();
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/downloadFile/{entity}/{field}/{ids}/**")
+	public void downloadFileGet(@PathVariable("entity") String entity, @PathVariable("field") String field,
+			@PathVariable("ids") String ids) throws Exception {
+		
+		DataSource ds = new DataSource(entity);
+		
+		List<Var> varIds = new LinkedList<Var>();
+		String[] idsSplited = ids.split(Pattern.quote(":"));
+		for (String id: idsSplited) {
+		  varIds.add(Var.valueOf(id));
+		}
+	  Object domainInstance = ds.getObjectWithId(varIds.toArray(new Var[0]));
+		ds.filter(Var.valueOf(domainInstance) , null);
+		Object obj = ds.getObject();
+		
+		byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
+		StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
+		response.setContentType(fileObject.contentType);
+		response.addHeader("x-filename", fileObject.name + fileObject.extension);
+		response.setHeader("Content-Disposition", "attachment;filename=" + fileObject.name + fileObject.extension);
+
+		ServletOutputStream responseOutputStream = response.getOutputStream();
+		responseOutputStream.write(fileObject.bytes);
+		responseOutputStream.flush();
+		responseOutputStream.close();
+	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/uploadFile")
 	public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile[] uploadfiles) throws Exception {

@@ -1311,4 +1311,26 @@ public class DataSource implements JsonSerializable {
     public String getFilter(){
     return this.filter;
   }
+  
+  public Object getObjectWithId(Var[] ids) {
+    EntityManager em = getEntityManager(domainClass);
+    EntityType type = em.getMetamodel().entity(domainClass);
+    Object instanceDomain = null;
+    try {
+      instanceDomain = domainClass.newInstance();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    
+    int i = 0;
+    for(Object obj : getAjustedAttributes(type)) {
+      SingularAttribute field = (SingularAttribute)obj;
+      if(field.isId()) {
+        Utils.updateField(instanceDomain, field.getName(), ids[i].getObject(field.getType().getJavaType()));
+        i++;
+      }
+    }
+    return instanceDomain;    
+  }
 }

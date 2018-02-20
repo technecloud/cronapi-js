@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -261,7 +262,7 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return getObjectAsBoolean();
     }
     else if(type == JsonElement.class) {
-      return new Gson().fromJson(getObjectAsString(), JsonElement.class);
+      return getObjectAsJson();
     }
     else if(type == Date.class) {
       return getObjectAsDateTime().getTime();
@@ -421,6 +422,32 @@ public class Var implements Comparable<Var>, JsonSerializable {
 
     else
       return new File(toString());
+  }
+
+  public JsonElement getObjectAsJson() {
+    if (_object != null) {
+      if (_object instanceof JsonElement) {
+        return (JsonElement) _object;
+      }
+      else {
+
+        try {
+          String s = null;
+          if (_object instanceof String || _object instanceof InputStream) {
+            return new Gson().fromJson(getObjectAsString(), JsonElement.class);
+          } else {
+            ObjectMapper mapper = new ObjectMapper();
+            s = mapper.writeValueAsString(_object);
+          }
+          return new Gson().fromJson(s, JsonElement.class);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+    }
+
+    return null;
   }
   
   /**
