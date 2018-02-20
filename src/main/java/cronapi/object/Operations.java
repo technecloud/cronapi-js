@@ -6,6 +6,10 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Var;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
 /**
  * Classe que representa ...
  * 
@@ -39,12 +43,34 @@ public class Operations {
           ObjectType.STRING,
           ObjectType.MAP }, returnType = ObjectType.OBJECT, arbitraryParams = true, wizard = "procedures_createnewobject_callreturn")
   public static final Var newObject(Var object, Var ... params) throws Exception {
-    if(!object.equals(Var.VAR_NULL)) {
+    if (!object.equals(Var.VAR_NULL)) {
       String className = object.getObjectAsString();
       Class<?> c = Class.forName(className);
-      Var returnObject = new Var((Object)c.newInstance());
-      for(Var param : params) {
-        returnObject.setField(param.getId(), param.getObject());
+
+      Class<?> builderClass = Arrays.stream(c.getDeclaredClasses())
+          .filter(e -> e.getSimpleName().equals("Builder"))
+          .findFirst()
+          .orElse(null);
+
+      boolean hasDefaultConstructor = Arrays.stream(c.getConstructors())
+          .anyMatch(e -> e.isAccessible() && e.getParameterCount() == 0);
+
+      Var returnObject;
+
+      if (!hasDefaultConstructor && builderClass != null) {
+        Object builderObject = builderClass.newInstance();
+        for (Var param : params) {
+          if (param.isNull() || param.getObject() == null) continue;
+          Method method = builderClass.getMethod(param.getId(), param.getObject().getClass());
+          method.invoke(builderObject, param.getObject());
+        }
+
+        returnObject = Var.valueOf(builderClass.getMethod("build").invoke(builderObject));
+      } else {
+        returnObject = new Var((Object) c.newInstance());
+        for (Var param : params) {
+          returnObject.setField(param.getId(), param.getObject());
+        }
       }
       return returnObject;
     }
