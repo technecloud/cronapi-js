@@ -34,7 +34,7 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.JSON, description = "{{FirebaseData}}") Var paramData)
 			throws Exception {
 
-    JsonObject body = new JsonObject();
+		JsonObject body = new JsonObject();
 		body.addProperty("to", paramTo.getObjectAsString());
 		body.addProperty("priority", "high");
 		
@@ -43,10 +43,10 @@ public class Operations {
 		notification.addProperty("body", paramBody.getObjectAsString());
 
 		body.add("notification", notification);
-    //body.add("data", (JsonObject) paramData.getObject()); 
+		body.add("data", (JsonObject) paramData.getObject()); 
 		
 		HttpEntity<String> request = new HttpEntity<>(body.toString());
-    FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
+		FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
 		CompletableFuture<String> pushNotification = firebaseService.send(request);
 		CompletableFuture.allOf(pushNotification).join();
 		
