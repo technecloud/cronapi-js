@@ -2727,7 +2727,7 @@
    * @type internal
    */
   this.cronapi.util.upload = function(id, description, filter, maxSize, multiple) {
-    this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple});
+    this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple, 'scope': scope});
   };
   
   
