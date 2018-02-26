@@ -2595,9 +2595,9 @@
   };
 
   this.cronapi.internal.removeAccents = function(value) {
-    withAccents = 'áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ';
-    withoutAccents = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
-    newValue = '';
+    var withAccents = 'áàãâäéèêëíìîïóòõôöúùûüçÁÀÃÂÄÉÈÊËÍÌÎÏÓÒÕÖÔÚÙÛÜÇ';
+    var withoutAccents = 'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC';
+    var newValue = '';
     for (i = 0; i < value.length; i++) {
       if (withAccents.search(value.substr(i, 1)) >= 0) {
         newValue += withoutAccents.substr(withAccents.search(value
@@ -2727,7 +2727,7 @@
    * @type internal
    */
   this.cronapi.util.upload = function(id, description, filter, maxSize, multiple) {
-    this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple, 'scope': scope});
+    this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple, 'scope': this});
   };
   
   
