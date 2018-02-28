@@ -255,7 +255,10 @@ public class Var implements Comparable<Var>, JsonSerializable {
   
   public Object getObject(Class type) {
 
-    if(type == String.class || type == StringBuilder.class || type == StringBuffer.class || type == Character.class) {
+    if(type == Var.class) {
+      return this;
+    }
+    else if(type == String.class || type == StringBuilder.class || type == StringBuffer.class || type == Character.class) {
       return getObjectAsString();
     }
     else if(type == Boolean.class) {
