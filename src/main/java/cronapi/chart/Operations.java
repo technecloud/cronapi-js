@@ -27,7 +27,7 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createChartId}}", blockType = "ids_from_screen") Var chartId,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{createChartType}}", blockType = "util_dropdown", keys = {
 					"line", "bar", "doughnut",
-					"pie" }, values = { "{{line}}", "{{bar}}", "{{doughnut}}", "{{pie}}" }) Var type,
+					"pie","polarArea" }, values = { "{{line}}", "{{bar}}", "{{doughnut}}", "{{pie}}","{{polarArea}}" }) Var type,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createChartLegends}}") Var chartLegends,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createChartOptions}}") Var options,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{createChartSeries}}") Var... series
