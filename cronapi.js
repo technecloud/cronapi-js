@@ -901,8 +901,11 @@
    * @multilayer true
    */
     this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+		try{
         $('#'+id).modal('show');
+		}catch(e){
 		$('#'+id).show();
+		}
   };
   
   
@@ -915,8 +918,11 @@
    * @multilayer true
    */
     this.cronapi.screen.hideModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+		try{
 		$('#'+id).modal('hide');
+		}catch(e){
         $('#'+id).hide();
+		}
   };
 
 
