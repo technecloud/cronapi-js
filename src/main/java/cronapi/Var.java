@@ -39,6 +39,7 @@ import com.google.gson.reflect.TypeToken;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.json.Operations;
+import cronapi.serialization.CronappModule;
 import cronapi.util.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -679,6 +680,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
         }
         else {
           ObjectMapper mapper = new ObjectMapper();
+          mapper.registerModule(new CronappModule(false));
+
           if(getObject() instanceof DataSource) {
             return (Map)mapper.convertValue(((DataSource)getObject()).getObject(), Map.class);
           }
