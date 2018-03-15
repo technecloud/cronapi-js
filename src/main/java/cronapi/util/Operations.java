@@ -395,7 +395,7 @@ public class Operations {
 				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpGet.addHeader(entry.getKey().getObjectAsString(),
-							new Var(entry.getValue()).getObjectAsString());
+							 Var.valueOf(entry.getValue()).getObjectAsString());
 				});
 
 				if (params != Var.VAR_NULL) {
@@ -403,8 +403,8 @@ public class Operations {
 					Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
 					List<NameValuePair> params2 = new LinkedList<>();
 					mapObject.entrySet().stream().forEach((entry) -> {
-						params2.add(new BasicNameValuePair(new Var(entry.getKey()).getObjectAsString(),
-								new Var(entry.getValue()).getObjectAsString()));
+						params2.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+								Var.valueOf(entry.getValue()).getObjectAsString()));
 					});
 					URI uri = new URIBuilder(httpGet.getURI()).addParameters(params2).build();
 					httpGet.setURI(uri);
@@ -419,7 +419,7 @@ public class Operations {
 					for (Header header : headers) {
 						responseMap.put(header.getName(), header.getValue());
 					}
-					toReturn = new Var(responseMap);
+					toReturn = Var.valueOf(responseMap);
 				} else {
 					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 							cronapi.CronapiConfigurator.ENCODING);
@@ -429,7 +429,7 @@ public class Operations {
 					} catch (Exception e) {
 					}
 					scanner.close();
-					toReturn = new Var(response);
+					toReturn = Var.valueOf(response);
 				}
 				httpGet.completed();
 				return toReturn;
@@ -440,7 +440,7 @@ public class Operations {
 				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpPost.addHeader(entry.getKey().getObjectAsString(),
-							new Var(entry.getValue()).getObjectAsString());
+							Var.valueOf(entry.getValue()).getObjectAsString());
 				});
 
 				if (params != Var.VAR_NULL) {
@@ -450,8 +450,8 @@ public class Operations {
 						Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(new Var(entry.getKey()).getObjectAsString(),
-									new Var(entry.getValue()).getObjectAsString()));
+							params2.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+									Var.valueOf(entry.getValue()).getObjectAsString()));
 						});
 
 						httpPost.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
@@ -473,7 +473,7 @@ public class Operations {
 					for (Header header : headers) {
 						responseMap.put(header.getName(), header.getValue());
 					}
-					toReturn = new Var(responseMap);
+					toReturn = Var.valueOf(responseMap);
 				} else {
 					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 							cronapi.CronapiConfigurator.ENCODING);
@@ -483,7 +483,7 @@ public class Operations {
 					} catch (Exception e) {
 					}
 					scanner.close();
-					toReturn = new Var(response);
+					toReturn = Var.valueOf(response);
 				}
 				httpPost.completed();
 				return toReturn;
@@ -495,7 +495,7 @@ public class Operations {
 				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpPut.addHeader(entry.getKey().getObjectAsString(),
-							new Var(entry.getValue()).getObjectAsString());
+							Var.valueOf(entry.getValue()).getObjectAsString());
 				});
 
 				if (params != Var.VAR_NULL) {
@@ -504,7 +504,7 @@ public class Operations {
 						List<NameValuePair> params2 = new LinkedList<>();
 						mapObject.entrySet().stream().forEach((entry) -> {
 							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
-									new Var(entry.getValue()).getObjectAsString()));
+									Var.valueOf(entry.getValue()).getObjectAsString()));
 						});
 						httpPut.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
 					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
@@ -523,7 +523,7 @@ public class Operations {
 					for (Header header : headers) {
 						responseMap.put(header.getName(), header.getValue());
 					}
-					toReturn = new Var(responseMap);
+					toReturn = Var.valueOf(responseMap);
 				} else {
 					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 							cronapi.CronapiConfigurator.ENCODING);
@@ -545,7 +545,7 @@ public class Operations {
 				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
 				headerObject.entrySet().stream().forEach((entry) -> {
 					httpDelete.addHeader(entry.getKey().getObjectAsString(),
-							new Var(entry.getValue()).getObjectAsString());
+							Var.valueOf(entry.getValue()).getObjectAsString());
 				});
 
 				Var toReturn;
@@ -557,7 +557,7 @@ public class Operations {
 					for (Header header : headers) {
 						responseMap.put(header.getName(), header.getValue());
 					}
-					toReturn = new Var(responseMap);
+					toReturn = Var.valueOf(responseMap);
 				} else {
 					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
 							cronapi.CronapiConfigurator.ENCODING);
@@ -567,7 +567,7 @@ public class Operations {
 					} catch (Exception e) {
 					}
 					scanner.close();
-					toReturn = new Var(response);
+					toReturn = Var.valueOf(response);
 				}
 				httpDelete.completed();
 				return toReturn;
