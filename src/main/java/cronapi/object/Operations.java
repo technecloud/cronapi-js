@@ -61,8 +61,13 @@ public class Operations {
         Object builderObject = builderClass.newInstance();
         for (Var param : params) {
           if (param.isNull() || param.getObject() == null) continue;
-          Method method = builderClass.getMethod(param.getId(), param.getObject().getClass());
-          method.invoke(builderObject, param.getObject());
+          Method method = Arrays.stream(builderClass.getMethods())
+              .filter(m -> m.getName().equals(param.getId()) && m.getParameterCount() == 1)
+              .findFirst()
+              .orElse(null);
+          if (method != null) {
+            method.invoke(builderObject, param.getTypedObject(method.getParameterTypes()[0]));
+          }
         }
 
         returnObject = Var.valueOf(builderClass.getMethod("build").invoke(builderObject));

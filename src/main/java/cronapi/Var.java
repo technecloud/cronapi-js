@@ -251,7 +251,24 @@ public class Var implements Comparable<Var>, JsonSerializable {
   }
 
   public <T extends Object> T getTypedObject(Class<T> type) {
-    return type.cast(getObject(type));
+    Object object = getObject(type);
+
+    if (object == null)
+    {
+      return null;
+    }
+
+    if (type.isInstance(object)) {
+      return type.cast(object);
+    } else {
+      JsonElement json = getObjectAsJson();
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+        return mapper.readValue(json.toString(), type);
+      } catch (IOException e) {
+        throw new ClassCastException("Cannot cast " + object.getClass().getName() + " to " + type.getName());
+      }
+    }
   }
   
   public Object getObject(Class type) {

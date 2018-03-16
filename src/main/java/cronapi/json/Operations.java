@@ -1,5 +1,10 @@
 package cronapi.json;
 
+import com.google.gson.JsonArray;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +24,12 @@ import cronapi.database.DataSource;
 @CronapiMetaData(category = CategoryType.JSON, categoryTags = { "Json" })
 public class Operations {
 
+	public static final Configuration GSON_CONFIGURATION = Configuration
+			.builder()
+			.mappingProvider(new GsonMappingProvider())
+			.jsonProvider(new GsonJsonProvider())
+			.build();
+
 	@CronapiMetaData(type = "function", name = "{{createObjectJson}}", nameTags = {
 			"createObjectJson" }, description = "{{functionToCreateObjectJson}}", returnType = ObjectType.JSON)
 	public static final Var createObjectJson() throws Exception {
@@ -33,10 +44,17 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{pathKey}}") Var keyVar) throws Exception {
 		Var value = Var.VAR_NULL;
 		Object obj = mapVar.getObject();
-		Object key = keyVar.getObject();
+		String key = keyVar.toString();
 
 		if (obj instanceof DataSource) {
 			obj = ((DataSource) obj).getObject();
+		}
+
+		if (key.startsWith("$"))
+		{
+			JsonElement jsonToBeSearched = mapVar.getObjectAsJson();
+			Object result = JsonPath.using(GSON_CONFIGURATION).parse(jsonToBeSearched).read(key);
+			return Var.valueOf(result);
 		}
 
 		String[] path = key.toString().split("\\.");
