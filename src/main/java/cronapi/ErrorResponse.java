@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import cronapi.i18n.AppMessages;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 
@@ -72,7 +73,7 @@ public class ErrorResponse {
           obj = obj.get(ERROR_HANDLES).getAsJsonObject();
         }
         if(obj != null && obj.get(PRIMARY_KEY) != null && !obj.get(PRIMARY_KEY).isJsonNull()) {
-          return Messages.format(Messages.getString(obj.get(PRIMARY_KEY).getAsString()), Messages.getString("error" + method + "Type"));
+          return Messages.format(AppMessages.getString(obj.get(PRIMARY_KEY).getAsString().replace("{{", "").replace("}}", "")), AppMessages.getString("error" + method + "Type"));
         }
         else {
           return Messages.format(Messages.getString(PRIMARY_KEY_ERROR), Messages.getString("error" + method + "Type"));
