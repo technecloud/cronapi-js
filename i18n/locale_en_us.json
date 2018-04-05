@@ -370,5 +370,7 @@
 	"createChartType": "Chart type: Chart type to be created",
 	"createChartSeries": "Chart serie(s): Set of chart series",
 	"createChartLegends": "Legends: Chart legends",
-	"CategoryType.CHART":"Chart"
+	"CategoryType.CHART":"Chart",
+	"isShownIonicModal":"Is shown modal?",
+	"isShownIonicModallDesc":"Function that return if a modal are shown"
 }

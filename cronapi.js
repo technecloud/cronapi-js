@@ -896,6 +896,7 @@
    * @type function
    * @name {{showModal}}
    * @nameTags Show| Modal| Exibir| Mostrar
+   * @platform W
    * @description {{showModalDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @multilayer true
@@ -907,7 +908,6 @@
 		$('#'+id).show();
 		}
   };
-  
   
     /**
    * @type function
@@ -923,6 +923,62 @@
 		}catch(e){
         $('#'+id).hide();
 		}
+  };
+  
+  
+    /**
+   * @type function
+   * @name {{showModal}}
+   * @nameTags Show| Modal| Exibir| Mostrar
+   * @description {{showModalDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.showIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal') ) $('#'+id).data('cronapp-modal').remove();
+	    this.cronapi.$scope.$ionicModal.fromTemplateUrl(id, {
+	      scope: this.cronapi.$scope,
+        animation: 'slide-in-up'
+      }).then(function(modal){
+        $('#'+id).data('cronapp-modal', modal);
+        modal.show();
+      })
+  };
+  
+  
+	/**
+   * @type function
+   * @name {{hideModal}}
+   * @nameTags Hide| Modal| Esconder | Fechar
+   * @description {{hideModalDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.hideIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal')) {
+         var modal = $('#'+id).data('cronapp-modal');
+         modal.remove();
+        $('#'+id).data('cronapp-modal', null);
+      }
+  };
+  
+  /**
+   * @type function
+   * @name {{isShownIonicModal}}
+   * @nameTags isShown| Modal| Exibido
+   * @description {{isShownIonicModallDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+    this.cronapi.screen.isShownIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal')) {
+         var modal = $('#'+id).data('cronapp-modal');
+         return modal.isShown();
+      }
+      return false;
   };
 
 

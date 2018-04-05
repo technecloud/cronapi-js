@@ -372,5 +372,7 @@
 	"createChartType": "Tipo de gráfico: Tipo de gráfico a ser criado",
 	"createChartSeries": "Série(s) do gráfico: Conjunto de séries do gráfico",
 	"createChartLegends": "Legenda: Legenda do gráfico",
-	"CategoryType.CHART":"Gráfico"
+	"CategoryType.CHART":"Gráfico",
+	"isShownIonicModal":"Modal é mostrado?",
+	"isShownIonicModallDesc":"Função que retorna se o modal é mostrado"
 }
