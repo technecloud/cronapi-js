@@ -58,5 +58,36 @@ public class Operations {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	@CronapiMetaData(type = "function", name = "{{firebaseRegister}}", description = "{{firebaseRegisterDescription}}")
+	public static void firebaseRegister(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{firebaseServerKey}}") Var serverKey,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{firebaseTopicName}}") Var topicName,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{firebaseToken}}") Var token)
+			throws Exception {
+		String baseUrl = "https://iid.googleapis.com/iid/v1/";
+		String topicUrl = "/rel/topics/";
+		RestTemplate restTemplate = new RestTemplate();
+		ArrayList<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+		interceptors.add(new HeaderRequestInterceptor("Authorization", "key=" + serverKey.toString()));
+		interceptors.add(new HeaderRequestInterceptor("Content-Type", "application/json"));
+		restTemplate.setInterceptors(interceptors);
+		HttpEntity<String> request = new HttpEntity<>("");
+
+		if (token.getType().equals(Var.Type.LIST)) {
+			for (Var tokenItem : token.getObjectAsList()) {
+				String url = baseUrl + tokenItem.getObjectAsString() + topicUrl + topicName.getObjectAsString();
+				restTemplate.postForObject(url, request, String.class);
+			}
+		} else {
+
+			String url = baseUrl + token.getObjectAsString() + topicUrl + topicName.getObjectAsString();
+			restTemplate.postForObject(url, request, String.class);
+
+		}
+
+	}
 
 }
