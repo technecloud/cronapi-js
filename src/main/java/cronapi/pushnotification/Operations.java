@@ -4,14 +4,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.http.HttpEntity;
-
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import com.google.gson.JsonObject;
-
+import java.util.ArrayList;
 import cronapi.CronapiMetaData;
 import cronapi.ParamMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Classe que representa ...
@@ -61,7 +62,8 @@ public class Operations {
 	
 	
 	
-	@CronapiMetaData(type = "function", name = "{{firebaseRegister}}", description = "{{firebaseRegisterDescription}}")
+	@CronapiMetaData(type = "function", name = "{{firebaseRegister}}", nameTags = {
+			"Firebase","Topic","Register","Registrar" } , description = "{{firebaseRegisterDescription}}")
 	public static void firebaseRegister(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{firebaseServerKey}}") Var serverKey,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{firebaseTopicName}}") Var topicName,
