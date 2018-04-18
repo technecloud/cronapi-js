@@ -372,5 +372,8 @@
 	"createChartLegends": "Legends: Chart legends",
 	"CategoryType.CHART":"Chart",
 	"isShownIonicModal":"Is shown modal?",
-	"isShownIonicModallDesc":"Function that return if a modal are shown"
+	"isShownIonicModallDesc":"Function that return if a modal are shown",
+	"createObject":"Create object",
+	"createObjectDescription":"Function that create an object from a text",
+	"string":"text: JSON Text to be converted"
 }

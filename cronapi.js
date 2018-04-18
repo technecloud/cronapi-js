@@ -2235,6 +2235,18 @@
        object = object[split[i]];
      }
      object = value;
+   };
+   
+	/**
+    * @type function
+    * @name {{createObject}}
+	* @description {{createObjectDescription}}
+    * @nameTags object
+    * @param {ObjectType.STRING} string {{string}}
+    * @returns {ObjectType.OBJECT}
+   */
+   this.cronapi.object.createObjectFromString = function(string) {
+    return JSON.parse(string);
    };  
     
    /**
