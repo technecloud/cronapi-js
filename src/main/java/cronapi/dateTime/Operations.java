@@ -276,6 +276,14 @@ public class Operations {
 
     return new Var(cal);
   }
+  
+    @CronapiMetaData(type = "function", name = "{{getNowInMilliseconds}}", nameTags = { "getNow", "now",
+      "getDate","milliseconds" }, description = "{{getNowInMillisecondsDescription}}", returnType = ObjectType.LONG)
+  public static final Var getNowInMilliseconds() throws Exception {
+    Calendar cal = Calendar.getInstance();
+	cal.setTime(new Date());
+    return new Var(cal.getTimeInMillis());
+  }
 
 	@CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {
 			"formatDateTime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
