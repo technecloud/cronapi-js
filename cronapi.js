@@ -1079,7 +1079,7 @@
    * @multilayer true
    */
   this.cronapi.screen.refreshDatasource = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource , /** @type {ObjectType.BOOLEAN} @description {{keepFilters}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  keepFilters ) {
-    if(keepFilters == true){
+    if(keepFilters == true || keepFilters == 'true' ){
     this[datasource].search(this[datasource].terms , this[datasource].caseInsensitive);
     }else
     this[datasource].search("", this[datasource].caseInsensitive);
