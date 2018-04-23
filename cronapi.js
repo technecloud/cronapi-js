@@ -1069,6 +1069,21 @@
     if(this.cronapi.$scope.logout != undefined)
     this.cronapi.$scope.logout();
   };
+  
+      /**
+   * @type function
+   * @name {{refreshDatasource}}
+   * @nameTags refresh|datasource|atualizar|fonte
+   * @description {{refreshDatasourceDescription}}
+   * @param {ObjectType.STRING} datasource {{datasource}}
+   * @multilayer true
+   */
+  this.cronapi.screen.refreshDatasource = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource , /** @type {ObjectType.BOOLEAN} @description {{keepFilters}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  keepFilters ) {
+    if(keepFilters == true){
+    this[datasource].search(this[datasource].terms , this[datasource].caseInsensitive);
+    }else
+    this[datasource].search("", this[datasource].caseInsensitive);
+  };
 
   /**
    * @category CategoryType.DATETIME

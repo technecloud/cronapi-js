@@ -375,5 +375,10 @@
 	"isShownIonicModallDesc":"Function that return if a modal are shown",
 	"createObject":"Create object",
 	"createObjectDescription":"Function that create an object from a text",
-	"string":"text: JSON Text to be converted"
+	"string":"text: JSON Text to be converted",
+	"true":"True",
+	"false":"False",
+	"refreshDatasource":"Update datasource",
+	"refreshDatasourceDescription":"Function that update a datasource, with or without filters",
+	"keepFilters":"Keep filter(s)? : If true, keep the filters on datasource update."
 }

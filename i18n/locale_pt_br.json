@@ -377,5 +377,10 @@
 	"isShownIonicModallDesc":"Função que retorna se o modal é mostrado",
 	"createObject":"Criar objeto",
 	"createObjectDescription":"Função que cria um objeto a partir de um texto",
-	"string":"texto: texto em JSON à ser convertido"
+	"string":"texto: texto em JSON à ser convertido",
+	"true":"Verdadeiro",
+	"false":"Falso",
+	"refreshDatasource":"Atualizar fonte de dados",
+	"refreshDatasourceDescription":"Função que atualiza uma fonte de dados, mantendo ou não os filtros",
+	"keepFilters":"Manter filtro(s)? : Caso verdadeiro, mantém os filtros existentes na fonte de dados"
 }
