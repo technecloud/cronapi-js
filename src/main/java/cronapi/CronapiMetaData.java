@@ -29,6 +29,10 @@ public @interface CronapiMetaData {
   String[] params() default "";
   
   String wizard() default "";
+
+  String help() default "";
+
+  String helpTemplate() default "";
   
   boolean displayInline() default false;
   

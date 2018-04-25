@@ -1,5 +1,6 @@
 package cronapi.io;
 
+import cronapi.i18n.Messages;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -26,7 +27,7 @@ import cronapi.util.Callback;
  *
  */
 
-@CronapiMetaData(category = CategoryType.IO, categoryTags = { "Arquivo", "File" })
+@CronapiMetaData(category = CategoryType.IO, categoryTags = { "Arquivo", "File" }, helpTemplate = "{{addressOfTheServerBlockDocumentation}}")
 public class Operations {
 
 	private static String APP_FOLDER;
