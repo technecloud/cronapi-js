@@ -757,7 +757,10 @@ public class Utils {
         params.add(result.getObjectAsList().getFirst().getField("value"));
         paramBlockly++;
       }
-      else if (paramObj.get("fieldValue").isJsonPrimitive() && paramObj.get("fieldValue").getAsString().trim().length()  > 0) {
+      else if (paramObj.get("fieldValue").isJsonPrimitive() 
+           && paramObj.get("fieldValue").getAsString().trim().length()  > 0
+           && !paramObj.get("fieldValue").getAsString().trim().startsWith("{{")
+           && !paramObj.get("fieldValue").getAsString().trim().endsWith("}}")) {
         params.add(Var.valueOf(paramObj.get("fieldValue").getAsString()));
         paramBlockly++;
       }

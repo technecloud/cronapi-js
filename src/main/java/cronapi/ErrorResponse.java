@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import cronapi.i18n.AppMessages;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 
@@ -26,6 +27,16 @@ public class ErrorResponse {
   private String method;
   
   private String stackTrace;
+  
+  private static final String PRIMARY_KEY = "primaryKey";
+  private static final String PRIMARY_KEY_ERROR = "primaryKeyError";
+  private static final String FOREIGN_KEY = "foreignKey";
+  private static final String FOREIGN_KEY_ERROR = "foreignKeyError";
+  
+  
+  
+  
+  private static final String ERROR_HANDLES = "errorHandles";
   
   static {
     IGNORED.add("java.lang.reflect.InvocationTargetException");
@@ -55,32 +66,32 @@ public class ErrorResponse {
   }
   
   private static String heandleDatabaseException(String message, String method) {
-    for(JsonElement elem : getDataBaseJSON().getAsJsonArray("primaryKeyError")) {
+    for(JsonElement elem : getDataBaseJSON().getAsJsonArray(PRIMARY_KEY_ERROR)) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
         JsonObject obj = RestClient.getRestClient().getQuery();
-        if(obj != null && obj.get("errorHandles") != null && !obj.get("errorHandles").isJsonNull()) {
-          obj = obj.get("errorHandles").getAsJsonObject();
+        if(obj != null && obj.get(ERROR_HANDLES) != null && !obj.get(ERROR_HANDLES).isJsonNull()) {
+          obj = obj.get(ERROR_HANDLES).getAsJsonObject();
         }
-        if(obj != null && obj.get("primaryKey") != null && !obj.get("primaryKey").isJsonNull()) {
-          return Messages.format(obj.get("primaryKey").getAsString(), Messages.getString("error" + method + "Type"));
+        if(obj != null && obj.get(PRIMARY_KEY) != null && !obj.get(PRIMARY_KEY).isJsonNull()) {
+          return Messages.format(AppMessages.getString(obj.get(PRIMARY_KEY).getAsString().replace("{{", "").replace("}}", "")), AppMessages.getString("error" + method + "Type"));
         }
         else {
-          return Messages.format(Messages.getString("primaryKeyError"), Messages.getString("error" + method + "Type"));
+          return Messages.format(Messages.getString(PRIMARY_KEY_ERROR), Messages.getString("error" + method + "Type"));
         }
       }
     }
     
-    for(JsonElement elem : getDataBaseJSON().getAsJsonArray("foreignKeyError")) {
+    for(JsonElement elem : getDataBaseJSON().getAsJsonArray(FOREIGN_KEY_ERROR)) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
         JsonObject obj = RestClient.getRestClient().getQuery();
-        if(obj != null && obj.get("errorHandles") != null) {
-          obj = obj.get("errorHandles").getAsJsonObject();
+        if(obj != null && obj.get(ERROR_HANDLES) != null) {
+          obj = obj.get(ERROR_HANDLES).getAsJsonObject();
         }
-        if(obj != null && obj.get("foreignKey") != null && !obj.get("foreignKey").isJsonNull()) {
-          return Messages.format(obj.get("foreignKey").getAsString(), Messages.getString("error" + method + "Type"));
+        if(obj != null && obj.get(FOREIGN_KEY) != null && !obj.get(FOREIGN_KEY).isJsonNull()) {
+          return Messages.format(obj.get(FOREIGN_KEY).getAsString(), Messages.getString("error" + method + "Type"));
         }
         else {
-          return Messages.format(Messages.getString("foreignKeyError"), Messages.getString("error" + method + "Type"));
+          return Messages.format(Messages.getString(FOREIGN_KEY_ERROR), Messages.getString("error" + method + "Type"));
         }
       }
     }
