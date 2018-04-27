@@ -2227,11 +2227,22 @@
     * @returns {ObjectType.OBJECT}
    */
    this.cronapi.object.getProperty = function(object, property) {
-     var split = property.split('.');
-     for (var i = 0; i < split.length; i++){ 
-       object = object[split[i]];
-     }
-     return object;
+	   
+	var splited = property.split('.');
+    if(splited.length > 1 ){
+    var recursiva = function(object, params , idx) {
+       if (!idx) idx = 0;
+       if(object[params[idx]] === undefined)
+       object[params[idx]] = {};
+       idx++;
+       if (idx < params.length)
+         return recursiva(object[params[idx -1]], params , idx);
+    	else return object[params[idx-1]];
+    };
+    return recursiva(object , splited , 0);
+    }else{
+      return object[property];
+    }
    };
    
     /**
@@ -2245,11 +2256,21 @@
     * @returns {ObjectType.VOID}
    */
    this.cronapi.object.setProperty = function(object, property, value) {
-     var split = property.split('.');
-     for (var i = 0; i < split.length; i++){ 
-       object = object[split[i]];
-     }
-     object = value;
+	var splited = property.split('.');
+    if(splited.length > 1 ){
+    var recursiva = function(object, params,value , idx) {
+       if (!idx) idx = 0;
+       if(object[params[idx]] === undefined)
+       object[params[idx]] = {};
+       idx++;
+       if (idx < params.length)
+         recursiva(object[params[idx -1]], params, value , idx);
+    	else object[params[idx-1]] = value;
+    };
+    recursiva(object , splited , value, 0);
+    }else{
+      object[property] = value;
+    }
    };
    
 	/**
