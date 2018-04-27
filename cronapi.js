@@ -585,7 +585,7 @@
         if (field.indexOf('vars.') > -1)
           return eval('this.'+field);
         else
-          return eval(field);
+          return this[field];
       }
       return '';
     }
