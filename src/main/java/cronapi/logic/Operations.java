@@ -21,7 +21,7 @@ public class Operations {
 	public static final Var isNullOrEmpty(@ParamMetaData(type = ObjectType.OBJECT, description = "{{parameter}}") Var var)
 			throws Exception {
 		return (var.equals(Var.VAR_NULL) || var.getObjectAsString() == ""
-				|| (var.getType().equals(Var.Type.LIST) && var.getObjectAsList().isEmpty())) ? Var.VAR_TRUE
+				|| var.getObjectAsList().isEmpty()) ? Var.VAR_TRUE
 						: Var.VAR_FALSE;
 	}
 
