@@ -316,7 +316,7 @@
 	"executeSql": "Executar Comando SQL",
 	"executeSqlDescription": "Função para executar comando SQL.",
 	"text": "Texto",
-	"array": "Lista de parâmetros",
+	"arrayParams": "Lista de parâmetros",
 	"downloadFileName": "Iniciar download de arquivo na URL",
 	"downloadFileDescription": "Inicia o download de um arquivo de uma url",
 	"downloadFileParam0": "URL: Url para download",
@@ -377,10 +377,16 @@
 	"isShownIonicModallDesc":"Função que retorna se o modal é mostrado",
 	"createObject":"Criar objeto",
 	"createObjectDescription":"Função que cria um objeto a partir de um texto",
-	"string":"texto: texto em JSON à ser convertido",
+	"string":"Texto",
 	"true":"Verdadeiro",
 	"false":"Falso",
 	"refreshDatasource":"Atualizar fonte de dados",
 	"refreshDatasourceDescription":"Função que atualiza uma fonte de dados, mantendo ou não os filtros",
-	"keepFilters":"Manter filtro(s)? : Caso verdadeiro, mantém os filtros existentes na fonte de dados"
+	"keepFilters":"Manter filtro(s)? : Caso verdadeiro, mantém os filtros existentes na fonte de dados",
+	"typeOf":"É do tipo? ",
+	"typeOfDescription":"Função que verifica se uma variável é de determinado tipo",
+	"number":"Número",
+	"undefined" : "Não definido",
+	"function":"Função",
+	"array":"Lista"
 }

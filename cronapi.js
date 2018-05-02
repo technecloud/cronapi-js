@@ -1840,6 +1840,21 @@
    this.cronapi.logic.isNullOrEmpty = function(/** @type {ObjectType.OBJECT} @description */ value) {
      return (this.cronapi.logic.isNull(value) || this.cronapi.logic.isEmpty(value));
    }
+   
+   
+   /**
+   * @type function
+    * @name {{}}
+    * @nameTags typeOf
+    * @description {{typeOfDescription}}
+    * @returns {ObjectType.OBJECT}
+    * @displayInline true
+   */
+   this.cronapi.logic.typeOf = function(/** @type {ObjectType.OBJECT} @description {{value}} */ value, /** @type {ObjectType.OBJECT} @description {{typeOf}} @blockType util_dropdown @keys string|number|undefined|object|function|array  @values {{string}}|{{number}}|{{undefined}}|{{object}}|{{function}}|{{array}}  */ type) {
+     if(type==='array') return Array.isArray(value);
+     if(type==='object' && Array.isArray(value)) return false;
+     return (typeof(value) === type);
+   }
   
   this.cronapi.i18n = {};
 
@@ -2639,7 +2654,7 @@
       * @name {{executeSql}}
       * @nameTags executesql
       * @param {ObjectType.STRING} text {{text}}
-      * @param {ObjectType.OBJECT} array {{array}}
+      * @param {ObjectType.OBJECT} array {{arrayParams}}
       * @param {ObjectType.STATEMENTSENDER} success {{success}}
       * @param {ObjectType.STATEMENTSENDER} error {{error}}
       * @description {{executeSqlDescription}}
