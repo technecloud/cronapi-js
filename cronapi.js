@@ -413,26 +413,7 @@
    * @multilayer true
    */
   this.cronapi.util.downloadFile = function(url) {
-
-    var id = 'IFRAME' + parseInt((Math.random() * 9999999));
-    var iframe;
-    if(document.all) {
-      iframe = window.document.createElement("<iframe name='" + id + "' id='" + id + "'>");
-    }
-    else {
-      iframe = window.document.createElement("iframe");
-      iframe.name = id;
-      iframe.id = id;
-    }
-    iframe.frameBorder = 0;
-    iframe.setAttribute("frameborder", "no");
-    iframe.setAttribute("border", 0);
-    iframe.setAttribute("marginwidth", 0);
-    iframe.setAttribute("marginheight", 0);
-    iframe.width = 0;
-    iframe.height = 0;
-    iframe.src = url;
-    window.document.body.appendChild(iframe);
+	this.cronapi.screen.openUrl(url, '_blank' ,0,0 );
   };
   
   /**
