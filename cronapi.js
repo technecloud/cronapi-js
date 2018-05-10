@@ -413,7 +413,11 @@
    * @multilayer true
    */
   this.cronapi.util.downloadFile = function(url) {
-	this.cronapi.screen.openUrl(url, '_blank' ,0,0 );
+	if(window.hostApp){
+		this.cronapi.screen.openUrl(window.hostApp + url, '_blank' ,0,0 );
+	}else{
+		this.cronapi.screen.openUrl(url, '_blank' ,0,0 );
+	};
   };
   
   /**
