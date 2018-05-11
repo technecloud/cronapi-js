@@ -37,7 +37,7 @@ public class OdataConfiguration implements ServletContextInitializer, EmbeddedSe
 
         String namespace = pui.getPersistenceUnitName();
 
-        OdataServlet servlet = new OdataServlet(new JpaOdataServiceFactory(Persistence.createEntityManagerFactory(namespace), namespace));
+        OdataServlet servlet = new OdataServlet(Persistence.createEntityManagerFactory(namespace), namespace);
 
         ServletRegistration.Dynamic serviceServlet = servletContext.addServlet("ServiceOData" + namespace, servlet);
 
