@@ -139,18 +139,7 @@ public class Operations {
 					"{{XMLDocumentToStringParam0}}" }, paramsType = {
 							ObjectType.OBJECT }, returnType = ObjectType.STRING)
 	public final static Var XMLDocumentToString(Var document) {
-		if (!document.equals(Var.VAR_NULL)) {
-			if (document.getObject() instanceof Document) {
-				Document documentCasted = (Document) document.getObject();
-				XMLOutputter xmlOut = new XMLOutputter();
-				return new Var(xmlOut.outputString(documentCasted));
-			} else if (document.getObject() instanceof Element) {
-				Element documentCasted = (Element) document.getObject();
-				XMLOutputter xmlOut = new XMLOutputter();
-				return new Var(xmlOut.outputString(documentCasted.getDocument()));
-			}
-		}
-		return Var.VAR_NULL;
+		return Var.valueOf(document.getObjectAsString());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLElementToStringName}}", nameTags = {
