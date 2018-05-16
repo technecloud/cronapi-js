@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
-public class OdataConfiguration implements ServletContextInitializer, EmbeddedServletContainerCustomizer {
+public class ODataConfiguration implements ServletContextInitializer, EmbeddedServletContainerCustomizer {
 
-  public static final String SERVICE_URL = "/api/cronapi/odata/v2/";
+  public static final String SERVICE_URL = "/api/cronapi/odata/v4/";
 
   @Override
   public void onStartup(ServletContext servletContext) throws ServletException {
@@ -37,7 +37,7 @@ public class OdataConfiguration implements ServletContextInitializer, EmbeddedSe
 
         String namespace = pui.getPersistenceUnitName();
 
-        OdataServlet servlet = new OdataServlet(Persistence.createEntityManagerFactory(namespace), namespace);
+        ODataServletV4 servlet = new ODataServletV4(Persistence.createEntityManagerFactory(namespace), namespace);
 
         ServletRegistration.Dynamic serviceServlet = servletContext.addServlet("ServiceOData" + namespace, servlet);
 
