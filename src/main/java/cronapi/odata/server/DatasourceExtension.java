@@ -1,15 +1,18 @@
 package cronapi.odata.server;
 
-import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
-import org.apache.olingo.odata2.api.edm.FullQualifiedName;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import cronapi.QueryManager;
 import org.apache.olingo.odata2.api.edm.provider.*;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
+import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmMapping;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class DatasourceExtension implements JPAEdmExtension {
   @Override
@@ -20,65 +23,28 @@ public class DatasourceExtension implements JPAEdmExtension {
   @Override
   public void extendJPAEdmSchema(JPAEdmSchemaView view) {
     Schema edmSchema = view.getEdmSchema();
-  /*  List<ComplexType> types = new ArrayList<>();
-    types.add(getComplexType());
-    edmSchema.setComplexTypes(types);
 
+    for (EntityType entityType : edmSchema.getEntityTypes()) {
+      JPAEdmMapping mapping = (JPAEdmMapping) entityType.getMapping();
+      if (mapping.getODataJPATombstoneEntityListener() == null) {
+        mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
+      }
+    }
 
-    EntityType old = edmSchema.getEntityTypes().get(0);
-
-
-    EntityType type = new EntityType();
-    type.setName("Thiago");
-    type.setMapping(old.getMapping());
-    type.setKey(old.getKey());
-    type.setProperties(old.getProperties());
-    type.setAbstract(old.isAbstract());
-    type.setAnnotationAttributes(old.getAnnotationAttributes());
-    type.setAnnotationElements(old.getAnnotationElements());
-    type.setBaseType(old.getBaseType());
-    type.setDocumentation(old.getDocumentation());
-    type.setCustomizableFeedMappings(old.getCustomizableFeedMappings());
-    type.setNavigationProperties(old.getNavigationProperties());
-    type.setHasStream(old.isHasStream());*/
-
-//    edmSchema.getEntityTypes().add(type);
-
-  /*  EntitySet oldSet = edmSchema.getEntityContainers().get(0).getEntitySets().get(0);
-
-    EntitySet set = new EntitySet();
-    set.setName("jose");
-    set.setEntityType(oldSet.getEntityType());
-    set.setMapping(oldSet.getMapping());
-    set.setAnnotationAttributes(oldSet.getAnnotationAttributes());
-    set.setAnnotationElements(oldSet.getAnnotationElements());
-
-    AssociationSet oldAss = edmSchema.getEntityContainers().get(0).getAssociationSets().get(0);
-
-    AssociationSet associationSet = new AssociationSet();
-    associationSet.setName("TESTTE");
-    associationSet.setAnnotationAttributes(oldAss.getAnnotationAttributes());
-    associationSet.setAnnotationElements(oldAss.getAnnotationElements());
-    associationSet.setAssociation(oldAss.getAssociation());
-    AssociationSetEnd xy = new AssociationSetEnd();
-    xy.setEntitySet("jose");
-    xy.setRole(oldAss.getEnd1().getRole());
-    associationSet.setEnd1(xy);
-    associationSet.setEnd2(oldAss.getEnd2());
-
-
-
-    edmSchema.getEntityContainers().get(0).getEntitySets().add(set);
-   edmSchema.getEntityContainers().get(0).getAssociationSets().add(associationSet);*/
-
-
-
-
-
-   // edmSchema.getComplexTypes().add(getComplexType());
-
-    createDataSource(edmSchema, "thiago", "Company");
-
+    JsonObject queries = QueryManager.getJSON();
+    for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
+      JsonObject customObj = entry.getValue().getAsJsonObject();
+      if (!QueryManager.isNull(customObj.get("entityFullName"))) {
+        String clazz = customObj.get("entityFullName").getAsString();
+        if (clazz.startsWith(edmSchema.getNamespace())) {
+          try {
+            createDataSource(edmSchema, entry.getKey(), customObj.get("entitySimpleName").getAsString());
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
   }
 
   private void createDataSource(Schema edmSchema, String id, String entity) {
@@ -105,11 +71,11 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       List<AssociationSet> addAssociationSet = new LinkedList<>();
 
-      for ( AssociationSet association: container.getAssociationSets()) {
+      for (AssociationSet association : container.getAssociationSets()) {
         if (association.getEnd1().getRole().equals(entity)) {
 
           AssociationSet newAssociation = new AssociationSet();
-          newAssociation.setName(association.getName()+"_"+id);
+          newAssociation.setName(association.getName() + "_" + id);
           newAssociation.setAnnotationAttributes(association.getAnnotationAttributes());
           newAssociation.setAnnotationElements(association.getAnnotationElements());
           newAssociation.setAssociation(association.getAssociation());
@@ -125,37 +91,45 @@ public class DatasourceExtension implements JPAEdmExtension {
         }
       }
 
-      for (AssociationSet association: addAssociationSet) {
+      for (AssociationSet association : addAssociationSet) {
         container.getAssociationSets().add(association);
       }
     }
+
+  /*  EntityType foundET = null;
+
+    for (EntityType entityType : edmSchema.getEntityTypes()) {
+      if (entityType.getName().equals(entity)) {
+        foundET = entityType;
+        break;
+      }
+    }
+
+    EntityType type = new EntityType();
+    type.setHasStream(foundET.isHasStream());
+    type.setNavigationProperties(foundET.getNavigationProperties());
+    type.setCustomizableFeedMappings(foundET.getCustomizableFeedMappings());
+    type.setDocumentation(foundET.getDocumentation());
+    type.setBaseType(foundET.getBaseType());
+    type.setAnnotationElements(foundET.getAnnotationElements());
+    type.setProperties(foundET.getProperties());
+
+    Key key = new Key();
+    List<PropertyRef> props = new ArrayList<>();
+    PropertyRef p = new PropertyRef();
+    p.setName("teste");
+    props.add(p);
+    type.setKey(key);
+
+    type.setMapping(foundET.getMapping());
+    type.setAnnotationAttributes(foundET.getAnnotationAttributes());
+    type.setName(id);
+
+    edmSchema.getEntityTypes().add(type);*/
   }
 
   @Override
   public InputStream getJPAEdmMappingModelStream() {
     return null;
-  }
-
-
-  private ComplexType getComplexType() {
-    ComplexType complexType = new ComplexType();
-
-    List<Property> properties = new ArrayList<>();
-    SimpleProperty property = new SimpleProperty();
-
-    property.setName("Amount");
-    property.setType(EdmSimpleTypeKind.Double);
-    properties.add(property);
-
-    property = new SimpleProperty();
-    property.setName("Currency");
-    property.setType(EdmSimpleTypeKind.String);
-    properties.add(property);
-
-    complexType.setName("Object");
-    complexType.setProperties(properties);
-
-    return complexType;
-
   }
 }

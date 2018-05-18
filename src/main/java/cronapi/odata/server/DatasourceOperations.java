@@ -24,12 +24,12 @@ public class DatasourceOperations {
     em = Persistence.createEntityManagerFactory("app").createEntityManager();
   }
 
-//  @SuppressWarnings("unchecked")
-//  @EdmFunctionImport(name = "FindAllSalesOrders", returnType = @EdmFunctionImport.ReturnType(type = EdmFunctionImport.ReturnType.Type.COMPLEX, isCollection = false))
-  public Object findAllSalesOrders() {
+ // @SuppressWarnings("unchecked")
+  //@EdmFunctionImport(name = "FindAllSalesOrders", returnType = @EdmFunctionImport.ReturnType(type = EdmFunctionImport.ReturnType.Type.ENTITY, isCollection = false))
+  public int findAllSalesOrders() {
 
 
-    return null;
+    return 0;
   }
 
 }

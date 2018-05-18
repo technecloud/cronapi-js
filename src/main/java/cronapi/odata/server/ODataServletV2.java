@@ -9,13 +9,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-class OdataServlet extends ODataServlet {
+class ODataServletV2 extends ODataServlet {
 
   private static final long serialVersionUID = 1L;
   private EntityManagerFactory entityManagerFactory;
   private String namespace;
 
-  OdataServlet(EntityManagerFactory entityManagerFactory, String namespace) {
+  ODataServletV2(EntityManagerFactory entityManagerFactory, String namespace) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
   }

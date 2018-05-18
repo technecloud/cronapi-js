@@ -43,7 +43,7 @@ public class QueryManager {
     }
   }
 
-  private static JsonObject getJSON() {
+  public static JsonObject getJSON() {
     if (Operations.IS_DEBUG) {
       return loadJSON();
     } else {
@@ -146,7 +146,7 @@ public class QueryManager {
     }
   }
 
-  private static boolean isNull(JsonElement value) {
+  public static boolean isNull(JsonElement value) {
     return value == null || value.isJsonNull();
   }
 
