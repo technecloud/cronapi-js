@@ -3,18 +3,45 @@ package cronapi.odata.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
-import org.apache.olingo.odata2.api.edm.provider.*;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.NotFoundException;
+import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
+import org.apache.olingo.odata2.api.edm.FullQualifiedName;
+import org.apache.olingo.odata2.api.edm.provider.EntitySet;
+import org.apache.olingo.odata2.api.edm.provider.EntityType;
+import org.apache.olingo.odata2.api.edm.provider.Key;
+import org.apache.olingo.odata2.api.edm.provider.Mapping;
+import org.apache.olingo.odata2.api.edm.provider.Property;
+import org.apache.olingo.odata2.api.edm.provider.PropertyRef;
+import org.apache.olingo.odata2.api.edm.provider.Schema;
+import org.apache.olingo.odata2.api.edm.provider.SimpleProperty;
+import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmMapping;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
+import org.eclipse.persistence.internal.queries.ReportItem;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
+import org.eclipse.persistence.queries.ReportQuery;
 
 public class DatasourceExtension implements JPAEdmExtension {
+
+  private final ODataJPAContext context;
+
+  public DatasourceExtension(ODataJPAContext context) {
+    this.context = context;
+  }
+
   @Override
   public void extendWithOperation(JPAEdmSchemaView jpaEdmSchemaView) {
     jpaEdmSchemaView.registerOperations(DatasourceOperations.class, null);
@@ -38,7 +65,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         String clazz = customObj.get("entityFullName").getAsString();
         if (clazz.startsWith(edmSchema.getNamespace())) {
           try {
-            createDataSource(edmSchema, entry.getKey(), customObj.get("entitySimpleName").getAsString());
+            createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString());
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -47,85 +74,111 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
+  private static CtMethod generateGetter(CtClass declaringClass, String fieldName, Class fieldClass)
+      throws CannotCompileException {
+
+    String getterName = "get" + fieldName.substring(0, 1).toUpperCase()
+        + fieldName.substring(1);
+
+    String sb = "public " + getClassName(fieldClass) + " "
+        + getterName + "(){" + "return this."
+        + fieldName + ";" + "}";
+    return CtMethod.make(sb, declaringClass);
+  }
+
+  private static String getClassName(Class clazz)
+  {
+    String toReturn = clazz.getName();
+    if (toReturn.startsWith("["))
+      toReturn = clazz.getSimpleName();
+
+    return toReturn;
+  }
+
+  private static CtMethod generateSetter(CtClass declaringClass, String fieldName, Class fieldClass)
+      throws CannotCompileException {
+
+    String setterName = "set" + fieldName.substring(0, 1).toUpperCase()
+        + fieldName.substring(1);
+
+    String sb = "public void " + setterName + "("
+        + getClassName(fieldClass) + " " + fieldName
+        + ")" + "{" + "this." + fieldName
+        + "=" + fieldName + ";" + "}";
+    return CtMethod.make(sb, declaringClass);
+  }
+
+  private static EdmSimpleTypeKind toEdmSimpleTypeKind(Class fieldClass)
+  {
+    return EdmSimpleTypeKind.String;
+  }
+
   private void createDataSource(Schema edmSchema, String id, String entity) {
+    String edmNamespace = edmSchema.getNamespace();
+    EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
+    JsonObject queryJson = QueryManager.getQuery(id);
+    String jpql = QueryManager.getJPQL(queryJson);
+    AbstractSession session = em.getActiveSessionIfExists();
 
-    for (EntityContainer container : edmSchema.getEntityContainers()) {
+    HermesParser parser = new HermesParser();
+    ReportQuery reportQuery = (ReportQuery) parser.buildQuery(jpql, session);
+    reportQuery.prepareInternal(session);
 
-      EntitySet foundES = null;
+    try {
+      Class.forName(edmNamespace + "." + id);
+    } catch(ClassNotFoundException e) {
+      ClassPool pool = ClassPool.getDefault();
+      CtClass cc = pool.makeClass(edmNamespace + "." + id);
+      try {
+        cc.addInterface(pool.get(Serializable.class.getName()));
 
-      for (EntitySet entitySet : container.getEntitySets()) {
-        if (entitySet.getEntityType().getName().equals(entity)) {
-          foundES = entitySet;
-          break;
+        for (ReportItem item : reportQuery.getItems()) {
+          String typeName = item.getMapping().getField().getTypeName();
+          Class type = item.getMapping().getField().getType();
+          cc.addField(new CtField(pool.get(typeName), item.getName(), cc));
+          cc.addMethod(generateGetter(cc, item.getName(), type));
+          cc.addMethod(generateSetter(cc, item.getName(), type));
         }
+
+        cc.toClass(this.getClass().getClassLoader(), this.getClass().getProtectionDomain());
+      } catch (CannotCompileException | NotFoundException e1) {
+        e1.printStackTrace();
       }
-
-      EntitySet set = new EntitySet();
-      set.setName(id);
-      set.setEntityType(foundES.getEntityType());
-      set.setMapping(foundES.getMapping());
-      set.setAnnotationAttributes(foundES.getAnnotationAttributes());
-      set.setAnnotationElements(foundES.getAnnotationElements());
-
-      container.getEntitySets().add(set);
-
-      List<AssociationSet> addAssociationSet = new LinkedList<>();
-
-      for (AssociationSet association : container.getAssociationSets()) {
-        if (association.getEnd1().getRole().equals(entity)) {
-
-          AssociationSet newAssociation = new AssociationSet();
-          newAssociation.setName(association.getName() + "_" + id);
-          newAssociation.setAnnotationAttributes(association.getAnnotationAttributes());
-          newAssociation.setAnnotationElements(association.getAnnotationElements());
-          newAssociation.setAssociation(association.getAssociation());
-
-          AssociationSetEnd end = new AssociationSetEnd();
-          end.setEntitySet(id);
-          end.setRole(association.getEnd1().getRole());
-
-          newAssociation.setEnd1(end);
-          newAssociation.setEnd2(association.getEnd2());
-
-          addAssociationSet.add(newAssociation);
-        }
-      }
-
-      for (AssociationSet association : addAssociationSet) {
-        container.getAssociationSets().add(association);
-      }
+      //Class.forName("MyClass");
     }
 
-  /*  EntityType foundET = null;
+    EntitySet set = new EntitySet();
+    set.setName(id);
+    set.setEntityType(new FullQualifiedName(edmNamespace, id));
 
-    for (EntityType entityType : edmSchema.getEntityTypes()) {
-      if (entityType.getName().equals(entity)) {
-        foundET = entityType;
-        break;
+    edmSchema.getEntityContainers().get(0).getEntitySets().add(set);
+
+    Key key = null;
+    List<Property> properties = new ArrayList<>();
+    for (ReportItem item : reportQuery.getItems()) {
+      SimpleProperty property = new SimpleProperty();
+      property.setType(toEdmSimpleTypeKind(item.getMapping().getField().getType()));
+      property.setName(item.getName());
+      properties.add(property);
+
+      if (key == null)
+      {
+        key = new Key();
+        PropertyRef propertyRef = new PropertyRef();
+        propertyRef.setName(item.getName());
+        List<PropertyRef> propertyRefList = new ArrayList<>();
+        propertyRefList.add(propertyRef);
+        key.setKeys(propertyRefList);
       }
     }
 
     EntityType type = new EntityType();
-    type.setHasStream(foundET.isHasStream());
-    type.setNavigationProperties(foundET.getNavigationProperties());
-    type.setCustomizableFeedMappings(foundET.getCustomizableFeedMappings());
-    type.setDocumentation(foundET.getDocumentation());
-    type.setBaseType(foundET.getBaseType());
-    type.setAnnotationElements(foundET.getAnnotationElements());
-    type.setProperties(foundET.getProperties());
 
-    Key key = new Key();
-    List<PropertyRef> props = new ArrayList<>();
-    PropertyRef p = new PropertyRef();
-    p.setName("teste");
-    props.add(p);
+    type.setProperties(properties);
     type.setKey(key);
-
-    type.setMapping(foundET.getMapping());
-    type.setAnnotationAttributes(foundET.getAnnotationAttributes());
     type.setName(id);
 
-    edmSchema.getEntityTypes().add(type);*/
+    edmSchema.getEntityTypes().add(type);
   }
 
   @Override
