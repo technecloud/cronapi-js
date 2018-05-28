@@ -1,6 +1,7 @@
 package cronapi.serialization;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,7 +13,7 @@ public class CronappVirtualBeanPropertyWriter extends BeanPropertyWriter {
   private Object value;
   
   public CronappVirtualBeanPropertyWriter(BeanPropertyWriter base, String name, Object value) {
-    super(base, new PropertyName(name));
+    super(base, new SerializedString(name));
     this.value = value;
   }
   

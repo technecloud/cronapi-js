@@ -13,9 +13,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.reflect.TypeToken;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
+import cronapi.json.JsonArrayWrapper;
 import cronapi.json.Operations;
 import cronapi.serialization.CronappModule;
 import cronapi.util.StorageService;
@@ -41,10 +43,23 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
+@JsonAdapter(VarSerializer.class)
 public class Var implements Comparable<Var>, JsonSerializable {
 
-  public static final Pattern ISO_PATTERN = Pattern.compile(
+  public static class JsonAdapter {
+
+  }
+
+  public static void main(String[] args) {
+    Var var = new Var("Teste");
+    System.out.print(new Gson().toJson(var));
+  }
+
+    public static final Pattern ISO_PATTERN = Pattern.compile(
       "(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))");
 
   ;
@@ -627,14 +642,27 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * the form {x,y,z,...}
    */
   public String getObjectAsString() {
-    if (getObject() instanceof InputStream) {
+    if (isNull())
+      return "";
+
+    Object object = getObject();
+    if (object instanceof InputStream) {
       try {
         return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+    } else if (object instanceof Document) {
+      Document document = (Document) object;
+      XMLOutputter outputter = new XMLOutputter();
+      return outputter.outputString(document);
+    } else if (object instanceof Element) {
+      Element element = (Element) object;
+      XMLOutputter outputter = new XMLOutputter();
+      return outputter.outputString(element);
     }
-    return this.toString();
+
+    return this.getObjectAsJson().toString();
   }
 
   private LinkedList<Var> getSingleList(Object o) {
@@ -666,6 +694,13 @@ public class Var implements Comparable<Var>, JsonSerializable {
         myList.add(Var.valueOf(obj));
       }
 
+      return myList;
+    } else if (getObject() instanceof JsonArray) {
+      LinkedList<Var> myList = new LinkedList<>();
+      for (JsonElement element : (JsonArray) getObject())
+      {
+        myList.add(Var.valueOf(element));
+      }
       return myList;
     } else if (getObject() instanceof List) {
       return (LinkedList<Var>) getObject();

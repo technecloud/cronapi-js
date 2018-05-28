@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import cronapi.serialization.CronappModule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.MultipartConfigFactory;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ConversionServiceFactoryBean;
@@ -75,22 +75,17 @@ public class CronapiConfigurator {
     builder.modulesToInstall(new CronappModule());
     return builder;
   }
-  
-  @Bean
-  public StringToVarConverter stringToVarConverter() {
-    return new StringToVarConverter();
-  }
-  
-  @Bean(name = "conversionService")
-  public ConversionService getConversionService() {
-    ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
-    Set<Converter> converters = new HashSet<Converter>();
-    
-    converters.add(stringToVarConverter());
-    
-    bean.setConverters(converters);
-    return bean.getObject();
-  }
+
+//  @Bean(name = "conversionService")
+//  public ConversionService getConversionService() {
+//    ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
+//    Set<Converter> converters = new HashSet<Converter>();
+//
+//    //converters.add(new StringToVarConverter());
+//
+//    bean.setConverters(converters);
+//    return bean.getObject();
+//  }
 
   @Bean
   public MultipartConfigElement multipartConfigElement() {
