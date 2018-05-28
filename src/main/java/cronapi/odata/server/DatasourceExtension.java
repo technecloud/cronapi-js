@@ -196,7 +196,10 @@ public class DatasourceExtension implements JPAEdmExtension {
 
         ListIterable<Expression> children = ((SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause()).getSelectExpression().children();
         ListIterator<Expression> expressions = children.iterator();
-        Key key = null;
+        Key key = new Key();
+        List<PropertyRef> propertyRefList = new ArrayList<>();
+        key.setKeys(propertyRefList);
+
         List<Property> properties = new ArrayList<>();
         for (ReportItem item : reportQuery.getItems()) {
           Expression expression = expressions.next();
@@ -225,14 +228,9 @@ public class DatasourceExtension implements JPAEdmExtension {
 
           properties.add(property);
 
-          if (key == null) {
-            key = new Key();
-            PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(item.getName());
-            List<PropertyRef> propertyRefList = new ArrayList<>();
-            propertyRefList.add(propertyRef);
-            key.setKeys(propertyRefList);
-          }
+          PropertyRef propertyRef = new PropertyRef();
+          propertyRef.setName(item.getName());
+          propertyRefList.add(propertyRef);
         }
 
         EntityType type = new EntityType();
@@ -242,7 +240,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         type.setName(id);
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
-        mapping.setObject(jpqlExpression);
+        mapping.setObject("doNotEdit");
         type.setMapping(mapping);
 
         edmSchema.getEntityTypes().add(type);

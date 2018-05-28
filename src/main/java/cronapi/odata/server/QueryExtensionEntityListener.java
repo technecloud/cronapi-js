@@ -4,9 +4,7 @@ import com.google.gson.JsonObject;
 import cronapi.CronapiFilter;
 import cronapi.QueryManager;
 import org.apache.olingo.odata2.api.uri.UriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntityCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetUriInfo;
+import org.apache.olingo.odata2.api.uri.info.*;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
@@ -27,7 +25,7 @@ import java.util.Map;
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
 
-  public Query getBaseQuery(UriInfo uriInfo, EntityManager em, boolean count) throws ODataJPARuntimeException {
+  public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
     HttpServletRequest request = CronapiFilter.REQUEST.get();
     try {
@@ -41,7 +39,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       if (customQuery != null) {
 
-        String whereExpression = "";
+        String whereExpression = null;
 
         Query query = null;
 
@@ -97,22 +95,24 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           orderBy = "ORDER BY " + orderExpression;
         }
 
-        if (uriInfo.getFilter() != null) {
 
-          ODataExpressionParser.reInitializePositionalParameters();
+        ODataExpressionParser.reInitializePositionalParameters();
+        Map<String, Map<Integer, Object>> parameterizedExpressionMap =
+            new HashMap<String, Map<Integer, Object>>();
+
+        if (uriInfo.getFilter() != null) {
           whereExpression = ODataExpressionParser.parseToJPAWhereExpression(
               uriInfo.getFilter(), alias);
-
-          Map<String, Map<Integer, Object>> parameterizedExpressionMap =
-              new HashMap<String, Map<Integer, Object>>();
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
           ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
           ODataExpressionParser.reInitializePositionalParameters();
+        }
 
-          String where = null;
-          String having = null;
-          String groupBy = null;
+        String where = null;
+        String having = null;
+        String groupBy = null;
 
+        if (whereExpression != null) {
 
           if (selectStatement.hasWhereClause()) {
             where = ((WhereClause) selectStatement.getWhereClause()).getConditionalExpression().toString();
@@ -145,40 +145,43 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           if (groupBy != null) {
             jpqlStatement += " " + groupBy;
           }
+        }
 
-          if (orderBy != null) {
-            jpqlStatement += " " + orderBy;
-          }
+        if (orderBy != null) {
+          jpqlStatement += " " + orderBy;
+        }
 
-          query = em.createQuery(jpqlStatement);
+        query = em.createQuery(jpqlStatement);
 
-          Map<String, Map<Integer, Object>> parameterizedMap = ODataParameterizedWhereExpressionUtil.
-              getParameterizedQueryMap();
-          if (parameterizedMap != null && parameterizedMap.size() > 0) {
-            for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
-              if (jpqlStatement.contains(parameterEntry.getKey())) {
-                Map<Integer, Object> positionalParameters = parameterEntry.getValue();
-                for (Map.Entry<Integer, Object> param : positionalParameters.entrySet()) {
-                  if (param.getValue() instanceof Calendar || param.getValue() instanceof Timestamp) {
-                    query.setParameter(param.getKey(), (Calendar) param.getValue(), TemporalType.TIMESTAMP);
-                  } else if (param.getValue() instanceof Time) {
-                    query.setParameter(param.getKey(), (Time) param.getValue(), TemporalType.TIME);
-                  } else {
-                    query.setParameter(param.getKey(), param.getValue());
-                  }
+        Map<String, Map<Integer, Object>> parameterizedMap = ODataParameterizedWhereExpressionUtil.
+            getParameterizedQueryMap();
+        if (parameterizedMap != null && parameterizedMap.size() > 0) {
+          for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
+            if (jpqlStatement.contains(parameterEntry.getKey())) {
+              Map<Integer, Object> positionalParameters = parameterEntry.getValue();
+              for (Map.Entry<Integer, Object> param : positionalParameters.entrySet()) {
+                if (param.getValue() instanceof Calendar || param.getValue() instanceof Timestamp) {
+                  query.setParameter(param.getKey(), (Calendar) param.getValue(), TemporalType.TIMESTAMP);
+                } else if (param.getValue() instanceof Time) {
+                  query.setParameter(param.getKey(), (Time) param.getValue(), TemporalType.TIME);
+                } else {
+                  query.setParameter(param.getKey(), param.getValue());
                 }
-                parameterizedMap.remove(parameterEntry.getKey());
-                ODataParameterizedWhereExpressionUtil.setJPQLStatement(null);
-                break;
               }
+              parameterizedMap.remove(parameterEntry.getKey());
+              ODataParameterizedWhereExpressionUtil.setJPQLStatement(null);
+              break;
             }
           }
-        } else {
+        }
+
+        // }
+      /*  } else {
           if (orderBy != null) {
             jpqlStatement += " " + orderBy;
           }
           query = em.createQuery(jpqlStatement);
-        }
+        }*/
 
         return query;
 
@@ -192,17 +195,22 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   @Override
   public Query getQuery(GetEntitySetUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
-    return this.getBaseQuery((UriInfo) uriInfo, em, false);
+    return this.getBaseQuery((UriInfo) uriInfo, em);
   }
 
   @Override
   public Query getQuery(GetEntityCountUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
-    return this.getBaseQuery((UriInfo) uriInfo, em, true);
+    return this.getBaseQuery((UriInfo) uriInfo, em);
   }
 
   @Override
   public Query getQuery(GetEntitySetCountUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
-    return this.getBaseQuery((UriInfo) uriInfo, em, true);
+    return this.getBaseQuery((UriInfo) uriInfo, em);
+  }
+
+  @Override
+  public Query getQuery(GetEntityUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
+    return this.getBaseQuery((UriInfo) uriInfo, em);
   }
 
   private void setField(Object obj, String name, Object value) {

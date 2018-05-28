@@ -23,7 +23,6 @@ public class JpaOdataServiceFactory extends ODataJPAServiceFactory {
     context.setEntityManagerFactory(entityManagerFactory);
     context.setPersistenceUnitName(namespace);
     context.setJPAEdmExtension((JPAEdmExtension) new DatasourceExtension(context));
-    context.getEntityManager();
     return context;
   }
 
