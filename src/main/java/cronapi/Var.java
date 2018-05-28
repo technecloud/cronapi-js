@@ -467,21 +467,20 @@ public class Var implements Comparable<Var>, JsonSerializable {
       if (_object instanceof JsonElement) {
         return (JsonElement) _object;
       } else {
-
         try {
-          String s = null;
-          if (_object instanceof String || _object instanceof InputStream) {
+          if (_object instanceof String) {
+            return new Gson().fromJson(_object.toString(), JsonElement.class);
+          } else if (_object instanceof InputStream) {
             return new Gson().fromJson(getObjectAsString(), JsonElement.class);
           } else {
             ObjectMapper mapper = new ObjectMapper();
-            s = mapper.writeValueAsString(_object);
+            String json = mapper.writeValueAsString(_object);
+            return new Gson().fromJson(json, JsonElement.class);
           }
-          return new Gson().fromJson(s, JsonElement.class);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }
-
     }
 
     return null;
@@ -660,6 +659,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
+    } else if (object instanceof String) {
+      return object.toString();
     }
 
     return this.getObjectAsJson().toString();
