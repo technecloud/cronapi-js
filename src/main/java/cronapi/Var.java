@@ -43,6 +43,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
 public class Var implements Comparable<Var>, JsonSerializable {
@@ -639,14 +642,27 @@ public class Var implements Comparable<Var>, JsonSerializable {
    * the form {x,y,z,...}
    */
   public String getObjectAsString() {
-    if (getObject() instanceof InputStream) {
+    if (isNull())
+      return "";
+
+    Object object = getObject();
+    if (object instanceof InputStream) {
       try {
         return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+    } else if (object instanceof Document) {
+      Document document = (Document) object;
+      XMLOutputter outputter = new XMLOutputter();
+      return outputter.outputString(document);
+    } else if (object instanceof Element) {
+      Element element = (Element) object;
+      XMLOutputter outputter = new XMLOutputter();
+      return outputter.outputString(element);
     }
-    return this.toString();
+
+    return this.getObjectAsJson().toString();
   }
 
   private LinkedList<Var> getSingleList(Object o) {
