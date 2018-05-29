@@ -7,7 +7,7 @@
   <artifactId>cronapi-java</artifactId>
   <packaging>jar</packaging>
   <name>cronapi-java</name>
-  <version>1.22.0-SNAPHSOT</version>
+  <version>1.22.0-SNAPSHOT</version>
   <description>Public Java library for CronApp's users</description>
   <url>https://github.com/technecloud/cronapi-java</url>
   <build>
