@@ -3,6 +3,9 @@ package cronapi;
 import cronapi.database.DataSourceFilter.DataSourceFilterItem;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,14 +14,21 @@ import com.google.gson.*;
 import cronapi.database.DataSourceFilter;
 import cronapi.database.JPQLConverter;
 import java.util.Map.Entry;
+
+import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.olingo.odata2.api.edm.EdmEntityType;
+import org.apache.olingo.odata2.api.edm.EdmProperty;
+import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.springframework.security.core.GrantedAuthority;
 
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
+import org.springframework.util.ReflectionUtils;
 
 import javax.json.Json;
+import javax.servlet.http.HttpServletRequest;
 
 public class QueryManager {
 
@@ -278,6 +288,153 @@ public class QueryManager {
     ignores.add(field);
   }
 
+  public static boolean isFieldAuthorized(Class clazzToCheck, String key, String method)
+      throws Exception {
+    RestClient client = RestClient.getRestClient();
+    if (client.getRequest() != null) {
+      if (clazzToCheck != null) {
+
+        Class clazz = clazzToCheck;
+        if (clazz != null) {
+          Field field = ReflectionUtils.findField(clazz, key);
+          if (field != null) {
+            Annotation security = field.getAnnotation(CronappSecurity.class);
+
+            if (security instanceof CronappSecurity) {
+              CronappSecurity cronappSecurity = (CronappSecurity) security;
+              try {
+                Method methodPermission = cronappSecurity.getClass().getMethod(method == null ? client.getMethod().toLowerCase() : method.toLowerCase());
+
+                if (methodPermission != null) {
+                  String value = (String) methodPermission.invoke(cronappSecurity);
+
+                  if (value != null && !value.isEmpty()) {
+                    boolean authorized = false;
+
+                    String[] authorities = value.trim().split(";");
+
+                    for (String role : authorities) {
+                      if (role.equalsIgnoreCase("authenticated")) {
+                        authorized = RestClient.getRestClient().getUser() != null;
+                        if (authorized)
+                          break;
+                      }
+                      if (role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+                        authorized = true;
+                        break;
+                      }
+                      for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                        if (role.equalsIgnoreCase(authority.getAuthority())) {
+                          authorized = true;
+                          break;
+                        }
+                      }
+
+                      if (authorized)
+                        break;
+                    }
+
+                    if (!authorized) {
+                      return false;
+                    }
+                  }
+                }
+
+              } catch (Exception e) {
+                //
+              }
+            }
+          }
+        }
+
+      }
+    }
+    return true;
+  }
+
+  public static void checkSecurity(Class clazz, String method) throws Exception {
+    Annotation security = clazz.getAnnotation(CronappSecurity.class);
+    boolean authorized = false;
+
+    if(security instanceof CronappSecurity) {
+      CronappSecurity cronappSecurity = (CronappSecurity)security;
+      Method methodPermission = cronappSecurity.getClass().getMethod(method.toLowerCase());
+      if(methodPermission != null) {
+        String value = (String)methodPermission.invoke(cronappSecurity);
+        if(value == null || value.trim().isEmpty()) {
+          value = "authenticated";
+        }
+
+        String[] authorities = value.trim().split(";");
+
+        for(String role : authorities) {
+          if(role.equalsIgnoreCase("authenticated")) {
+            authorized = RestClient.getRestClient().getUser() != null;
+            if(authorized)
+              break;
+          }
+          if(role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+            authorized = true;
+            break;
+          }
+          for(GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+            if(role.equalsIgnoreCase(authority.getAuthority())) {
+              authorized = true;
+              break;
+            }
+          }
+
+          if(authorized)
+            break;
+        }
+      }
+    }
+
+    if(!authorized) {
+      throw new RuntimeException(Messages.getString("notAllowed"));
+    }
+  }
+
+  public static boolean isFieldAuthorized(JsonObject query, String field, String method)
+      throws Exception {
+    if (!isNull(query.get("security"))) {
+      JsonObject security = query.get("security").getAsJsonObject();
+
+      JsonElement permissionElement = security.get(field);
+
+      if (!isNull(permissionElement)) {
+        JsonObject permission = permissionElement.getAsJsonObject();
+        if (!isNull(permission.get(method.toLowerCase()))) {
+          String[] roles = permission.get(method.toLowerCase()).getAsString().toLowerCase()
+              .split(";");
+
+          boolean authorized = false;
+
+          if (ArrayUtils.contains(roles, "public") || ArrayUtils.contains(roles, "permitAll")) {
+            authorized = true;
+          }
+
+          if (ArrayUtils.contains(roles, "authenticated")) {
+            authorized = RestClient.getRestClient().getUser() != null;
+          }
+
+          if (!authorized) {
+            for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+              if (ArrayUtils.contains(roles, authority.getAuthority().toLowerCase())) {
+                authorized = true;
+                break;
+              }
+            }
+          }
+
+          return authorized;
+        }
+      }
+    }
+
+    return true;
+  }
+
   public static void checkFieldSecurity(JsonObject query, Object ds, String method)
       throws Exception {
     if (!isNull(query.get("security"))) {
@@ -310,6 +467,18 @@ public class QueryManager {
               }
             }
 
+            if (!authorized) {
+              if (ds instanceof UriInfo) {
+                UriInfo uriView = (UriInfo) ds;
+                EdmEntityType entityType = uriView.getTargetEntitySet().getEntityType();
+                if (uriView.getSelect().isEmpty()) {
+                  for (String propertyName : entityType.getPropertyNames()) {
+                    EdmProperty property = (EdmProperty) entityType.getProperty(propertyName);
+                  }
+                }
+              }
+            }
+
             if (!authorized && method.equalsIgnoreCase("GET")) {
               addIgnoreField(((DataSource) ds).getDomainClass().getName() + "#" + entry.getKey());
             }
@@ -317,7 +486,7 @@ public class QueryManager {
             if (!authorized && !method.equalsIgnoreCase("GET")) {
               if (ds instanceof Var) {
                 ((Var) ds).getObjectAsMap().remove(entry.getKey());
-              } else {
+              } else if (ds instanceof RestBody)  {
                 ((RestBody) ds).getInputs()[0].getObjectAsMap().remove(entry.getKey());
               }
             }

@@ -1,14 +1,18 @@
 package cronapi.odata.server;
 
 import com.google.gson.JsonObject;
-import cronapi.CronapiFilter;
-import cronapi.QueryManager;
+import cronapi.*;
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
+import org.apache.olingo.odata2.api.edm.EdmEntityType;
+import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.apache.olingo.odata2.api.uri.info.*;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
+import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.jpa.jpql.parser.*;
 
 import javax.persistence.EntityManager;
@@ -24,11 +28,13 @@ import java.util.Map;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
+  public ClassLoader classLoader = DatasourceExtension.LOADER.get();
 
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
     HttpServletRequest request = CronapiFilter.REQUEST.get();
     try {
+
       JsonObject customQuery = null;
 
       try {
@@ -37,7 +43,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         //No Command
       }
 
+      EdmEntityType entityType = uriInfo.getTargetEntitySet().getEntityType();
+
       if (customQuery != null) {
+
+        QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
 
         String whereExpression = null;
 
@@ -175,19 +185,17 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
         }
 
-        // }
-      /*  } else {
-          if (orderBy != null) {
-            jpqlStatement += " " + orderBy;
-          }
-          query = em.createQuery(jpqlStatement);
-        }*/
-
         return query;
 
       }
+
+      if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
+        Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+        QueryManager.checkSecurity(clazz, RestClient.getRestClient().getMethod());
+      }
+
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw ErrorResponse.createException(e, RestClient.getRestClient().getMethod());
     }
 
     return null;
@@ -211,6 +219,17 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   @Override
   public Query getQuery(GetEntityUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
     return this.getBaseQuery((UriInfo) uriInfo, em);
+  }
+
+  @Override
+  public Class forName(String className) throws ClassNotFoundException {
+    try {
+      return DatasourceExtension.getClassLoader().loadClass(className);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return null;
   }
 
   private void setField(Object obj, String name, Object value) {
@@ -250,5 +269,37 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
 
     return null;
+  }
+
+  @Override
+  public boolean authorizeProperty(EdmEntityType entityType, EdmProperty property) {
+
+    JsonObject query = null;
+
+    try {
+      try {
+        query = QueryManager.getQuery(entityType.getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      boolean authorized = true;
+
+      if (query != null) {
+        authorized = QueryManager.isFieldAuthorized(query, property.getName(), RestClient.getRestClient().getMethod());
+      }
+
+      if (authorized) {
+        if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
+          Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+          authorized = QueryManager.isFieldAuthorized(clazz, property.getName(), RestClient.getRestClient().getMethod());
+        }
+      }
+
+      return authorized;
+
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

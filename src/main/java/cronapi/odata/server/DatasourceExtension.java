@@ -3,6 +3,8 @@ package cronapi.odata.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
+import cronapi.clazz.CronapiClassLoader;
+import cronapi.util.Operations;
 import javassist.*;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
@@ -16,16 +18,13 @@ import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
-import org.eclipse.persistence.internal.jpa.parsing.DotNode;
-import org.eclipse.persistence.internal.jpa.parsing.SelectNode;
-import org.eclipse.persistence.internal.jpa.parsing.VariableNode;
-import org.eclipse.persistence.internal.jpa.parsing.jpql.JPQLParser;
 import org.eclipse.persistence.internal.queries.ReportItem;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.jpa.jpql.parser.*;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.eclipse.persistence.queries.ReportQuery;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
@@ -34,8 +33,15 @@ public class DatasourceExtension implements JPAEdmExtension {
 
   private final ODataJPAContext context;
 
+  public static final ThreadLocal<ClassLoader> LOADER = new ThreadLocal<ClassLoader>();
+
   public DatasourceExtension(ODataJPAContext context) {
     this.context = context;
+    if (Operations.IS_DEBUG) {
+      LOADER.set(new CronapiClassLoader());
+    } else {
+      LOADER.set(DatasourceExtension.class.getClassLoader());
+    }
   }
 
   @Override
@@ -114,6 +120,14 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
+  public static ClassLoader getClassLoader() {
+    if (Operations.IS_DEBUG) {
+      return DatasourceExtension.class.getClassLoader();
+    } else {
+      return LOADER.get();
+    }
+  }
+
   private void createDataSource(Schema edmSchema, String id, String entity) {
 
     String edmNamespace = edmSchema.getNamespace();
@@ -135,21 +149,24 @@ public class DatasourceExtension implements JPAEdmExtension {
         createEntityDataSource(edmSchema, id, entity);
       } else {
 
+        ClassLoader classLoader = getClassLoader();
+
         boolean createClass = false;
         try {
-          Class.forName(edmNamespace + "." + id);
+          classLoader.loadClass(edmNamespace + "." + id);
         } catch (ClassNotFoundException e) {
           createClass = true;
         }
 
         if (createClass) {
+
           ClassPool pool = ClassPool.getDefault();
-          pool.appendClassPath(new LoaderClassPath(this.getClass().getClassLoader()));
+          pool.appendClassPath(new LoaderClassPath(DatasourceExtension.class.getClassLoader()));
           CtClass cc;
           try {
             cc = pool.get(edmNamespace + "." + id);
-            //  if (Operations.IS_DEBUG)
-            //    cc.detach();
+             if (Operations.IS_DEBUG)
+               cc.detach();
           } catch (NotFoundException e) {
             //No Command
           }
@@ -176,8 +193,12 @@ public class DatasourceExtension implements JPAEdmExtension {
               i++;
             }
 
-            cc.toClass(this.getClass().getClassLoader(), this.getClass().getProtectionDomain());
-          } catch (CannotCompileException | NotFoundException e1) {
+            if (classLoader instanceof CronapiClassLoader) {
+              ((CronapiClassLoader) classLoader).addClass(edmNamespace + "." + id, cc.toBytecode());
+            } else {
+              cc.toClass(this.getClass().getClassLoader(), this.getClass().getProtectionDomain());
+            }
+          } catch (CannotCompileException | IOException | NotFoundException e1) {
             e1.printStackTrace();
           }
         }
