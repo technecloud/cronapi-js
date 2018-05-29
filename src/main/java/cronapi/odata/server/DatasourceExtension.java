@@ -121,11 +121,51 @@ public class DatasourceExtension implements JPAEdmExtension {
   }
 
   public static ClassLoader getClassLoader() {
-    if (Operations.IS_DEBUG) {
+    if (!Operations.IS_DEBUG) {
       return DatasourceExtension.class.getClassLoader();
     } else {
       return LOADER.get();
     }
+  }
+
+  private EntityType findEntityType(Schema edmSchema, String entity) {
+    for (EntityType type: edmSchema.getEntityTypes()) {
+      if (type.getName().equals(entity)) {
+        return type;
+      }
+    }
+
+    return null;
+  }
+
+  private ReportItem findReportItem(ReportQuery reportQuery, String name) {
+    for (ReportItem item : reportQuery.getItems()) {
+      if (item.getName().equals(name)) {
+        return item;
+      }
+    }
+
+    return null;
+  }
+
+  private Property findProperty(EntityType entityType, String name) {
+    for (Property item : entityType.getProperties()) {
+      if (item.getName().equals(name)) {
+        return item;
+      }
+    }
+
+    return null;
+  }
+
+  private PropertyRef findKey(EntityType entityType, String name) {
+    for (PropertyRef item : entityType.getKey().getKeys()) {
+      if (item.getName().equals(name)) {
+        return item;
+      }
+    }
+
+    return null;
   }
 
   private void createDataSource(Schema edmSchema, String id, String entity) {
@@ -148,6 +188,26 @@ public class DatasourceExtension implements JPAEdmExtension {
         entity = reportQuery.getItems().get(0).getDescriptor().getJavaClass().getSimpleName();
         createEntityDataSource(edmSchema, id, entity);
       } else {
+
+        String alias = "";
+        String mainEntity = "";
+
+        JPQLExpression jpqlExpression = new JPQLExpression(
+            jpql,
+            DefaultEclipseLinkJPQLGrammar.instance(),
+            true
+        );
+
+        SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
+
+        IdentificationVariableDeclaration identificationVariableDeclaration = ((IdentificationVariableDeclaration) ((FromClause) selectStatement.getFromClause()).getDeclaration());
+        if (!identificationVariableDeclaration.hasJoins()) {
+          RangeVariableDeclaration rangeVariableDeclaration = (RangeVariableDeclaration) identificationVariableDeclaration.getRangeVariableDeclaration();
+          alias = rangeVariableDeclaration.getIdentificationVariable().toActualText();
+          mainEntity = rangeVariableDeclaration.getRootObject().toString();
+        }
+
+        EntityType mainType = findEntityType(edmSchema, mainEntity);
 
         ClassLoader classLoader = getClassLoader();
 
@@ -175,6 +235,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             cc.addInterface(pool.get(Serializable.class.getName()));
 
             int i = 0;
+
             for (ReportItem item : reportQuery.getItems()) {
               String typeName = "java.lang.Object";
               Class type = Object.class;
@@ -208,12 +269,6 @@ public class DatasourceExtension implements JPAEdmExtension {
         set.setEntityType(new FullQualifiedName(edmNamespace, id));
 
         edmSchema.getEntityContainers().get(0).getEntitySets().add(set);
-
-        JPQLExpression jpqlExpression = new JPQLExpression(
-            jpql,
-            DefaultEclipseLinkJPQLGrammar.instance(),
-            true
-        );
 
         ListIterable<Expression> children = ((SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause()).getSelectExpression().children();
         ListIterator<Expression> expressions = children.iterator();
@@ -249,9 +304,15 @@ public class DatasourceExtension implements JPAEdmExtension {
 
           properties.add(property);
 
-          PropertyRef propertyRef = new PropertyRef();
-          propertyRef.setName(item.getName());
-          propertyRefList.add(propertyRef);
+          if (findKey(mainType, item.getName()) != null) {
+            PropertyRef propertyRef = new PropertyRef();
+            propertyRef.setName(item.getName());
+            propertyRefList.add(propertyRef);
+          }
+
+         // if (findProperty(mainType, item.getName()) == null) {
+            mapping.setVirtualAccess(true);
+          //}
         }
 
         EntityType type = new EntityType();
@@ -261,7 +322,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         type.setName(id);
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
-        mapping.setObject("doNotEdit");
+        mapping.setCanEdit(false);
         type.setMapping(mapping);
 
         edmSchema.getEntityTypes().add(type);

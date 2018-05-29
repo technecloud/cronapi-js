@@ -302,4 +302,45 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       throw new RuntimeException(e);
     }
   }
+
+  public void checkOprAuthorization(final UriInfo uriView) throws ODataJPARuntimeException {
+    JsonObject query = null;
+
+    try {
+      EdmEntityType entityType = uriView.getTargetEntitySet().getEntityType();
+
+      try {
+        query = QueryManager.getQuery(uriView.getTargetEntitySet().getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      if (query != null) {
+        QueryManager.checkSecurity(query, RestClient.getRestClient().getMethod());
+      } else {
+        if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
+          Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+          QueryManager.checkSecurity(clazz, RestClient.getRestClient().getMethod());
+        }
+      }
+
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void checkAuthorization(final PostUriInfo postView) throws ODataJPARuntimeException {
+    this.checkOprAuthorization((UriInfo) postView);
+  }
+
+  @Override
+  public void checkAuthorization(final PutMergePatchUriInfo putView) throws ODataJPARuntimeException {
+    this.checkOprAuthorization((UriInfo) putView);
+  }
+
+  @Override
+  public void checkAuthorization(final DeleteUriInfo deleteView) throws ODataJPARuntimeException {
+    this.checkOprAuthorization((UriInfo) deleteView);
+  }
 }
