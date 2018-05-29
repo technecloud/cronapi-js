@@ -645,7 +645,9 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return "";
 
     Object object = getObject();
-    if (object instanceof InputStream) {
+    if (object == null) {
+      return "";
+    } else if (object instanceof InputStream) {
       try {
         return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
       } catch (IOException e) {
