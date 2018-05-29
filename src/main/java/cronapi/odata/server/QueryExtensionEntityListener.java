@@ -28,8 +28,6 @@ import java.util.Map;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
-  public ClassLoader classLoader = DatasourceExtension.LOADER.get();
-
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
     HttpServletRequest request = CronapiFilter.REQUEST.get();
@@ -67,11 +65,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         String alias = null;
 
         if (!selection.contains(".") && !selection.contains(",")) {
-          IdentificationVariableDeclaration identificationVariableDeclaration = ((IdentificationVariableDeclaration) ((FromClause) selectStatement.getFromClause()).getDeclaration());
-          if (!identificationVariableDeclaration.hasJoins()) {
-            RangeVariableDeclaration rangeVariableDeclaration = (RangeVariableDeclaration) identificationVariableDeclaration.getRangeVariableDeclaration();
-            alias = rangeVariableDeclaration.getIdentificationVariable().toActualText();
-          }
+          alias = JPQLParserUtil.getMainAlias(jpqlExpression);
         }
 
         if (uriInfo.isCount()) {
@@ -113,6 +107,13 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         if (uriInfo.getFilter() != null) {
           whereExpression = ODataExpressionParser.parseToJPAWhereExpression(
               uriInfo.getFilter(), alias);
+          parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
+          ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
+          ODataExpressionParser.reInitializePositionalParameters();
+        }
+
+        if (uriInfo.getKeyPredicates().size() > 0) {
+          whereExpression = ODataExpressionParser.parseKeyPredicates(uriInfo.getKeyPredicates(), alias);
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
           ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
           ODataExpressionParser.reInitializePositionalParameters();
@@ -222,14 +223,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   }
 
   @Override
-  public Class forName(String className) throws ClassNotFoundException {
-    try {
-      return DatasourceExtension.getClassLoader().loadClass(className);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    return null;
+  public Query getQuery(PutMergePatchUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
+    return this.getBaseQuery((UriInfo) uriInfo, em);
   }
 
   private void setField(Object obj, String name, Object value) {

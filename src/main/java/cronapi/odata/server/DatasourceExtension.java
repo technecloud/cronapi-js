@@ -3,9 +3,9 @@ package cronapi.odata.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
-import cronapi.clazz.CronapiClassLoader;
-import cronapi.util.Operations;
-import javassist.*;
+import javassist.CannotCompileException;
+import javassist.CtClass;
+import javassist.CtMethod;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
@@ -24,24 +24,15 @@ import org.eclipse.persistence.jpa.jpql.parser.*;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 import org.eclipse.persistence.queries.ReportQuery;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.*;
 
 public class DatasourceExtension implements JPAEdmExtension {
 
   private final ODataJPAContext context;
 
-  public static final ThreadLocal<ClassLoader> LOADER = new ThreadLocal<ClassLoader>();
-
   public DatasourceExtension(ODataJPAContext context) {
     this.context = context;
-    if (Operations.IS_DEBUG) {
-      LOADER.set(new CronapiClassLoader());
-    } else {
-      LOADER.set(DatasourceExtension.class.getClassLoader());
-    }
   }
 
   @Override
@@ -120,16 +111,8 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  public static ClassLoader getClassLoader() {
-    if (!Operations.IS_DEBUG) {
-      return DatasourceExtension.class.getClassLoader();
-    } else {
-      return LOADER.get();
-    }
-  }
-
   private EntityType findEntityType(Schema edmSchema, String entity) {
-    for (EntityType type: edmSchema.getEntityTypes()) {
+    for (EntityType type : edmSchema.getEntityTypes()) {
       if (type.getName().equals(entity)) {
         return type;
       }
@@ -189,8 +172,6 @@ public class DatasourceExtension implements JPAEdmExtension {
         createEntityDataSource(edmSchema, id, entity);
       } else {
 
-        String alias = "";
-        String mainEntity = "";
 
         JPQLExpression jpqlExpression = new JPQLExpression(
             jpql,
@@ -198,71 +179,9 @@ public class DatasourceExtension implements JPAEdmExtension {
             true
         );
 
-        SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-
-        IdentificationVariableDeclaration identificationVariableDeclaration = ((IdentificationVariableDeclaration) ((FromClause) selectStatement.getFromClause()).getDeclaration());
-        if (!identificationVariableDeclaration.hasJoins()) {
-          RangeVariableDeclaration rangeVariableDeclaration = (RangeVariableDeclaration) identificationVariableDeclaration.getRangeVariableDeclaration();
-          alias = rangeVariableDeclaration.getIdentificationVariable().toActualText();
-          mainEntity = rangeVariableDeclaration.getRootObject().toString();
-        }
+        String mainEntity = JPQLParserUtil.getMainEntity(jpqlExpression);
 
         EntityType mainType = findEntityType(edmSchema, mainEntity);
-
-        ClassLoader classLoader = getClassLoader();
-
-        boolean createClass = false;
-        try {
-          classLoader.loadClass(edmNamespace + "." + id);
-        } catch (ClassNotFoundException e) {
-          createClass = true;
-        }
-
-        if (createClass) {
-
-          ClassPool pool = ClassPool.getDefault();
-          pool.appendClassPath(new LoaderClassPath(DatasourceExtension.class.getClassLoader()));
-          CtClass cc;
-          try {
-            cc = pool.get(edmNamespace + "." + id);
-             if (Operations.IS_DEBUG)
-               cc.detach();
-          } catch (NotFoundException e) {
-            //No Command
-          }
-          cc = pool.makeClass(edmNamespace + "." + id);
-          try {
-            cc.addInterface(pool.get(Serializable.class.getName()));
-
-            int i = 0;
-
-            for (ReportItem item : reportQuery.getItems()) {
-              String typeName = "java.lang.Object";
-              Class type = Object.class;
-
-              if (item.getMapping() != null) {
-                typeName = item.getMapping().getField().getTypeName();
-                type = item.getMapping().getField().getType();
-              } else if (item.getDescriptor() != null) {
-                typeName = item.getDescriptor().getJavaClassName();
-                type = item.getDescriptor().getJavaClass();
-              }
-              cc.addField(new CtField(pool.get(typeName), item.getName(), cc));
-              cc.addMethod(generateGetter(cc, item.getName(), type));
-              cc.addMethod(generateSetter(cc, null, item.getName(), type));
-              cc.addMethod(generateSetter(cc, "CronAppParam" + i, item.getName(), type));
-              i++;
-            }
-
-            if (classLoader instanceof CronapiClassLoader) {
-              ((CronapiClassLoader) classLoader).addClass(edmNamespace + "." + id, cc.toBytecode());
-            } else {
-              cc.toClass(this.getClass().getClassLoader(), this.getClass().getProtectionDomain());
-            }
-          } catch (CannotCompileException | IOException | NotFoundException e1) {
-            e1.printStackTrace();
-          }
-        }
 
         EntitySet set = new EntitySet();
         set.setName(id);
@@ -277,6 +196,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         key.setKeys(propertyRefList);
 
         List<Property> properties = new ArrayList<>();
+        boolean keysSet = false;
         for (ReportItem item : reportQuery.getItems()) {
           Expression expression = expressions.next();
           if (expression instanceof IdentificationVariable) {
@@ -299,6 +219,9 @@ public class DatasourceExtension implements JPAEdmExtension {
 
           JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
           mapping.setInternalExpression(expression.toString());
+          mapping.setInternalName(item.getName());
+          mapping.setJPAType(type);
+          mapping.setVirtualAccess(true);
 
           property.setMapping(mapping);
 
@@ -308,11 +231,20 @@ public class DatasourceExtension implements JPAEdmExtension {
             PropertyRef propertyRef = new PropertyRef();
             propertyRef.setName(item.getName());
             propertyRefList.add(propertyRef);
+            keysSet = true;
           }
 
-         // if (findProperty(mainType, item.getName()) == null) {
-            mapping.setVirtualAccess(true);
-          //}
+        }
+
+        boolean canEdit = true;
+        if (!keysSet || propertyRefList.size() != mainType.getKey().getKeys().size()) {
+          propertyRefList.clear();
+          canEdit = false;
+          for (ReportItem item : reportQuery.getItems()) {
+            PropertyRef propertyRef = new PropertyRef();
+            propertyRef.setName(item.getName());
+            propertyRefList.add(propertyRef);
+          }
         }
 
         EntityType type = new EntityType();
@@ -322,7 +254,11 @@ public class DatasourceExtension implements JPAEdmExtension {
         type.setName(id);
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
-        mapping.setCanEdit(false);
+        mapping.setCanEdit(canEdit);
+        mapping.setJPAType(((JPAEdmMappingImpl) mainType.getMapping()).getJPAType());
+        if (canEdit) {
+          mapping.setInternalName(mainEntity);
+        }
         type.setMapping(mapping);
 
         edmSchema.getEntityTypes().add(type);
