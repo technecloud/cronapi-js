@@ -1,9 +1,9 @@
 package cronapi.odata.server;
 
 import com.google.gson.JsonObject;
-import cronapi.*;
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
+import cronapi.ErrorResponse;
+import cronapi.QueryManager;
+import cronapi.RestClient;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
@@ -18,7 +18,6 @@ import org.eclipse.persistence.jpa.jpql.parser.*;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -30,7 +29,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
-    HttpServletRequest request = CronapiFilter.REQUEST.get();
     try {
 
       JsonObject customQuery = null;
@@ -48,6 +46,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
 
         String whereExpression = null;
+        String selectExpression = null;
 
         Query query = null;
 
@@ -63,27 +62,25 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
 
         String alias = null;
+        String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
 
         if (!selection.contains(".") && !selection.contains(",")) {
-          alias = JPQLParserUtil.getMainAlias(jpqlExpression);
+          alias = mainAlias;
         }
 
-        if (uriInfo.isCount()) {
+        if (uriInfo.isCount() || uriInfo.rawEntity()) {
           setField(selectStatement, "selectClause", null);
-          jpqlStatement = "SELECT count(" + alias + ") " + selectStatement.toString();
-
-          jpqlExpression = new JPQLExpression(
-              jpqlStatement,
-              DefaultEclipseLinkJPQLGrammar.instance(),
-              true
-          );
-          selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-          selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
+          if (uriInfo.rawEntity()) {
+            selectExpression = "SELECT " + mainAlias + " ";
+          } else {
+            selectExpression = "SELECT count(" + mainAlias + ") ";
+          }
 
           if (selectStatement.hasOrderByClause()) {
             setField(selectStatement, "orderByClause", null);
-            jpqlStatement = selectStatement.toString();
           }
+
+          jpqlStatement = selectStatement.toString();
         }
 
         String orderBy = null;
@@ -98,7 +95,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
           orderBy = "ORDER BY " + orderExpression;
         }
-
 
         ODataExpressionParser.reInitializePositionalParameters();
         Map<String, Map<Integer, Object>> parameterizedExpressionMap =
@@ -160,6 +156,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         if (orderBy != null) {
           jpqlStatement += " " + orderBy;
+        }
+
+        if (selectExpression != null) {
+          jpqlStatement = selectExpression + " " + jpqlStatement;
         }
 
         query = em.createQuery(jpqlStatement);
@@ -224,6 +224,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   @Override
   public Query getQuery(PutMergePatchUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
+    return this.getBaseQuery((UriInfo) uriInfo, em);
+  }
+
+  @Override
+  public Query getQuery(DeleteUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
     return this.getBaseQuery((UriInfo) uriInfo, em);
   }
 
@@ -293,7 +298,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       return authorized;
 
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -319,7 +324,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
       }
 
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -337,5 +342,17 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   @Override
   public void checkAuthorization(final DeleteUriInfo deleteView) throws ODataJPARuntimeException {
     this.checkOprAuthorization((UriInfo) deleteView);
+  }
+
+  @Override
+  public void checkEntityGetAuthorization(final EdmEntityType entityType) throws ODataJPARuntimeException {
+    try {
+      if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
+        Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+        QueryManager.checkSecurity(clazz, RestClient.getRestClient().getMethod());
+      }
+    } catch (Exception e) {
+      throw ErrorResponse.createException(e, RestClient.getRestClient().getMethod());
+    }
   }
 }
