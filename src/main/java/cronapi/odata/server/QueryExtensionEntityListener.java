@@ -1,5 +1,6 @@
 package cronapi.odata.server;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.ErrorResponse;
 import cronapi.QueryManager;
@@ -354,5 +355,33 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     } catch (Exception e) {
       throw ErrorResponse.createException(e, RestClient.getRestClient().getMethod());
     }
+  }
+
+  @Override
+  public Map<String, Object> getDefaultFieldValues(final EdmEntityType entityType, Object data) throws ODataJPARuntimeException {
+    return super.getDefaultFieldValues(entityType, data);
+  }
+
+  @Override
+  public Map<String, Object> getCalcFieldValues(final EdmEntityType entityType, Object data) throws ODataJPARuntimeException {
+    JsonObject query = null;
+
+    try {
+
+      try {
+        query = QueryManager.getQuery(entityType.getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      if (query != null && RestClient.getRestClient() != null  && RestClient.getRestClient().getRequest() != null) {
+        return QueryManager.getCalcFieldValues(query, data);
+      }
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return null;
   }
 }

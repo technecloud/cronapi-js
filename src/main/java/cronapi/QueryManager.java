@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -540,6 +541,95 @@ public class QueryManager {
           }
         }
       }
+    }
+
+    public static Map<String, Object> getCalcFieldValues(JsonObject query, Object bean) {
+
+      JsonObject calcObj = null;
+      Map<String, Object> result = null;
+
+      if (!isNull(query.get("calcFields"))) {
+        calcObj = query.get("calcFields").getAsJsonObject();
+      }
+
+      if (calcObj != null) {
+
+        JsonObject securityObj = null;
+
+        if (!isNull(query.get("calcFieldsSecurity"))) {
+          securityObj = query.get("calcFieldsSecurity").getAsJsonObject();
+        }
+
+        for (Entry<String, JsonElement> entry : calcObj.entrySet()) {
+          String name = entry.getKey();
+          boolean authorized = true;
+
+          if (securityObj != null) {
+            if (!isNull(securityObj.get(name)) && (!isNull(
+                securityObj.get(name).getAsJsonObject().get("get")))) {
+              String security = securityObj.get(name).getAsJsonObject().get("get").getAsString();
+              if (security == null) {
+                security = "public";
+              }
+              String[] roles = security.split(";");
+
+              authorized = false;
+              for (String role : roles) {
+                if (role.equalsIgnoreCase("public") || role.equalsIgnoreCase("permitAll")) {
+                  authorized = true;
+                  break;
+                }
+
+                if (role.equalsIgnoreCase("authenticated")) {
+                  authorized = RestClient.getRestClient().getUser() != null;
+                  if (authorized) {
+                    break;
+                  }
+                }
+
+                if (!authorized) {
+                  for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                    if (authority.getAuthority().equalsIgnoreCase(role)) {
+                      authorized = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (authorized) {
+                  break;
+                }
+              }
+            }
+          }
+
+          if (authorized) {
+            JsonElement element = calcObj.get(name);
+            if (!isNull(element)) {
+              Var value = Var.VAR_NULL;
+
+              if (element.isJsonPrimitive()) {
+                value = Var.valueOf(element);
+              } else {
+                try {
+                  value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),
+                      RestClient.getRestClient().getMethod(), Var.valueOf(bean));
+                } catch (Exception e) {
+                  value = Var.valueOf("ERROR: " + e.getMessage());
+                }
+              }
+
+              if (result == null) {
+                result = new HashMap<>();
+              }
+
+              result.put(name, value.getObject());
+            }
+          }
+        }
+      }
+
+      return result;
     }
 
     public static void addCalcFields (JsonObject query, DataSource ds){

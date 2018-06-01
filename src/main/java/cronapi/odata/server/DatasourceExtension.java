@@ -3,16 +3,14 @@ package cronapi.odata.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
-import javassist.CannotCompileException;
-import javassist.CtClass;
-import javassist.CtMethod;
+import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
+import org.apache.olingo.odata2.core.CloneUtils;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPAModelException;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
-import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmMapping;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
 import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
@@ -44,13 +42,6 @@ public class DatasourceExtension implements JPAEdmExtension {
   public void extendJPAEdmSchema(JPAEdmSchemaView view) {
     Schema edmSchema = view.getEdmSchema();
 
-    for (EntityType entityType : edmSchema.getEntityTypes()) {
-      JPAEdmMapping mapping = (JPAEdmMapping) entityType.getMapping();
-      if (mapping.getODataJPATombstoneEntityListener() == null) {
-        mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
-      }
-    }
-
     JsonObject queries = QueryManager.getJSON();
     for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
       JsonObject customObj = entry.getValue().getAsJsonObject();
@@ -58,49 +49,20 @@ public class DatasourceExtension implements JPAEdmExtension {
         String clazz = customObj.get("entityFullName").getAsString();
         if (clazz.startsWith(edmSchema.getNamespace())) {
           try {
-            createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString());
+            LinkedList<String> calcFields = new LinkedList<>();
+            if (!QueryManager.isNull(customObj.get("calcFields"))) {
+              JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
+              for (Map.Entry<String, JsonElement> entryObj: calcObj.entrySet()) {
+                calcFields.add(entryObj.getKey());
+              }
+            }
+            createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString(), calcFields);
           } catch (Exception e) {
             e.printStackTrace();
           }
         }
       }
     }
-  }
-
-  private static CtMethod generateGetter(CtClass declaringClass, String fieldName, Class fieldClass)
-      throws CannotCompileException {
-
-    String getterName = "get" + fieldName.substring(0, 1).toUpperCase()
-        + fieldName.substring(1);
-
-    String sb = "public " + getClassName(fieldClass) + " "
-        + getterName + "(){" + "return this."
-        + fieldName + ";" + "}";
-    return CtMethod.make(sb, declaringClass);
-  }
-
-  private static String getClassName(Class clazz) {
-    String toReturn = clazz.getName();
-    if (toReturn.startsWith("["))
-      toReturn = clazz.getSimpleName();
-
-    return toReturn;
-  }
-
-  private static CtMethod generateSetter(CtClass declaringClass, String methodName, String fieldName, Class fieldClass)
-      throws CannotCompileException {
-
-    if (methodName == null) {
-      methodName = fieldName;
-    }
-    String setterName = "set" + methodName.substring(0, 1).toUpperCase()
-        + methodName.substring(1);
-
-    String sb = "public void " + setterName + "("
-        + getClassName(fieldClass) + " " + fieldName
-        + ")" + "{" + "this." + fieldName
-        + "=" + fieldName + ";" + "}";
-    return CtMethod.make(sb, declaringClass);
   }
 
   private static EdmSimpleTypeKind toEdmSimpleTypeKind(Class fieldClass) {
@@ -121,26 +83,6 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private ReportItem findReportItem(ReportQuery reportQuery, String name) {
-    for (ReportItem item : reportQuery.getItems()) {
-      if (item.getName().equals(name)) {
-        return item;
-      }
-    }
-
-    return null;
-  }
-
-  private Property findProperty(EntityType entityType, String name) {
-    for (Property item : entityType.getProperties()) {
-      if (item.getName().equals(name)) {
-        return item;
-      }
-    }
-
-    return null;
-  }
-
   private PropertyRef findKey(EntityType entityType, String name) {
     for (PropertyRef item : entityType.getKey().getKeys()) {
       if (item.getName().equals(name)) {
@@ -151,7 +93,27 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private void createDataSource(Schema edmSchema, String id, String entity) {
+  private void addCalcFields(EntityType newType, List<String> addFields) {
+    if (addFields != null) {
+      for (String field: addFields) {
+        SimpleProperty property = new SimpleProperty();
+        property.setType(toEdmSimpleTypeKind(String.class));
+        property.setName(field);
+
+        JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+        mapping.setInternalName(field);
+        mapping.setJPAType(String.class);
+        mapping.setVirtualAccess(true);
+        mapping.setCalculated(true);
+
+        property.setMapping(mapping);
+
+        newType.getProperties().add(property);
+      }
+    }
+  }
+
+  private void createDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
     EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
@@ -169,9 +131,8 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       if (reportQuery.getItems().size() == 1 && reportQuery.getItems().get(0).getDescriptor() != null) {
         entity = reportQuery.getItems().get(0).getDescriptor().getJavaClass().getSimpleName();
-        createEntityDataSource(edmSchema, id, entity);
+        createEntityDataSource(edmSchema, id, entity, addFields);
       } else {
-
 
         JPQLExpression jpqlExpression = new JPQLExpression(
             jpql,
@@ -253,22 +214,26 @@ public class DatasourceExtension implements JPAEdmExtension {
         type.setKey(key);
         type.setName(id);
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-        mapping.setODataJPATombstoneEntityListener(QueryExtensionEntityListener.class);
         mapping.setCanEdit(canEdit);
         mapping.setJPAType(((JPAEdmMappingImpl) mainType.getMapping()).getJPAType());
+        mapping.setVirtualAccess(true);
         if (canEdit) {
           mapping.setInternalName(mainEntity);
         }
         type.setMapping(mapping);
 
+        addCalcFields(type, addFields);
+
         edmSchema.getEntityTypes().add(type);
       }
     } else {
-      createEntityDataSource(edmSchema, id, entity);
+      createEntityDataSource(edmSchema, id, entity, addFields);
     }
   }
 
-  private void createEntityDataSource(Schema edmSchema, String id, String entity) {
+  private void createEntityDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
+
+    String edmNamespace = edmSchema.getNamespace();
 
     for (EntityContainer container : edmSchema.getEntityContainers()) {
 
@@ -281,9 +246,18 @@ public class DatasourceExtension implements JPAEdmExtension {
         }
       }
 
+      EntityType oldType = edmSchema.getEntityType(entity);
+
+      EntityType newType = (EntityType) CloneUtils.getClone(oldType);
+      newType.setName(id);
+
+      addCalcFields(newType, addFields);
+
+      edmSchema.getEntityTypes().add(newType);
+
       EntitySet set = new EntitySet();
       set.setName(id);
-      set.setEntityType(foundES.getEntityType());
+      set.setEntityType(new FullQualifiedName(edmNamespace, id));
       set.setMapping(foundES.getMapping());
       set.setAnnotationAttributes(foundES.getAnnotationAttributes());
       set.setAnnotationElements(foundES.getAnnotationElements());
