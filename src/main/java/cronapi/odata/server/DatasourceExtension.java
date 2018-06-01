@@ -97,12 +97,12 @@ public class DatasourceExtension implements JPAEdmExtension {
     if (addFields != null) {
       for (String field: addFields) {
         SimpleProperty property = new SimpleProperty();
-        property.setType(toEdmSimpleTypeKind(String.class));
+        property.setType(EdmSimpleTypeKind.Auto);
         property.setName(field);
 
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setInternalName(field);
-        mapping.setJPAType(String.class);
+        mapping.setJPAType(Object.class);
         mapping.setVirtualAccess(true);
         mapping.setCalculated(true);
 
