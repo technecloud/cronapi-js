@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import cronapi.ErrorResponse;
 import cronapi.QueryManager;
 import cronapi.RestClient;
+import cronapi.Var;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
@@ -15,18 +16,31 @@ import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.jpa.jpql.parser.*;
+import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
+
+  private void findInputParams(Expression expression, List<String> inputs) {
+
+    if (expression instanceof InputParameter) {
+      inputs.add(expression.toString());
+    }
+
+    if (expression.children() != null) {
+      expression.children().forEach((e) -> {
+        findInputParams(e, inputs);
+      });
+    }
+  }
 
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
@@ -58,6 +72,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             DefaultEclipseLinkJPQLGrammar.instance(),
             true
         );
+
+        List<String> inputs = new LinkedList<>();
+
+        findInputParams(jpqlExpression, inputs);
 
         SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
         String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
@@ -163,10 +181,32 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           jpqlStatement = selectExpression + " " + jpqlStatement;
         }
 
-        query = em.createQuery(jpqlStatement);
-
         Map<String, Map<Integer, Object>> parameterizedMap = ODataParameterizedWhereExpressionUtil.
             getParameterizedQueryMap();
+
+        int maxParam = 0;
+
+        if (parameterizedMap != null && parameterizedMap.size() > 0) {
+          for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
+            if (jpqlStatement.contains(parameterEntry.getKey())) {
+              Map<Integer, Object> positionalParameters = parameterEntry.getValue();
+              for (Map.Entry<Integer, Object> param : positionalParameters.entrySet()) {
+                if (param.getKey() > maxParam) {
+                  maxParam = param.getKey();
+                }
+              }
+            }
+          }
+        }
+
+        int i = maxParam;
+        for (String param : inputs) {
+          i++;
+          jpqlStatement = jpqlStatement.replace(param, "?" + i);
+        }
+
+        query = em.createQuery(jpqlStatement);
+
         if (parameterizedMap != null && parameterizedMap.size() > 0) {
           for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
             if (jpqlStatement.contains(parameterEntry.getKey())) {
@@ -184,6 +224,24 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               ODataParameterizedWhereExpressionUtil.setJPQLStatement(null);
               break;
             }
+          }
+        }
+
+        i = maxParam;
+        for (String param : inputs) {
+          i++;
+          Parameter p = query.getParameter(i);
+          String strValue = RestClient.getRestClient().getParameter(param.substring(1));
+          if (strValue != null) {
+            Object requestParam = null;
+            if (strValue.contains("@@") || p.getParameterType().getSimpleName().equals("Object")) {
+              requestParam = Var.deserialize(RestClient.getRestClient().getParameter(param.substring(1)));
+            } else {
+              requestParam = Var.valueOf(requestParam).getObject(p.getParameterType());
+            }
+            query.setParameter(i, requestParam);
+          } else {
+            query.setParameter(i, null);
           }
         }
 
@@ -359,7 +417,25 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   @Override
   public Map<String, Object> getDefaultFieldValues(final EdmEntityType entityType, Object data) throws ODataJPARuntimeException {
-    return super.getDefaultFieldValues(entityType, data);
+    JsonObject query = null;
+
+    try {
+
+      try {
+        query = QueryManager.getQuery(entityType.getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      if (query != null && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
+        return QueryManager.getDefaultValues(query, data);
+      }
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return null;
   }
 
   @Override
@@ -374,7 +450,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         //No Command
       }
 
-      if (query != null && RestClient.getRestClient() != null  && RestClient.getRestClient().getRequest() != null) {
+      if (query != null && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
         return QueryManager.getCalcFieldValues(query, data);
       }
 
