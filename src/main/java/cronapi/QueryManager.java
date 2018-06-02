@@ -7,10 +7,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.google.gson.*;
 import cronapi.database.DataSourceFilter;
@@ -18,6 +15,7 @@ import cronapi.database.JPQLConverter;
 
 import java.util.Map.Entry;
 
+import cronapi.database.TransactionManager;
 import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
@@ -31,6 +29,9 @@ import cronapi.util.Operations;
 import org.springframework.util.ReflectionUtils;
 
 import javax.json.Json;
+import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.servlet.http.HttpServletRequest;
 
 public class QueryManager {
@@ -506,6 +507,100 @@ public class QueryManager {
       for (DataSourceFilterItem item : filter.getItems()) {
         if (!isNull(security.get(item.key))) {
           JsonObject permission = security.get(item.key).getAsJsonObject();
+          if (!isNull(permission.get("filter"))) {
+            String[] roles = permission.get("filter").getAsString().toLowerCase().split(";");
+            boolean authorized = false;
+            for (String role : roles) {
+              if (role.equalsIgnoreCase("public") || role.equalsIgnoreCase("permitAll")) {
+                authorized = true;
+                break;
+              }
+
+              if (role.equalsIgnoreCase("authenticated")) {
+                authorized = RestClient.getRestClient().getUser() != null;
+                if (authorized) {
+                  break;
+                }
+              }
+
+              if (!authorized) {
+                for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                  if (authority.getAuthority().equalsIgnoreCase(role)) {
+                    authorized = true;
+                    break;
+                  }
+                }
+              }
+
+              if (authorized) {
+                break;
+              }
+            }
+
+            if (!authorized) {
+              throw new RuntimeException(Messages.getString("notAllowed"));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static void checkEntityFilterSecurity(Object obj, List<String> filters) {
+    Class clazz = obj instanceof Class ? (Class)obj : obj.getClass();
+
+    for(String filter: filters) {
+      Field f = null;
+      try {
+        f = clazz.getDeclaredField(filter);
+      } catch(Exception e) {
+        //NoCommand
+      }
+
+      if (f != null) {
+        Annotation annotation = f.getAnnotation(CronappSecurity.class);
+        boolean authorized = true;
+        if (annotation != null) {
+          CronappSecurity security = (CronappSecurity) annotation;
+          String authoritiesStr = security.filter();
+          String[] authorities;
+          if (authoritiesStr != null && !authoritiesStr.trim().isEmpty()) {
+            authorized = false;
+            authorities = authoritiesStr.trim().split(";");
+            for (String role : authorities) {
+              if (role.equalsIgnoreCase("authenticated")) {
+                authorized = RestClient.getRestClient().getUser() != null;
+                if (authorized)
+                  break;
+              }
+              if (role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
+                authorized = true;
+                break;
+              }
+              for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+                if (role.equalsIgnoreCase(authority.getAuthority())) {
+                  authorized = true;
+                  break;
+                }
+              }
+
+            }
+          }
+        }
+        if (!authorized) {
+          throw new RuntimeException(Messages.getString("notAllowed"));
+        }
+      }
+    }
+  }
+
+  public static void checkFilterSecurity(JsonObject query, List<String> filter) {
+    if (!isNull(query.get("security")) && filter != null && filter.size() > 0) {
+      JsonObject security = query.get("security").getAsJsonObject();
+
+      for (String item : filter) {
+        if (!isNull(security.get(item))) {
+          JsonObject permission = security.get(item).getAsJsonObject();
           if (!isNull(permission.get("filter"))) {
             String[] roles = permission.get("filter").getAsString().toLowerCase().split(";");
             boolean authorized = false;

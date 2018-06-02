@@ -1,6 +1,5 @@
 package cronapi.odata.server;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.ErrorResponse;
 import cronapi.QueryManager;
@@ -9,6 +8,7 @@ import cronapi.Var;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
+import org.apache.olingo.odata2.api.uri.expression.*;
 import org.apache.olingo.odata2.api.uri.info.*;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
@@ -16,7 +16,6 @@ import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.jpa.jpql.parser.*;
-import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
@@ -26,6 +25,7 @@ import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.logging.Filter;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -120,6 +120,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             new HashMap<String, Map<Integer, Object>>();
 
         if (uriInfo.getFilter() != null) {
+          checkFilter(entityType, uriInfo.getFilter());
           whereExpression = ODataExpressionParser.parseToJPAWhereExpression(
               uriInfo.getFilter(), alias);
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
@@ -342,20 +343,16 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         //No Command
       }
 
-      boolean authorized = true;
-
       if (query != null) {
-        authorized = QueryManager.isFieldAuthorized(query, property.getName(), RestClient.getRestClient().getMethod());
+        return QueryManager.isFieldAuthorized(query, property.getName(), RestClient.getRestClient().getMethod());
       }
 
-      if (authorized) {
-        if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
-          Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
-          authorized = QueryManager.isFieldAuthorized(clazz, property.getName(), RestClient.getRestClient().getMethod());
-        }
+      if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
+        Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+        return QueryManager.isFieldAuthorized(clazz, property.getName(), RestClient.getRestClient().getMethod());
       }
 
-      return authorized;
+      return true;
 
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -459,5 +456,61 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
 
     return null;
+  }
+
+  @Override
+  public void checkFilter(final EdmEntityType entityType, FilterExpression filter) throws ODataJPARuntimeException {
+    try {
+      JsonObject query = null;
+
+      try {
+        query = QueryManager.getQuery(entityType.getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      List<String> filters = new LinkedList<>();
+      visitExpression(filter, filters);
+      if (query != null) {
+        QueryManager.checkFilterSecurity(query, filters);
+      } else {
+        Class clazz = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType();
+        QueryManager.checkEntityFilterSecurity(clazz, filters);
+      }
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void doCheckFilter(BinaryExpression expression, List<String> filters) {
+    visitExpression(expression.getLeftOperand(), filters);
+    visitExpression(expression.getRightOperand(), filters);
+  }
+
+  private void doCheckFilter(FilterExpression expression, List<String> filters) {
+    visitExpression(expression.getExpression(), filters);
+  }
+
+  private void doCheckFilter(PropertyExpression expression, List<String> filters) {
+    filters.add(expression.getPropertyName());
+  }
+
+  private void doCheckFilter(MethodExpression expression, List<String> filters) {
+    for (CommonExpression e : expression.getParameters()) {
+      visitExpression(e, filters);
+    }
+  }
+
+  private void visitExpression(CommonExpression expression, List<String> filters) {
+    if (expression instanceof BinaryExpression) {
+      doCheckFilter((BinaryExpression) expression, filters);
+    } else if (expression instanceof PropertyExpression) {
+      doCheckFilter((PropertyExpression) expression, filters);
+    } else if (expression instanceof FilterExpression) {
+      doCheckFilter((FilterExpression) expression, filters);
+    } else if (expression instanceof MethodExpression) {
+      doCheckFilter((MethodExpression) expression, filters);
+    }
   }
 }
