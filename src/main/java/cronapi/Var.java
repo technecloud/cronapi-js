@@ -43,9 +43,19 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
 
 @JsonAdapter(VarSerializer.class)
-public class Var implements Comparable<Var>, JsonSerializable {
+public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer {
+
+  @Override
+  public String serializeAsJson() {
+    try {
+      return new CronapiConfigurator().objectMapperBuilder().build().writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public static class JsonAdapter {
 

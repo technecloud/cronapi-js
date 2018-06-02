@@ -1,15 +1,14 @@
 package cronapi.odata.server;
 
 import com.google.gson.JsonObject;
-import cronapi.ErrorResponse;
-import cronapi.QueryManager;
-import cronapi.RestClient;
-import cronapi.Var;
+import cronapi.*;
+import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.apache.olingo.odata2.api.uri.expression.*;
 import org.apache.olingo.odata2.api.uri.info.*;
+import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
@@ -511,6 +510,40 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       doCheckFilter((FilterExpression) expression, filters);
     } else if (expression instanceof MethodExpression) {
       doCheckFilter((MethodExpression) expression, filters);
+    }
+  }
+
+  @Override
+  public List<ClientCallback> getClientCallbacks() {
+    List<ClientCallback> callbacks = null;
+    for (ClientCommand command: RestClient.getRestClient().getCommands()) {
+      if (callbacks == null) {
+        callbacks = new LinkedList<>();
+      }
+      callbacks.add(command.toClientCallback());
+    }
+    return callbacks;
+  }
+
+  @Override
+  public void execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) throws ODataJPARuntimeException {
+    try {
+      JsonObject query = null;
+
+      try {
+        query = QueryManager.getQuery(entityType.getName());
+      } catch (Exception e) {
+        //No Command
+      }
+
+      if (query != null) {
+        QueryManager.executeEvent(query, data, type);
+      }
+
+      ((UriInfoImpl)infoView).setClientCallbacks(getClientCallbacks());
+
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
