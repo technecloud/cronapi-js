@@ -178,6 +178,19 @@ public class DatasourceExtension implements JPAEdmExtension {
           property.setType(toEdmSimpleTypeKind(type));
           property.setName(item.getName());
 
+          int total = 0;
+          String name = item.getName();
+          for (Property prop: properties) {
+            if (prop.getName().equals(name)) {
+              total++;
+              name = property.getName() + "_"+ total;
+            }
+          }
+
+          if (total > 0) {
+            property.setName(name);
+          }
+
           JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
           mapping.setInternalExpression(expression.toString());
           mapping.setInternalName(item.getName());

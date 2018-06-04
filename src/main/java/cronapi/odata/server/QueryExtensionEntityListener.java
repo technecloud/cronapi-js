@@ -14,6 +14,8 @@ import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeExcep
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
+import org.eclipse.persistence.annotations.BatchFetchType;
+import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.persistence.jpa.jpql.parser.*;
 
 import javax.persistence.EntityManager;
@@ -244,6 +246,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             query.setParameter(i, null);
           }
         }
+
 
         return query;
 
