@@ -23,7 +23,7 @@ public class TransactionManager {
 		ListableBeanFactory factory = (ListableBeanFactory) ApplicationContextHolder.getContext();
 		Repositories repositories = new Repositories(factory);
 		if (repositories.hasRepositoryFor(domainClass)) {
-			return (JpaRepository) repositories.getRepositoryFor(domainClass);
+			return (JpaRepository) repositories.getRepositoryFor(domainClass).orElse(null);
 		}
 
 		return null;

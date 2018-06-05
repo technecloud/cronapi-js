@@ -1,6 +1,7 @@
 package cronapi.rest;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.JsonObject;
@@ -37,6 +46,7 @@ import cronapi.database.DataSourceFilter;
 import cronapi.database.EntityMetadata;
 import cronapi.database.TenantService;
 import cronapi.database.TransactionManager;
+import cronapi.database.DataSourceFilter.DataSourceFilterItem;
 import cronapi.rest.CronapiREST.TranslationPath;
 import cronapi.util.SecurityUtil;
 import cronapi.util.StorageService;
@@ -127,6 +137,13 @@ public class CronapiREST {
     translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
             request.getParameter("filterType"), caseInsensitive);
 
+    if (translationPath.params.length == 0 && 
+        translationPath.filter != null && 
+        translationPath.filter.getItems() != null &&
+        translationPath.filter.getItems().size() > 0) {
+      translationPath.params = toVarArray(translationPath.filter.getItems());    
+    }
+    
     return translationPath;
   }
 
@@ -291,13 +308,16 @@ public class CronapiREST {
   public HttpEntity<?> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
-
+      
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "GET");
-
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
-        return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
+        if (translationPath.filter != null) {
+          return QueryManager.executeBlockly(query, "FILTER", translationPath.params).getObjectAsPOJOList();
+        } else {
+          return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
+        }
       } else {
         //TranslationPath translationPath = translatePathVars(id, 0, query.getAsJsonArray("queryParamsValues").size());
         TranslationPath translationPath = translatePathVars(id, 0, -1);

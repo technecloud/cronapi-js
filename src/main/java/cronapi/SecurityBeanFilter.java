@@ -92,11 +92,18 @@ public class SecurityBeanFilter extends SimpleBeanPropertyFilter {
   }
   
   @Override
+  protected boolean include(BeanPropertyWriter writer) {
+    return includeProperty(writer.getMember().getDeclaringClass(), writer.getName(), "GET");
+  }
+
+  @Override
   protected boolean include(PropertyWriter writer) {
     if(writer instanceof BeanPropertyWriter) {
       return includeProperty(((BeanPropertyWriter)writer).getMember().getDeclaringClass(), writer.getName(), "GET");
     }
-    
+
     return true;
   }
+
+
 }
