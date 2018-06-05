@@ -477,21 +477,20 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       if (_object instanceof JsonElement) {
         return (JsonElement) _object;
       } else {
-
         try {
-          String s = null;
-          if (_object instanceof String || _object instanceof InputStream) {
+          if (_object instanceof String) {
+            return new Gson().fromJson(_object.toString(), JsonElement.class);
+          } else if (_object instanceof InputStream) {
             return new Gson().fromJson(getObjectAsString(), JsonElement.class);
           } else {
             ObjectMapper mapper = new ObjectMapper();
-            s = mapper.writeValueAsString(_object);
+            String json = mapper.writeValueAsString(_object);
+            return new Gson().fromJson(json, JsonElement.class);
           }
-          return new Gson().fromJson(s, JsonElement.class);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }
-
     }
 
     return null;
@@ -656,7 +655,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return "";
 
     Object object = getObject();
-    if (object instanceof InputStream) {
+    if (object == null) {
+      return "";
+    } else if (object instanceof InputStream) {
       try {
         return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
       } catch (IOException e) {
@@ -670,6 +671,8 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
+    } else if (object instanceof String) {
+      return object.toString();
     }
 
     return this.getObjectAsJson().toString();
