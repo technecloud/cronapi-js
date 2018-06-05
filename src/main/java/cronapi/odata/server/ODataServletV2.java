@@ -1,18 +1,14 @@
 package cronapi.odata.server;
 
-import cronapi.util.Operations;
 import org.apache.olingo.odata2.api.ODataServiceFactory;
-import org.apache.olingo.odata2.api.commons.ODataHttpMethod;
 import org.apache.olingo.odata2.core.servlet.ODataServlet;
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
 
 import javax.persistence.EntityManagerFactory;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 
 class ODataServletV2 extends ODataServlet {
 
@@ -28,7 +24,7 @@ class ODataServletV2 extends ODataServlet {
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
     try {
-      req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JpaOdataServiceFactory(this.entityManagerFactory, namespace));
+      req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace));
       super.service(req, res);
     } finally {
       ODataParameterizedWhereExpressionUtil.clear();

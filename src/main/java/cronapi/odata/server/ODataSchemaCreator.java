@@ -46,7 +46,7 @@ public class ODataSchemaCreator {
           properties.setProperty("javax.persistence.jtaDataSource", "");
           properties.setProperty("eclipselink.ddl-generation", "none");
           EntityManagerFactory emf = Persistence.createEntityManagerFactory(namespace, properties);
-          JpaOdataServiceFactory serviceFactory = new JpaOdataServiceFactory(emf, namespace);
+          JPAODataServiceFactory serviceFactory = new JPAODataServiceFactory(emf, namespace);
 
           List<PathSegment> odataPathSegment = new LinkedList<>();
           odataPathSegment.add(new ODataPathSegmentImpl("$metadata", new LinkedHashMap<>()));

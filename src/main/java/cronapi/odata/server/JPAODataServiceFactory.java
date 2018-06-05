@@ -7,13 +7,10 @@ import org.apache.olingo.odata2.api.processor.ODataSingleProcessor;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAServiceFactory;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
-import org.apache.olingo.odata2.jpa.processor.api.factory.ODataJPAAccessFactory;
-import org.apache.olingo.odata2.jpa.processor.api.factory.ODataJPAFactory;
-import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
 
 import javax.persistence.EntityManagerFactory;
 
-public class JpaOdataServiceFactory extends ODataJPAServiceFactory {
+public class JPAODataServiceFactory extends ODataJPAServiceFactory {
 
   private final EntityManagerFactory entityManagerFactory;
   private final String namespace;
@@ -22,7 +19,7 @@ public class JpaOdataServiceFactory extends ODataJPAServiceFactory {
   private static DatasourceExtension datasourceExtension;
   private static QueryExtensionEntityListener queryExtensionEntityListener;
 
-  public JpaOdataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace) {
+  public JPAODataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
   }
@@ -38,7 +35,7 @@ public class JpaOdataServiceFactory extends ODataJPAServiceFactory {
       context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
     } else {
       if (datasourceExtension == null) {
-        synchronized (JpaOdataServiceFactory.this) {
+        synchronized (JPAODataServiceFactory.this) {
           if (datasourceExtension == null) {
             datasourceExtension = new DatasourceExtension(context);
             queryExtensionEntityListener = new QueryExtensionEntityListener();
@@ -60,7 +57,7 @@ public class JpaOdataServiceFactory extends ODataJPAServiceFactory {
     }
 
     if (oDataService == null) {
-      synchronized (JpaOdataServiceFactory.this) {
+      synchronized (JPAODataServiceFactory.this) {
         if (oDataService == null) {
           oDataService = super.createODataSingleProcessorService(provider, processor);
         }

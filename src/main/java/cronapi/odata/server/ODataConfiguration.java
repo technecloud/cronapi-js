@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
-public class OdataConfiguration implements ServletContextInitializer {
+public class ODataConfiguration implements ServletContextInitializer {
 
   public static final String SERVICE_URL = "/api/cronapi/odata/v2/";
 
