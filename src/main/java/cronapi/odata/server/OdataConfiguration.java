@@ -3,9 +3,7 @@ package cronapi.odata.server;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
 import org.eclipse.persistence.jpa.Archive;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.context.embedded.ServletContextInitializer;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Configuration;
 
 import javax.persistence.Persistence;
@@ -16,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
-public class OdataConfiguration implements ServletContextInitializer, EmbeddedServletContainerCustomizer {
+public class OdataConfiguration implements ServletContextInitializer {
 
   public static final String SERVICE_URL = "/api/cronapi/odata/v2/";
 
@@ -46,9 +44,5 @@ public class OdataConfiguration implements ServletContextInitializer, EmbeddedSe
         serviceServlet.setLoadOnStartup(2);
       }
     }
-  }
-
-  @Override
-  public void customize(ConfigurableEmbeddedServletContainer configurableEmbeddedServletContainer) {
   }
 }
