@@ -36,7 +36,7 @@ public class ODataSchemaCreator {
 
         String namespace = pui.getPersistenceUnitName();
 
-        if (namespace.equalsIgnoreCase(pu)) {
+        if (pu == null || namespace.equalsIgnoreCase(pu)) {
           Properties properties = pui.getProperties();
           properties.setProperty("javax.persistence.jdbc.driver", "org.h2.Driver");
           properties.setProperty("javax.persistence.jdbc.url", "jdbc:h2:mem:test");
@@ -108,7 +108,10 @@ public class ODataSchemaCreator {
           }
 
           if (out instanceof ByteArrayOutputStream) {
-            System.out.println(new String(((ByteArrayOutputStream) out).toByteArray()));
+            System.out.println();
+            System.out.print("[" + namespace + " = ");
+            System.out.print(new String(((ByteArrayOutputStream) out).toByteArray()));
+            System.out.println("]");
           }
         }
       }
@@ -133,7 +136,7 @@ public class ODataSchemaCreator {
 
   public static void main(String[] args) throws Exception {
     if (args.length == 0) {
-      test();
+      create(null,null);
     } else {
       for (int i = 0; i < args.length; i++) {
         create(args[i], null);
