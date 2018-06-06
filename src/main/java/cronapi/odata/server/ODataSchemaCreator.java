@@ -135,10 +135,8 @@ public class ODataSchemaCreator {
     if (args.length == 0) {
       test();
     } else {
-      for (int i = 0; i < args.length; i = i + 2) {
-        if (i + 1 < args.length) {
-          create(args[i], args[i + 1]);
-        }
+      for (int i = 0; i < args.length; i++) {
+        create(args[i], null);
       }
     }
   }
