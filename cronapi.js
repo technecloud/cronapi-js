@@ -2361,8 +2361,9 @@
      * @returns {ObjectType.VOID}
     */
     
-   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
-     navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
+   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType) { 
+    if(mediaType === undefined || mediaType === null) mediaType = 0 ;
+     navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType , mediaType: mediaType });
    };
    
     /**
@@ -2452,20 +2453,37 @@
      * @platform M
      * @name {{readFile}}
      * @nameTags file|arquivo|readFile|lerarquivo
-     * @param {ObjectType.STRING} fileName {{fileName}}
-     * @param {ObjectType.STATEMENTSENDER} success {{success}}
-     * @param {ObjectType.STATEMENTSENDER} error {{error}}
      * @description {{readFileDescription}}
      * @returns {ObjectType.VOID}
     */
-     this.cronapi.cordova.file.readFile = function(fileName, success, error) {
+     this.cronapi.cordova.file.readFile = function( /** @type {ObjectType.STRING} @description {{fileName}} */ fileName,  /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success,  /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */ error, /** @type {ObjectType.STRING} @description {{returnType}} @blockType util_dropdown @keys ARRAYBUFFER|TEXT|BINARYSTRING|DATAURL @values {{ARRAYBUFFER}}|{{TEXT}}|{{BINARYSTRING}}|{{DATAURL}}   */  returnType) {
         window.resolveLocalFileSystemURL(fileName, function (fileEntry) { 
           fileEntry.file(function (file) { 
             var reader = new FileReader();
             reader.onloadend = function (e) {
                 success(this.result);
+            };        
+            switch (returnType) {
+              case 'ARRAYBUFFER': {
+                reader.readAsArrayBuffer(file);
+                break; 
+              }
+              case 'TEXT': {
+                reader.readAsText(file);
+                break; 
+              }
+              case 'BINARYSTRING': {
+                reader.readAsBinaryString(file);
+                break; 
+              }
+              case 'DATAURL': {
+                reader.readAsDataURL(file);
+                break; 
+              }
+              default: {
+                reader.readAsText(file);
+              }
             };
-            reader.readAsText(file);
           }.bind(this),error);
         }.bind(this),error);
      };

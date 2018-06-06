@@ -388,5 +388,7 @@
 	"number":"Número",
 	"undefined" : "Não definido",
 	"function":"Função",
-	"array":"Lista"
+	"array":"Lista",
+	"returnType":"Tipo de Retorno",
+	"mediaType":"Tipo de Mídia"
 }

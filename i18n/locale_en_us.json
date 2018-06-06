@@ -386,5 +386,7 @@
 	"number":"Number",
 	"undefined":"Undefined",
 	"function":"Function",
-	"array":"List"
+	"array":"List",
+	"returnType":"Return Type",
+	"mediaType":"Media Type"
 }
