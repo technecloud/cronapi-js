@@ -778,13 +778,14 @@
    */
   this.cronapi.screen.changeView = function(view, params) {
     try {
-      debugger;
       var queryString = '?';
       var template = '#key#=#value#&';
-      for (var i in Object.keys(params)) {
+      if (typeof params != 'undefined') {
+        for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
           var v = String(Object.values(params[i])[0]);
-           queryString += template.replace('#key#', this.cronapi.internal.Url.encode(k)).replace('#value#', this.cronapi.internal.Url.encode(v));
+          queryString += template.replace('#key#', this.cronapi.internal.Url.encode(k)).replace('#value#', this.cronapi.internal.Url.encode(v));
+        }
       }
       window.location.hash = view + queryString;
     }
