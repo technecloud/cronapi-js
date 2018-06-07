@@ -413,26 +413,11 @@
    * @multilayer true
    */
   this.cronapi.util.downloadFile = function(url) {
-
-    var id = 'IFRAME' + parseInt((Math.random() * 9999999));
-    var iframe;
-    if(document.all) {
-      iframe = window.document.createElement("<iframe name='" + id + "' id='" + id + "'>");
-    }
-    else {
-      iframe = window.document.createElement("iframe");
-      iframe.name = id;
-      iframe.id = id;
-    }
-    iframe.frameBorder = 0;
-    iframe.setAttribute("frameborder", "no");
-    iframe.setAttribute("border", 0);
-    iframe.setAttribute("marginwidth", 0);
-    iframe.setAttribute("marginheight", 0);
-    iframe.width = 0;
-    iframe.height = 0;
-    iframe.src = url;
-    window.document.body.appendChild(iframe);
+	if(window.hostApp){
+		this.cronapi.screen.openUrl(window.hostApp + url, '_blank' ,0,0 );
+	}else{
+		this.cronapi.screen.openUrl(url, '_blank' ,0,0 );
+	};
   };
   
   /**
@@ -585,7 +570,7 @@
         if (field.indexOf('vars.') > -1)
           return eval('this.'+field);
         else
-          return eval(field);
+          return this[field];
       }
       return '';
     }
@@ -897,6 +882,7 @@
    * @type function
    * @name {{showModal}}
    * @nameTags Show| Modal| Exibir| Mostrar
+   * @platform W
    * @description {{showModalDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @multilayer true
@@ -908,7 +894,6 @@
 		$('#'+id).show();
 		}
   };
-  
   
     /**
    * @type function
@@ -924,6 +909,62 @@
 		}catch(e){
         $('#'+id).hide();
 		}
+  };
+  
+  
+    /**
+   * @type function
+   * @name {{showModal}}
+   * @nameTags Show| Modal| Exibir| Mostrar
+   * @description {{showModalDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.showIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal') ) $('#'+id).data('cronapp-modal').remove();
+	    this.cronapi.$scope.$ionicModal.fromTemplateUrl(id, {
+	      scope: this.cronapi.$scope,
+        animation: 'slide-in-up'
+      }).then(function(modal){
+        $('#'+id).data('cronapp-modal', modal);
+        modal.show();
+      })
+  };
+  
+  
+	/**
+   * @type function
+   * @name {{hideModal}}
+   * @nameTags Hide| Modal| Esconder | Fechar
+   * @description {{hideModalDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+    this.cronapi.screen.hideIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal')) {
+         var modal = $('#'+id).data('cronapp-modal');
+         modal.remove();
+        $('#'+id).data('cronapp-modal', null);
+      }
+  };
+  
+  /**
+   * @type function
+   * @name {{isShownIonicModal}}
+   * @nameTags isShown| Modal| Exibido
+   * @description {{isShownIonicModallDesc}}
+   * @platform M
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+    this.cronapi.screen.isShownIonicModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      if($('#'+id).data('cronapp-modal')) {
+         var modal = $('#'+id).data('cronapp-modal');
+         return modal.isShown();
+      }
+      return false;
   };
 
 
@@ -1013,6 +1054,21 @@
   this.cronapi.screen.logout = function() {
     if(this.cronapi.$scope.logout != undefined)
     this.cronapi.$scope.logout();
+  };
+  
+      /**
+   * @type function
+   * @name {{refreshDatasource}}
+   * @nameTags refresh|datasource|atualizar|fonte
+   * @description {{refreshDatasourceDescription}}
+   * @param {ObjectType.STRING} datasource {{datasource}}
+   * @multilayer true
+   */
+  this.cronapi.screen.refreshDatasource = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource , /** @type {ObjectType.BOOLEAN} @description {{keepFilters}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  keepFilters ) {
+    if(keepFilters == true || keepFilters == 'true' ){
+    this[datasource].search(this[datasource].terms , this[datasource].caseInsensitive);
+    }else
+    this[datasource].search("", this[datasource].caseInsensitive);
   };
 
   /**
@@ -1770,6 +1826,21 @@
    this.cronapi.logic.isNullOrEmpty = function(/** @type {ObjectType.OBJECT} @description */ value) {
      return (this.cronapi.logic.isNull(value) || this.cronapi.logic.isEmpty(value));
    }
+   
+   
+   /**
+   * @type function
+    * @name {{}}
+    * @nameTags typeOf
+    * @description {{typeOfDescription}}
+    * @returns {ObjectType.OBJECT}
+    * @displayInline true
+   */
+   this.cronapi.logic.typeOf = function(/** @type {ObjectType.OBJECT} @description {{value}} */ value, /** @type {ObjectType.OBJECT} @description {{typeOf}} @blockType util_dropdown @keys string|number|undefined|object|function|array  @values {{string}}|{{number}}|{{undefined}}|{{object}}|{{function}}|{{array}}  */ type) {
+     if(type==='array') return Array.isArray(value);
+     if(type==='object' && Array.isArray(value)) return false;
+     return (typeof(value) === type);
+   }
   
   this.cronapi.i18n = {};
 
@@ -2157,11 +2228,22 @@
     * @returns {ObjectType.OBJECT}
    */
    this.cronapi.object.getProperty = function(object, property) {
-     var split = property.split('.');
-     for (var i = 0; i < split.length; i++){ 
-       object = object[split[i]];
-     }
-     return object;
+	   
+	var splited = property.split('.');
+    if(splited.length > 1 ){
+    var recursiva = function(object, params , idx) {
+       if (!idx) idx = 0;
+       if(object[params[idx]] === undefined)
+       object[params[idx]] = {};
+       idx++;
+       if (idx < params.length)
+         return recursiva(object[params[idx -1]], params , idx);
+    	else return object[params[idx-1]];
+    };
+    return recursiva(object , splited , 0);
+    }else{
+      return object[property];
+    }
    };
    
     /**
@@ -2175,11 +2257,33 @@
     * @returns {ObjectType.VOID}
    */
    this.cronapi.object.setProperty = function(object, property, value) {
-     var split = property.split('.');
-     for (var i = 0; i < split.length; i++){ 
-       object = object[split[i]];
-     }
-     object = value;
+	var splited = property.split('.');
+    if(splited.length > 1 ){
+    var recursiva = function(object, params,value , idx) {
+       if (!idx) idx = 0;
+       if(object[params[idx]] === undefined)
+       object[params[idx]] = {};
+       idx++;
+       if (idx < params.length)
+         recursiva(object[params[idx -1]], params, value , idx);
+    	else object[params[idx-1]] = value;
+    };
+    recursiva(object , splited , value, 0);
+    }else{
+      object[property] = value;
+    }
+   };
+   
+	/**
+    * @type function
+    * @name {{createObject}}
+	* @description {{createObjectDescription}}
+    * @nameTags object
+    * @param {ObjectType.STRING} string {{string}}
+    * @returns {ObjectType.OBJECT}
+   */
+   this.cronapi.object.createObjectFromString = function(string) {
+    return JSON.parse(string);
    };  
     
    /**
@@ -2258,8 +2362,9 @@
      * @returns {ObjectType.VOID}
     */
     
-   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType) {
-     navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType });
+   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType) { 
+    if(mediaType === undefined || mediaType === null) mediaType = 0 ;
+     navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType , mediaType: mediaType });
    };
    
     /**
@@ -2349,20 +2454,37 @@
      * @platform M
      * @name {{readFile}}
      * @nameTags file|arquivo|readFile|lerarquivo
-     * @param {ObjectType.STRING} fileName {{fileName}}
-     * @param {ObjectType.STATEMENTSENDER} success {{success}}
-     * @param {ObjectType.STATEMENTSENDER} error {{error}}
      * @description {{readFileDescription}}
      * @returns {ObjectType.VOID}
     */
-     this.cronapi.cordova.file.readFile = function(fileName, success, error) {
+     this.cronapi.cordova.file.readFile = function( /** @type {ObjectType.STRING} @description {{fileName}} */ fileName,  /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success,  /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */ error, /** @type {ObjectType.STRING} @description {{returnType}} @blockType util_dropdown @keys ARRAYBUFFER|TEXT|BINARYSTRING|DATAURL @values {{ARRAYBUFFER}}|{{TEXT}}|{{BINARYSTRING}}|{{DATAURL}}   */  returnType) {
         window.resolveLocalFileSystemURL(fileName, function (fileEntry) { 
           fileEntry.file(function (file) { 
             var reader = new FileReader();
             reader.onloadend = function (e) {
                 success(this.result);
+            };        
+            switch (returnType) {
+              case 'ARRAYBUFFER': {
+                reader.readAsArrayBuffer(file);
+                break; 
+              }
+              case 'TEXT': {
+                reader.readAsText(file);
+                break; 
+              }
+              case 'BINARYSTRING': {
+                reader.readAsBinaryString(file);
+                break; 
+              }
+              case 'DATAURL': {
+                reader.readAsDataURL(file);
+                break; 
+              }
+              default: {
+                reader.readAsText(file);
+              }
             };
-            reader.readAsText(file);
           }.bind(this),error);
         }.bind(this),error);
      };
@@ -2536,7 +2658,7 @@
       * @name {{executeSql}}
       * @nameTags executesql
       * @param {ObjectType.STRING} text {{text}}
-      * @param {ObjectType.OBJECT} array {{array}}
+      * @param {ObjectType.OBJECT} array {{arrayParams}}
       * @param {ObjectType.STATEMENTSENDER} success {{success}}
       * @param {ObjectType.STATEMENTSENDER} error {{error}}
       * @description {{executeSqlDescription}}
