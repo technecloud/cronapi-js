@@ -43,12 +43,22 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
-public class Var implements Comparable<Var>, JsonSerializable {
+public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer {
+
+  @Override
+  public String serializeAsJson() {
+    try {
+      return new CronapiConfigurator().objectMapperBuilder().build().writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public static class JsonAdapter {
 
@@ -467,21 +477,20 @@ public class Var implements Comparable<Var>, JsonSerializable {
       if (_object instanceof JsonElement) {
         return (JsonElement) _object;
       } else {
-
         try {
-          String s = null;
-          if (_object instanceof String || _object instanceof InputStream) {
+          if (_object instanceof String) {
+            return new Gson().fromJson(_object.toString(), JsonElement.class);
+          } else if (_object instanceof InputStream) {
             return new Gson().fromJson(getObjectAsString(), JsonElement.class);
           } else {
             ObjectMapper mapper = new ObjectMapper();
-            s = mapper.writeValueAsString(_object);
+            String json = mapper.writeValueAsString(_object);
+            return new Gson().fromJson(json, JsonElement.class);
           }
-          return new Gson().fromJson(s, JsonElement.class);
         } catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }
-
     }
 
     return null;
@@ -646,7 +655,9 @@ public class Var implements Comparable<Var>, JsonSerializable {
       return "";
 
     Object object = getObject();
-    if (object instanceof InputStream) {
+    if (object == null) {
+      return "";
+    } else if (object instanceof InputStream) {
       try {
         return org.apache.commons.io.IOUtils.toString((InputStream) getObject());
       } catch (IOException e) {
@@ -660,6 +671,8 @@ public class Var implements Comparable<Var>, JsonSerializable {
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
+    } else if (object instanceof String) {
+      return object.toString();
     }
 
     return this.getObjectAsJson().toString();
