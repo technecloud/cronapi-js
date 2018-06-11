@@ -11,6 +11,11 @@ import cronapi.util.Operations;
 public class CronapiClassLoader extends ClassLoader {
   
   private Hashtable<String, Class<?>> classes = new Hashtable<>();
+
+  public void addClass(String className, byte[] classData) {
+    Class<?> clazz = defineClass(className, classData, 0, classData.length);
+    classes.put(className, clazz);
+  }
   
   public CronapiClassLoader() {
     super(CronapiClassLoader.class.getClassLoader()); // calls the parent class loader's constructor

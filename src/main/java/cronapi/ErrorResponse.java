@@ -161,6 +161,11 @@ public class ErrorResponse {
     
     return false;
   }
+
+  public static RuntimeException createException(Throwable ex, String method) {
+    final String message = getExceptionMessage(ex, method);
+    return new RuntimeException(message, ex);
+  }
   
   public static String getExceptionMessage(Throwable ex, String method) {
     
