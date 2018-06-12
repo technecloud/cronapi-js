@@ -11,8 +11,8 @@ public class OperationsTest {
 
   @Test
   public void checkMethodIsNull() {
-    Assert.assertEquals(Operations.isNull(Var.VAR_EMPTY), false);
-    Assert.assertEquals(Operations.isNull(null), true);
+    Assert.assertFalse(Operations.isNull(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isNull(null).getObjectAsBoolean());
   }
 
   @Test
@@ -20,10 +20,10 @@ public class OperationsTest {
     List<Object> list = new ArrayList<>();
     list.add(new Object());
     Var listVar = Var.valueOf(list);
-    Assert.assertEquals(Operations.isNullOrEmpty(listVar), false);
-    Assert.assertEquals(Operations.isNullOrEmpty(Var.VAR_EMPTY), true);
-    Assert.assertEquals(Operations.isNullOrEmpty(null), true);
-    Assert.assertEquals(Operations.isNullOrEmpty(Var.VAR_ZERO), false);
+    Assert.assertFalse(Operations.isNullOrEmpty(listVar).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isNullOrEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isNullOrEmpty(null).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isNullOrEmpty(Var.VAR_ZERO).getObjectAsBoolean());
   }
 
   @Test
@@ -31,10 +31,10 @@ public class OperationsTest {
     List<Object> list = new ArrayList<>();
     list.add(new Object());
     Var listVar = Var.valueOf(list);
-    Assert.assertEquals(Operations.isEmpty(listVar), false);
-    Assert.assertEquals(Operations.isEmpty(Var.VAR_EMPTY), true);
-    Assert.assertEquals(Operations.isEmpty(null), false);
-    Assert.assertEquals(Operations.isEmpty(Var.VAR_ZERO), false);
+    Assert.assertFalse(Operations.isEmpty(listVar).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isEmpty(null).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isEmpty(Var.VAR_ZERO).getObjectAsBoolean());
   }
 
 }
