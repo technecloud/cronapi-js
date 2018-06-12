@@ -12,7 +12,7 @@ public class OperationsTest {
   @Test
   public void checkMethodIsNull() {
     Assert.assertFalse(Operations.isNull(Var.VAR_EMPTY).getObjectAsBoolean());
-    Assert.assertFalse(Operations.isNull(null).getObjectAsBoolean());
+    Assert.assertTrue(Operations.isNull(null).getObjectAsBoolean());
   }
 
   @Test
@@ -21,8 +21,8 @@ public class OperationsTest {
     list.add(new Object());
     Var listVar = Var.valueOf(list);
     Assert.assertFalse(Operations.isNullOrEmpty(listVar).getObjectAsBoolean());
-    Assert.assertFalse(Operations.isNullOrEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
-    Assert.assertFalse(Operations.isNullOrEmpty(null).getObjectAsBoolean());
+    Assert.assertTrue(Operations.isNullOrEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertTrue(Operations.isNullOrEmpty(null).getObjectAsBoolean());
     Assert.assertFalse(Operations.isNullOrEmpty(Var.VAR_ZERO).getObjectAsBoolean());
   }
 
@@ -32,7 +32,7 @@ public class OperationsTest {
     list.add(new Object());
     Var listVar = Var.valueOf(list);
     Assert.assertFalse(Operations.isEmpty(listVar).getObjectAsBoolean());
-    Assert.assertFalse(Operations.isEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertTrue(Operations.isEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
     Assert.assertFalse(Operations.isEmpty(null).getObjectAsBoolean());
     Assert.assertFalse(Operations.isEmpty(Var.VAR_ZERO).getObjectAsBoolean());
   }
