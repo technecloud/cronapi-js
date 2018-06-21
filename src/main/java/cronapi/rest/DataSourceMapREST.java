@@ -53,10 +53,10 @@ public class DataSourceMapREST {
           }
 
         }
-        write(out, mapped);
       }
     }
-    else if (mapped != null) {
+
+    if (mapped != null) {
       write(out, mapped);
     }
 
