@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class DataSourceMapREST {
 
   private static Map<String, DataSourceDetail> mapped;
+  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
+      .indexOf("-agentlib:jdwp") > 0;
 
   /**
    * Construtor
@@ -34,14 +37,19 @@ public class DataSourceMapREST {
     if(mapped == null) {
       synchronized(DataSourceMapREST.class) {
         if(mapped == null) {
-          mapped = new HashMap<String, DataSourceDetail>();
-
+          HashMap<String, DataSourceDetail> mappedAllDs = new HashMap<String, DataSourceDetail>();
           JsonObject customQuery = QueryManager.getJSON();
-
           for (Map.Entry<String, JsonElement> entry : customQuery.entrySet()) {
             String guid = entry.getKey();
             DataSourceDetail detail = this.getDetail(guid, entry.getValue().getAsJsonObject());
-            mapped.put(guid, detail);
+            mappedAllDs.put(guid, detail);
+          }
+
+          if(!isDebug) {
+            mapped = mappedAllDs;
+          }
+          else {
+            write(out, mappedAllDs);
           }
 
         }
