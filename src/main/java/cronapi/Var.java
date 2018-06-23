@@ -840,19 +840,23 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    */
   public int size() {
     switch (getType()) {
+      case NULL:
+        return 0;
       case LIST: {
         return ((LinkedList<Var>) getObject()).size();
       }
       default: {
         if (getObject() instanceof Map) {
           return ((Map) getObject()).size();
-        } else if (getObject() instanceof DataSource) {
+        }
+
+        else if (getObject() instanceof DataSource) {
           return ((DataSource) getObject()).getPage().getContent().size();
         }
       }
     }
 
-    return 0;
+    return getObjectAsString().length();
   }
 
   public int length() {
