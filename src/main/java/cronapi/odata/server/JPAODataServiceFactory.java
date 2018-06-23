@@ -15,10 +15,6 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
   private final EntityManagerFactory entityManagerFactory;
   private final String namespace;
 
-  private static ODataService oDataService;
-  private static DatasourceExtension datasourceExtension;
-  private static QueryExtensionEntityListener queryExtensionEntityListener;
-
   public JPAODataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
@@ -30,40 +26,14 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
     context.setEntityManagerFactory(entityManagerFactory);
     context.setPersistenceUnitName(namespace);
 
-    if (Operations.IS_DEBUG) {
-      context.setJPAEdmExtension(new DatasourceExtension(context));
-      context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
-    } else {
-      if (datasourceExtension == null) {
-        synchronized (JPAODataServiceFactory.this) {
-          if (datasourceExtension == null) {
-            datasourceExtension = new DatasourceExtension(context);
-            queryExtensionEntityListener = new QueryExtensionEntityListener();
-          }
-        }
-      }
-
-      context.setJPAEdmExtension(datasourceExtension);
-      context.setoDataJPAQueryExtensionEntityListener(queryExtensionEntityListener);
-    }
+    context.setJPAEdmExtension(new DatasourceExtension(context));
+    context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
 
     return context;
   }
 
   @Override
   public ODataService createODataSingleProcessorService(EdmProvider provider, ODataSingleProcessor processor) {
-    if (Operations.IS_DEBUG) {
-      return super.createODataSingleProcessorService(provider, processor);
-    }
-
-    if (oDataService == null) {
-      synchronized (JPAODataServiceFactory.this) {
-        if (oDataService == null) {
-          oDataService = super.createODataSingleProcessorService(provider, processor);
-        }
-      }
-    }
-
-    return oDataService;
+    return super.createODataSingleProcessorService(provider, processor);
   }
 }
