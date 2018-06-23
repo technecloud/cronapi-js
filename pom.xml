@@ -66,6 +66,11 @@
       <name>artifactory-cronapp-snapshot</name>
       <url>https://artifactory.cronapp.io/libs-snapshot</url>
     </repository>
+    <repository>
+      <id>public-snapshots</id>
+      <name>artifactory.cronapp.io-snapshots</name>
+      <url>https://artifactory.cronapp.io/public-snapshot</url>
+    </repository>
   </repositories>
   <dependencies>
     <dependency>
