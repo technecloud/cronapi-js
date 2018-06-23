@@ -19,6 +19,7 @@ public class OperationsTest {
     Assert.assertTrue(Operations.isNull(Var.valueOf(null)).getObjectAsBoolean());
     Assert.assertTrue(Operations.isNull(Var.VAR_NULL).getObjectAsBoolean());
     Assert.assertFalse(Operations.isNull(Var.valueOf(new ArrayList<>())).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isNull(Var.valueOf(new HashMap<>())).getObjectAsBoolean());
   }
 
   @Test
@@ -46,6 +47,8 @@ public class OperationsTest {
 
   @Test
   public void checkMethodIsEmpty() {
+    Assert.assertTrue(Operations.isEmpty(Var.valueOf(new ArrayList<>())).getObjectAsBoolean());
+
     List<Object> list = new ArrayList<>();
     list.add(new Object());
     Var listVar = Var.valueOf(list);
@@ -53,6 +56,16 @@ public class OperationsTest {
     Assert.assertTrue(Operations.isEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
     Assert.assertTrue(Operations.isEmpty(null).getObjectAsBoolean());
     Assert.assertFalse(Operations.isEmpty(Var.VAR_ZERO).getObjectAsBoolean());
+
+    Assert.assertTrue(Operations.isEmpty(Var.valueOf(" ")).getObjectAsBoolean());
+
+    Assert.assertTrue(Operations.isEmpty(Var.valueOf(new HashMap<>())).getObjectAsBoolean());
+
+    Map map = new HashMap();
+    map.put("chave", new Object());
+    Var mapVar = Var.valueOf(list);
+
+    Assert.assertFalse(Operations.isEmpty(mapVar).getObjectAsBoolean());
   }
 
 }
