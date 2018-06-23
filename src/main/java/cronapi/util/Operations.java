@@ -1,9 +1,6 @@
 package cronapi.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -775,6 +772,11 @@ public class Operations {
       @ParamMetaData(type = ObjectType.STRING, description = "{{location}}") Var location
   ) throws Exception {
     RestClient.getRestClient().getResponse().sendRedirect(location.getObjectAsString());
+  }
+
+  @CronapiMetaData(type = "function", name = "{{createDownloadURL}}", nameTags = { "download", "url" }, description = "{{createDownloadURLDescription}}")
+  public static Var createDownloadLink(@ParamMetaData(type = ObjectType.STRING, description = "{{createDownloadURLParam}}") Var file) {
+	    return Var.valueOf(DownloadREST.getDownloadUrl(new File(file.toString())));
   }
 
 }

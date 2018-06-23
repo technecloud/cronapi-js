@@ -1,22 +1,20 @@
 package cronapi.io;
 
 import cronapi.i18n.Messages;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.net.URL;
+
+import java.io.*;
+import java.net.*;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.rest.DownloadREST;
 import cronapi.util.Callback;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Classe que representa ...
@@ -420,44 +418,67 @@ public class Operations {
 							ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public static final Var downloadFileFromUrl(Var urlAddress, Var path, Var name, Var extension) {
 		try {
-			if (path.equals(Var.VAR_NULL) && !name.equals(Var.VAR_NULL)) {
-				java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
-				java.io.InputStream is = url.openStream();
-				java.io.FileOutputStream fos = new java.io.FileOutputStream(
-						name.getObjectAsString() + extension.getObjectAsString());
-				int umByte = 0;
-				while ((umByte = is.read()) != -1) {
-					fos.write(umByte);
-				}
-				is.close();
-				fos.close();
-				return new Var(true);
-			} else if (!name.equals(Var.VAR_NULL)) {
+			if (path.isNull() && !name.isNull()) {
+        return downloadUrltoFile(urlAddress, Var.valueOf(name.getObjectAsString() + extension.getObjectAsString()));
+			} else if (!name.isNull()) {
+
 				String pathLocal = path.getObjectAsString();
 				java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
 				if (!pathLocal.endsWith(File.separator))
 					pathLocal += File.separator;
 
-				java.io.InputStream is = url.openStream();
-				java.io.FileOutputStream fos = new java.io.FileOutputStream(
-						pathLocal + name.getObjectAsString() + extension.getObjectAsString());
-				int umByte = 0;
-				while ((umByte = is.read()) != -1) {
-					fos.write(umByte);
-				}
-				is.close();
-				fos.close();
-				return new Var(true);
+        return downloadUrltoFile(urlAddress, Var.valueOf(pathLocal + name.getObjectAsString() + extension.getObjectAsString()));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		return new Var(false);
 	}
 
+	public static void resolveAuthentication(String urlAddress, URLConnection urlConnection) {
+    Pattern pattern = Pattern.compile("https?:\\/\\/(.*?):(.*?)@.*");
+    Matcher matcher = pattern.matcher(urlAddress);
+
+    if (matcher.find()) {
+      try {
+        String user = URLDecoder.decode(matcher.group(1), "UTF8");
+        String pass = URLDecoder.decode(matcher.group(2), "UTF8");
+        String header = "Basic " + new String(Base64.getEncoder().encode((user+":"+pass).getBytes()));
+        urlConnection.addRequestProperty("Authorization", header);
+      } catch (UnsupportedEncodingException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+  }
+
+  @CronapiMetaData(type = "function", name = "{{downloadUrltoFile}}", nameTags = {
+      "download", "url" }, description = "{{functionDownloadUrltoFile}}", returnType = ObjectType.BOOLEAN)
+  public static final Var downloadUrltoFile(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var urlAddress,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{filePathToSaveURL}}") Var file) throws Exception {
+    java.net.URL url = new java.net.URL(urlAddress.getObjectAsString());
+
+    URLConnection urlConnection = url.openConnection();
+    resolveAuthentication(urlAddress.getObjectAsString(), urlConnection);
+
+    try (java.io.InputStream is = urlConnection.getInputStream()) {
+      File outFile = new File(file.getObjectAsString());
+      if (outFile.exists()) {
+        outFile.delete();
+      }
+
+      try (java.io.FileOutputStream fos = new java.io.FileOutputStream(outFile)) {
+        IOUtils.copy(is, fos);
+      }
+    }
+
+    return new Var(true);
+  }
+
   /**
-   *  Ler Todo Arquivo Definindo Charset  
+   *  Ler Todo Arquivo Definindo Charset
    */
   @CronapiMetaData(type = "function", name = "{{readAllFileWithCharset}}", nameTags = {
       "fileReadContentWithCharset" }, description = "{{functionToReadAllFileWithCharset}}", params = {

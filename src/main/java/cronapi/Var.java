@@ -1245,7 +1245,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public Boolean isNull() {
-    return (VAR_NULL == getObject());
+    return (null == getObject());
   }
 
   public enum Type {
