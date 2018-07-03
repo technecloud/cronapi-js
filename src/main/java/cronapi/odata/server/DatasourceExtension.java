@@ -2,8 +2,8 @@ package cronapi.odata.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import cronapi.AppConfig;
 import cronapi.QueryManager;
-import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
@@ -42,6 +42,16 @@ public class DatasourceExtension implements JPAEdmExtension {
   public void extendJPAEdmSchema(JPAEdmSchemaView view) {
     Schema edmSchema = view.getEdmSchema();
 
+    for (EntitySet set : edmSchema.getEntityContainers().get(0).getEntitySets()) {
+      set.setShowMetadata(AppConfig.exposeLocalEntities());
+    }
+
+    for (EntityType type : edmSchema.getEntityTypes()) {
+      type.setShowMetadata(AppConfig.exposeLocalEntities());
+    }
+
+    List<EntitySet> queryDatasource = new LinkedList<>();
+
     JsonObject queries = QueryManager.getJSON();
     for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
       JsonObject customObj = entry.getValue().getAsJsonObject();
@@ -52,16 +62,38 @@ public class DatasourceExtension implements JPAEdmExtension {
             LinkedList<String> calcFields = new LinkedList<>();
             if (!QueryManager.isNull(customObj.get("calcFields"))) {
               JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
-              for (Map.Entry<String, JsonElement> entryObj: calcObj.entrySet()) {
+              for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
                 calcFields.add(entryObj.getKey());
               }
             }
-            createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString(), calcFields);
+            EntitySet set = createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString(), calcFields);
+            if (set != null) {
+              queryDatasource.add(set);
+            }
           } catch (Exception e) {
             e.printStackTrace();
           }
         }
       }
+    }
+
+    if (!AppConfig.exposeLocalEntities()) {
+      edmSchema.getEntityContainers().get(0).getAssociationSets().clear();
+
+      for (EntityType type : edmSchema.getEntityTypes()) {
+        if (type.getNavigationProperties() != null) {
+          type.getNavigationProperties().clear();
+        }
+      }
+    }
+  }
+
+  private static boolean isEdmSimpleTypeKind(Class fieldClass) {
+    try {
+      JPATypeConverter.convertToEdmSimpleType(fieldClass, null);
+      return false;
+    } catch (ODataJPAModelException e) {
+      return true;
     }
   }
 
@@ -93,9 +125,19 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
+  private Property findProperty(EntityType entityType, String name) {
+    for (Property item : entityType.getProperties()) {
+      if (item.getName().equals(name)) {
+        return item;
+      }
+    }
+
+    return null;
+  }
+
   private void addCalcFields(EntityType newType, List<String> addFields) {
     if (addFields != null) {
-      for (String field: addFields) {
+      for (String field : addFields) {
         SimpleProperty property = new SimpleProperty();
         property.setType(EdmSimpleTypeKind.Auto);
         property.setName(field);
@@ -113,7 +155,55 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private void createDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
+  private void addProperty(Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties) {
+
+    boolean isComplex = isEdmSimpleTypeKind(type);
+
+    if (isComplex) {
+      EntityType complexType = findEntityType(edmSchema, type.getSimpleName());
+      if (complexType != null) {
+
+        String internalExpression = expression.substring(expression.indexOf(".")+1);
+        List<PropertyRef> keys = complexType.getKey().getKeys();
+        for (PropertyRef key: keys) {
+          Property prop = findProperty(complexType, key.getName());
+          addProperty(edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), orgName, internalExpression+"."+key.getName(), expression+"."+key.getName(), properties);
+        }
+      }
+
+    } else {
+
+      SimpleProperty property = new SimpleProperty();
+
+      property.setType(toEdmSimpleTypeKind(type));
+      property.setName(orgName);
+
+      int total = 0;
+      String name = orgName;
+      for (Property prop : properties) {
+        if (prop.getName().equals(name)) {
+          total++;
+          name = property.getName() + "_" + total;
+        }
+      }
+
+      if (total > 0) {
+        property.setName(name);
+      }
+
+      JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+      mapping.setInternalExpression(expression);
+      mapping.setInternalName(internalName);
+      mapping.setJPAType(type);
+      mapping.setVirtualAccess(true);
+
+      property.setMapping(mapping);
+
+      properties.add(property);
+    }
+  }
+
+  private EntitySet createDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
     EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
@@ -131,7 +221,7 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       if (reportQuery.getItems().size() == 1 && reportQuery.getItems().get(0).getDescriptor() != null) {
         entity = reportQuery.getItems().get(0).getDescriptor().getJavaClass().getSimpleName();
-        createEntityDataSource(edmSchema, id, entity, addFields);
+        return createEntityDataSource(edmSchema, id, entity, addFields);
       } else {
 
         JPQLExpression jpqlExpression = new JPQLExpression(
@@ -167,7 +257,7 @@ public class DatasourceExtension implements JPAEdmExtension {
           if (expression instanceof ResultVariable) {
             expression = ((ResultVariable) expression).getSelectExpression();
           }
-          SimpleProperty property = new SimpleProperty();
+
           Class type = Object.class;
           if (item.getMapping() != null) {
             type = item.getMapping().getField().getType();
@@ -175,31 +265,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             type = item.getDescriptor().getJavaClass();
           }
 
-          property.setType(toEdmSimpleTypeKind(type));
-          property.setName(item.getName());
-
-          int total = 0;
-          String name = item.getName();
-          for (Property prop: properties) {
-            if (prop.getName().equals(name)) {
-              total++;
-              name = property.getName() + "_"+ total;
-            }
-          }
-
-          if (total > 0) {
-            property.setName(name);
-          }
-
-          JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-          mapping.setInternalExpression(expression.toString());
-          mapping.setInternalName(item.getName());
-          mapping.setJPAType(type);
-          mapping.setVirtualAccess(true);
-
-          property.setMapping(mapping);
-
-          properties.add(property);
+          addProperty(edmSchema, type, item.getName(), item.getName(), expression.toString(), properties);
 
           if (findKey(mainType, item.getName()) != null) {
             PropertyRef propertyRef = new PropertyRef();
@@ -238,13 +304,15 @@ public class DatasourceExtension implements JPAEdmExtension {
         addCalcFields(type, addFields);
 
         edmSchema.getEntityTypes().add(type);
+
+        return set;
       }
     } else {
-      createEntityDataSource(edmSchema, id, entity, addFields);
+      return createEntityDataSource(edmSchema, id, entity, addFields);
     }
   }
 
-  private void createEntityDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
+  private EntitySet createEntityDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
 
@@ -262,6 +330,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       EntityType oldType = edmSchema.getEntityType(entity);
 
       EntityType newType = (EntityType) CloneUtils.getClone(oldType);
+      newType.setShowMetadata(true);
       newType.setName(id);
 
       addCalcFields(newType, addFields);
@@ -302,7 +371,11 @@ public class DatasourceExtension implements JPAEdmExtension {
       for (AssociationSet association : addAssociationSet) {
         container.getAssociationSets().add(association);
       }
+
+      return set;
     }
+
+    return null;
   }
 
   @Override

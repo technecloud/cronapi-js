@@ -530,23 +530,25 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   @Override
   public void execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) throws ODataJPARuntimeException {
-    try {
-      JsonObject query = null;
-
+    if (infoView != null) {
       try {
-        query = QueryManager.getQuery(entityType.getName());
+        JsonObject query = null;
+
+        try {
+          query = QueryManager.getQuery(entityType.getName());
+        } catch (Exception e) {
+          //No Command
+        }
+
+        if (query != null) {
+          QueryManager.executeEvent(query, data, type);
+        }
+
+        ((UriInfoImpl) infoView).setClientCallbacks(getClientCallbacks());
+
       } catch (Exception e) {
-        //No Command
+        throw new RuntimeException(e);
       }
-
-      if (query != null) {
-        QueryManager.executeEvent(query, data, type);
-      }
-
-      ((UriInfoImpl)infoView).setClientCallbacks(getClientCallbacks());
-
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
   }
 }
