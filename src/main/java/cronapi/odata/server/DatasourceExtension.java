@@ -263,13 +263,21 @@ public class DatasourceExtension implements JPAEdmExtension {
             type = item.getMapping().getField().getType();
           } else if (item.getDescriptor() != null) {
             type = item.getDescriptor().getJavaClass();
+          } else if (item.getResultType() != null){
+            type = item.getResultType();
           }
 
-          addProperty(edmSchema, type, item.getName(), item.getName(), expression.toString(), properties);
+          String name = item.getName();
 
-          if (findKey(mainType, item.getName()) != null) {
+          if (name == null || name.isEmpty()) {
+            name = "expression";
+          }
+
+          addProperty(edmSchema, type, name, name, expression.toString(), properties);
+
+          if (findKey(mainType, name) != null) {
             PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(item.getName());
+            propertyRef.setName(name);
             propertyRefList.add(propertyRef);
             keysSet = true;
           }

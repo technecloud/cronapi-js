@@ -99,6 +99,16 @@ public class DataSourceMapREST {
 
       out.println(curr);
 
+      if (!v.customId.equals(k)) {
+        curr = String.format("window.dataSourceMap[\"%s\"] = { customId: \"%s\", serviceUrl: \"%s\", serviceUrlODATA: \"%s\" };",
+            v.customId,
+            v.customId,
+            v.serviceUrl,
+            v.serviceUrlODATA
+        );
+
+        out.println(curr);
+      }
     });
   }
 
