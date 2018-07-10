@@ -166,10 +166,10 @@ public class RestClient {
 
 	public HttpServletRequest getRequest() {
 		if (request != null) {
-		  return request;
-    } else {
-      return((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-    }
+			return request;
+		} else {
+			return RequestContextHolder.getRequestAttributes() != null ? ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest() : null;
+		}
 	}
 
   public void setResponse(HttpServletResponse response) {
@@ -177,11 +177,11 @@ public class RestClient {
   }
 
 	public HttpServletResponse getResponse() {
-    if (response != null) {
-      return response;
-    } else {
-      return((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-    }
+		if (response != null) {
+			return response;
+		} else {
+			return RequestContextHolder.getRequestAttributes() != null ? ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse() : null;
+		}
 	}
 
 	public String getParameter(String key) {
