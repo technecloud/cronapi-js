@@ -1,4 +1,4 @@
-# CronApi JS
+# CronApi Js
 Javascript library for CronApp's users
 
 ## Install
