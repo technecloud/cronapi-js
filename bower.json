@@ -1,6 +1,6 @@
 {
   "name": "cronapi-js",
-  "version": "develop",
+  "version": "1.23.0",
   "homepage": "https://github.com/technecloud/cronapi-js",
   "authors": [
     "Cronapp <suporte@cronapp.io>"
