@@ -1,3 +1,10 @@
+package cronapi.logic;
+
+import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
+import cronapi.Var;
 
 @CronapiMetaData(category = CategoryType.LOGIC, categoryTags = {"Lógica", "Logic"})
 public class Operations {
@@ -21,6 +28,6 @@ public class Operations {
       "isEmptyFunction"}, description = "{{isEmptyDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
   public static final Var isEmpty(
       @ParamMetaData(type = ObjectType.OBJECT, description = "{{parameter}}") Var var) {
-    return var.valueOf(var.isEmpty()) ;
+    return var.valueOf(var.isEmpty());
   }
 }

@@ -206,6 +206,11 @@ public class Var implements Comparable<Var>, JsonSerializable {
     return Var.valueOf(map);
   }
 
+  public Var put(Object key, Object value) {
+    getObjectAsMap().put(key.toString(), Var.valueOf(value));
+    return this;
+  }
+
   public static Var newList() {
     return new Var(new LinkedList<>());
   }
@@ -1216,7 +1221,19 @@ public class Var implements Comparable<Var>, JsonSerializable {
   }
 
   public Boolean isNull() {
-    return (VAR_NULL == getObject());
+    return (_object == null);
+  }
+
+  public Boolean isEmpty() {
+    if (getType() == Type.STRING) {
+      return getObjectAsString().trim().isEmpty();
+    }
+
+    return size() == 0;
+  }
+
+  public Boolean isEmptyOrNull() {
+    return isNull() || isEmpty();
   }
 
   public enum Type {
