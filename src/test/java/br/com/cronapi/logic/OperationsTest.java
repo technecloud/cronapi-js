@@ -32,6 +32,7 @@ public class OperationsTest {
     Assert.assertFalse(Operations.isNullOrEmpty(listVar).getObjectAsBoolean());
 
     Assert.assertTrue(Operations.isNullOrEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertTrue(Operations.isNullOrEmpty(Var.valueOf(null)).getObjectAsBoolean());
     Assert.assertFalse(Operations.isNullOrEmpty(Var.VAR_ZERO).getObjectAsBoolean());
 
     Assert.assertTrue(Operations.isNullOrEmpty(Var.valueOf(new HashMap<>())).getObjectAsBoolean());
@@ -52,6 +53,7 @@ public class OperationsTest {
     Var listVar = Var.valueOf(list);
     Assert.assertFalse(Operations.isEmpty(listVar).getObjectAsBoolean());
     Assert.assertTrue(Operations.isEmpty(Var.VAR_EMPTY).getObjectAsBoolean());
+    Assert.assertFalse(Operations.isEmpty(null).getObjectAsBoolean());
     Assert.assertFalse(Operations.isEmpty(Var.VAR_ZERO).getObjectAsBoolean());
 
     Assert.assertTrue(Operations.isEmpty(Var.valueOf(" ")).getObjectAsBoolean());

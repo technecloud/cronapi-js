@@ -17,7 +17,7 @@ public class Operations {
       "isNullFunction"}, description = "{{isNullDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
   public static final Var isNull(
       @ParamMetaData(type = ObjectType.OBJECT, description = "{{parameter}}") Var var) {
-    return Var.valueOf(var.isNull());
+    return Var.valueOf(var == null ? true : Var.valueOf(var.isNull()));
   }
 
   @CronapiMetaData(type = "function", name = "{{isNullOrEmptyName}}", nameTags = {
@@ -25,14 +25,14 @@ public class Operations {
   public static final Var isNullOrEmpty(
       @ParamMetaData(type = ObjectType.OBJECT, description = "{{parameter}}") Var var) {
 
-    return Var.valueOf(var.isEmptyOrNull());
+    return Var.valueOf(var == null ? true : var.isEmptyOrNull());
   }
 
   @CronapiMetaData(type = "function", name = "{{isEmptyName}}", nameTags = {
       "isEmptyFunction"}, description = "{{isEmptyDescription}}", displayInline = true, returnType = ObjectType.BOOLEAN)
   public static final Var isEmpty(
       @ParamMetaData(type = ObjectType.OBJECT, description = "{{parameter}}") Var var) {
-    return var.valueOf(var.isEmpty()) ;
+    return var.valueOf(var == null ? false : var.isEmpty()) ;
   }
 
 }
