@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.QueryManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
@@ -155,7 +156,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private void addProperty(Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties) {
+  private SimpleProperty addProperty(Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
 
@@ -176,8 +177,22 @@ public class DatasourceExtension implements JPAEdmExtension {
       SimpleProperty property = new SimpleProperty();
 
       property.setType(toEdmSimpleTypeKind(type));
-      property.setName(orgName);
 
+      boolean contains = false;
+      for (Property prop : properties) {
+        if (prop.getName().equals(orgName)) {
+          contains = true;
+          break;
+        }
+      }
+
+      if (contains) {
+        if (StringUtils.countMatches(expression, ".") > 1) {
+          orgName = expression.substring(expression.indexOf(".")+1).replace(".", "_");
+        }
+      }
+
+      property.setName(orgName);
       int total = 0;
       String name = orgName;
       for (Property prop : properties) {
@@ -200,7 +215,11 @@ public class DatasourceExtension implements JPAEdmExtension {
       property.setMapping(mapping);
 
       properties.add(property);
+
+      return property;
     }
+
+    return null;
   }
 
   private EntitySet createDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
@@ -273,13 +292,15 @@ public class DatasourceExtension implements JPAEdmExtension {
             name = "expression";
           }
 
-          addProperty(edmSchema, type, name, name, expression.toString(), properties);
+          SimpleProperty added = addProperty(edmSchema, type, name, name, expression.toString(), properties);
 
-          if (findKey(mainType, name) != null) {
-            PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(name);
-            propertyRefList.add(propertyRef);
-            keysSet = true;
+          if (added != null) {
+            if (findKey(mainType, added.getName()) != null) {
+              PropertyRef propertyRef = new PropertyRef();
+              propertyRef.setName(name);
+              propertyRefList.add(propertyRef);
+              keysSet = true;
+            }
           }
 
         }
@@ -288,7 +309,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         if (!keysSet || propertyRefList.size() != mainType.getKey().getKeys().size()) {
           propertyRefList.clear();
           canEdit = false;
-          for (ReportItem item : reportQuery.getItems()) {
+          for (Property item : properties) {
             PropertyRef propertyRef = new PropertyRef();
             propertyRef.setName(item.getName());
             propertyRefList.add(propertyRef);
