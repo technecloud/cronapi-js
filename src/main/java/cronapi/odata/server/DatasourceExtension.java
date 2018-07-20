@@ -156,7 +156,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private SimpleProperty addProperty(Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties) {
+  private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties, List<PropertyRef> propertyRefList) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
 
@@ -168,28 +168,26 @@ public class DatasourceExtension implements JPAEdmExtension {
         List<PropertyRef> keys = complexType.getKey().getKeys();
         for (PropertyRef key: keys) {
           Property prop = findProperty(complexType, key.getName());
-          addProperty(edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), orgName, internalExpression+"."+key.getName(), expression+"."+key.getName(), properties);
+          addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_")+"_"+key.getName(), "[name]."+key.getName(), expression+"."+key.getName(), properties, propertyRefList);
         }
       }
 
     } else {
 
+      int count = StringUtils.countMatches(expression, ".");
+      boolean useExpression = false;
+
+      if (alias == null && count > 1) {
+        useExpression = true;
+      }
+
       SimpleProperty property = new SimpleProperty();
 
       property.setType(toEdmSimpleTypeKind(type));
 
-      boolean contains = false;
-      for (Property prop : properties) {
-        if (prop.getName().equals(orgName)) {
-          contains = true;
-          break;
-        }
-      }
-
-      if (contains) {
-        if (StringUtils.countMatches(expression, ".") > 1) {
-          orgName = expression.substring(expression.indexOf(".")+1).replace(".", "_");
-        }
+      if (useExpression) {
+        orgName = expression.substring(expression.indexOf(".")+1).replace(".", "_");
+        internalName = orgName;
       }
 
       property.setName(orgName);
@@ -208,7 +206,7 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
       mapping.setInternalExpression(expression);
-      mapping.setInternalName(internalName);
+      mapping.setInternalName(internalName.replace("[name]", property.getName()));
       mapping.setJPAType(type);
       mapping.setVirtualAccess(true);
 
@@ -268,12 +266,16 @@ public class DatasourceExtension implements JPAEdmExtension {
         List<Property> properties = new ArrayList<>();
         boolean keysSet = false;
         for (ReportItem item : reportQuery.getItems()) {
+          String alias = null;
           Expression expression = expressions.next();
           if (expression instanceof IdentificationVariable) {
             expression = expression.getParent();
           }
 
           if (expression instanceof ResultVariable) {
+            if (((ResultVariable) expression).getResultVariable() != null) {
+              alias = ((ResultVariable) expression).getResultVariable().toActualText();
+            }
             expression = ((ResultVariable) expression).getSelectExpression();
           }
 
@@ -292,7 +294,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             name = "expression";
           }
 
-          SimpleProperty added = addProperty(edmSchema, type, name, name, expression.toString(), properties);
+          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name, expression.toString(), properties, propertyRefList);
 
           if (added != null) {
             if (findKey(mainType, added.getName()) != null) {
