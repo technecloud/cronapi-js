@@ -103,9 +103,7 @@ public class DataSourceMapREST {
     if ("entityFullName".equals(json.get("sourceType").getAsString())) {
       String entityFullName = json.get("entityFullName").getAsString();
       String namespace = entityFullName.substring(0, entityFullName.indexOf(".entity."));
-      String[] splited = entityFullName.split(Pattern.quote("."));
-      String rootPackage = splited[0];
-      String serviceUrlODATA = String.format(ODataConfiguration.SERVICE_URL + "%s", rootPackage);
+      String serviceUrlODATA = String.format(ODataConfiguration.SERVICE_URL + "%s/%s", namespace, customId);
       detail = new DataSourceDetail(namespace, customId, serviceUrl, serviceUrlODATA, false);
     } else {
       detail = new DataSourceDetail("", customId, serviceUrl, "", false);
