@@ -1,5 +1,7 @@
 package cronapi.odata.server;
 
+import cronapi.ErrorResponse;
+import cronapi.RestClient;
 import cronapi.util.Operations;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.edm.provider.EdmProvider;
@@ -35,5 +37,11 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
   @Override
   public ODataService createODataSingleProcessorService(EdmProvider provider, ODataSingleProcessor processor) {
     return super.createODataSingleProcessorService(provider, processor);
+  }
+
+  @Override
+  public Exception handleException(Throwable throwable) {
+    String msg = ErrorResponse.getExceptionMessage(throwable, RestClient.getRestClient() != null ? RestClient.getRestClient().getMethod() : "GET");
+    return new RuntimeException(msg, throwable);
   }
 }
