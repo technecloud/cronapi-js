@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class AppConfig {
+  public static boolean FORCE_METADATA = false;
   private static JsonObject JSON;
 
   static {
@@ -45,7 +46,37 @@ public class AppConfig {
       return !isNull(elem) && elem.getAsBoolean();
     }
 
-    return false;
+    return true;
+  }
+
+  public static boolean exposeMetadada() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("odata"))) {
+      JsonElement elem = config.get("odata").getAsJsonObject().get("exposeMetadata");
+      return (!isNull(elem) && elem.getAsBoolean()) || FORCE_METADATA;
+    }
+
+    return true;
+  }
+
+  public static String exposeMetadadaSecurity() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("odata"))) {
+      JsonElement elem = config.get("odata").getAsJsonObject().get("exposeMetadadaSecurity");
+      return !isNull(elem) ? elem.getAsString() : null;
+    }
+
+    return null;
+  }
+
+  public static String exposeEnitiesSecurity() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("odata"))) {
+      JsonElement elem = config.get("odata").getAsJsonObject().get("exposeEnitiesSecurity");
+      return !isNull(elem) ? elem.getAsString() : null;
+    }
+
+    return null;
   }
 
   public static String token() {
@@ -53,7 +84,7 @@ public class AppConfig {
     if (!isNull(config.get("security"))) {
       JsonElement elem = config.get("security").getAsJsonObject().get("token");
       if (!isNull(elem)) {
-        return  elem.getAsString();
+        return elem.getAsString();
       }
     }
 
