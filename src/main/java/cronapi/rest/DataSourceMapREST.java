@@ -50,7 +50,8 @@ public class DataSourceMapREST {
           for (Map.Entry<String, JsonElement> entry : customQuery.entrySet()) {
             String guid = entry.getKey();
             DataSourceDetail detail = this.getDetail(guid, entry.getValue().getAsJsonObject());
-            mappedAllDs.put(guid, detail);
+            mappedAllDs.put(detail.namespace + "." + detail.customId, detail);
+            mappedAllDs.put(detail.namespace + "." + guid, detail);
           }
 
           if (AppConfig.exposeLocalEntities()) {
@@ -125,20 +126,6 @@ public class DataSourceMapREST {
       );
 
       out.println(curr);
-
-      if (!v.isEntity) {
-        if (!v.customId.equals(k)) {
-          curr = String.format("window.dataSourceMap[\"%s\"] = { customId: \"%s\", serviceUrl: \"%s\", serviceUrlODATA: \"%s\" };",
-              v.customId,
-              v.customId,
-              v.serviceUrl,
-              v.serviceUrlODATA
-          );
-
-
-          out.println(curr);
-        }
-      }
     });
   }
 
