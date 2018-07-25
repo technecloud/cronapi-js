@@ -50,8 +50,13 @@ public class DataSourceMapREST {
           for (Map.Entry<String, JsonElement> entry : customQuery.entrySet()) {
             String guid = entry.getKey();
             DataSourceDetail detail = this.getDetail(guid, entry.getValue().getAsJsonObject());
-            mappedAllDs.put(detail.namespace + "." + detail.customId, detail);
-            mappedAllDs.put(detail.namespace + "." + guid, detail);
+            if (detail.namespace.isEmpty()) {
+              mappedAllDs.put(detail.customId, detail);
+              mappedAllDs.put(guid, detail);
+            } else {
+              mappedAllDs.put(detail.namespace + "." + detail.customId, detail);
+              mappedAllDs.put(detail.namespace + "." + guid, detail);
+            }
           }
 
           if (AppConfig.exposeLocalEntities()) {

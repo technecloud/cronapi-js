@@ -13,6 +13,7 @@ import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPAModelException;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
@@ -110,6 +111,10 @@ public class DatasourceExtension implements JPAEdmExtension {
     } catch (ODataJPAModelException e) {
       return EdmSimpleTypeKind.String;
     }
+  }
+
+  private static EdmSimpleTypeKind toEdmSimpleTypeKind(String fieldClass) {
+    return Enum.valueOf(EdmSimpleTypeKind.class, fieldClass);
   }
 
   private EntityType findEntityType(Schema edmSchema, String entity) {
@@ -415,7 +420,74 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  @Override
+  private EntitySet createBlocklyDataSource(Schema edmSchema, JsonObject query) {
+    JsonObject defaultValuesProperties = null;
+    String id = query.get("customId").getAsString();
+    if (query.get("defaultValuesProperties") != null) {
+      defaultValuesProperties = query.get("defaultValuesProperties").getAsJsonObject();
+    }
+
+    if (defaultValuesProperties != null) {
+      boolean hasDefined = false;
+      for (Map.Entry<String, JsonElement> entry: defaultValuesProperties.entrySet()) {
+        if (entry.getValue() != null && !entry.getValue().isJsonNull()) {
+          hasDefined = true;
+          break;
+        }
+      }
+
+      if (hasDefined) {
+        EntityType type = new EntityType();
+
+        Key key = new Key();
+        List<PropertyRef> propertyRefList = new ArrayList<>();
+        key.setKeys(propertyRefList);
+
+        List<Property> properties = new ArrayList<>();
+
+        for (Map.Entry<String, JsonElement> entry: defaultValuesProperties.entrySet()) {
+          JsonObject obj = entry.getValue().getAsJsonObject();
+
+          SimpleProperty property = new SimpleProperty();
+
+          property.setType(toEdmSimpleTypeKind(obj.get("type").getAsString()));
+          property.setName(entry.getKey());
+
+          JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+          mapping.setInternalExpression(entry.getKey());
+          mapping.setInternalName(entry.getKey());
+          mapping.setJPAType(String.class);
+          mapping.setVirtualAccess(true);
+
+          property.setMapping(mapping);
+
+          if (obj.get("key").getAsBoolean()) {
+            PropertyRef propertyRef = new PropertyRef();
+            propertyRef.setName(entry.getKey());
+            propertyRefList.add(propertyRef);
+          }
+        }
+
+        type.setProperties(properties);
+        type.setKey(key);
+        type.setName(id);
+
+        JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+        mapping.setCanEdit(true);
+        mapping.setJPAType(VirtualClass.class);
+        mapping.setVirtualAccess(true);
+        type.setMapping(mapping);
+
+        edmSchema.getEntityTypes().add(type);
+      }
+
+    }
+
+    return  null;
+  }
+
+
+    @Override
   public InputStream getJPAEdmMappingModelStream() {
     return null;
   }
