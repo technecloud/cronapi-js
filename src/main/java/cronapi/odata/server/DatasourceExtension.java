@@ -48,6 +48,12 @@ public class DatasourceExtension implements JPAEdmExtension {
       set.setShowMetadata(AppConfig.exposeLocalEntities());
     }
 
+    List<EntityType> localEntities = new LinkedList<>();
+
+    for (EntityType type : edmSchema.getEntityTypes()) {
+      localEntities.add(type);
+    }
+
     List<EntitySet> queryDatasource = new LinkedList<>();
 
     JsonObject queries = QueryManager.getJSON();
@@ -85,12 +91,15 @@ public class DatasourceExtension implements JPAEdmExtension {
       }
     }
 
-    for (EntityType type : edmSchema.getEntityTypes()) {
-      type.setShowMetadata(AppConfig.exposeMetadada());
+    for (EntityType type : localEntities) {
       JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) type.getMapping();
-      if (mapping != null && mapping.isVirtualAccess()) {
+      if (mapping != null && !mapping.isVirtualAccess()) {
         addDisplayFields(edmSchema, type);
       }
+    }
+
+    for (EntityType type : edmSchema.getEntityTypes()) {
+      type.setShowMetadata(AppConfig.exposeMetadada());
     }
 
     for (EntityContainer container : edmSchema.getEntityContainers()) {
