@@ -219,6 +219,11 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     return Var.valueOf(map);
   }
 
+  public Var put(Object key, Object value) {
+    getObjectAsMap().put(key.toString(), Var.valueOf(value));
+    return this;
+  }
+
   public static Var newList() {
     return new Var(new LinkedList<>());
   }
@@ -840,19 +845,23 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    */
   public int size() {
     switch (getType()) {
+      case NULL:
+        return 0;
       case LIST: {
         return ((LinkedList<Var>) getObject()).size();
       }
       default: {
         if (getObject() instanceof Map) {
           return ((Map) getObject()).size();
-        } else if (getObject() instanceof DataSource) {
+        }
+
+        else if (getObject() instanceof DataSource) {
           return ((DataSource) getObject()).getPage().getContent().size();
         }
       }
     }
 
-    return 0;
+    return getObjectAsString().length();
   }
 
   public int length() {
@@ -1245,7 +1254,19 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public Boolean isNull() {
-    return (VAR_NULL == getObject());
+    return (_object == null);
+  }
+
+  public Boolean isEmpty() {
+    if (getType() == Type.STRING) {
+      return getObjectAsString().trim().isEmpty();
+    }
+
+    return size() == 0;
+  }
+
+  public Boolean isEmptyOrNull() {
+    return isNull() || isEmpty();
   }
 
   public enum Type {

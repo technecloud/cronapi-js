@@ -137,13 +137,6 @@ public class CronapiREST {
     translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
             request.getParameter("filterType"), caseInsensitive);
 
-    if (translationPath.params.length == 0 && 
-        translationPath.filter != null && 
-        translationPath.filter.getItems() != null &&
-        translationPath.filter.getItems().size() > 0) {
-      translationPath.params = toVarArray(translationPath.filter.getItems());    
-    }
-    
     return translationPath;
   }
 
@@ -313,8 +306,10 @@ public class CronapiREST {
       QueryManager.checkSecurity(query, "GET");
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
-        if (translationPath.filter != null) {
-          return QueryManager.executeBlockly(query, "FILTER", translationPath.params).getObjectAsPOJOList();
+        if (translationPath.filter != null && translationPath.filter.getItems().size() > 0) {
+          Var[] filterParams = toVarArray(translationPath.filter.getItems());
+          Var[] params = (Var[])ArrayUtils.addAll(translationPath.params, filterParams);
+          return QueryManager.executeBlockly(query, "FILTER", params).getObjectAsPOJOList();
         } else {
           return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
         }

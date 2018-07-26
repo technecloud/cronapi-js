@@ -1,5 +1,6 @@
 package cronapi.odata.server;
 
+import cronapi.AppConfig;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.commons.ODataHttpMethod;
 import org.apache.olingo.odata2.api.processor.ODataRequest;
@@ -135,6 +136,7 @@ public class ODataSchemaCreator {
   }
 
   public static void main(String[] args) throws Exception {
+    AppConfig.FORCE_METADATA = true;
     if (args.length == 0) {
       create(null,null);
     } else {

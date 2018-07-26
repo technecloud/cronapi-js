@@ -357,6 +357,10 @@ public class QueryManager {
   }
 
   public static void checkSecurity(Class clazz, String method) throws Exception {
+    if (!AppConfig.exposeLocalEntities()) {
+      throw new RuntimeException(Messages.getString("notAllowed"));
+    }
+
     Annotation security = clazz.getAnnotation(CronappSecurity.class);
     boolean authorized = false;
 

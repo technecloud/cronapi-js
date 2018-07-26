@@ -1,9 +1,6 @@
 package cronapi.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
@@ -30,10 +27,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
@@ -368,7 +362,8 @@ public class Operations {
 	public static final Var getURLFromOthers(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{HTTPMethod}}", blockType = "util_dropdown", keys = {
 					"GET", "POST", "PUT",
-					"DELETE" }, values = { "{{HTTPGet}}", "{{HTTPPost}}", "{{HTTPPut}}", "{{HTTPDelete}}" }) Var method,
+					"DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE" }, values = { "{{HTTPGet}}", "{{HTTPPost}}", "{{HTTPPut}}",
+          "{{HTTPDelete}}", "PATCH", "HEAD", "OPTIONS", "TRACE" }) Var method,
 
 			@ParamMetaData(type = ObjectType.STRING, description = "{{contentType}}", blockType = "util_dropdown", keys = {
 					"application/x-www-form-urlencoded",
@@ -381,202 +376,98 @@ public class Operations {
 		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY"));
 	}
 
+  private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+  private static final String APPLICATION_JSON = "application/json";
+
 	private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
-			Var cookieContainer, Var returnType) throws Exception {
-		try {
-			String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-			String APPLICATION_JSON = "application/json";
+    Var cookieContainer, Var returnType) throws Exception {
 
-			if (method.getObjectAsString().toUpperCase().equals("GET")) {
+    HttpClient httpClient = HttpClients.createDefault();
+    final HttpRequestBase httpMethod;
 
-				HttpClient httpClient = HttpClients.createDefault();
-				HttpGet httpGet = new HttpGet(address.getObjectAsString());
+    if (method.getObjectAsString().equalsIgnoreCase("POST")) {
+      httpMethod = new HttpPost(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("PUT")) {
+      httpMethod = new HttpPut(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("DELETE")) {
+      httpMethod = new HttpDelete(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("PATCH")) {
+      httpMethod = new HttpPatch(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("HEAD")) {
+      httpMethod = new HttpHead(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("OPTIONS")) {
+      httpMethod = new HttpOptions(address.getObjectAsString());
+    } else if (method.getObjectAsString().equalsIgnoreCase("TRACE")) {
+      httpMethod = new HttpTrace(address.getObjectAsString());
+    } else {
+      httpMethod = new HttpGet(address.getObjectAsString());
+    }
 
-				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
-				headerObject.entrySet().stream().forEach((entry) -> {
-					httpGet.addHeader(entry.getKey().getObjectAsString(),
-							 Var.valueOf(entry.getValue()).getObjectAsString());
-				});
+    if (!cookieContainer.isNull()) {
+      Map<?, ?> headerObject = cookieContainer.getObjectAsMap();
+      headerObject.entrySet().stream().forEach((entry) -> {
+        httpMethod.addHeader(Var.valueOf(entry.getKey()).getObjectAsString(),
+            Var.valueOf(entry.getValue()).getObjectAsString());
+      });
+    }
 
-				if (params != Var.VAR_NULL) {
+    if (!params.isNull()) {
+      if (httpMethod instanceof HttpEntityEnclosingRequestBase) {
 
-					Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
-					List<NameValuePair> params2 = new LinkedList<>();
-					mapObject.entrySet().stream().forEach((entry) -> {
-						params2.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
-								Var.valueOf(entry.getValue()).getObjectAsString()));
-					});
-					URI uri = new URIBuilder(httpGet.getURI()).addParameters(params2).build();
-					httpGet.setURI(uri);
-				}
+        HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
 
-				Var toReturn;
-				HttpResponse httpResponse = httpClient.execute(httpGet);
-				Map<String, String> responseMap = new HashMap<String, String>();
+        if (params.getObject() instanceof Map) {
 
-				if (returnType != null && returnType.equals("HEADER")) {
-					Header[] headers = httpResponse.getAllHeaders();
-					for (Header header : headers) {
-						responseMap.put(header.getName(), header.getValue());
-					}
-					toReturn = Var.valueOf(responseMap);
-				} else {
-					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-							cronapi.CronapiConfigurator.ENCODING);
-					String response = "";
-					try {
-						response = scanner.useDelimiter("\\A").next();
-					} catch (Exception e) {
-					}
-					scanner.close();
-					toReturn = Var.valueOf(response);
-				}
-				httpGet.completed();
-				return toReturn;
+          Map<?, ?> mapObject = params.getObjectAsMap();
+          List<NameValuePair> paramsData = new LinkedList<>();
+          mapObject.entrySet().stream().forEach((entry) -> {
+            paramsData.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+                Var.valueOf(entry.getValue()).getObjectAsString()));
+          });
 
-			} else if (method.getObjectAsString().toUpperCase().equals("POST")) {
-				HttpClient httpClient = HttpClients.createDefault();
-				HttpPost httpPost = new HttpPost(address.getObjectAsString());
-				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
-				headerObject.entrySet().stream().forEach((entry) -> {
-					httpPost.addHeader(entry.getKey().getObjectAsString(),
-							Var.valueOf(entry.getValue()).getObjectAsString());
-				});
+          httpEntityEnclosingRequestBase.setEntity(new UrlEncodedFormEntity(paramsData, cronapi.CronapiConfigurator.ENCODING));
+        } else {
 
-				if (params != Var.VAR_NULL) {
+          StringEntity paramsData = new StringEntity(params.getObjectAsString(),
+              Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+          paramsData.setContentType(contentType.getObjectAsString());
+          httpEntityEnclosingRequestBase.setEntity(paramsData);
+        }
+      } else {
+        Map<?, ?> mapObject = params.getObjectAsMap();
+        List<NameValuePair> paramsData = new LinkedList<>();
+        mapObject.entrySet().stream().forEach((entry) -> {
+          paramsData.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+              Var.valueOf(entry.getValue()).getObjectAsString()));
+        });
+        URI uri = new URIBuilder(httpMethod.getURI()).addParameters(paramsData).build();
+        httpMethod.setURI(uri);
+      }
+    }
 
-					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
+    Var toReturn;
+    HttpResponse httpResponse = httpClient.execute(httpMethod);
+    Map<String, String> responseMap = new HashMap<String, String>();
 
-						Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
-						List<NameValuePair> params2 = new LinkedList<>();
-						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
-									Var.valueOf(entry.getValue()).getObjectAsString()));
-						});
-
-						httpPost.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
-					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
-
-						StringEntity params2 = new StringEntity(params.getObjectAsString(),
-								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
-						params2.setContentType(APPLICATION_JSON);
-						httpPost.setEntity(params2);
-					}
-				}
-
-				Var toReturn;
-				HttpResponse httpResponse = httpClient.execute(httpPost);
-				Map<String, String> responseMap = new HashMap<String, String>();
-
-				if (returnType != null && returnType.equals("HEADER")) {
-					Header[] headers = httpResponse.getAllHeaders();
-					for (Header header : headers) {
-						responseMap.put(header.getName(), header.getValue());
-					}
-					toReturn = Var.valueOf(responseMap);
-				} else {
-					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-							cronapi.CronapiConfigurator.ENCODING);
-					String response = "";
-					try {
-						response = scanner.useDelimiter("\\A").next();
-					} catch (Exception e) {
-					}
-					scanner.close();
-					toReturn = Var.valueOf(response);
-				}
-				httpPost.completed();
-				return toReturn;
-
-			} else if (method.getObjectAsString().toUpperCase().equals("PUT")) {
-				HttpClient httpClient = HttpClients.createDefault();
-				HttpPut httpPut = new HttpPut(address.getObjectAsString());
-
-				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
-				headerObject.entrySet().stream().forEach((entry) -> {
-					httpPut.addHeader(entry.getKey().getObjectAsString(),
-							Var.valueOf(entry.getValue()).getObjectAsString());
-				});
-
-				if (params != Var.VAR_NULL) {
-					if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString().toLowerCase())) {
-						Map<Var, Var> mapObject = (Map<Var, Var>) params.getObjectAsMap();
-						List<NameValuePair> params2 = new LinkedList<>();
-						mapObject.entrySet().stream().forEach((entry) -> {
-							params2.add(new BasicNameValuePair(entry.getKey().getObjectAsString(),
-									Var.valueOf(entry.getValue()).getObjectAsString()));
-						});
-						httpPut.setEntity(new UrlEncodedFormEntity(params2, cronapi.CronapiConfigurator.ENCODING));
-					} else if (APPLICATION_JSON.equals(contentType.getObjectAsString().toLowerCase())) {
-						StringEntity params2 = new StringEntity(params.getObjectAsString(),
-								Charset.forName(cronapi.CronapiConfigurator.ENCODING));
-						httpPut.setEntity(params2);
-					}
-				}
-
-				Var toReturn;
-				HttpResponse httpResponse = httpClient.execute(httpPut);
-				Map<String, String> responseMap = new HashMap<String, String>();
-
-				if (returnType != null && returnType.equals("HEADER")) {
-					Header[] headers = httpResponse.getAllHeaders();
-					for (Header header : headers) {
-						responseMap.put(header.getName(), header.getValue());
-					}
-					toReturn = Var.valueOf(responseMap);
-				} else {
-					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-							cronapi.CronapiConfigurator.ENCODING);
-					String response = "";
-					try {
-						response = scanner.useDelimiter("\\A").next();
-					} catch (Exception e) {
-					}
-					scanner.close();
-					toReturn = new Var(response);
-				}
-				httpPut.completed();
-				return toReturn;
-
-			} else if (method.getObjectAsString().toUpperCase().equals("DELETE")) {
-				HttpClient httpClient = HttpClients.createDefault();
-				HttpDelete httpDelete = new HttpDelete(address.getObjectAsString());
-
-				Map<Var, Var> headerObject = (Map<Var, Var>) cookieContainer.getObjectAsMap();
-				headerObject.entrySet().stream().forEach((entry) -> {
-					httpDelete.addHeader(entry.getKey().getObjectAsString(),
-							Var.valueOf(entry.getValue()).getObjectAsString());
-				});
-
-				Var toReturn;
-				HttpResponse httpResponse = httpClient.execute(httpDelete);
-				Map<String, String> responseMap = new HashMap<String, String>();
-
-				if (returnType != null && returnType.equals("HEADER")) {
-					Header[] headers = httpResponse.getAllHeaders();
-					for (Header header : headers) {
-						responseMap.put(header.getName(), header.getValue());
-					}
-					toReturn = Var.valueOf(responseMap);
-				} else {
-					Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-							cronapi.CronapiConfigurator.ENCODING);
-					String response = "";
-					try {
-						response = scanner.useDelimiter("\\A").next();
-					} catch (Exception e) {
-					}
-					scanner.close();
-					toReturn = Var.valueOf(response);
-				}
-				httpDelete.completed();
-				return toReturn;
-
-			}
-			return new Var();
-		} catch (Exception e) {
-			throw e;
-		}
+    if (returnType != null && returnType.equals("HEADER")) {
+      Header[] headers = httpResponse.getAllHeaders();
+      for (Header header : headers) {
+        responseMap.put(header.getName(), header.getValue());
+      }
+      toReturn = Var.valueOf(responseMap);
+    } else {
+      Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
+          cronapi.CronapiConfigurator.ENCODING);
+      String response = "";
+      try {
+        response = scanner.useDelimiter("\\A").next();
+      } catch (Exception e) {
+      }
+      scanner.close();
+      toReturn = Var.valueOf(response);
+    }
+    httpMethod.completed();
+    return toReturn;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getFromSession}}", nameTags = {
@@ -775,6 +666,11 @@ public class Operations {
       @ParamMetaData(type = ObjectType.STRING, description = "{{location}}") Var location
   ) throws Exception {
     RestClient.getRestClient().getResponse().sendRedirect(location.getObjectAsString());
+  }
+
+  @CronapiMetaData(type = "function", name = "{{createDownloadURL}}", nameTags = { "download", "url" }, description = "{{createDownloadURLDescription}}")
+  public static Var createDownloadLink(@ParamMetaData(type = ObjectType.STRING, description = "{{createDownloadURLParam}}") Var file) {
+	    return Var.valueOf(DownloadREST.getDownloadUrl(new File(file.toString())));
   }
 
 }

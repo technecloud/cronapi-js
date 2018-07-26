@@ -547,7 +547,7 @@ public class DataSource implements JsonSerializable {
   }
 
   public void filterByPk(Var[] params) {
-    filter(null, null, params);
+    filter(null, new PageRequest(1, 1), params);
   }
   
   public void filter(Var data, Var[] extraParams) {
