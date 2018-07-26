@@ -3,16 +3,20 @@ package cronapi.odata.server;
 import com.google.gson.JsonObject;
 import cronapi.*;
 import org.apache.olingo.odata2.api.ClientCallback;
+import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.apache.olingo.odata2.api.uri.expression.*;
 import org.apache.olingo.odata2.api.uri.info.*;
+import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
 import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpressionUtil;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.ReflectionUtil;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.annotations.BatchFetchType;
 import org.eclipse.persistence.config.QueryHints;
@@ -530,7 +534,35 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
   @Override
   public void execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) throws ODataJPARuntimeException {
+    if (infoView != null) {
+      try {
+        JsonObject query = null;
+
+        try {
+          query = QueryManager.getQuery(entityType.getName());
+        } catch (Exception e) {
+          //No Command
+        }
+
+        if (query != null) {
+          QueryManager.executeEvent(query, data, type);
+        }
+
+        ((UriInfoImpl) infoView).setClientCallbacks(getClientCallbacks());
+
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  @Override
+  public Object processNew(UriInfo infoView) {
+
     try {
+      final EdmEntitySet oDataEntitySet = infoView.getTargetEntitySet();
+      final EdmEntityType entityType = oDataEntitySet.getEntityType();
+
       JsonObject query = null;
 
       try {
@@ -540,13 +572,48 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
 
       if (query != null) {
-        QueryManager.executeEvent(query, data, type);
+
+        Object jpaEntity = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType().newInstance();
+
+        String jpqlStatement = QueryManager.getJPQL(query);
+
+        JPQLExpression jpqlExpression = new JPQLExpression(
+            jpqlStatement,
+            DefaultEclipseLinkJPQLGrammar.instance(),
+            true
+        );
+
+        String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+
+        VirtualClass virtualClass = new VirtualClass();
+
+        for (String name: entityType.getPropertyNames()) {
+          EdmSimplePropertyImplProv type = (EdmSimplePropertyImplProv) entityType.getProperty(name);
+          if (type.getMapping() != null && type.getMapping().getInternalExpression() != null) {
+            String expression = type.getMapping().getInternalExpression();
+            String[] parts = expression.split("\\.");
+            if (parts.length == 2) {
+              String f = parts[1];
+              if (parts[0].equals(mainAlias)) {
+                Field field = ReflectionUtil.getField(jpaEntity, f);
+                if (field != null) {
+                  field.setAccessible(true);
+                  Object o = field.get(jpaEntity);
+                  virtualClass.set(name, o);
+                }
+              }
+            }
+          }
+        }
+
+        return virtualClass;
+
       }
 
-      ((UriInfoImpl)infoView).setClientCallbacks(getClientCallbacks());
+    } catch(Exception e) {
 
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
+
+    return null;
   }
 }

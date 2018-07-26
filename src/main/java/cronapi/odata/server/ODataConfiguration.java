@@ -4,6 +4,7 @@ import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
 import org.eclipse.persistence.jpa.Archive;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.persistence.Persistence;
@@ -14,6 +15,9 @@ import java.util.List;
 import java.util.Set;
 
 @Configuration
+@ComponentScan(basePackages = {
+    "cronapi.odata.server",
+})
 public class ODataConfiguration implements ServletContextInitializer {
 
   public static final String SERVICE_URL = "/api/cronapi/odata/v2/";

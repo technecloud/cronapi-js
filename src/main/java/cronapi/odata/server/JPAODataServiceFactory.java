@@ -1,5 +1,7 @@
 package cronapi.odata.server;
 
+import cronapi.ErrorResponse;
+import cronapi.RestClient;
 import cronapi.util.Operations;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.edm.provider.EdmProvider;
@@ -15,10 +17,6 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
   private final EntityManagerFactory entityManagerFactory;
   private final String namespace;
 
-  private static ODataService oDataService;
-  private static DatasourceExtension datasourceExtension;
-  private static QueryExtensionEntityListener queryExtensionEntityListener;
-
   public JPAODataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
@@ -30,40 +28,20 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
     context.setEntityManagerFactory(entityManagerFactory);
     context.setPersistenceUnitName(namespace);
 
-    if (Operations.IS_DEBUG) {
-      context.setJPAEdmExtension(new DatasourceExtension(context));
-      context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
-    } else {
-      if (datasourceExtension == null) {
-        synchronized (JPAODataServiceFactory.this) {
-          if (datasourceExtension == null) {
-            datasourceExtension = new DatasourceExtension(context);
-            queryExtensionEntityListener = new QueryExtensionEntityListener();
-          }
-        }
-      }
-
-      context.setJPAEdmExtension(datasourceExtension);
-      context.setoDataJPAQueryExtensionEntityListener(queryExtensionEntityListener);
-    }
+    context.setJPAEdmExtension(new DatasourceExtension(context));
+    context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
 
     return context;
   }
 
   @Override
   public ODataService createODataSingleProcessorService(EdmProvider provider, ODataSingleProcessor processor) {
-    if (Operations.IS_DEBUG) {
-      return super.createODataSingleProcessorService(provider, processor);
-    }
+    return super.createODataSingleProcessorService(provider, processor);
+  }
 
-    if (oDataService == null) {
-      synchronized (JPAODataServiceFactory.this) {
-        if (oDataService == null) {
-          oDataService = super.createODataSingleProcessorService(provider, processor);
-        }
-      }
-    }
-
-    return oDataService;
+  @Override
+  public Exception handleException(Throwable throwable) {
+    String msg = ErrorResponse.getExceptionMessage(throwable, RestClient.getRestClient() != null ? RestClient.getRestClient().getMethod() : "GET");
+    return new RuntimeException(msg, throwable);
   }
 }
