@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.JsonAdapter;
@@ -1254,7 +1255,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public Boolean isNull() {
-    return (_object == null);
+    return (_object == null) || (_object instanceof JsonNull);
   }
 
   public Boolean isEmpty() {
