@@ -90,4 +90,16 @@ public class AppConfig {
 
     return "9SyECk96oDsTmXfogIieDI0cD/8FpnojlYSUJT5U9I/FGVmBz5oskmjOR8cbXTvoPjX+Pq/T/b1PqpHX0lYm0oCBjXWICA==";
   }
+
+  public static long tokenExpiration() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("security"))) {
+      JsonElement elem = config.get("security").getAsJsonObject().get("tokenExpiration");
+      if (!isNull(elem)) {
+        return elem.getAsLong();
+      }
+    }
+
+    return 3600L;
+  }
 }
