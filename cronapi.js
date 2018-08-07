@@ -2176,9 +2176,13 @@
     var formData = new FormData();
     formData.append("file", file);
     var _u = JSON.parse(sessionStorage.getItem('_u'));
+
+    var urlWithoutEndSlash = window.hostApp || "";
+    urlWithoutEndSlash = urlWithoutEndSlash.endsWith('/') ? urlWithoutEndSlash.substr(0, urlWithoutEndSlash.length - 1): urlWithoutEndSlash;
+
     this.$promise = this.cronapi.$scope.$http({
         method: 'POST',
-        url: (window.hostApp || "") + uploadUrl,
+        url: (urlWithoutEndSlash) + uploadUrl,
         data: formData,
         headers:  {
           'Content-Type': undefined, 
