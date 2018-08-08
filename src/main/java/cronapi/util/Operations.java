@@ -416,7 +416,7 @@ public class Operations {
 
         HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
 
-        if (params.getObject() instanceof Map) {
+        if (params.getObject() instanceof Map && contentType.getObjectAsString().equals(APPLICATION_X_WWW_FORM_URLENCODED)) {
 
           Map<?, ?> mapObject = params.getObjectAsMap();
           List<NameValuePair> paramsData = new LinkedList<>();
