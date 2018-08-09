@@ -2,8 +2,7 @@ package cronapi;
 
 import cronapi.database.DataSourceFilter.DataSourceFilterItem;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -40,6 +39,8 @@ public class QueryManager {
 
   private static JsonArray DEFAULT_AUTHORITIES;
 
+  private static File fromFile = null;
+
   static {
     JSON = loadJSON();
     DEFAULT_AUTHORITIES = new JsonArray();
@@ -47,14 +48,28 @@ public class QueryManager {
   }
 
   private static JsonObject loadJSON() {
-    ClassLoader classLoader = QueryManager.class.getClassLoader();
-    try (InputStream stream = classLoader.getResourceAsStream("META-INF/customQuery.json")) {
-      InputStreamReader reader = new InputStreamReader(stream);
-      JsonElement jsonElement = new JsonParser().parse(reader);
-      return jsonElement.getAsJsonObject();
-    } catch (Exception e) {
-      return new JsonObject();
+    if (fromFile != null) {
+      try (InputStream stream = new FileInputStream(fromFile)) {
+        InputStreamReader reader = new InputStreamReader(stream);
+        JsonElement jsonElement = new JsonParser().parse(reader);
+        return jsonElement.getAsJsonObject();
+      } catch (Exception e) {
+        return new JsonObject();
+      }
+    } else {
+      ClassLoader classLoader = QueryManager.class.getClassLoader();
+      try (InputStream stream = classLoader.getResourceAsStream("META-INF/customQuery.json")) {
+        InputStreamReader reader = new InputStreamReader(stream);
+        JsonElement jsonElement = new JsonParser().parse(reader);
+        return jsonElement.getAsJsonObject();
+      } catch (Exception e) {
+        return new JsonObject();
+      }
     }
+  }
+
+  public static void loadJSONFromFile(File file) throws IOException {
+    fromFile = file;
   }
 
   public static JsonObject getJSON() {
@@ -551,13 +566,13 @@ public class QueryManager {
   }
 
   public static void checkEntityFilterSecurity(Object obj, List<String> filters) {
-    Class clazz = obj instanceof Class ? (Class)obj : obj.getClass();
+    Class clazz = obj instanceof Class ? (Class) obj : obj.getClass();
 
-    for(String filter: filters) {
+    for (String filter : filters) {
       Field f = null;
       try {
         f = clazz.getDeclaredField(filter);
-      } catch(Exception e) {
+      } catch (Exception e) {
         //NoCommand
       }
 

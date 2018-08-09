@@ -1,6 +1,7 @@
 package cronapi.odata.server;
 
 import cronapi.AppConfig;
+import cronapi.QueryManager;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.commons.ODataHttpMethod;
 import org.apache.olingo.odata2.api.processor.ODataRequest;
@@ -26,7 +27,12 @@ public class ODataSchemaCreator {
   private static final int DEFAULT_BUFFER_SIZE = 32768;
   private static final String DEFAULT_READ_CHARSET = "utf-8";
 
-  public static void create(String pu, String file) throws Exception {
+  public static void create(String pu, String fromFile, String file) throws Exception {
+
+    if (fromFile != null) {
+      QueryManager.loadJSONFromFile(new File(fromFile));
+    }
+
     Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
     for (Archive archive : archives) {
@@ -138,16 +144,14 @@ public class ODataSchemaCreator {
   public static void main(String[] args) throws Exception {
     AppConfig.FORCE_METADATA = true;
     if (args.length == 0) {
-      create(null,null);
+      create(null, null, null);
     } else {
-      for (int i = 0; i < args.length; i++) {
-        create(args[i], null);
-      }
+      create(null, args[0], null);
     }
   }
 
   public static void test() throws Exception {
-    create("app", null);
+    create(null, null, null);
   }
 
 }
