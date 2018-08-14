@@ -2133,7 +2133,7 @@
 
       url += '/' + entity;
       url += '/' + field;
-      var _u = JSON.parse(sessionStorage.getItem('_u'));
+      var _u = JSON.parse(localStorage.getItem('_u'));
       var object = itemActive;
 
       var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
@@ -2182,7 +2182,7 @@
     var uploadUrl = '/api/cronapi/uploadFile';
     var formData = new FormData();
     formData.append("file", file);
-    var _u = JSON.parse(sessionStorage.getItem('_u'));
+    var _u = JSON.parse(localStorage.getItem('_u'));
 
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(uploadUrl);
 
