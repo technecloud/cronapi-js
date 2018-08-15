@@ -571,10 +571,10 @@
   this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field) {
     try {
       if (field && field.length > 0) {
-        if (field.indexOf('vars.') > -1)
-          return eval('this.'+field);
+        if (field.indexOf('.active.') > -1)
+          return eval(field);
         else
-          return this[field];
+          return eval('this.'+field);
       }
       return '';
     }
