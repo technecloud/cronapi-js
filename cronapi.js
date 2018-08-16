@@ -3,6 +3,14 @@
 
   this.cronapi = {};
 
+  var getDatasource = function(ds) {
+    if (typeof ds == 'string') {
+      return window[ds];
+    } else {
+      return ds;
+    }
+  }
+
   this.cronapi.doEval = function(arg) {
     return arg;
   }
@@ -115,7 +123,7 @@
       else if (pattern.test(value)) {
         var splited = pattern.exec(value);
         var userLang = (navigator.language || navigator.userLanguage)
-        .split("-")[0];
+            .split("-")[0];
 
         if (userLang == "pt" || userLang == "en") {
           var functionToCall = eval(userLang + "Date");
@@ -643,7 +651,7 @@
    * @multilayer true
    */
   this.cronapi.screen.startInsertingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( function() { window[datasource].startInserting();});
+    getDatasource(datasource).$apply( function() { getDatasource(datasource).startInserting();});
   };
 
   /**
@@ -655,7 +663,7 @@
    * @multilayer true
    */
   this.cronapi.screen.startEditingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].startEditing();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).startEditing();} );
   };
 
   /**
@@ -667,7 +675,7 @@
    * @multilayer true
    */
   this.cronapi.screen.previusRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].previous();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).previous();} );
   };
 
   /**
@@ -679,7 +687,7 @@
    * @multilayer true
    */
   this.cronapi.screen.nextRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].next();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).next();} );
   };
 
   /**
@@ -691,7 +699,7 @@
    * @multilayer true
    */
   this.cronapi.screen.removeRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].remove();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).removeSilent();} );
   };
 
   /**
@@ -703,7 +711,7 @@
    * @multilayer true
    */
   this.cronapi.screen.refreshActiveRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].refreshActive();
+    getDatasource(datasource).refreshActive();
   };
 
   /**
@@ -715,7 +723,7 @@
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.screen.hasNextRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].hasNext();
+    return getDatasource(datasource).hasNext();
   };
 
   /**
@@ -727,7 +735,7 @@
    * @returns {ObjectType.LONG}
    */
   this.cronapi.screen.quantityRecords = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].data.length;
+    return getDatasource(datasource).data.length;
   };
 
   /**
@@ -739,7 +747,7 @@
    * @multilayer true
    */
   this.cronapi.screen.post = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].post();
+    return getDatasource(datasource).postSilent();
   };
 
   /**
@@ -752,7 +760,7 @@
    * @multilayer true
    */
   this.cronapi.screen.filter = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource,/** @type {ObjectType.STRING}*/ path) {
-    window[datasource].filter("/"+path);
+    getDatasource(datasource).filter("/"+path);
   };
 
   /**
@@ -1935,10 +1943,10 @@
 
         cameraContainer =
             cameraContainer
-            .split('$height$').join(res.height+'px')
-            .split('$width$').join(res.width+'px')
-            .split('$marginleft$').join(halfWidth+'px')
-            .split('$margintop$').join(halfHeight+'px')
+                .split('$height$').join(res.height+'px')
+                .split('$width$').join(res.width+'px')
+                .split('$marginleft$').join(halfWidth+'px')
+                .split('$margintop$').join(halfHeight+'px')
         ;
         var cronapiVideoCapture = $(cameraContainer);
         cronapiVideoCapture.prependTo("body");
@@ -2742,7 +2750,7 @@
     for (i = 0; i < value.length; i++) {
       if (withAccents.search(value.substr(i, 1)) >= 0) {
         newValue += withoutAccents.substr(withAccents.search(value
-        .substr(i, 1)), 1);
+            .substr(i, 1)), 1);
       } else {
         newValue += value.substr(i, 1);
       }
