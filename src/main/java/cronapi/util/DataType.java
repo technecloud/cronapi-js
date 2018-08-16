@@ -76,6 +76,7 @@ public class DataType {
 
     map.put("draw", "text/draw");
 
+
     // report
     map.put("jrxml", "text/xml");
 
