@@ -455,7 +455,7 @@ public class CronapiREST {
         TranslationPath translationPath = translatePathVars(id, query.getAsJsonArray("queryParamsValues").size(), -1);
 
         DataSource ds = new DataSource(query);
-        ds.filter(null, null, translationPath.params);
+        ds.filter(null, new PageRequest(1, 1), translationPath.params);
         QueryManager.executeEvent(query, ds.getObject(), "beforeDelete");
         ds.delete();
         QueryManager.executeEvent(query, ds.getObject(), "afterDelete");

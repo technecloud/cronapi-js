@@ -33,14 +33,7 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -346,7 +339,13 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return BigInteger.valueOf(getObjectAsLong());
     } else if (type == byte[].class) {
       return getObjectAsByteArray();
-    } else {
+    } else if (Collection.class.isAssignableFrom(type)) {
+      try {
+        return getObjectAsRawList(type);
+      } catch (Exception e) {
+        return getObjectAsRawList(LinkedList.class);
+      }
+    }  else {
       //create instance for Entity class
       if (Utils.isEntityClass(type) && _object != null
           && !(_object instanceof java.util.LinkedHashMap)
@@ -700,11 +699,31 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     return myList;
   }
 
-  /**
-   * Get the object as a list.
-   *
-   * @return a LinkedList whose elements are of type Var
-   */
+  public Collection getObjectAsRawList(Class clazz) {
+    List list = getObjectAsList();
+
+    Collection result;
+    try {
+      if (!clazz.isInterface()) {
+        result = (Collection) clazz.newInstance();
+      } else {
+        result = new LinkedList();
+      }
+    } catch (Exception e) {
+      result = new LinkedList();
+    }
+    for (Object o: list) {
+      result.add(Var.valueOf(o).getObject());
+    }
+
+    return result;
+  }
+
+    /**
+     * Get the object as a list.
+     *
+     * @return a LinkedList whose elements are of type Var
+     */
   public LinkedList<Var> getObjectAsList() {
 
     if (getObject() instanceof Map) {

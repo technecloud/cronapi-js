@@ -20,6 +20,7 @@ import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorQueryManager;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.queries.DatabaseQuery;
@@ -262,11 +263,18 @@ public class DataSource implements JsonSerializable {
       AbstractSession session = (AbstractSession)((EntityManagerImpl) em.getDelegate()).getActiveSession();
       DatabaseQuery dbQuery = EJBQueryImpl.buildEJBQLDatabaseQuery("customQuery", jpql, session, (Enum)null, (Map)null, session.getDatasourcePlatform().getConversionManager().getLoader());
 
+
+      HermesParser parser = new HermesParser();
+      DatabaseQuery queryParsed = parser.buildQuery(jpql, session);
+
       TypedQuery<?> query = new EJBQueryImpl(dbQuery, (EntityManagerImpl) em.getDelegate());
 
       int i = 0;
       List<String> parsedParams = parseParams(jpql);
-      
+
+      List<Class> argsTypes = queryParsed.getArgumentTypes();
+      List<String> argsNames = queryParsed.getArguments();
+
       for(String param : parsedParams) {
         Var p = null;
         if(i <= params.length - 1) {
@@ -274,10 +282,11 @@ public class DataSource implements JsonSerializable {
         }
         if(p != null) {
           if(p.getId() != null) {
-            query.setParameter(p.getId(), p.getObject(query.getParameter(p.getId()).getParameterType()));
+            int idx = argsNames.indexOf(p.getId());
+            query.setParameter(p.getId(), p.getObject(argsTypes.get(idx)));
           }
           else {
-            query.setParameter(param, p.getObject(query.getParameter(parsedParams.get(i)).getParameterType()));
+            query.setParameter(param, p.getObject(argsTypes.get(i)));
           }
         }
         else {
@@ -788,7 +797,7 @@ public class DataSource implements JsonSerializable {
   public void setDataSourceFilter(DataSourceFilter dsFilter) {
     this.dsFilter = dsFilter;
   }
-  
+
   public void filter(String filter, PageRequest pageRequest, Var ... params) {
     if(filter == null) {
       if(params.length > 0) {
