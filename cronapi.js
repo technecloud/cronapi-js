@@ -28,6 +28,76 @@
     }
   }
 
+  this.cronapi.client = function(pack) {
+    return {
+      run: function() {
+        var bk = eval('blockly.'+pack);
+        return bk.apply(this, arguments);
+      }.bind(this)
+    }
+  };
+
+  this.cronapi.client = function(pack) {
+    return {
+      run: function() {
+        var bk = eval('blockly.'+pack);
+        return bk.apply(this, arguments);
+      }.bind(this)
+    }
+  };
+
+  var serverMap = {};
+
+  this.cronapi.server = function(pack) {
+    return {
+      run: function() {
+        var key = pack;
+
+        for (var i = 0;i <arguments.length;i++) {
+          key += String(arguments[i]);
+        }
+
+        if (serverMap.hasOwnProperty(key)) {
+          if (serverMap[key] != "$$loading") {
+            return serverMap[key];
+          } else {
+            return "";
+          }
+        }
+
+        serverMap[key] = "$$loading";
+
+        var parts = pack.split(".");
+        var func = parts[parts.length-1];
+        parts.pop();
+        var namespace = parts.join(".");
+
+        var blocklyName = namespace + ":" + func;
+
+        var success = function(data) {
+          this.safeApply(function() {
+            serverMap[key] = data;
+          });
+        }.bind(this);
+
+        var error = function(error) {
+          this.safeApply(function() {
+            serverMap[key] = error;
+          });
+        }.bind(this);
+
+        var args = [blocklyName, error, success];
+
+        for (var i = 0;i <arguments.length;i++) {
+          args.push(arguments[i]);
+        }
+
+        this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+
+      }.bind(this)
+    }
+  };
+
   /**
    * @category CategoryType.CONVERSION
    * @categoryTags Conversão|Convert
