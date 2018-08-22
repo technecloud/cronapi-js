@@ -1882,7 +1882,7 @@
    * @displayInline true
    */
   this.cronapi.logic.isNull = function(/** @type {ObjectType.OBJECT} @description */ value) {
-    return (value === null || typeof value  == 'undefined');
+    return (value === null || typeof value  == 'undefined'  || value == undefined);
   }
 
   /**
