@@ -767,16 +767,21 @@
    */
   this.cronapi.screen.changeView = function(view, params) {
     try {
-      var queryString = '?';
-      var template = '#key#=#value#&';
+      var queryString = '';
+
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
           var v = String(Object.values(params[i])[0]);
-          queryString += template.replace('#key#', this.cronapi.internal.Url.encode(k)).replace('#value#', this.cronapi.internal.Url.encode(v));
+          if (queryString != null) {
+            queryString += "&";
+          }
+          queryString += encodeURIComponent(k) + "=" + encodeURIComponent(v);
+
         }
       }
-      window.location.hash = view + queryString;
+
+      window.location.hash = view + (queryString?"?"+queryString:"");
     }
     catch (e) {
       alert(e);
@@ -1804,7 +1809,7 @@
    * @displayInline true
    */
   this.cronapi.logic.isNull = function(/** @type {ObjectType.OBJECT} @description */ value) {
-    return (value === null || typeof value  == 'undefined');
+    return (value === null || typeof value  == 'undefined'  || value == undefined);
   }
 
   /**
