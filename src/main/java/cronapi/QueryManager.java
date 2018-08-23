@@ -41,6 +41,8 @@ public class QueryManager {
 
   private static File fromFile = null;
 
+  public static boolean DISABLE_AUTH = false;
+
   static {
     JSON = loadJSON();
     DEFAULT_AUTHORITIES = new JsonArray();
@@ -130,6 +132,10 @@ public class QueryManager {
   }
 
   public static void checkSecurity(JsonObject obj, String verb, boolean checkAuthorities) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!obj.getAsJsonObject("verbs").get(verb).getAsBoolean()) {
       throw new RuntimeException(Messages.format(Messages.getString("verbNotAllowed"), verb));
     }
@@ -372,6 +378,9 @@ public class QueryManager {
   }
 
   public static void checkSecurity(Class clazz, String method) throws Exception {
+    if (DISABLE_AUTH) {
+      return;
+    }
     if (!AppConfig.exposeLocalEntities()) {
       throw new RuntimeException(Messages.getString("notAllowed"));
     }
@@ -460,6 +469,10 @@ public class QueryManager {
 
   public static void checkFieldSecurity(JsonObject query, Object ds, String method)
       throws Exception {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security"))) {
       JsonObject security = query.get("security").getAsJsonObject();
 
@@ -520,6 +533,10 @@ public class QueryManager {
   }
 
   public static void checkFilterSecurity(JsonObject query, DataSourceFilter filter) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security")) && filter != null && filter.getItems().size() > 0) {
       JsonObject security = query.get("security").getAsJsonObject();
 
@@ -566,6 +583,10 @@ public class QueryManager {
   }
 
   public static void checkEntityFilterSecurity(Object obj, List<String> filters) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     Class clazz = obj instanceof Class ? (Class) obj : obj.getClass();
 
     for (String filter : filters) {
@@ -614,6 +635,10 @@ public class QueryManager {
   }
 
   public static void checkFilterSecurity(JsonObject query, List<String> filter) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security")) && filter != null && filter.size() > 0) {
       JsonObject security = query.get("security").getAsJsonObject();
 

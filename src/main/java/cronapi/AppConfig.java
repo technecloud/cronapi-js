@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 
 public class AppConfig {
   public static boolean FORCE_METADATA = false;
+  public static boolean FORCE_LOCAL_ENTITIES = false;
   private static JsonObject JSON;
 
   static {
@@ -43,7 +44,7 @@ public class AppConfig {
     JsonObject config = getJSON();
     if (!isNull(config.get("odata"))) {
       JsonElement elem = config.get("odata").getAsJsonObject().get("exposeEntities");
-      return !isNull(elem) && elem.getAsBoolean();
+      return (!isNull(elem) && elem.getAsBoolean()) || FORCE_LOCAL_ENTITIES;
     }
 
     return true;
