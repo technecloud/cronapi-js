@@ -74,6 +74,9 @@ public class DataType {
     map.put("logic", "text/logic");
     map.put("graph", "text/graph");
 
+    map.put("kroki", "text/kroki");
+
+
     // report
     map.put("jrxml", "text/xml");
 
