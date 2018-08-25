@@ -1,6 +1,15 @@
 (function() {
   'use strict';
 
+  this.$evt = function(str) {
+    var self = this;
+    if (!self.$eval) {
+      self = angular.element(event.target).scope();
+    }
+
+    self.$eval(str);
+  }.bind(this);
+
   this.cronapi = {};
 
   var getDatasource = function(ds) {
@@ -27,15 +36,6 @@
       return result.value;
     }
   }
-
-  this.cronapi.client = function(pack) {
-    return {
-      run: function() {
-        var bk = eval('blockly.'+pack);
-        return bk.apply(this, arguments);
-      }.bind(this)
-    }
-  };
 
   this.cronapi.client = function(pack) {
     return {
