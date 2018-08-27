@@ -39,6 +39,9 @@
 
   this.cronapi.client = function(pack) {
     return {
+      attr: function() {
+        return this;
+      },
       run: function() {
         var bk = eval('blockly.'+pack);
         return bk.apply(this, arguments);
@@ -49,7 +52,12 @@
   var serverMap = {};
 
   this.cronapi.server = function(pack) {
+    var attr = false;
     return {
+      attr: function() {
+        attr = true;
+        return this;
+      },
       run: function() {
         var key = pack;
 
@@ -57,15 +65,17 @@
           key += String(arguments[i]);
         }
 
-        if (serverMap.hasOwnProperty(key)) {
-          if (serverMap[key] != "$$loading") {
-            return serverMap[key];
-          } else {
-            return "";
+        if (attr) {
+          if (serverMap.hasOwnProperty(key)) {
+            if (serverMap[key] != "$$loading") {
+              return serverMap[key];
+            } else {
+              return "";
+            }
           }
-        }
 
-        serverMap[key] = "$$loading";
+          serverMap[key] = "$$loading";
+        }
 
         var parts = pack.split(".");
         var func = parts[parts.length-1];
@@ -76,13 +86,17 @@
 
         var success = function(data) {
           this.safeApply(function() {
-            serverMap[key] = data;
+            if (attr) {
+              serverMap[key] = data;
+            }
           });
         }.bind(this);
 
         var error = function(error) {
           this.safeApply(function() {
-            serverMap[key] = error;
+            if (attr) {
+              serverMap[key] = error;
+            }
           });
         }.bind(this);
 
@@ -695,6 +709,10 @@
    * @multilayer true
    */
   this.cronapi.screen.notify = function(/** @type {ObjectType.STRING} */ type, /** @type {ObjectType.STRING} */  message) {
+    if (message == null || message == undefined) {
+      message = '';
+    }
+
     this.cronapi.$scope.Notification({'message':message.toString() },type);
   };
 
