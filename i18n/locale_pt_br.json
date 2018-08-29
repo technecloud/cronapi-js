@@ -232,6 +232,8 @@
 	"searchIdsDescription": "Identificador do campo da tela",
 	"enableComponent": "Habilitar componente",
 	"enableComponentDesc": "Função que habilita o componente o uso do componente na tela",
+    "focusComponent": "Focar componente",
+    "focusComponentDesc": "Função que foca um componente na tela",
 	"disableComponent": "Desabilitar componente",
 	"disableComponentDesc": "Função que desabilita o uso do componente na tela",
 	"CategoryType.OBJECT": "Objeto",

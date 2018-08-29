@@ -1,7 +1,24 @@
 (function() {
   'use strict';
 
+  this.$evt = function(str) {
+    var self = this;
+    if (!self.$eval) {
+      self = angular.element(event.target).scope();
+    }
+
+    self.$eval(str);
+  }.bind(this);
+
   this.cronapi = {};
+
+  var getDatasource = function(ds) {
+    if (typeof ds == 'string') {
+      return window[ds];
+    } else {
+      return ds;
+    }
+  }
 
   this.cronapi.doEval = function(arg) {
     return arg;
@@ -19,6 +36,81 @@
       return result.value;
     }
   }
+
+  this.cronapi.client = function(pack) {
+    return {
+      attr: function() {
+        return this;
+      },
+      run: function() {
+        var bk = eval('blockly.'+pack);
+        return bk.apply(this, arguments);
+      }.bind(this)
+    }
+  };
+
+  var serverMap = {};
+
+  this.cronapi.server = function(pack) {
+    var attr = false;
+    return {
+      attr: function() {
+        attr = true;
+        return this;
+      },
+      run: function() {
+        var key = pack;
+
+        for (var i = 0;i <arguments.length;i++) {
+          key += String(arguments[i]);
+        }
+
+        if (attr) {
+          if (serverMap.hasOwnProperty(key)) {
+            if (serverMap[key] != "$$loading") {
+              return serverMap[key];
+            } else {
+              return "";
+            }
+          }
+
+          serverMap[key] = "$$loading";
+        }
+
+        var parts = pack.split(".");
+        var func = parts[parts.length-1];
+        parts.pop();
+        var namespace = parts.join(".");
+
+        var blocklyName = namespace + ":" + func;
+
+        var success = function(data) {
+          this.safeApply(function() {
+            if (attr) {
+              serverMap[key] = data;
+            }
+          });
+        }.bind(this);
+
+        var error = function(error) {
+          this.safeApply(function() {
+            if (attr) {
+              serverMap[key] = error;
+            }
+          });
+        }.bind(this);
+
+        var args = [blocklyName, error, success];
+
+        for (var i = 0;i <arguments.length;i++) {
+          args.push(arguments[i]);
+        }
+
+        this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+
+      }.bind(this)
+    }
+  };
 
   /**
    * @category CategoryType.CONVERSION
@@ -571,10 +663,10 @@
   this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field) {
     try {
       if (field && field.length > 0) {
-        if (field.indexOf('vars.') > -1)
-          return eval('this.'+field);
+        if (field.indexOf('.active.') > -1)
+          return eval(field);
         else
-          return this[field];
+          return eval('this.'+field);
       }
       return '';
     }
@@ -617,6 +709,10 @@
    * @multilayer true
    */
   this.cronapi.screen.notify = function(/** @type {ObjectType.STRING} */ type, /** @type {ObjectType.STRING} */  message) {
+    if (message == null || message == undefined) {
+      message = '';
+    }
+
     this.cronapi.$scope.Notification({'message':message.toString() },type);
   };
 
@@ -643,7 +739,7 @@
    * @multilayer true
    */
   this.cronapi.screen.startInsertingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( function() { window[datasource].startInserting();});
+    getDatasource(datasource).$apply( function() { getDatasource(datasource).startInserting();});
   };
 
   /**
@@ -655,7 +751,7 @@
    * @multilayer true
    */
   this.cronapi.screen.startEditingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].startEditing();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).startEditing();} );
   };
 
   /**
@@ -667,7 +763,7 @@
    * @multilayer true
    */
   this.cronapi.screen.previusRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].previous();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).previous();} );
   };
 
   /**
@@ -679,7 +775,7 @@
    * @multilayer true
    */
   this.cronapi.screen.nextRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].next();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).next();} );
   };
 
   /**
@@ -691,7 +787,7 @@
    * @multilayer true
    */
   this.cronapi.screen.removeRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].$apply( new function(){window[datasource].remove();} );
+    getDatasource(datasource).$apply( new function(){getDatasource(datasource).removeSilent();} );
   };
 
   /**
@@ -703,7 +799,7 @@
    * @multilayer true
    */
   this.cronapi.screen.refreshActiveRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    window[datasource].refreshActive();
+    getDatasource(datasource).refreshActive();
   };
 
   /**
@@ -715,7 +811,7 @@
    * @returns {ObjectType.BOOLEAN}
    */
   this.cronapi.screen.hasNextRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].hasNext();
+    return getDatasource(datasource).hasNext();
   };
 
   /**
@@ -727,7 +823,7 @@
    * @returns {ObjectType.LONG}
    */
   this.cronapi.screen.quantityRecords = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].data.length;
+    return getDatasource(datasource).data.length;
   };
 
   /**
@@ -739,7 +835,7 @@
    * @multilayer true
    */
   this.cronapi.screen.post = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    return window[datasource].post();
+    return getDatasource(datasource).postSilent();
   };
 
   /**
@@ -752,7 +848,7 @@
    * @multilayer true
    */
   this.cronapi.screen.filter = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource,/** @type {ObjectType.STRING}*/ path) {
-    window[datasource].filter("/"+path);
+    getDatasource(datasource).filter("/"+path);
   };
 
   /**
@@ -1037,6 +1133,18 @@
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
     $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
   };
+
+  /**
+   * @type function
+   * @name {{focusComponent}}
+   * @nameTags focus
+   * @description {{focusComponentDesc}}*
+   * @multilayer true
+   */
+  this.cronapi.screen.focusComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    $('#'+id).find('*').addBack().focus();
+  };
+
 
   /**
    * @type function
@@ -2138,7 +2246,7 @@
 
       url += '/' + entity;
       url += '/' + field;
-      var _u = JSON.parse(sessionStorage.getItem('_u'));
+      var _u = JSON.parse(localStorage.getItem('_u'));
       var object = itemActive;
 
       var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
@@ -2187,7 +2295,7 @@
     var uploadUrl = '/api/cronapi/uploadFile';
     var formData = new FormData();
     formData.append("file", file);
-    var _u = JSON.parse(sessionStorage.getItem('_u'));
+    var _u = JSON.parse(localStorage.getItem('_u'));
 
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(uploadUrl);
 
