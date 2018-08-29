@@ -231,6 +231,8 @@
 	"searchIdsDescription": "Identifier field from screen",
 	"enableComponent": "Enable component",
 	"enableComponentDesc": "Function that enable a component from screen",
+    "focusComponent": "Focus component",
+    "focusComponentDesc": "Function that focus a component from screen",
 	"disableComponent": "Disable component",
 	"disableComponentDesc": "Function that disable a component from screen",
 	"CategoryType.OBJECT": "Object",

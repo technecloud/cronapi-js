@@ -1136,6 +1136,18 @@
 
   /**
    * @type function
+   * @name {{focusComponent}}
+   * @nameTags focus
+   * @description {{focusComponentDesc}}*
+   * @multilayer true
+   */
+  this.cronapi.screen.focusComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    $('#'+id).find('*').addBack().focus();
+  };
+
+
+  /**
+   * @type function
    * @name {{changeAttrValueName}}
    * @nameTags changeAttrValue
    * @description {{changeAttrValueDesc}}
