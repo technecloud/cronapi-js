@@ -37,10 +37,13 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class ODataAgent {
+
+  private static final String ERROR_TEMPLATE = "<?xml version=\"1.0\" ?><error xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\"><code></code><message xml:lang=\"en\">{0}</message></error>";
 
   private static final int START_RESULT = 0x1C;
   private static final int END_RESULT = 0x1D;
@@ -80,10 +83,30 @@ public class ODataAgent {
 
   }
 
+  private static String xmlEscapeText(String t) {
+    StringBuilder sb = new StringBuilder();
+    for(int i = 0; i < t.length(); i++){
+      char c = t.charAt(i);
+      switch(c){
+        case '<': sb.append("&lt;"); break;
+        case '>': sb.append("&gt;"); break;
+        case '\"': sb.append("&quot;"); break;
+        case '&': sb.append("&amp;"); break;
+        case '\'': sb.append("&apos;"); break;
+        default:
+          if(c>0x7e) {
+            sb.append("&#"+((int)c)+";");
+          }else
+            sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
   public static void sendError(String msg) {
     System.out.println();
     System.out.write(START_RESULT);
-    System.out.print(msg);
+    System.out.print(MessageFormat.format(ERROR_TEMPLATE, xmlEscapeText(msg)));
     System.out.write(END_RESULT);
     System.out.println();
   }
