@@ -207,7 +207,7 @@
       else if (pattern.test(value)) {
         var splited = pattern.exec(value);
         var userLang = (navigator.language || navigator.userLanguage)
-        .split("-")[0];
+            .split("-")[0];
 
         if (userLang == "pt" || userLang == "en") {
           var functionToCall = eval(userLang + "Date");
@@ -998,6 +998,27 @@
     }catch(e){
       $('#'+id).show();
     }
+  };
+  
+  /**
+   * @type function
+   * @name {{setActiveTab}}
+   * @nameTags Show| Tab| Exibir| Mostrar | Ativar |  Aba
+   * @platform W
+   * @description {{setActiveTablDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.setActiveTab = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      this.cronapi.$scope.safeApply( function(){
+        if( $('#'+id).attr('data-target') === undefined){
+           $( '[data-target="#'+ id + '"]' ).tab('show');
+        }
+        else{
+          $('#'+id).tab('show');
+        }
+        
+      });
   };
 
   /**
@@ -2048,10 +2069,10 @@
 
         cameraContainer =
             cameraContainer
-            .split('$height$').join(res.height+'px')
-            .split('$width$').join(res.width+'px')
-            .split('$marginleft$').join(halfWidth+'px')
-            .split('$margintop$').join(halfHeight+'px')
+                .split('$height$').join(res.height+'px')
+                .split('$width$').join(res.width+'px')
+                .split('$marginleft$').join(halfWidth+'px')
+                .split('$margintop$').join(halfHeight+'px')
         ;
         var cronapiVideoCapture = $(cameraContainer);
         cronapiVideoCapture.prependTo("body");
@@ -2855,7 +2876,7 @@
     for (i = 0; i < value.length; i++) {
       if (withAccents.search(value.substr(i, 1)) >= 0) {
         newValue += withoutAccents.substr(withAccents.search(value
-        .substr(i, 1)), 1);
+            .substr(i, 1)), 1);
       } else {
         newValue += value.substr(i, 1);
       }
