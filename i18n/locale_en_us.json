@@ -390,5 +390,7 @@
 	"function":"Function",
 	"array":"List",
 	"returnType":"Return Type",
-	"mediaType":"Media Type"
+	"mediaType":"Media Type",
+	"setActiveTab": "Change tab",
+	"setActiveTablDesc": "Function that set active the selected tab"
 }

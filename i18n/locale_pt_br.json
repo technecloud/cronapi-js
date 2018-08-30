@@ -392,5 +392,7 @@
 	"function":"Função",
 	"array":"Lista",
 	"returnType":"Tipo de Retorno",
-	"mediaType":"Tipo de Mídia"
+	"mediaType":"Tipo de Mídia",
+	"setActiveTab": "Mudar aba",
+	"setActiveTablDesc": "Função que modifica a aba ativa do componente aba"
 }

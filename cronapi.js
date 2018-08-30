@@ -999,6 +999,27 @@
       $('#'+id).show();
     }
   };
+  
+  /**
+   * @type function
+   * @name {{setActiveTab}}
+   * @nameTags Show| Tab| Exibir| Mostrar | Ativar |  Aba
+   * @platform W
+   * @description {{setActiveTablDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @multilayer true
+   */
+  this.cronapi.screen.setActiveTab = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+      this.cronapi.$scope.safeApply( function(){
+        if( $('#'+id).attr('data-target') === undefined){
+           $( '[data-target="#'+ id + '"]' ).tab('show');
+        }
+        else{
+          $('#'+id).tab('show');
+        }
+        
+      });
+  };
 
   /**
    * @type function
