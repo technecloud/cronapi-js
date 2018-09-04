@@ -29,7 +29,7 @@ public class Operations {
     } else if (value.getObject() instanceof JsonArray) {
       return Var.valueOf(new JsonArrayWrapper((JsonArray) value.getObject()));
     } else {
-      return value;
+      return Var.valueOf(value.getObjectAsList());
     }
   }
 
