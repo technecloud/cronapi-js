@@ -2927,7 +2927,7 @@
     urlWithoutEndSlash = urlWithoutEndSlash.endsWith('/') ? urlWithoutEndSlash.substr(0, urlWithoutEndSlash.length - 1): urlWithoutEndSlash;
     if (address) {
       var addressWithoutStartSlash = address.startsWith('/') ? address.substr(1) : address;
-      urlWithoutEndSlash = urlWithoutEndSlash + '/' + addressWithoutStartSlash;
+      urlWithoutEndSlash === "" ? urlWithoutEndSlash = addressWithoutStartSlash : urlWithoutEndSlash = urlWithoutEndSlash + '/' + addressWithoutStartSlash;
     }
     return urlWithoutEndSlash;
   };
