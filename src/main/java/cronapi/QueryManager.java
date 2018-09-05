@@ -102,7 +102,7 @@ public class QueryManager {
     return obj;
   }
 
-  public static String getJPQL(JsonObject query) {
+  public static String getJPQL(JsonObject query, boolean checkMultitenant) {
     if (!isNull(query.get("query"))) {
       if (query.get("query").isJsonObject()) {
         JsonObject queryObj = query.get("query").getAsJsonObject();
@@ -110,7 +110,7 @@ public class QueryManager {
             .get("isRawSql").getAsBoolean()) {
           return queryObj.get("sqlContent").getAsString();
         } else {
-          return JPQLConverter.sqlFromJson(queryObj);
+          return JPQLConverter.sqlFromJson(queryObj, checkMultitenant);
         }
       } else {
         return query.get("query").getAsString();

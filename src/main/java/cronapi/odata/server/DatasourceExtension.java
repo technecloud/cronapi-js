@@ -322,7 +322,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     String edmNamespace = edmSchema.getNamespace();
     EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
     JsonObject queryJson = QueryManager.getQuery(id);
-    String jpql = QueryManager.getJPQL(queryJson);
+    String jpql = QueryManager.getJPQL(queryJson, false);
     AbstractSession session = em.getActiveSessionIfExists();
 
     HermesParser parser = new HermesParser();

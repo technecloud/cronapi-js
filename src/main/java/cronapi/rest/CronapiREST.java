@@ -321,7 +321,7 @@ public class CronapiREST {
 
         DataSource ds = new DataSource(query);
 
-        String jpql = QueryManager.getJPQL(query);
+        String jpql = QueryManager.getJPQL(query, true);
 
         List<Var> params = Utils.getParamsAndExecuteBlockParams(query, translationPath);
         ds.setDataSourceFilter(translationPath.filter);

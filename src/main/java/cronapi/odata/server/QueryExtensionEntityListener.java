@@ -70,7 +70,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         Query query = null;
 
-        String jpqlStatement = QueryManager.getJPQL(customQuery);
+        String jpqlStatement = QueryManager.getJPQL(customQuery, false);
 
         JPQLExpression jpqlExpression = new JPQLExpression(
             jpqlStatement,
@@ -575,7 +575,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         Object jpaEntity = ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType().newInstance();
 
-        String jpqlStatement = QueryManager.getJPQL(query);
+        String jpqlStatement = QueryManager.getJPQL(query, false);
 
         JPQLExpression jpqlExpression = new JPQLExpression(
             jpqlStatement,
