@@ -1,32 +1,5 @@
 package cronapi.report;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.sql.DataSource;
-
-import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import cronapi.rest.DownloadREST;
 import cronapp.reports.PrintDesign;
 import cronapp.reports.ReportExport;
@@ -37,10 +10,36 @@ import cronapp.reports.commons.ParameterType;
 import cronapp.reports.commons.ReportFront;
 import cronapp.reports.j4c.dataset.J4CDataset;
 import cronapp.reports.j4c.dataset.J4CEntity;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ReportService {
@@ -85,6 +84,17 @@ public class ReportService {
 			throw new RuntimeException(e);
 		}
 		return reportResult;
+	}
+
+	public String getContentReport(String reportName) {
+		try (InputStream inputStream = this.getInputStream(reportName)) {
+			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+				return buffer.lines().collect(Collectors.joining("\n"));
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public String getPDFAsFile(ReportFront reportFront) {
