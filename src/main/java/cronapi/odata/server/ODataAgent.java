@@ -1,6 +1,7 @@
 package cronapi.odata.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.QueryManager;
@@ -85,18 +86,28 @@ public class ODataAgent {
 
   private static String xmlEscapeText(String t) {
     StringBuilder sb = new StringBuilder();
-    for(int i = 0; i < t.length(); i++){
+    for (int i = 0; i < t.length(); i++) {
       char c = t.charAt(i);
-      switch(c){
-        case '<': sb.append("&lt;"); break;
-        case '>': sb.append("&gt;"); break;
-        case '\"': sb.append("&quot;"); break;
-        case '&': sb.append("&amp;"); break;
-        case '\'': sb.append("&apos;"); break;
+      switch (c) {
+        case '<':
+          sb.append("&lt;");
+          break;
+        case '>':
+          sb.append("&gt;");
+          break;
+        case '\"':
+          sb.append("&quot;");
+          break;
+        case '&':
+          sb.append("&amp;");
+          break;
+        case '\'':
+          sb.append("&apos;");
+          break;
         default:
-          if(c>0x7e) {
-            sb.append("&#"+((int)c)+";");
-          }else
+          if (c > 0x7e) {
+            sb.append("&#" + ((int) c) + ";");
+          } else
             sb.append(c);
       }
     }
@@ -260,9 +271,28 @@ public class ODataAgent {
 
       Set<Var> params = new HashSet<Var>();
       if (json.get("parameters") != null && !json.get("parameters").isJsonNull()) {
-        json.get("parameters").getAsJsonArray().forEach(p -> {
-          params.add(Var.valueOf(p.getAsString()));
-        });
+        if (json.get("parameters").isJsonArray()) {
+          json.get("parameters").getAsJsonArray().forEach(p -> {
+            params.add(Var.valueOf(p.getAsString()));
+          });
+        }
+
+        if (json.get("parameters").isJsonObject()) {
+          for (Map.Entry<String, JsonElement> entry : json.get("parameters").getAsJsonObject().entrySet()) {
+            Object value = null;
+            if (entry.getValue().isJsonPrimitive()) {
+              if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
+                value = entry.getValue().getAsJsonPrimitive().getAsBoolean();
+              }
+              else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
+                value = entry.getValue().getAsJsonPrimitive().getAsNumber();
+              } else {
+                value = entry.getValue().getAsJsonPrimitive().getAsString();
+              }
+            }
+            params.add(Var.valueOf(entry.getKey(), value));
+          }
+        }
       }
 
       PageRequest p = new PageRequest(0, json.get("rows").getAsInt());
@@ -276,8 +306,6 @@ public class ODataAgent {
       } else {
         ds.filter(jpql, p);
       }
-
-      ds.fetch();
 
       System.out.println();
       System.out.write(START_RESULT);
