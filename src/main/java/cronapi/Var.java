@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -489,6 +490,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
             return new Gson().fromJson(getObjectAsString(), JsonElement.class);
           } else {
             ObjectMapper mapper = new ObjectMapper();
+            SimpleFilterProvider filters = new SimpleFilterProvider();
+            filters.setFailOnUnknownId(false);
+            mapper.setFilters(filters);
             String json = mapper.writeValueAsString(_object);
             return new Gson().fromJson(json, JsonElement.class);
           }
