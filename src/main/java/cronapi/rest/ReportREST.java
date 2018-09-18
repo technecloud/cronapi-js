@@ -38,6 +38,18 @@ public class ReportREST {
     ReportFront reportResult = reportService.getReport(reportFront.getReportName());
     return ResponseEntity.ok().body(reportResult);
   }
+
+  @RequestMapping(value = "/report/contentasstring", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> getContentAsString(@RequestBody ReportFront reportFront, HttpServletResponse response) {
+    if(reportFront == null)
+      return ResponseEntity.badRequest().header("Error", "Report is null").body("Error read content file");
+    String reportName = reportFront.getReportName();
+    log.debug("Print report [" + reportName + "]");
+    response.setHeader("Content-Disposition", "inline; filename=" + reportName);
+    response.setContentType("application/plain");
+    String reportResult = reportService.getContentReport(reportName);
+    return ResponseEntity.ok().body(reportResult);
+  }
   
   @RequestMapping(value = "/report/pdf", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<byte[]> getPDF(@RequestBody ReportFront reportFront, HttpServletResponse response) {
