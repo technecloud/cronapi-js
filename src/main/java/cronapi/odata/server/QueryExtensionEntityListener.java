@@ -1,14 +1,36 @@
 package cronapi.odata.server;
 
-import com.google.gson.JsonObject;
-import cronapi.*;
+import java.lang.reflect.Field;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
-import org.apache.olingo.odata2.api.uri.expression.*;
-import org.apache.olingo.odata2.api.uri.info.*;
+import org.apache.olingo.odata2.api.uri.expression.BinaryExpression;
+import org.apache.olingo.odata2.api.uri.expression.CommonExpression;
+import org.apache.olingo.odata2.api.uri.expression.FilterExpression;
+import org.apache.olingo.odata2.api.uri.expression.MethodExpression;
+import org.apache.olingo.odata2.api.uri.expression.PropertyExpression;
+import org.apache.olingo.odata2.api.uri.info.DeleteUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntityCountUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntitySetCountUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntitySetUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntityUriInfo;
+import org.apache.olingo.odata2.api.uri.info.PostUriInfo;
+import org.apache.olingo.odata2.api.uri.info.PutMergePatchUriInfo;
 import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
@@ -18,19 +40,28 @@ import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpres
 import org.apache.olingo.odata2.jpa.processor.core.access.data.ReflectionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
-import org.eclipse.persistence.annotations.BatchFetchType;
-import org.eclipse.persistence.config.QueryHints;
-import org.eclipse.persistence.jpa.jpql.parser.*;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
+import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
+import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
+import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
+import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.logging.Filter;
+import com.google.gson.JsonObject;
+
+import cronapi.ClientCommand;
+import cronapi.ErrorResponse;
+import cronapi.QueryManager;
+import cronapi.RestClient;
+import cronapi.Var;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -91,21 +122,27 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         if (!selection.contains(".") && !selection.contains(",")) {
           alias = mainAlias;
         }
+        
+        if ( uriInfo.rawEntity()) {
+           setField(selectStatement, "selectClause", null);
+           if (uriInfo.rawEntity()) {
+             selectExpression = "SELECT " + mainAlias + " ";
+           }
 
-        if (uriInfo.isCount() || uriInfo.rawEntity()) {
-          setField(selectStatement, "selectClause", null);
-          if (uriInfo.rawEntity()) {
-            selectExpression = "SELECT " + mainAlias + " ";
-          } else {
-            selectExpression = "SELECT count(" + mainAlias + ") ";
-          }
+           if (selectStatement.hasOrderByClause()) {
+             setField(selectStatement, "orderByClause", null);
+           }
 
-          if (selectStatement.hasOrderByClause()) {
-            setField(selectStatement, "orderByClause", null);
-          }
+           jpqlStatement = selectStatement.toString();
+         }
+         
+         if (uriInfo.isCount() || uriInfo.rawEntity()) {
+           if (selectStatement.hasOrderByClause()) {
+             setField(selectStatement, "orderByClause", null);
+           }
 
-          jpqlStatement = selectStatement.toString();
-        }
+           jpqlStatement = selectStatement.toString();
+         }
 
         String orderBy = null;
 
@@ -213,6 +250,20 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         query = em.createQuery(jpqlStatement);
 
+        if (uriInfo.isCount() || uriInfo.rawEntity()) {
+          if (!uriInfo.rawEntity()) {
+            Session session = em.unwrap(JpaEntityManager.class).getActiveSession();
+            DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery(); 
+            databaseQuery.prepareCall(session, new DatabaseRecord());
+            String sqlString = databaseQuery.getSQLString();
+            
+            selectExpression = "SELECT count(*) FROM ( ";
+            selectExpression = selectExpression.concat(sqlString);
+            selectExpression = selectExpression.concat(" ) countRecord ");
+            query = em.createNativeQuery(selectExpression);
+          }
+        }
+        
         if (parameterizedMap != null && parameterizedMap.size() > 0) {
           for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
             if (jpqlStatement.contains(parameterEntry.getKey())) {
