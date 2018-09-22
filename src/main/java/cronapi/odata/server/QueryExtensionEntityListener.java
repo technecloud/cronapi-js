@@ -1,5 +1,6 @@
 package cronapi.odata.server;
 
+import cronapp.reports.commons.Functions;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -14,6 +15,8 @@ import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
@@ -41,6 +44,9 @@ import org.apache.olingo.odata2.jpa.processor.core.access.data.ReflectionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
@@ -62,6 +68,8 @@ import cronapi.ErrorResponse;
 import cronapi.QueryManager;
 import cronapi.RestClient;
 import cronapi.Var;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -252,9 +260,9 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         if (uriInfo.isCount() || uriInfo.rawEntity()) {
           if (!uriInfo.rawEntity()) {
-            Session session = em.unwrap(JpaEntityManager.class).getActiveSession();
-            DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery(); 
-            databaseQuery.prepareCall(session, new DatabaseRecord());
+            Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
+            DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery();
+            databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
             String sqlString = databaseQuery.getSQLString();
             
             selectExpression = "SELECT count(*) FROM ( ";
@@ -284,27 +292,33 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
         }
 
-        i = maxParam;
-        for (String param : inputs) {
-          i++;
-          Parameter p = query.getParameter(i);
-          String strValue = RestClient.getRestClient().getParameter(param.substring(1));
-          if (strValue != null) {
-            Object requestParam = null;
-            if (strValue.contains("@@") || p.getParameterType().getSimpleName().equals("Object")) {
-              requestParam = Var.deserialize(RestClient.getRestClient().getParameter(param.substring(1)));
+        if (!uriInfo.isCount() && inputs.size() > 0) {
+          AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
+          HermesParser parser = new HermesParser();
+          DatabaseQuery queryParsed = parser.buildQuery(jpqlStatement, session);
+          List<Class> argsTypes = queryParsed.getArgumentTypes();
+          List<String> argsNames = queryParsed.getArguments();
+          i = maxParam;
+          for (String param : inputs) {
+            i++;
+            String strValue = RestClient.getRestClient().getParameter(param.substring(1));
+            int idx = argsNames.indexOf(String.valueOf(i));
+            Class type = argsTypes.get(idx);
+            if (strValue != null) {
+              Var requestParam = null;
+              if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
+                requestParam = Var.valueOf(Var.deserialize(RestClient.getRestClient().getParameter(param.substring(1))));
+              } else {
+                requestParam = Var.valueOf(requestParam);
+              }
+              query.setParameter(i, requestParam.getObject(type));
             } else {
-              requestParam = Var.valueOf(requestParam).getObject(p.getParameterType());
+              query.setParameter(i, getParameterValue(customQuery, param.substring(1)).getObject(type));
             }
-            query.setParameter(i, requestParam);
-          } else {
-            query.setParameter(i, null);
           }
         }
 
-
         return query;
-
       }
 
       if (entityType.getMapping() != null && ((JPAEdmMappingImpl) entityType.getMapping()).getJPAType() != null) {
@@ -318,6 +332,71 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
     return null;
   }
+  
+  private Var getParameterValue(JsonObject customQuery, String param) {
+    JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
+    
+    if (customQuery.getAsJsonArray("queryParamsValues") != null) {
+      for (int x = 0; x < paramValues.size(); x++)  {
+        JsonElement prv = paramValues.get(x);
+        if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
+          JsonObject obj = ((JsonObject)prv).getAsJsonObject("fieldValue");
+          if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
+            try {
+              JsonObject jsonCallBlockly = new JsonObject();
+              jsonCallBlockly.add("blockly", ((JsonObject)prv).getAsJsonObject("fieldValue"));
+              String method = obj.get("blocklyMethod").getAsString();
+
+              JsonArray params = obj.getAsJsonArray("blocklyParams");
+              Var[] blocklyParams = null;
+              if (params != null) {
+                blocklyParams = new Var[params.size()];
+                for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
+                  JsonObject value = params.get(countBlocklys).getAsJsonObject();
+                  blocklyParams[countBlocklys] = parserValueType(customQuery, value.get("value").getAsString());
+                }
+              }
+
+              Var result = QueryManager.executeBlockly(
+                              jsonCallBlockly, 
+                              method,
+                              blocklyParams
+                            );
+
+              return result;
+            } catch (Exception e) {
+              throw new RuntimeException(e);
+            }
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  private Var parserValueType(JsonObject customQuery, String value) {
+    Var result = Var.VAR_NULL;
+
+    if (!StringUtils.isEmpty(value)) {
+      if (value.startsWith("'") && value.endsWith("'") ||
+          value.startsWith("\"") && value.endsWith("\"")){
+        value = value.substring(1);
+        value = value.substring(0, value.length()-1);
+      }
+
+      if ("entityName".equalsIgnoreCase(value)){
+        result = Var.valueOf(customQuery.get("entityFullName").getAsString());
+      } else if ("null".equalsIgnoreCase(value)){
+        result = Var.VAR_NULL;
+      } else {
+        result = Var.valueOf(value);
+      }
+    }
+
+    return result;
+  }
+
 
   @Override
   public Query getQuery(GetEntitySetUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
