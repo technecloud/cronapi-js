@@ -14,9 +14,9 @@ import cronapi.database.JPQLConverter;
 
 import java.util.Map.Entry;
 
-import cronapi.database.TransactionManager;
 import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
@@ -26,12 +26,6 @@ import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 import org.springframework.util.ReflectionUtils;
-
-import javax.json.Json;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.servlet.http.HttpServletRequest;
 
 public class QueryManager {
 
@@ -226,11 +220,38 @@ public class QueryManager {
             .valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod")
                 .getAsString());
         try {
-          Operations.callBlockly(name, Var.valueOf(ds));
+          if (query.getAsJsonArray("queryParamsValues") != null) {
+            callBlocly(event, name, ds);
+          } else {
+            Operations.callBlockly(name, Var.valueOf(ds));
+          }
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
+    }
+  }
+
+  private static void callBlocly(JsonObject event, Var methodName, Object ds) {
+    try {
+      if (event.get("blocklyParams") != null) {
+        JsonArray bloclyParams = event.get("blocklyParams").getAsJsonArray();
+        Var params[] = new Var[bloclyParams.size()];
+        for (int i = 0; i < bloclyParams.size(); i++) {
+          JsonObject param = bloclyParams.get(i).getAsJsonObject();
+          if ("entityName".equalsIgnoreCase(param.get("value").getAsString())) {
+            params[i] = Var.valueOf(ds);
+          } else {
+            params[i] = Var.valueOf(Utils.getParserValueType(param.get("value").getAsString()));
+          }
+        }
+
+        Operations.callBlockly(methodName, params);
+      } else {
+        Operations.callBlockly(methodName, Var.VAR_NULL);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 

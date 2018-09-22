@@ -1,6 +1,6 @@
 package cronapi.odata.server;
 
-import cronapp.reports.commons.Functions;
+import cronapi.Utils;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -11,12 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
@@ -336,7 +333,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   private Var getParameterValue(JsonObject customQuery, String param) {
     JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
     
-    if (customQuery.getAsJsonArray("queryParamsValues") != null) {
+    if (paramValues != null) {
       for (int x = 0; x < paramValues.size(); x++)  {
         JsonElement prv = paramValues.get(x);
         if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
@@ -353,7 +350,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
                 blocklyParams = new Var[params.size()];
                 for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
                   JsonObject value = params.get(countBlocklys).getAsJsonObject();
-                  blocklyParams[countBlocklys] = parserValueType(customQuery, value.get("value").getAsString());
+                  if ("entityName".equalsIgnoreCase(value.get("value").getAsString())) {
+                    blocklyParams[countBlocklys] = Var.valueOf(customQuery.get("entityFullName").getAsString());
+                  } else {
+                    blocklyParams[countBlocklys] = Utils.getParserValueType(value.get("value").getAsString());
+                  }
                 }
               }
 
@@ -361,7 +362,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
                               jsonCallBlockly, 
                               method,
                               blocklyParams
-                            );
+                           );
 
               return result;
             } catch (Exception e) {
@@ -372,31 +373,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
     }
     
-    return null;
+    return Var.VAR_NULL;
   }
-
-  private Var parserValueType(JsonObject customQuery, String value) {
-    Var result = Var.VAR_NULL;
-
-    if (!StringUtils.isEmpty(value)) {
-      if (value.startsWith("'") && value.endsWith("'") ||
-          value.startsWith("\"") && value.endsWith("\"")){
-        value = value.substring(1);
-        value = value.substring(0, value.length()-1);
-      }
-
-      if ("entityName".equalsIgnoreCase(value)){
-        result = Var.valueOf(customQuery.get("entityFullName").getAsString());
-      } else if ("null".equalsIgnoreCase(value)){
-        result = Var.VAR_NULL;
-      } else {
-        result = Var.valueOf(value);
-      }
-    }
-
-    return result;
-  }
-
 
   @Override
   public Query getQuery(GetEntitySetUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {

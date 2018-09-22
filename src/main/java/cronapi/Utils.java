@@ -29,6 +29,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
@@ -833,6 +834,26 @@ public class Utils {
 	    result += sql + " " + filter;
 	  
 	  return result;
+	}
+
+	public static Var getParserValueType(String value) {
+		Var result = Var.VAR_NULL;
+
+		if (!StringUtils.isEmpty(value)) {
+			if (value.startsWith("'") && value.endsWith("'") ||
+					value.startsWith("\"") && value.endsWith("\"")){
+				value = value.substring(1);
+				value = value.substring(0, value.length()-1);
+			}
+
+			if ("null".equalsIgnoreCase(value)){
+				result = Var.VAR_NULL;
+			} else {
+				result = Var.valueOf(value);
+			}
+		}
+
+		return result;
 	}
 
 }
