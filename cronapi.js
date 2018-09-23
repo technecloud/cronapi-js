@@ -12,6 +12,10 @@
 
   this.cronapi = {};
 
+  this.cronapi.toDate = function(value) {
+    return new Date(value);
+  }
+
   var getDatasource = function(ds) {
     if (typeof ds == 'string') {
       return window[ds];
