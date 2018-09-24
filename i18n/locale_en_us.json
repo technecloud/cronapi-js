@@ -392,5 +392,9 @@
 	"returnType":"Return Type",
 	"mediaType":"Media Type",
 	"setActiveTab": "Change tab",
-	"setActiveTablDesc": "Function that set active the selected tab"
+	"setActiveTablDesc": "Function that set active the selected tab",
+	"showLoading":"Show Loading",
+	"showLoadingDesc":"Function that show a loading",
+	"hideLoading":"Hide Loading",
+	"hideLoadingDesc":"Function that hide a loading"
 }

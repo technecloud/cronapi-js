@@ -394,5 +394,9 @@
 	"returnType":"Tipo de Retorno",
 	"mediaType":"Tipo de Mídia",
 	"setActiveTab": "Mudar aba",
-	"setActiveTablDesc": "Função que modifica a aba ativa do componente aba"
+	"setActiveTablDesc": "Função que modifica a aba ativa do componente aba",
+	"showLoading":"Exibir Carregamento",
+	"showLoadingDesc":"Função que exibe um carregamento",
+	"hideLoading":"Esconder Carregamento",
+	"hideLoadingDesc":"Função que esconde um carregamento"
 }

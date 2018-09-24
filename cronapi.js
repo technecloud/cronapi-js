@@ -1097,6 +1097,34 @@
     return false;
   };
 
+  /**
+   * @type function
+   * @name {{showLoading}}
+   * @nameTags Show| Loading| Exibir | Carregamento
+   * @description {{showLoadingDesc}}
+   * @platform M
+   */
+  this.cronapi.screen.showLoading = function() {
+    this.cronapi.$scope.$ionicLoading.show({
+      content : 'Loading',
+      animation : 'fade-in',
+      showBackdrop : true,
+      maxWidth : 200,
+      showDelay : 0
+    });
+  };
+
+  /**
+   * @type function
+   * @name {{hideLoading}}
+   * @nameTags Hide| Loading| Esconder | Carregamento
+   * @description {{hideLoadingDesc}}
+   * @platform M
+   */
+  this.cronapi.screen.hide = function() {
+    this.cronapi.$scope.$ionicLoading.hide();
+  };
+
 
   /**
    * @type function
