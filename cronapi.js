@@ -560,6 +560,82 @@
 
   /**
    * @type function
+   * @name {{getURLFromOthersName}}
+   * @description {{getURLFromOthersDescription}}
+   * @nameTags URL|API|Content|Download|Address|Endereco|Conteudo
+   * @param {ObjectType.STRING} method {{HTTPMethod}}
+   * @param {ObjectType.STRING} contentType {{contentType}}
+   * @param {ObjectType.STRING} url {{URLAddress}}
+   * @param {ObjectType.STRING} params {{paramsHTTP}}
+   * @param {ObjectType.STRING} headers {{headers}}
+   * @param {ObjectType.STRING} success {{success}}
+   * @param {ObjectType.STRING} error {{error}}
+   */
+  this.cronapi.util.getURLFromOthers = function(/** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE @values GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE  */  method , /** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys application/x-www-form-urlencoded|application/json @values application/x-www-form-urlencoded|application/json  */  contentType , /** @type {ObjectType.STRING} @description {{URLAddress}} */ url, /** @type {ObjectType.OBJECT} @description {{paramsHTTP}} */ params, /** @type {ObjectType.OBJECT} @description {{headers}} */ headers, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
+
+    var header = Object.create(headers);
+    header["Content-Type"] = contentType;
+    // Angular has a .run that inject X-AUTH-TOKEN, so we use JQuery
+    $.ajax({
+      method : method,
+      url : url,
+      data: params,
+      headers: header
+    }).success(success.bind(this)).error(error.bind(this));
+
+  };
+
+  /**
+   * @type function
+   * @name {{setSessionStorage}}
+   * @nameTags storage | session | sessão | armazenamento
+   * @description {{setSessionStorageDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @param {ObjectType.STRING} value {{value}}
+   */
+  this.cronapi.util.setSessionStorage = function(key, value) {
+    window.sessionStorage.setItem(key, value);
+  };
+
+  /**
+   * @type function
+   * @name {getSessionStorage}}
+   * @nameTags storage | session | sessão | armazenamento
+   * @description {{getSessionStorageDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.util.getSessionStorage = function(key) {
+    return window.sessionStorage.getItem(key);
+  };
+
+  /**
+   * @type function
+   * @name {{setLocalStorage}}
+   * @nameTags storage | session | sessão | armazenamento
+   * @description {{setLocalStorageDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @param {ObjectType.STRING} value {{value}}
+   */
+  this.cronapi.util.setLocalStorage = function(key, value) {
+    window.localStorage.setItem(key, value);
+  };
+
+  /**
+   * @type function
+   * @name {{getLocalStorage}}
+   * @nameTags storage | session | sessão | armazenamento
+   * @description {{getLocalStorageDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getLocalStorage = function(key) {
+    return window.localStorage.getItem(key);
+  };
+
+
+  /**
+   * @type function
    * @name {{executeAsynchronousName}}
    * @nameTags Executar|Assíncrono|Execute| Asynchronous
    * @description {{executeAsynchronousDescription}}
@@ -1123,6 +1199,18 @@
    */
   this.cronapi.screen.hide = function() {
     this.cronapi.$scope.$ionicLoading.hide();
+  };
+
+  /**
+   * @type function
+   * @name {{getHostapp}}
+   * @nameTags Hostapp
+   * @description {{getHostappDesc}}
+   * @platform M
+   * @returns {ObjectType.String}
+   */
+  this.cronapi.screen.getHostapp = function() {
+    return window.hostApp;
   };
 
 
@@ -2468,6 +2556,18 @@
    */
   this.cronapi.object.createObjectFromString = function(string) {
     return JSON.parse(string);
+  };
+
+  /**
+   * @type function
+   * @name {{serializeObject}}
+   * @description {{serializeObjectDescription}}
+   * @nameTags object
+   * @param {ObjectType.STRING} string {{string}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.object.serializeObject = function(obj) {
+    return JSON.stringify(obj);
   };
 
   /**
