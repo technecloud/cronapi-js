@@ -1,39 +1,17 @@
 package cronapi.odata.server;
 
-import cronapp.reports.commons.Functions;
-import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Parameter;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-
-import org.apache.commons.lang3.ArrayUtils;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import cronapi.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
-import org.apache.olingo.odata2.api.uri.expression.BinaryExpression;
-import org.apache.olingo.odata2.api.uri.expression.CommonExpression;
-import org.apache.olingo.odata2.api.uri.expression.FilterExpression;
-import org.apache.olingo.odata2.api.uri.expression.MethodExpression;
-import org.apache.olingo.odata2.api.uri.expression.PropertyExpression;
-import org.apache.olingo.odata2.api.uri.info.DeleteUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntityCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntityUriInfo;
-import org.apache.olingo.odata2.api.uri.info.PostUriInfo;
-import org.apache.olingo.odata2.api.uri.info.PutMergePatchUriInfo;
+import org.apache.olingo.odata2.api.uri.expression.*;
+import org.apache.olingo.odata2.api.uri.info.*;
 import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
@@ -48,28 +26,18 @@ import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
-import org.eclipse.persistence.jpa.jpql.parser.Expression;
-import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
-import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
-import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
-import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
-import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
-import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
-import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.jpa.jpql.parser.*;
 import org.eclipse.persistence.queries.DatabaseQuery;
 import org.eclipse.persistence.sessions.DatabaseRecord;
 import org.eclipse.persistence.sessions.Session;
 
-import com.google.gson.JsonObject;
-
-import cronapi.ClientCommand;
-import cronapi.ErrorResponse;
-import cronapi.QueryManager;
-import cronapi.RestClient;
-import cronapi.Var;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import java.lang.reflect.Field;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -84,6 +52,30 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         findInputParams(e, inputs);
       });
     }
+  }
+
+  private String getBlocklyMethod(UriInfo uriInfo, JsonObject customQuery) {
+    String restMethod = getRestMehtod(uriInfo);
+
+    if (QueryManager.isNull(customQuery.get("entityFullName"))) {
+      String blocklyMethod = QueryManager.getBlocklyMethod(customQuery, restMethod);
+      if (customQuery.get("baseEntity") != null && "default".equals(blocklyMethod)) {
+        return null;
+      } else {
+        return blocklyMethod;
+      }
+    }
+
+    return null;
+  }
+
+  private String getRestMehtod(UriInfo uriInfo) {
+    String restMethod = RestClient.getRestClient().getMethod();
+    if (uriInfo.getFilter() != null || (uriInfo.getKeyPredicates() != null && uriInfo.getKeyPredicates().size() > 0)) {
+      restMethod = "FILTER";
+    }
+
+    return restMethod;
   }
 
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
@@ -104,75 +96,87 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
 
-        String whereExpression = null;
-        String selectExpression = null;
+        boolean isBlockly = QueryManager.isNull(customQuery.get("entityFullName"));
+
+        String restMethod = getRestMehtod(uriInfo);
+
+        if (isBlockly) {
+          String blocklyMethod = getBlocklyMethod(uriInfo, customQuery);
+          if (blocklyMethod == null) {
+            return null;
+          }
+        }
 
         Query query = null;
-
-        String jpqlStatement = QueryManager.getJPQL(customQuery, false);
-
-        JPQLExpression jpqlExpression = new JPQLExpression(
-            jpqlStatement,
-            DefaultEclipseLinkJPQLGrammar.instance(),
-            true
-        );
-
+        String whereExpression = null;
+        String selectExpression = null;
+        SelectStatement selectStatement = null;
+        String jpqlStatement = "";
+        String alias = null;
+        String orderBy = null;
         List<String> inputs = new LinkedList<>();
 
-        findInputParams(jpqlExpression, inputs);
+        if (!isBlockly) {
+          jpqlStatement = QueryManager.getJPQL(customQuery, false);
 
-        SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-        String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
+          JPQLExpression jpqlExpression = new JPQLExpression(
+              jpqlStatement,
+              DefaultEclipseLinkJPQLGrammar.instance(),
+              true
+          );
 
-        String alias = null;
-        String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+          findInputParams(jpqlExpression, inputs);
 
-        if (!selection.contains(".") && !selection.contains(",")) {
-          alias = mainAlias;
-        }
-        
-        if ( uriInfo.rawEntity()) {
-           setField(selectStatement, "selectClause", null);
-           if (uriInfo.rawEntity()) {
-             selectExpression = "SELECT " + mainAlias + " ";
-           }
+          selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
+          String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
 
-           if (selectStatement.hasOrderByClause()) {
-             setField(selectStatement, "orderByClause", null);
-           }
+          String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
 
-           jpqlStatement = selectStatement.toString();
-         }
-         
-         if (uriInfo.isCount() || uriInfo.rawEntity()) {
-           if (selectStatement.hasOrderByClause()) {
-             setField(selectStatement, "orderByClause", null);
-           }
+          if (!selection.contains(".") && !selection.contains(",")) {
+            alias = mainAlias;
+          }
 
-           jpqlStatement = selectStatement.toString();
-         }
+          if (uriInfo.rawEntity()) {
+            setField(selectStatement, "selectClause", null);
+            if (uriInfo.rawEntity()) {
+              selectExpression = "SELECT " + mainAlias + " ";
+            }
 
-        String orderBy = null;
+            if (selectStatement.hasOrderByClause()) {
+              setField(selectStatement, "orderByClause", null);
+            }
 
-        if (selectStatement.hasOrderByClause()) {
-          orderBy = selectStatement.getOrderByClause().toString();
-          setField(selectStatement, "orderByClause", null);
-          jpqlStatement = selectStatement.toString();
-        }
+            jpqlStatement = selectStatement.toString();
+          }
 
-        if (uriInfo.getOrderBy() != null) {
-          String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
-          orderBy = "ORDER BY " + orderExpression;
+          if (uriInfo.isCount() || uriInfo.rawEntity()) {
+            if (selectStatement.hasOrderByClause()) {
+              setField(selectStatement, "orderByClause", null);
+            }
+
+            jpqlStatement = selectStatement.toString();
+          }
+
+
+          if (selectStatement.hasOrderByClause()) {
+            orderBy = selectStatement.getOrderByClause().toString();
+            setField(selectStatement, "orderByClause", null);
+            jpqlStatement = selectStatement.toString();
+          }
+
+          if (uriInfo.getOrderBy() != null) {
+            String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
+            orderBy = "ORDER BY " + orderExpression;
+          }
+
         }
 
         ODataExpressionParser.reInitializePositionalParameters();
-        Map<String, Map<Integer, Object>> parameterizedExpressionMap =
-            new HashMap<String, Map<Integer, Object>>();
+        Map<String, Map<Integer, Object>> parameterizedExpressionMap = new HashMap<String, Map<Integer, Object>>();
 
         if (uriInfo.getFilter() != null) {
           checkFilter(entityType, uriInfo.getFilter());
-          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(
-              uriInfo.getFilter(), alias);
+          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(uriInfo.getFilter(), alias);
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
           ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
           ODataExpressionParser.reInitializePositionalParameters();
@@ -191,19 +195,19 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         if (whereExpression != null) {
 
-          if (selectStatement.hasWhereClause()) {
+          if (selectStatement != null && selectStatement.hasWhereClause()) {
             where = ((WhereClause) selectStatement.getWhereClause()).getConditionalExpression().toString();
             setField(selectStatement, "whereClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
-          if (selectStatement.hasGroupByClause()) {
+          if (selectStatement != null && selectStatement.hasGroupByClause()) {
             groupBy = ((GroupByClause) selectStatement.getGroupByClause()).toString();
             setField(selectStatement, "groupByClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
-          if (selectStatement.hasHavingClause()) {
+          if (selectStatement != null && selectStatement.hasHavingClause()) {
             having = ((HavingClause) selectStatement.getHavingClause()).toString();
             setField(selectStatement, "havingClause", null);
             jpqlStatement = selectStatement.toString();
@@ -232,8 +236,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           jpqlStatement = selectExpression + " " + jpqlStatement;
         }
 
-        Map<String, Map<Integer, Object>> parameterizedMap = ODataParameterizedWhereExpressionUtil.
-            getParameterizedQueryMap();
+        Map<String, Map<Integer, Object>> parameterizedMap = ODataParameterizedWhereExpressionUtil.getParameterizedQueryMap();
 
         int maxParam = 0;
 
@@ -256,22 +259,31 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           jpqlStatement = jpqlStatement.replace(param, "?" + i);
         }
 
-        query = em.createQuery(jpqlStatement);
+        if (!isBlockly) {
+          query = em.createQuery(jpqlStatement);
 
-        if (uriInfo.isCount() || uriInfo.rawEntity()) {
-          if (!uriInfo.rawEntity()) {
-            Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
-            DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery();
-            databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
-            String sqlString = databaseQuery.getSQLString();
-            
-            selectExpression = "SELECT count(*) FROM ( ";
-            selectExpression = selectExpression.concat(sqlString);
-            selectExpression = selectExpression.concat(" ) countRecord ");
-            query = em.createNativeQuery(selectExpression);
+          if (uriInfo.isCount() || uriInfo.rawEntity()) {
+            if (!uriInfo.rawEntity()) {
+              Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
+              DatabaseQuery databaseQuery = ((EJBQueryImpl) query).getDatabaseQuery();
+              databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
+              String sqlString = databaseQuery.getSQLString();
+
+              selectExpression = "SELECT count(*) FROM ( ";
+              selectExpression = selectExpression.concat(sqlString);
+              selectExpression = selectExpression.concat(" ) countRecord ");
+              query = em.createNativeQuery(selectExpression);
+            }
           }
+
+        } else {
+          String type = "select";
+          if (uriInfo.isCount()) {
+            type = "count";
+          }
+          query = new BlocklyQuery(customQuery, restMethod, type, jpqlStatement, (uriInfo.getFilter() != null ? uriInfo.getFilter().getExpressionString() : ""));
         }
-        
+
         if (parameterizedMap != null && parameterizedMap.size() > 0) {
           for (Map.Entry<String, Map<Integer, Object>> parameterEntry : parameterizedMap.entrySet()) {
             if (jpqlStatement.contains(parameterEntry.getKey())) {
@@ -332,19 +344,19 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
     return null;
   }
-  
+
   private Var getParameterValue(JsonObject customQuery, String param) {
     JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
-    
+
     if (customQuery.getAsJsonArray("queryParamsValues") != null) {
-      for (int x = 0; x < paramValues.size(); x++)  {
+      for (int x = 0; x < paramValues.size(); x++) {
         JsonElement prv = paramValues.get(x);
         if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
-          JsonObject obj = ((JsonObject)prv).getAsJsonObject("fieldValue");
+          JsonObject obj = ((JsonObject) prv).getAsJsonObject("fieldValue");
           if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
             try {
               JsonObject jsonCallBlockly = new JsonObject();
-              jsonCallBlockly.add("blockly", ((JsonObject)prv).getAsJsonObject("fieldValue"));
+              jsonCallBlockly.add("blockly", ((JsonObject) prv).getAsJsonObject("fieldValue"));
               String method = obj.get("blocklyMethod").getAsString();
 
               JsonArray params = obj.getAsJsonArray("blocklyParams");
@@ -358,10 +370,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
 
               Var result = QueryManager.executeBlockly(
-                              jsonCallBlockly, 
-                              method,
-                              blocklyParams
-                            );
+                  jsonCallBlockly,
+                  method,
+                  blocklyParams
+              );
 
               return result;
             } catch (Exception e) {
@@ -371,7 +383,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
       }
     }
-    
+
     return null;
   }
 
@@ -380,14 +392,14 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
     if (!StringUtils.isEmpty(value)) {
       if (value.startsWith("'") && value.endsWith("'") ||
-          value.startsWith("\"") && value.endsWith("\"")){
+          value.startsWith("\"") && value.endsWith("\"")) {
         value = value.substring(1);
-        value = value.substring(0, value.length()-1);
+        value = value.substring(0, value.length() - 1);
       }
 
-      if ("entityName".equalsIgnoreCase(value)){
+      if ("entityName".equalsIgnoreCase(value)) {
         result = Var.valueOf(customQuery.get("entityFullName").getAsString());
-      } else if ("null".equalsIgnoreCase(value)){
+      } else if ("null".equalsIgnoreCase(value)) {
         result = Var.VAR_NULL;
       } else {
         result = Var.valueOf(value);
@@ -653,7 +665,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   @Override
   public List<ClientCallback> getClientCallbacks() {
     List<ClientCallback> callbacks = null;
-    for (ClientCommand command: RestClient.getRestClient().getCommands()) {
+    for (ClientCommand command : RestClient.getRestClient().getCommands()) {
       if (callbacks == null) {
         callbacks = new LinkedList<>();
       }
@@ -717,7 +729,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         VirtualClass virtualClass = new VirtualClass();
 
-        for (String name: entityType.getPropertyNames()) {
+        for (String name : entityType.getPropertyNames()) {
           EdmSimplePropertyImplProv type = (EdmSimplePropertyImplProv) entityType.getProperty(name);
           if (type.getMapping() != null && type.getMapping().getInternalExpression() != null) {
             String expression = type.getMapping().getInternalExpression();
@@ -740,10 +752,112 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       }
 
-    } catch(Exception e) {
+    } catch (Exception e) {
 
     }
 
     return null;
   }
+
+  @Override
+  public Object overridePost(UriInfo infoView, Object entity) {
+    JsonObject query = null;
+
+    try {
+      final EdmEntitySet oDataEntitySet = infoView.getTargetEntitySet();
+      final EdmEntityType entityType = oDataEntitySet.getEntityType();
+
+      query = QueryManager.getQuery(entityType.getName());
+
+      String blocklyMethod = getBlocklyMethod(infoView, query);
+      if (blocklyMethod == null) {
+        return null;
+      }
+
+      if (query != null && QueryManager.isNull(query.get("entityFullName"))) {
+
+        Var result = QueryManager.executeBlockly(query, getRestMehtod(infoView), Var.valueOf(entity));
+        if (result != null && !result.isNull()) {
+          if (query.get("baseEntity") != null) {
+            return result.getObject();
+          } else {
+            return result;
+          }
+        } else {
+          return entity;
+        }
+      }
+
+    } catch (Exception e) {
+      //No Command
+    }
+
+    return null;
+  }
+
+  @Override
+  public boolean canOverridePut(UriInfo infoView) {
+    try {
+      final EdmEntitySet oDataEntitySet = infoView.getTargetEntitySet();
+      final EdmEntityType entityType = oDataEntitySet.getEntityType();
+
+      JsonObject query = QueryManager.getQuery(entityType.getName());
+
+      String blocklyMethod = getBlocklyMethod(infoView, query);
+      if (blocklyMethod == null) {
+        return false;
+      }
+
+      return query != null && QueryManager.isNull(query.get("entityFullName"));
+
+    } catch (Exception e) {
+      //NoCommand
+    }
+
+    return false;
+  }
+
+  @Override
+  public boolean canOverrideDelete(UriInfo infoView) {
+    return canOverridePut(infoView);
+  }
+
+  @Override
+  public boolean canOverridePost(UriInfo infoView) {
+    return canOverridePut(infoView);
+  }
+
+  @Override
+  public Object overridePut(UriInfo infoView, Object entity) {
+    return overridePost(infoView, entity);
+  }
+
+  @Override
+  public boolean overrideDelete(UriInfo infoView, Object entity) {
+    JsonObject query = null;
+
+    try {
+      final EdmEntitySet oDataEntitySet = infoView.getTargetEntitySet();
+      final EdmEntityType entityType = oDataEntitySet.getEntityType();
+
+      query = QueryManager.getQuery(entityType.getName());
+
+      String blocklyMethod = getBlocklyMethod(infoView, query);
+      if (blocklyMethod == null) {
+        return false;
+      }
+
+      if (query != null && QueryManager.isNull(query.get("entityFullName"))) {
+
+        QueryManager.executeBlockly(query, getRestMehtod(infoView), Var.valueOf(entity));
+        return true;
+      }
+
+    } catch (Exception e) {
+      //No Command
+    }
+
+    return false;
+  }
+
 }

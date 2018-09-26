@@ -163,6 +163,7 @@ public class ODataAgent {
 
       boolean found = false;
 
+      int idx = 0;
       for (Archive archive : archives) {
 
         List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
@@ -177,7 +178,9 @@ public class ODataAgent {
             properties.setProperty("eclipselink.ddl-generation", "none");
 
             EntityManagerFactory emf = Persistence.createEntityManagerFactory(namespace, properties);
-            JPAODataServiceFactory serviceFactory = new JPAODataServiceFactory(emf, namespace);
+            JPAODataServiceFactory serviceFactory = new JPAODataServiceFactory(emf, namespace, idx);
+
+            idx++;
 
             List<PathSegment> odataPathSegment = new LinkedList<>();
             for (int i = 1; i < parts.length; i++) {

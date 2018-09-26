@@ -176,7 +176,7 @@ public class QueryManager {
       }
 
       if (!authorized) {
-        throw new RuntimeException(Messages.getString("notAllowed"));
+//        throw new RuntimeException(Messages.getString("notAllowed"));
       }
     }
   }
@@ -282,8 +282,8 @@ public class QueryManager {
       throws Exception {
     String function = blockly.get("blocklyMethod").getAsString();
 
-    if (!isNull(blockly.get("blockly" + method + "Method"))) {
-      function = blockly.get("blockly" + method + "Method").getAsString();
+    if (method != null && !isNull(blockly.get("blockly" + method.toUpperCase() + "Method"))) {
+      function = blockly.get("blockly" + method.toUpperCase() + "Method").getAsString();
     }
 
     Var name = Var.valueOf(blockly.get("blocklyClass").getAsString() + ":" + function);
@@ -300,6 +300,17 @@ public class QueryManager {
     }
 
     return Var.VAR_NULL;
+  }
+
+  public static String getBlocklyMethod(JsonObject query, String method) {
+    JsonObject blockly = query.getAsJsonObject("blockly");
+    String function = blockly.get("blocklyMethod").getAsString();
+
+    if (method != null && !isNull(blockly.get("blockly" + method.toUpperCase() + "Method"))) {
+      function = blockly.get("blockly" + method.toUpperCase() + "Method").getAsString();
+    }
+
+    return function;
   }
 
   private static void addIgnoreField(String field) {

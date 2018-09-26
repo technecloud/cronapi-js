@@ -30,9 +30,11 @@ import java.util.*;
 public class DatasourceExtension implements JPAEdmExtension {
 
   private final ODataJPAContext context;
+  private int order;
 
-  public DatasourceExtension(ODataJPAContext context) {
+  public DatasourceExtension(ODataJPAContext context, int order) {
     this.context = context;
+    this.order = order;
   }
 
   @Override
@@ -59,17 +61,35 @@ public class DatasourceExtension implements JPAEdmExtension {
     JsonObject queries = QueryManager.getJSON();
     for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
       JsonObject customObj = entry.getValue().getAsJsonObject();
+
+      LinkedList<CalcField> calcFields = new LinkedList<>();
+
+      if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
+        if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
+          JsonObject calcObj = customObj.get("calcFieldsProperties").getAsJsonObject();
+          for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
+            CalcField field = new CalcField();
+            field.name = entryObj.getKey();
+            field.type = entryObj.getValue().getAsJsonObject().get("type").getAsString();
+            calcFields.add(field);
+          }
+        }
+      } else {
+        //Suporte ao legado
+        if (!QueryManager.isNull(customObj.get("calcFields"))) {
+          JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
+          for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
+            CalcField field = new CalcField();
+            field.name = entryObj.getKey();
+            calcFields.add(field);
+          }
+        }
+      }
+
       if (!QueryManager.isNull(customObj.get("entityFullName"))) {
         String clazz = customObj.get("entityFullName").getAsString();
-        if (clazz.startsWith(edmSchema.getNamespace())) {
+        if (clazz.startsWith(edmSchema.getNamespace() + ".")) {
           try {
-            LinkedList<String> calcFields = new LinkedList<>();
-            if (!QueryManager.isNull(customObj.get("calcFields"))) {
-              JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
-              for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
-                calcFields.add(entryObj.getKey());
-              }
-            }
             EntitySet set = createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString(), calcFields);
             if (set != null) {
               queryDatasource.add(set);
@@ -78,7 +98,33 @@ public class DatasourceExtension implements JPAEdmExtension {
             e.printStackTrace();
           }
         }
+      } else {
+        if (!QueryManager.isNull(customObj.get("baseEntity"))) {
+          String baseEntity = customObj.get("baseEntity").getAsString();
+          if (baseEntity.startsWith(edmSchema.getNamespace() + ".")) {
+            try {
+              EntitySet set = createBlocklyDataSource(edmSchema, customObj.get("customId").getAsString(), customObj, calcFields);
+              if (set != null) {
+                queryDatasource.add(set);
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        } else {
+          if (order == 0) {
+            try {
+              EntitySet set = createBlocklyDataSource(edmSchema, customObj.get("customId").getAsString(), customObj, calcFields);
+              if (set != null) {
+                queryDatasource.add(set);
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        }
       }
+
     }
 
     if (!AppConfig.exposeLocalEntities()) {
@@ -160,15 +206,19 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private void addCalcFields(EntityType newType, List<String> addFields) {
+  private void addCalcFields(EntityType newType, List<CalcField> addFields) {
     if (addFields != null) {
-      for (String field : addFields) {
+      for (CalcField field : addFields) {
         SimpleProperty property = new SimpleProperty();
-        property.setType(EdmSimpleTypeKind.Auto);
-        property.setName(field);
+        if (field.type != null && !field.type.isEmpty()) {
+          property.setType(EdmSimpleTypeKind.valueOf(field.type));
+        } else {
+          property.setType(EdmSimpleTypeKind.Auto);
+        }
+        property.setName(field.name);
 
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-        mapping.setInternalName(field);
+        mapping.setInternalName(field.name);
         mapping.setJPAType(Object.class);
         mapping.setVirtualAccess(true);
         mapping.setCalculated(true);
@@ -317,7 +367,95 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private EntitySet createDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
+  private EntitySet createBlocklyDataSource(Schema edmSchema, String id, JsonObject entity, List<CalcField> addFields) {
+    if (entity.get("baseEntity") != null) {
+      String baseEntity = entity.get("baseEntity").getAsString();
+      if (baseEntity.contains(".")) {
+        baseEntity = baseEntity.substring(baseEntity.lastIndexOf(".") + 1);
+      }
+      return createEntityDataSource(edmSchema, id, baseEntity, addFields);
+    } else {
+
+      String edmNamespace = edmSchema.getNamespace();
+
+      EntitySet set = new EntitySet();
+      set.setName(id);
+      set.setEntityType(new FullQualifiedName(edmNamespace, id));
+
+      edmSchema.getEntityContainers().get(0).getEntitySets().add(set);
+
+      Key key = new Key();
+      List<PropertyRef> propertyRefList = new ArrayList<>();
+      key.setKeys(propertyRefList);
+
+      List<Property> properties = new ArrayList<>();
+      boolean keysSet = false;
+
+
+      JsonObject obj = entity.get("defaultValuesProperties").getAsJsonObject();
+
+      for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+        JsonObject propObj = entry.getValue().getAsJsonObject();
+        SimpleProperty property = new SimpleProperty();
+        property.setName(entry.getKey());
+
+        EdmSimpleTypeKind type = EdmSimpleTypeKind.valueOf(propObj.get("type").getAsString());
+        property.setType(type);
+
+        JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+        mapping.setJPAType(String.class);
+        mapping.setVirtualAccess(true);
+        mapping.setInternalExpression(entry.getKey());
+        mapping.setInternalExpression(entry.getKey());
+
+        property.setMapping(mapping);
+
+        properties.add(property);
+
+        if (entry.getValue().getAsJsonObject().get("key").getAsBoolean()) {
+          PropertyRef propertyRef = new PropertyRef();
+          propertyRef.setName(entry.getKey());
+          propertyRefList.add(propertyRef);
+          keysSet = true;
+        }
+
+      }
+
+      boolean canEdit = true;
+      if (!keysSet) {
+        propertyRefList.clear();
+        canEdit = false;
+        for (Property item : properties) {
+          PropertyRef propertyRef = new PropertyRef();
+          propertyRef.setName(item.getName());
+          propertyRefList.add(propertyRef);
+        }
+      }
+
+      EntityType type = new EntityType();
+
+      type.setProperties(properties);
+      type.setKey(key);
+      type.setName(id);
+      JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+      mapping.setCanEdit(canEdit);
+      mapping.setJPAType(VirtualClass.class);
+
+      mapping.setVirtualAccess(true);
+      if (canEdit) {
+        mapping.setInternalName(id);
+      }
+      type.setMapping(mapping);
+
+      addCalcFields(type, addFields);
+
+      edmSchema.getEntityTypes().add(type);
+
+      return set;
+    }
+  }
+
+  private EntitySet createDataSource(Schema edmSchema, String id, String entity, List<CalcField> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
     EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
@@ -440,7 +578,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private EntitySet createEntityDataSource(Schema edmSchema, String id, String entity, List<String> addFields) {
+  private EntitySet createEntityDataSource(Schema edmSchema, String id, String entity, List<CalcField> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
 
@@ -508,75 +646,13 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private EntitySet createBlocklyDataSource(Schema edmSchema, JsonObject query) {
-    JsonObject defaultValuesProperties = null;
-    String id = query.get("customId").getAsString();
-    if (query.get("defaultValuesProperties") != null) {
-      defaultValuesProperties = query.get("defaultValuesProperties").getAsJsonObject();
-    }
-
-    if (defaultValuesProperties != null) {
-      boolean hasDefined = false;
-      for (Map.Entry<String, JsonElement> entry : defaultValuesProperties.entrySet()) {
-        if (entry.getValue() != null && !entry.getValue().isJsonNull()) {
-          hasDefined = true;
-          break;
-        }
-      }
-
-      if (hasDefined) {
-        EntityType type = new EntityType();
-
-        Key key = new Key();
-        List<PropertyRef> propertyRefList = new ArrayList<>();
-        key.setKeys(propertyRefList);
-
-        List<Property> properties = new ArrayList<>();
-
-        for (Map.Entry<String, JsonElement> entry : defaultValuesProperties.entrySet()) {
-          JsonObject obj = entry.getValue().getAsJsonObject();
-
-          SimpleProperty property = new SimpleProperty();
-
-          property.setType(toEdmSimpleTypeKind(obj.get("type").getAsString()));
-          property.setName(entry.getKey());
-
-          JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-          mapping.setInternalExpression(entry.getKey());
-          mapping.setInternalName(entry.getKey());
-          mapping.setJPAType(String.class);
-          mapping.setVirtualAccess(true);
-
-          property.setMapping(mapping);
-
-          if (obj.get("key").getAsBoolean()) {
-            PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(entry.getKey());
-            propertyRefList.add(propertyRef);
-          }
-        }
-
-        type.setProperties(properties);
-        type.setKey(key);
-        type.setName(id);
-
-        JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-        mapping.setCanEdit(true);
-        mapping.setJPAType(VirtualClass.class);
-        mapping.setVirtualAccess(true);
-        type.setMapping(mapping);
-
-        edmSchema.getEntityTypes().add(type);
-      }
-
-    }
-
-    return null;
-  }
-
-
   @Override
   public InputStream getJPAEdmMappingModelStream() {
     return null;
+  }
+
+  public static class CalcField {
+    String name = null;
+    String type = null;
   }
 }

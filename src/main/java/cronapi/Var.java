@@ -39,12 +39,13 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClassInterface;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
-public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer {
+public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer, VirtualClassInterface {
 
   @Override
   public String serializeAsJson() {
@@ -53,6 +54,17 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public Object get(String name) {
+    return getField(name).getObject();
+  }
+
+  @Override
+  public VirtualClassInterface set(String name, Object value) {
+    setField(name, value);
+    return this;
   }
 
   public static class JsonAdapter {
