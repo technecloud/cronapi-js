@@ -325,6 +325,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   public Object getObject(Class type) {
 
+    if(_object == null){
+      return null;
+    }
+
     if (type == Var.class) {
       return this;
     } else if (type == String.class || type == StringBuilder.class || type == StringBuffer.class
