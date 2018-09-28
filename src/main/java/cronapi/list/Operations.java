@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import cronapi.Var;
 import cronapi.json.JsonArrayWrapper;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Classe que representa ...
@@ -20,7 +21,7 @@ public class Operations {
    **/
 
   public static final Var newList() {
-    return new Var(new LinkedList<Var>());
+    return Var.valueOf(new LinkedList<Var>());
   }
 
   private static Var ensureIsList(Var value) {
@@ -28,6 +29,8 @@ public class Operations {
       return newList();
     } else if (value.getObject() instanceof JsonArray) {
       return Var.valueOf(new JsonArrayWrapper((JsonArray) value.getObject()));
+    } else if (value.getObject() instanceof List) {
+      return value;
     } else {
       return Var.valueOf(value.getObjectAsList());
     }
@@ -38,7 +41,7 @@ public class Operations {
     for (Var v : values) {
       linkedList.add(v);
     }
-    return new Var(linkedList);
+    return Var.valueOf(linkedList);
   }
 
   public static final Var newListRepeat(Var item, Var times) throws Exception {
@@ -46,7 +49,7 @@ public class Operations {
     for (int i = 0; i < times.getObjectAsInt(); i++) {
       linkedList.add(item);
     }
-    return new Var(linkedList);
+    return Var.valueOf(linkedList);
   }
 
   public static final Var size(Var list) {
@@ -66,7 +69,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       if (list.getObjectAsList().contains(item)) {
-        return new Var(list.getObjectAsList().indexOf(item) + 1);
+        return Var.valueOf(list.getObjectAsList().indexOf(item) + 1);
       }
     }
     return Var.VAR_ZERO;
@@ -76,7 +79,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       if (list.getObjectAsList().contains(item)) {
-        return new Var(list.getObjectAsList().lastIndexOf(item) + 1);
+        return Var.valueOf(list.getObjectAsList().lastIndexOf(item) + 1);
       }
     }
     return Var.VAR_ZERO;
@@ -84,24 +87,25 @@ public class Operations {
 
   public static final Var get(Var list, Var index) throws Exception {
     list = ensureIsList(list);
-    if (index.getObjectAsInt() < 1) {
-      index = new Var(1);
+    int indexAsInt = index.getObjectAsInt();
+    if (indexAsInt < 1) {
+      indexAsInt = 1;
     }
-    if (index.getObjectAsInt() > list.size()) {
-      index = new Var(list.size());
+    if (indexAsInt > list.size()) {
+      indexAsInt = list.size();
     }
-    if (list.getObjectAsList().get(index.getObjectAsInt() - 1) != Var.VAR_NULL) {
-      return new Var(list.getObjectAsList().get(index.getObjectAsInt() - 1));
+    if (list.getObjectAsList().get(indexAsInt - 1) != Var.VAR_NULL) {
+      return Var.valueOf(list.getObjectAsList().get(index.getObjectAsInt() - 1));
     }
     return Var.VAR_NULL;
   }
 
   public static final Var getFromEnd(Var list, Var index) throws Exception {
     list = ensureIsList(list);
-    Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
-    Var item = get(list, i);
+    int i = list.getObjectAsList().size() - index.getObjectAsInt() + 1;
+    Var item = get(list, Var.valueOf(i));
     if (item != Var.VAR_NULL) {
-      return new Var(item);
+      return Var.valueOf(item);
     }
     return Var.VAR_NULL;
   }
@@ -109,7 +113,7 @@ public class Operations {
   public static final Var getFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getObjectAsList().size() > 0) {
-      return new Var(list.getObjectAsList().getFirst());
+      return Var.valueOf(list.getObjectAsList().getFirst());
     }
     return Var.VAR_NULL;
   }
@@ -117,7 +121,7 @@ public class Operations {
   public static final Var getLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getObjectAsList().size() > 0) {
-      return new Var(list.getObjectAsList().getLast());
+      return Var.valueOf(list.getObjectAsList().getLast());
     }
     return Var.VAR_NULL;
   }
@@ -133,7 +137,7 @@ public class Operations {
   public static final Var getAndRemove(Var list, Var index) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
-      Var v = new Var(get(list, index));
+      Var v = Var.valueOf(get(list, index));
       if (v != Var.VAR_NULL) {
         list.getObjectAsList().remove(v);
         return v;
@@ -145,7 +149,7 @@ public class Operations {
   public static final Var getAndRemoveFromEnd(Var list, Var index) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
-      Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt());
+      Var i = Var.valueOf(list.getObjectAsList().size() - index.getObjectAsInt());
       Var item = get(list, i);
       if (item != Var.VAR_NULL) {
         list.getObjectAsList().remove(item);
@@ -158,7 +162,7 @@ public class Operations {
   public static final Var getAndRemoveFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      Var v = new Var(list.getObjectAsList().getFirst());
+      Var v = Var.valueOf(list.getObjectAsList().getFirst());
       list.getObjectAsList().removeFirst();
       return v;
     }
@@ -168,7 +172,7 @@ public class Operations {
   public static final Var getAndRemoveLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      Var v = new Var(list.getObjectAsList().getLast());
+      Var v = Var.valueOf(list.getObjectAsList().getLast());
       list.getObjectAsList().removeLast();
       return v;
     }
@@ -190,7 +194,7 @@ public class Operations {
     if (list.getType() == Var.Type.LIST) {
       Var item = get(list, index);
       if (item != Var.VAR_NULL) {
-        return new Var(list.getObjectAsList().remove(item));
+        return Var.valueOf(list.getObjectAsList().remove(item));
       }
     }
     return Var.VAR_FALSE;
@@ -199,10 +203,10 @@ public class Operations {
   public static final Var removeFromEnd(Var list, Var index) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
-      Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt());
+      Var i = Var.valueOf(list.getObjectAsList().size() - index.getObjectAsInt());
       Var item = get(list, i);
       if (item != Var.VAR_NULL) {
-        return new Var(list.getObjectAsList().remove(item));
+        return Var.valueOf(list.getObjectAsList().remove(item));
       }
     }
     return Var.VAR_FALSE;
@@ -211,7 +215,7 @@ public class Operations {
   public static final Var removeFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      return new Var(list.getObjectAsList().removeFirst());
+      return Var.valueOf(list.getObjectAsList().removeFirst());
     }
     return Var.VAR_FALSE;
   }
@@ -219,7 +223,7 @@ public class Operations {
   public static final Var removeLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      return new Var(list.getObjectAsList().removeLast());
+      return Var.valueOf(list.getObjectAsList().removeLast());
     }
     return Var.VAR_FALSE;
   }
@@ -228,9 +232,9 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
       int index = cronapi.math.Operations
-          .randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+          .randomInt(Var.VAR_ZERO, Var.valueOf(list.getObjectAsList().size() - 1))
           .getObjectAsInt();
-      return new Var(list.getObjectAsList().remove(index));
+      return Var.valueOf(list.getObjectAsList().remove(index));
     }
     return Var.VAR_FALSE;
   }
@@ -240,10 +244,10 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       if (index.getObjectAsInt() < 1) {
-        index = new Var(1);
+        index = Var.valueOf(1);
       }
       if (list.size() > 0 && index.getObjectAsInt() > list.size()) {
-        index = new Var(list.size());
+        index = Var.valueOf(list.size());
         add(list, index, element);
       } else {
         list.getObjectAsList().set(index.getObjectAsInt() - 1, element);
@@ -256,15 +260,15 @@ public class Operations {
   public static final Var setFromEnd(Var list, Var index, Var element) throws Exception {
     list = ensureIsList(list);
     if (index.getObjectAsInt() <= 1) {
-      set(list, new Var(list.size()), element);
+      set(list, Var.valueOf(list.size()), element);
       return Var.VAR_TRUE;
     }
 
     if (index.getObjectAsInt() >= list.size()) {
-      set(list, new Var(1), element);
+      set(list, Var.valueOf(1), element);
       return Var.VAR_TRUE;
     }
-    Var i = new Var(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
+    Var i = Var.valueOf(list.getObjectAsList().size() - index.getObjectAsInt() + 1);
     set(list, i, element);
     return Var.VAR_TRUE;
   }
@@ -281,7 +285,7 @@ public class Operations {
   public static final Var setLast(Var list, Var element) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
-      set(list, new Var(list.getObjectAsList().size()), element);
+      set(list, Var.valueOf(list.getObjectAsList().size()), element);
       return Var.VAR_TRUE;
     }
     return Var.VAR_FALSE;
@@ -291,9 +295,9 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
       int index = cronapi.math.Operations
-          .randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+          .randomInt(Var.VAR_ZERO, Var.valueOf(list.getObjectAsList().size() - 1))
           .getObjectAsInt();
-      set(list, new Var(index), element);
+      set(list, Var.valueOf(index), element);
       return Var.VAR_TRUE;
     }
     return Var.VAR_FALSE;
@@ -303,10 +307,10 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       if (index.getObjectAsInt() < 1) {
-        index = new Var(1);
+        index = Var.valueOf(1);
       }
       if (list.size() > 0 && index.getObjectAsInt() > list.size() + 1) {
-        index = new Var(list.size() + 1);
+        index = Var.valueOf(list.size() + 1);
       }
       list.getObjectAsList().add(index.getObjectAsInt() - 1, element);
       return Var.VAR_TRUE;
@@ -338,7 +342,7 @@ public class Operations {
   public static final Var addLast(Var list, Var element) throws Exception {
     list = ensureIsList(list);
     if (list == Var.VAR_NULL) {
-      list = new Var(new LinkedList<Var>());
+      list = Var.valueOf(new LinkedList<Var>());
     }
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= 0)) {
       list.getObjectAsList().addLast(element);
@@ -351,7 +355,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
       int index = cronapi.math.Operations
-          .randomInt(Var.VAR_ZERO, new Var(list.getObjectAsList().size() - 1))
+          .randomInt(Var.VAR_ZERO, Var.valueOf(list.getObjectAsList().size() - 1))
           .getObjectAsInt();
       list.getObjectAsList().add(index, element);
       return Var.VAR_TRUE;
@@ -365,7 +369,7 @@ public class Operations {
     int start = getStartIndex(list, indexInitial).getObjectAsInt();
     int end = getEndIndex(list, indexFinal).getObjectAsInt();
     if (list.getType() == Var.Type.LIST) {
-      Var result = new Var(list.getObjectAsList().subList(start, end));
+      Var result = Var.valueOf(list.getObjectAsList().subList(start, end));
       return result;
     }
     return Var.newList();
@@ -377,7 +381,7 @@ public class Operations {
     if (list.getType() == Var.Type.LIST) {
       int start = getStartIndex(list, indexInitial).getObjectAsInt();
       int end = getEndIndex(list, Var.valueOf(indexFinal.getObjectAsInt() - 1)).getObjectAsInt();
-      Var result = new Var(
+      Var result = Var.valueOf(
           list.getObjectAsList().subList(start, list.getObjectAsList().size() - end));
       return result;
     }
@@ -388,7 +392,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       int start = getStartIndex(list, indexInitial).getObjectAsInt();
-      Var result = new Var(list.getObjectAsList().subList(start, list.size()));
+      Var result = Var.valueOf(list.getObjectAsList().subList(start, list.size()));
       return result;
     }
     return Var.newList();
@@ -400,7 +404,7 @@ public class Operations {
     if (list.getType() == Var.Type.LIST) {
       int start = getStartIndex(list, indexInitial).getObjectAsInt();
       int end = getEndIndex(list, indexFinal).getObjectAsInt();
-      return new Var(list.getObjectAsList().subList(list.size() - start, end));
+      return Var.valueOf(list.getObjectAsList().subList(list.size() - start, end));
     }
     return Var.newList();
   }
@@ -413,7 +417,7 @@ public class Operations {
           Var.valueOf((list.size() - indexInitial.getObjectAsInt()) + 1)).getObjectAsInt();
       int end = getEndIndex(list, Var.valueOf((list.size() - indexFinal.getObjectAsInt()) + 1))
           .getObjectAsInt();
-      return new Var(list.getObjectAsList().subList(start, end));
+      return Var.valueOf(list.getObjectAsList().subList(start, end));
     }
     return Var.newList();
   }
@@ -422,7 +426,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       int start = getStartIndex(list, indexInitial).getObjectAsInt() + 1;
-      return new Var(list.getObjectAsList().subList(list.size() - start, list.size()));
+      return Var.valueOf(list.getObjectAsList().subList(list.size() - start, list.size()));
     }
     return Var.newList();
   }
@@ -431,7 +435,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       int end = getEndIndex(list, indexFinal).getObjectAsInt();
-      Var result = new Var(list.getObjectAsList().subList(0, end));
+      Var result = Var.valueOf(list.getObjectAsList().subList(0, end));
       return result;
     }
     return Var.newList();
@@ -441,7 +445,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST) {
       int end = getEndIndex(list, Var.valueOf(indexFinal.getObjectAsInt() - 1)).getObjectAsInt();
-      Var result = new Var(list.getObjectAsList().subList(0, list.size() - end));
+      Var result = Var.valueOf(list.getObjectAsList().subList(0, list.size() - end));
       return result;
     }
     return Var.newList();
@@ -457,13 +461,13 @@ public class Operations {
 
   public static final Var getTextFromList(Var list, Var limiter) throws Exception {
     list = ensureIsList(list);
-    Var result = new Var("");
+    Var result = Var.valueOf("");
     for (Var v : list.getObjectAsList()) {
       result.append(v.getObjectAsString());
       result.append(limiter.getObjectAsString());
     }
 
-    return new Var(
+    return Var.valueOf(
         result.getObjectAsString().substring(0, result.getObjectAsString().length() - 1));
   }
 
@@ -476,13 +480,13 @@ public class Operations {
           linked.add(v);
         }
       }
-      return new Var(linked);
+      return Var.valueOf(linked);
     } else {
       String[] list = text.getObjectAsString().split(limiter.getObjectAsString());
       for (String s : list) {
-        linked.addLast(new Var(s));
+        linked.addLast(Var.valueOf(s));
       }
-      return new Var(linked);
+      return Var.valueOf(linked);
     }
   }
 
