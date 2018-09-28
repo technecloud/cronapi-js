@@ -44,11 +44,11 @@ public class Operations {
       ReportService service = new ReportService();
       ReportFront reportFront = service.getReport(reportName.getObjectAsString());
       if(params != Var.VAR_NULL && params.size() > 0) {
-        for(Var param : params.getObjectAsList()) {
+        for(Object param : params.getObjectAsList()) {
           Parameter parameter = new Parameter();
-          parameter.setName(param.getId());
-          parameter.setType(ParameterType.toType(param.getObject().getClass()));
-          parameter.setValue(param.getObjectAsString());
+          parameter.setName(Var.valueOf(param).getId());
+          parameter.setType(ParameterType.toType(Var.valueOf(param).getObject().getClass()));
+          parameter.setValue(Var.valueOf(param).getObjectAsString());
           reportFront.addParameter(parameter);
         }
       }

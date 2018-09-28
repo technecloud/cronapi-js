@@ -231,8 +231,8 @@ public class Operations {
 				Element elementCasted = (Element) element.getObject();
 				return new Var(elementCasted.getParentElement());
 			} else if (element.getType() == Var.Type.LIST) {
-				if (element.getObjectAsList().getFirst().getObject() instanceof Element) {
-					return new Var(((Element) element.getObjectAsList().getFirst().getObject()).getParent());
+				if (Var.valueOf(element.getObjectAsList().get(0)).getObject() instanceof Element) {
+					return new Var(((Element) Var.valueOf(element.getObjectAsList().get(0)).getObject()).getParent());
 				}
 			}
 		}
@@ -269,11 +269,11 @@ public class Operations {
 			return new Var(elementCasted.getText());
 		} else if (element.getType() == Var.Type.LIST) {
 			String result = "";
-			for (Var v : element.getObjectAsList()) {
-				if (v.getObject() instanceof Element)
-					result = result + (((Element) v.getObject()).getText());
+			for (Object v : element.getObjectAsList()) {
+				if (Var.valueOf(v).getObject() instanceof Element)
+					result = result + (((Element) Var.valueOf(v).getObject()).getText());
 				else {
-					result = result + v.getObjectAsString();
+					result = result + Var.valueOf(v).getObjectAsString();
 				}
 			}
 			return new Var(result);
