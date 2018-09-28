@@ -415,5 +415,7 @@
   "setLocalStorage":"Set Local Storage Item",
   "setLocalStorageDesc":"Function that set an item in session storage on browser (global). This Item is keeped when the browser are closed and are visible to all tabs",
   "getLocalStorage":"Get Local Storage Item",
-  "getLocalStorageDesc":"Function that get an item in session storage on browser (global). This Item is keeped when the browser are closed and are visible to all tabs"
+  "getLocalStorageDesc":"Function that get an item in session storage on browser (global). This Item is keeped when the browser are closed and are visible to all tabs",
+	"deleteProperty": "Delete property",
+	"deletePropertyDescription": "Function that delete a property from object/json."
 }

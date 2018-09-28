@@ -2571,6 +2571,18 @@
   };
 
   /**
+   * @type function
+   * @name {{deleteProperty}}
+   * @description {{deletePropertyDescription}}
+   * @nameTags object
+   * @param {ObjectType.OBJECT} object {{object}}
+   * @param {ObjectType.STRING} key {{key}}
+   */
+  this.cronapi.object.deleteProperty = function(obj, key) {
+    delete obj[key];
+  };
+
+  /**
    * @category CategoryType.DEVICE
    * @categoryTags CORDOVA|cordova|Dispositivos|device|Device
    */
