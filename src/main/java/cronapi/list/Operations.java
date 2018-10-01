@@ -121,7 +121,7 @@ public class Operations {
   public static final Var getLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().get(0));
+      return Var.valueOf(list.getObjectAsList().get(list.size() - 1));
     }
     return Var.VAR_NULL;
   }
