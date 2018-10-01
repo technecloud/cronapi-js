@@ -79,8 +79,8 @@ public class Operations {
 		HttpEntity<String> request = new HttpEntity<>("");
 
 		if (token.getType().equals(Var.Type.LIST)) {
-			for (Var tokenItem : token.getObjectAsList()) {
-				String url = baseUrl + tokenItem.getObjectAsString() + topicUrl + topicName.getObjectAsString();
+			for (Object tokenItem : token.getObjectAsList()) {
+				String url = baseUrl + Var.valueOf(tokenItem).getObjectAsString() + topicUrl + topicName.getObjectAsString();
 				restTemplate.postForObject(url, request, String.class);
 			}
 		} else {

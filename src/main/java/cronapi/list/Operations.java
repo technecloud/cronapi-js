@@ -113,7 +113,7 @@ public class Operations {
   public static final Var getFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().getFirst());
+      return Var.valueOf(list.getObjectAsList().get(0));
     }
     return Var.VAR_NULL;
   }
@@ -121,7 +121,7 @@ public class Operations {
   public static final Var getLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().getLast());
+      return Var.valueOf(list.getObjectAsList().get(list.size() - 1));
     }
     return Var.VAR_NULL;
   }
@@ -162,8 +162,8 @@ public class Operations {
   public static final Var getAndRemoveFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      Var v = Var.valueOf(list.getObjectAsList().getFirst());
-      list.getObjectAsList().removeFirst();
+      Var v = Var.valueOf(list.getObjectAsList().get(0));
+      list.getObjectAsList().remove(0);
       return v;
     }
     return Var.VAR_NULL;
@@ -172,8 +172,8 @@ public class Operations {
   public static final Var getAndRemoveLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      Var v = Var.valueOf(list.getObjectAsList().getLast());
-      list.getObjectAsList().removeLast();
+      Var v = Var.valueOf(list.getObjectAsList().get(list.size() - 1));
+      list.getObjectAsList().remove(list.size() - 1);
       return v;
     }
     return Var.VAR_NULL;
@@ -215,7 +215,7 @@ public class Operations {
   public static final Var removeFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().removeFirst());
+      return Var.valueOf(list.getObjectAsList().remove(0));
     }
     return Var.VAR_FALSE;
   }
@@ -223,7 +223,7 @@ public class Operations {
   public static final Var removeLast(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().removeLast());
+      return Var.valueOf(list.getObjectAsList().remove(list.size() - 1));
     }
     return Var.VAR_FALSE;
   }
@@ -333,7 +333,7 @@ public class Operations {
   public static final Var addFirst(Var list, Var element) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() > 0)) {
-      list.getObjectAsList().addFirst(element);
+      list.getObjectAsList().add(0,element);
       return Var.VAR_TRUE;
     }
     return Var.VAR_FALSE;
@@ -345,7 +345,7 @@ public class Operations {
       list = Var.valueOf(new LinkedList<Var>());
     }
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= 0)) {
-      list.getObjectAsList().addLast(element);
+      list.getObjectAsList().add(element);
       return Var.VAR_TRUE;
     }
     return Var.VAR_FALSE;
@@ -462,8 +462,8 @@ public class Operations {
   public static final Var getTextFromList(Var list, Var limiter) throws Exception {
     list = ensureIsList(list);
     Var result = Var.valueOf("");
-    for (Var v : list.getObjectAsList()) {
-      result.append(v.getObjectAsString());
+    for (Object v : list.getObjectAsList()) {
+      result.append(Var.valueOf(v).getObjectAsString());
       result.append(limiter.getObjectAsString());
     }
 
@@ -473,10 +473,10 @@ public class Operations {
 
   public static final Var getListFromText(Var text, Var limiter) throws Exception {
     text = ensureIsList(text);
-    LinkedList<Var> linked = new LinkedList<Var>();
+    List linked = new LinkedList<Var>();
     if (text.getType() == Var.Type.LIST) {
-      for (Var v : text.getObjectAsList()) {
-        if (!v.getObjectAsString().equals(limiter.getObjectAsString())) {
+      for (Object v : text.getObjectAsList()) {
+        if (!Var.valueOf(v).getObjectAsString().equals(limiter.getObjectAsString())) {
           linked.add(v);
         }
       }
@@ -484,7 +484,7 @@ public class Operations {
     } else {
       String[] list = text.getObjectAsString().split(limiter.getObjectAsString());
       for (String s : list) {
-        linked.addLast(Var.valueOf(s));
+        linked.add(Var.valueOf(s));
       }
       return Var.valueOf(linked);
     }
@@ -493,7 +493,7 @@ public class Operations {
   public static final Var orderListNumericGrowing(Var list) throws Exception {
     try {
       list = ensureIsList(list);
-      list.getObjectAsList().sort((p1, p2) -> p1.getObjectAsInt().compareTo(p2.getObjectAsInt()));
+      list.getObjectAsList().sort((p1, p2) -> Var.valueOf(p1).getObjectAsInt().compareTo(Var.valueOf(p2).getObjectAsInt()));
       return list;
     } catch (Exception e) {
       throw e;
@@ -502,7 +502,7 @@ public class Operations {
 
   public static final Var orderListNumericDecreasing(Var list) throws Exception {
     list = ensureIsList(list);
-    list.getObjectAsList().sort((p1, p2) -> p2.getObjectAsInt().compareTo(p1.getObjectAsInt()));
+    list.getObjectAsList().sort((p1, p2) -> Var.valueOf(p2).getObjectAsInt().compareTo(Var.valueOf(p1).getObjectAsInt()));
 
     return list;
   }
@@ -510,28 +510,28 @@ public class Operations {
   public static final Var orderListAlphabeticGrowing(Var list) throws Exception {
     list = ensureIsList(list);
     list.getObjectAsList()
-        .sort((p1, p2) -> p1.getObjectAsString().compareTo(p2.getObjectAsString()));
+        .sort((p1, p2) -> Var.valueOf(p1).getObjectAsString().compareTo(Var.valueOf(p2).getObjectAsString()));
     return list;
   }
 
   public static final Var orderListAlphabeticDecreasing(Var list) throws Exception {
     list = ensureIsList(list);
     list.getObjectAsList()
-        .sort((p1, p2) -> p2.getObjectAsString().compareTo(p1.getObjectAsString()));
+        .sort((p1, p2) -> Var.valueOf(p2).getObjectAsString().compareTo(Var.valueOf(p1).getObjectAsString()));
     return list;
   }
 
   public static final Var orderListAlphabeticIgnoreCasesGrowing(Var list) throws Exception {
     list = ensureIsList(list);
     list.getObjectAsList()
-        .sort((p1, p2) -> p1.getObjectAsString().compareToIgnoreCase(p2.getObjectAsString()));
+        .sort((p1, p2) -> Var.valueOf(p1).getObjectAsString().compareToIgnoreCase(Var.valueOf(p2).getObjectAsString()));
     return list;
   }
 
   public static final Var orderListAlphabeticIgnoreCasesDecreasing(Var list) throws Exception {
     list = ensureIsList(list);
     list.getObjectAsList()
-        .sort((p1, p2) -> p2.getObjectAsString().compareToIgnoreCase(p1.getObjectAsString()));
+        .sort((p1, p2) -> Var.valueOf(p2).getObjectAsString().compareToIgnoreCase(Var.valueOf(p1).getObjectAsString()));
     return list;
   }
 

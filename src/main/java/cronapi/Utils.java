@@ -754,7 +754,7 @@ public class Utils {
         JsonObject jsonCallBlockly = new JsonObject();
         jsonCallBlockly.add("blockly", paramObj.get("fieldValue").getAsJsonObject());
         Var result = QueryManager.executeBlockly(jsonCallBlockly, "GET", null).getObjectAsPOJOList();
-        params.add(result.getObjectAsList().getFirst().getField("value"));
+        params.add(Var.valueOf(result.getObjectAsList().get(0)).getField("value"));
         paramBlockly++;
       }
       else if (paramObj.get("fieldValue").isJsonPrimitive() 
