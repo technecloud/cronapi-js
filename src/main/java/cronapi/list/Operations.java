@@ -163,7 +163,7 @@ public class Operations {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
       Var v = Var.valueOf(list.getObjectAsList().get(0));
-      list.getObjectAsList().remove(list.size() - 1);
+      list.getObjectAsList().remove(0);
       return v;
     }
     return Var.VAR_NULL;
@@ -215,7 +215,7 @@ public class Operations {
   public static final Var removeFirst(Var list) throws Exception {
     list = ensureIsList(list);
     if (list.getType() == Var.Type.LIST && list.getObjectAsList().size() > 0) {
-      return Var.valueOf(list.getObjectAsList().remove(list.size() - 1));
+      return Var.valueOf(list.getObjectAsList().remove(0));
     }
     return Var.VAR_FALSE;
   }
@@ -345,7 +345,7 @@ public class Operations {
       list = Var.valueOf(new LinkedList<Var>());
     }
     if (list.getType() == Var.Type.LIST && (list.getObjectAsList().size() >= 0)) {
-      list.getObjectAsList().add(list.size() - 1,element);
+      list.getObjectAsList().add(element);
       return Var.VAR_TRUE;
     }
     return Var.VAR_FALSE;
@@ -484,7 +484,7 @@ public class Operations {
     } else {
       String[] list = text.getObjectAsString().split(limiter.getObjectAsString());
       for (String s : list) {
-        linked.add(linked.size() - 1, Var.valueOf(s));
+        linked.add(Var.valueOf(s));
       }
       return Var.valueOf(linked);
     }
