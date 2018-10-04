@@ -39,12 +39,13 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClassInterface;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
-public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer {
+public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer, VirtualClassInterface {
 
   @Override
   public String serializeAsJson() {
@@ -53,6 +54,17 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public Object get(String name) {
+    return getField(name).getObject();
+  }
+
+  @Override
+  public VirtualClassInterface set(String name, Object value) {
+    setField(name, value);
+    return this;
   }
 
   public static class JsonAdapter {
@@ -278,15 +290,6 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     }
     this._object = val;
     inferType();
-    // make sure each element of List is Var if type is list
-    if (_type.equals(Var.Type.LIST)) {
-      LinkedList<Var> myList = new LinkedList<>();
-      for (Object obj : this.getObjectAsList()) {
-        myList.add(Var.valueOf(obj));
-      }
-      this._object = myList;
-    }
-
     created = true;
   }
 
@@ -312,6 +315,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public Object getObject(Class type) {
+
+    if(_object == null){
+      return null;
+    }
 
     if (type == Var.class) {
       return this;
@@ -687,15 +694,15 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     return this.getObjectAsJson().toString();
   }
 
-  private LinkedList<Var> getSingleList(Object o) {
-    LinkedList<Var> list = new LinkedList<>();
+  private List getSingleList(Object o) {
+    List list = new LinkedList<>();
     list.add(Var.valueOf(o));
 
     return list;
   }
 
-  private LinkedList<Var> toList(List list) {
-    LinkedList<Var> myList = new LinkedList<>();
+  private List toList(List list) {
+    List myList = new LinkedList<>();
     for (Object obj : list) {
       myList.add(Var.valueOf(obj));
     }
@@ -728,24 +735,19 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
      *
      * @return a LinkedList whose elements are of type Var
      */
-  public LinkedList<Var> getObjectAsList() {
+  public List getObjectAsList() {
 
     if (getObject() instanceof Map) {
-      LinkedList<Var> myList = new LinkedList<>();
+      List myList = new LinkedList<>();
       for (Object obj : ((Map) getObject()).values()) {
         myList.add(Var.valueOf(obj));
       }
 
       return myList;
     } else if (getObject() instanceof JsonArray) {
-      LinkedList<Var> myList = new LinkedList<>();
-      for (JsonElement element : (JsonArray) getObject())
-      {
-        myList.add(Var.valueOf(element));
-      }
-      return myList;
+      return new JsonArrayWrapper((JsonArray) getObject());
     } else if (getObject() instanceof List) {
-      return (LinkedList<Var>) getObject();
+      return (List) getObject();
     } else if (getObject() instanceof DataSource) {
       return toList(((DataSource) getObject()).getPage().getContent());
     }
@@ -785,7 +787,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   public Var getObjectAsPOJOList() {
 
-    LinkedList<Var> myList = null;
+    List myList = null;
 
     if (getObject() instanceof DataSource) {
       myList = new LinkedList<>();
@@ -795,8 +797,8 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       }
     } else if (getObject() instanceof List) {
       myList = new LinkedList<>();
-      for (Var obj : ((LinkedList<Var>) getObject())) {
-        myList.add(obj.getPOJO());
+      for (Object obj : ((List) getObject())) {
+        myList.add(Var.valueOf(obj).getPOJO());
       }
     } else if (getObject() instanceof JsonArray) {
       myList = new LinkedList<>();
@@ -854,7 +856,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Var get(int index) {
     switch (getType()) {
       case LIST: {
-        return ((LinkedList<Var>) getObject()).get(index);
+        return Var.valueOf(((List) getObject()).get(index));
       }
     }
 
@@ -872,7 +874,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       case NULL:
         return 0;
       case LIST: {
-        return ((LinkedList<Var>) getObject()).size();
+        return ((List) getObject()).size();
       }
       default: {
         if (getObject() instanceof Map) {
@@ -904,7 +906,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    * @param var the var to insert
    */
   public void set(int index, Var var) {
-    ((LinkedList<Var>) getObject()).add(index, var);
+    ((List) getObject()).add(index, var);
   }
 
   /**
@@ -913,7 +915,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    * @param var The list to add
    */
   public void addAll(Var var) {
-    ((LinkedList<Var>) getObject()).addAll(var.getObjectAsList());
+    ((List) getObject()).addAll(var.getObjectAsList());
   }
 
   @Override
@@ -1097,14 +1099,14 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       case DATETIME:
         return Utils.getDateFormat().format(((Calendar) getObject()).getTime());
       case LIST:
-        LinkedList<Var> ll = (LinkedList) getObject();
+        List list = (LinkedList) getObject();
         StringBuilder sb = new StringBuilder();
-        if (ll.isEmpty()) {
+        if (list.isEmpty()) {
           return "[]";
         }
         sb.append("[");
-        for (Var v : ll) {
-          sb.append(v.toString());
+        for (Object v : list) {
+          sb.append(String.valueOf(v));
           sb.append(",");
         }
         sb.deleteCharAt(sb.length() - 1);
@@ -1187,7 +1189,6 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       _type = Type.LIST;
     } else if (_object instanceof List) {
       _type = Type.LIST;
-      _object = new LinkedList<>((List) _object);
     } else if (_object instanceof JsonPrimitive) {
       _object = getPrimitiveValue((JsonPrimitive) _object);
       inferType();

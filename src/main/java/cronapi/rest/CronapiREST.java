@@ -314,7 +314,6 @@ public class CronapiREST {
           return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
         }
       } else {
-        //TranslationPath translationPath = translatePathVars(id, 0, query.getAsJsonArray("queryParamsValues").size());
         TranslationPath translationPath = translatePathVars(id, 0, -1);
 
         QueryManager.checkFilterSecurity(query, translationPath.filter);

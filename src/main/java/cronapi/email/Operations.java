@@ -66,16 +66,16 @@ public class Operations {
 			email.setMsg(msg.getObjectAsString());
 
 			if (Cc.getType() == Var.Type.LIST) {
-				for (Var v : Cc.getObjectAsList()) {
-					email.addCc(v.getObjectAsString());
+				for (Object v : Cc.getObjectAsList()) {
+					email.addCc(Var.valueOf(v).getObjectAsString());
 				}
 			} else if (!Cc.equals(Var.VAR_NULL)) {
 				email.addCc(Cc.getObjectAsString());
 			}
 
 			if (Bcc.getType() == Var.Type.LIST) {
-				for (Var v : Bcc.getObjectAsList()) {
-					email.addBcc(v.getObjectAsString());
+				for (Object v : Bcc.getObjectAsList()) {
+					email.addBcc(Var.valueOf(v).getObjectAsString());
 				}
 			} else if (!Bcc.equals(Var.VAR_NULL)) {
 				email.addBcc(Bcc.getObjectAsString());
@@ -87,11 +87,11 @@ public class Operations {
 
 			if (!attachments.equals(Var.VAR_NULL)) {
 				if (attachments.getType() == Var.Type.LIST) {
-					for (Var v : attachments.getObjectAsList()) {
+					for (Object v : attachments.getObjectAsList()) {
 						EmailAttachment anexo = new EmailAttachment();
-						anexo.setPath(v.getObjectAsString());
+						anexo.setPath(Var.valueOf(v).getObjectAsString());
 						anexo.setDisposition(EmailAttachment.ATTACHMENT);
-						anexo.setName(v.getObjectAsString());
+						anexo.setName(Var.valueOf(v).getObjectAsString());
 						email.attach(anexo);
 					}
 				} else if (attachments.getType() == Var.Type.STRING) {
@@ -104,8 +104,8 @@ public class Operations {
 			}
 
 			if (to.getType() == Var.Type.LIST) {
-				for (Var v : to.getObjectAsList()) {
-					email.addTo(v.getObjectAsString());
+				for (Object v : to.getObjectAsList()) {
+					email.addTo(Var.valueOf(v).getObjectAsString());
 				}
 			} else if (to.getType() == Var.Type.STRING) {
 				email.addTo(to.getObjectAsString());

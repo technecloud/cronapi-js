@@ -34,6 +34,15 @@ public class Operations {
     return value;
   }
 
+  @CronapiMetaData(type = "function", name = "{{deleteObjectFromJson}}", nameTags = {
+      "createObjectJson"}, description = "{{deleteObjectFromJsonDescription}}", returnType = ObjectType.JSON)
+  public static final void deleteObjectFromJson(
+      @ParamMetaData(type = ObjectType.OBJECT, description = "{{mapOrJsonVar}}") Var object,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{pathKey}}") Var key
+  ) throws Exception {
+    object.getObjectAsJson().getAsJsonObject().remove(key.getObjectAsString());
+  }
+
   @CronapiMetaData(type = "function", name = "{{getJsonOrMapField}}", nameTags = {
       "getJsonOrMapField"}, description = "{{functionToGetJsonOrMapField}}", returnType = ObjectType.OBJECT)
   public static final Var getJsonOrMapField(
