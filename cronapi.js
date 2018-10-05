@@ -1163,7 +1163,13 @@
    * @multilayer true
    */
   this.cronapi.screen.focusComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $('#'+id).find('*').addBack().focus();
+	  this.cronapi.$scope.safeApply( function() { 
+      if( tinyMCE && tinyMCE.get(id) !== undefined) {
+        tinyMCE.get(id).focus();
+      }else{
+      $('#'+id).find('*').addBack().focus();
+      } 
+    });
   };
 
 
@@ -2921,7 +2927,7 @@
     urlWithoutEndSlash = urlWithoutEndSlash.endsWith('/') ? urlWithoutEndSlash.substr(0, urlWithoutEndSlash.length - 1): urlWithoutEndSlash;
     if (address) {
       var addressWithoutStartSlash = address.startsWith('/') ? address.substr(1) : address;
-      urlWithoutEndSlash = urlWithoutEndSlash + '/' + addressWithoutStartSlash;
+      urlWithoutEndSlash === "" ? urlWithoutEndSlash = addressWithoutStartSlash : urlWithoutEndSlash = urlWithoutEndSlash + '/' + addressWithoutStartSlash;
     }
     return urlWithoutEndSlash;
   };
