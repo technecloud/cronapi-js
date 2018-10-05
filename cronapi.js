@@ -1654,7 +1654,7 @@
    * @returns {ObjectType.DATETIME}
    */
   this.cronapi.dateTime.getNow = function() {
-    return this.cronapi.dateTime.getMomentObj(new Date().toLocaleString()).toDate();
+    return moment().toDate();
   };
 
   /**
