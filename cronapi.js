@@ -211,7 +211,7 @@
       else if (pattern.test(value)) {
         var splited = pattern.exec(value);
         var userLang = (navigator.language || navigator.userLanguage)
-            .split("-")[0];
+        .split("-")[0];
 
         if (userLang == "pt" || userLang == "en") {
           var functionToCall = eval(userLang + "Date");
@@ -1079,7 +1079,7 @@
       $('#'+id).show();
     }
   };
-  
+
   /**
    * @type function
    * @name {{setActiveTab}}
@@ -1090,15 +1090,15 @@
    * @multilayer true
    */
   this.cronapi.screen.setActiveTab = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      this.cronapi.$scope.safeApply( function(){
-        if( $('#'+id).attr('data-target') === undefined){
-           $( '[data-target="#'+ id + '"]' ).tab('show');
-        }
-        else{
-          $('#'+id).tab('show');
-        }
-        
-      });
+    this.cronapi.$scope.safeApply( function(){
+      if( $('#'+id).attr('data-target') === undefined){
+        $( '[data-target="#'+ id + '"]' ).tab('show');
+      }
+      else{
+        $('#'+id).tab('show');
+      }
+
+    });
   };
 
   /**
@@ -1283,12 +1283,12 @@
    * @multilayer true
    */
   this.cronapi.screen.focusComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-	  this.cronapi.$scope.safeApply( function() { 
+    this.cronapi.$scope.safeApply( function() {
       if( tinyMCE && tinyMCE.get(id) !== undefined) {
         tinyMCE.get(id).focus();
       }else{
-      $('#'+id).find('*').addBack().focus();
-      } 
+        $('#'+id).find('*').addBack().focus();
+      }
     });
   };
 
@@ -2195,10 +2195,10 @@
 
         cameraContainer =
             cameraContainer
-                .split('$height$').join(res.height+'px')
-                .split('$width$').join(res.width+'px')
-                .split('$marginleft$').join(halfWidth+'px')
-                .split('$margintop$').join(halfHeight+'px')
+            .split('$height$').join(res.height+'px')
+            .split('$width$').join(res.width+'px')
+            .split('$marginleft$').join(halfWidth+'px')
+            .split('$margintop$').join(halfHeight+'px')
         ;
         var cronapiVideoCapture = $(cameraContainer);
         cronapiVideoCapture.prependTo("body");
@@ -2296,14 +2296,18 @@
     this.cronapi.screen.changeValueOfField(field, base64);
   };
 
-  this.cronapi.internal.castBase64ToByteArray = function(base64) {
-    var binary_string =  window.atob(base64);
+  this.cronapi.internal.castBinaryStringToByteArray = function(binary_string) {
     var len = binary_string.length;
     var bytes = new Uint8Array( len );
     for (var i = 0; i < len; i++)        {
       bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes;
+  };
+
+  this.cronapi.internal.castBase64ToByteArray = function(base64) {
+    var binary_string = window.atob(base64);
+    return this.cronapi.internal.castBinaryStringToByteArray(binary_string);
   };
 
   this.cronapi.internal.castByteArrayToString = function(bytes) {
@@ -2319,7 +2323,7 @@
     catch (e) {
       try {
         //Tenta pegar do header
-        json = JSON.parse(this.cronapi.internal.castByteArrayToString(this.cronapi.internal.castBase64ToByteArray(data)))
+        json = JSON.parse(window.atob(data));
       }
       catch (e) {
         //Verifica se é drpobox
@@ -2332,6 +2336,25 @@
           json.fileExtension = extension;
           json.name = fullName.replace(extension, '');
           json.contentType = 'file/'+extension.replace('.','');
+        }
+        else if (data && data.match(/__odataFile_/g)) {
+          var file = eval(data);
+          var fullNameSplited = file.name.split('.');
+          var extension = '.' + fullNameSplited[fullNameSplited.length - 1];
+
+          json = {};
+          json.fileExtension = extension;
+          json.name = file.name;
+          json.contentType = file.type || 'unknown';
+        }
+        else if (data && this.cronapi.internal.isBase64(data)) {
+          var fileName = 'download';
+          var fileExtesion = this.cronapi.internal.getExtensionBase64(data);
+          fileName += fileExtesion;
+          json = {};
+          json.fileExtension = fileExtesion;
+          json.name = fileName;
+          json.contentType = 'unknown';
         }
       }
     }
@@ -2346,7 +2369,58 @@
     }
   };
 
+  this.cronapi.internal.getExtensionBase64 = function(base64) {
+    if (base64) {
+      var data = base64.substr(0, 5);
+      switch (data.toLocaleUpperCase())
+      {
+        case "IVBOR":
+          return ".png";
+        case "/9J/4":
+          return ".jpg";
+        case "AAAAF":
+          return ".mp4";
+        case "JVBER":
+          return ".pdf";
+        case "AAABA":
+          return ".ico";
+        case "UMFYI":
+          return ".rar";
+        case "E1XYD":
+          return ".rtf";
+        case "U1PKC":
+          return ".txt";
+        case "UESDB":
+          return ".zip";
+        case "MQOWM":
+        case "77U/M":
+          return ".srt";
+        default:
+          return "";
+      }
+    }
+    return "";
+  };
+
+  this.cronapi.internal.isBase64 = function(str) {
+    try {
+      return btoa(atob(str)) == str;
+    } catch (err) {
+      return false;
+    }
+  };
+
   this.cronapi.internal.downloadFileEntity = function(datasource, field, indexData) {
+
+    function downloadUrl(url, fileName) {
+      var link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute("download", fileName);
+      var event = document.createEvent('MouseEvents');
+      event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+      link.dispatchEvent(event);
+    }
+
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -2377,68 +2451,77 @@
       window.open(valueContent);
     }
     else {
-      var url = '/api/cronapi/downloadFile';
-      var splited = datasource.entity.split('/');
 
-      var entity = splited[splited.length-1];
-      if (entity.indexOf(":") > -1) {
-        //Siginifica que é relacionamento, pega a entidade do relacionamento
-        var entityRelation = '';
-        var splitedDomainBase = splited[3].split('.');
-        for (var i=0; i<splitedDomainBase.length-1;i++)
-          entityRelation += splitedDomainBase[i]+'.';
-        var entityRelationSplited = entity.split(':');
-        entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
-      }
-
-      url += '/' + entity;
-      url += '/' + field;
-      var _u = JSON.parse(localStorage.getItem('_u'));
-      var object = itemActive;
-
-      var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
-
-      this.$promise = this.cronapi.$scope.$http({
-        method: 'POST',
-        url: finalUrl,
-        data: (object) ? JSON.stringify(object) : null,
-        responseType: 'blob',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-AUTH-TOKEN': _u.token,
-        }
-      }).success(function(data, status, headers, config) {
-        var octetStreamMime = 'application/octet-stream';
-        headers = headers();
-        var filename = headers['x-filename'] || 'download.bin';
-        var contentType = headers['content-type'] || octetStreamMime;
+      if (datasource.isOData()) {
         var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
-        try
-        {
-          var link = document.createElement('a');
-          if('download' in link)
+        var bytesOrFileInput;
+        var fileName = 'download';
+
+        if (valueContent.match(/__odataFile_/g)) {
+          bytesOrFileInput = eval(valueContent);
+          fileName = bytesOrFileInput.name
+        }
+        else {
+          fileName += this.cronapi.internal.getExtensionBase64(valueContent);
+          valueContent = window.atob(valueContent);
+          bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
+        }
+        var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
+        downloadUrl(url, fileName);
+      }
+      else {
+        var url = '/api/cronapi/downloadFile';
+        var splited = datasource.entity.split('/');
+
+        var entity = splited[splited.length-1];
+        if (entity.indexOf(":") > -1) {
+          //Siginifica que é relacionamento, pega a entidade do relacionamento
+          var entityRelation = '';
+          var splitedDomainBase = splited[3].split('.');
+          for (var i=0; i<splitedDomainBase.length-1;i++)
+            entityRelation += splitedDomainBase[i]+'.';
+          var entityRelationSplited = entity.split(':');
+          entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
+        }
+
+        url += '/' + entity;
+        url += '/' + field;
+        var _u = JSON.parse(localStorage.getItem('_u'));
+        var object = itemActive;
+
+        var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
+
+        this.$promise = this.cronapi.$scope.$http({
+          method: 'POST',
+          url: finalUrl,
+          data: (object) ? JSON.stringify(object) : null,
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-AUTH-TOKEN': _u.token,
+          }
+        }).success(function(data, status, headers, config) {
+          headers = headers();
+          var filename = headers['x-filename'] || 'download.bin';
+          var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
+          try
           {
             var url = urlCreator.createObjectURL(data);
-            link.setAttribute('href', url);
-            link.setAttribute("download", filename);
-            var event = document.createEvent('MouseEvents');
-            event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-            link.dispatchEvent(event);
+            downloadUrl(url, filename);
+          } catch(ex) {
+            console.log('Error downloading file');
+            console.log(ex);
           }
-        } catch(ex) {
+        }.bind(this)).error(function(data, status, headers, config) {
           console.log('Error downloading file');
-          console.log(ex);
-        }
-      }.bind(this)).error(function(data, status, headers, config) {
-        console.log('Error downloading file');
-      }.bind(this));
+        }.bind(this));
+      }
+
     }
 
   };
 
-  this.cronapi.internal.uploadFile = function(field, file, progressId) {
-    if (!file)
-      return;
+  this.cronapi.internal.uploadFileAjax = function(field, file, progressId) {
     var uploadUrl = '/api/cronapi/uploadFile';
     var formData = new FormData();
     formData.append("file", file);
@@ -2482,6 +2565,40 @@
     }.bind(this)).error(function(data, status, headers, config) {
       alert('Error uploading file');
     }.bind(this));
+
+  };
+
+  this.cronapi.internal.uploadFile = function(field, file, progressId) {
+    if (!file)
+      return;
+
+    var regexForDatasource = /(.*?).active./g;
+    var groupDatasource = regexForDatasource.exec(field);
+    //Verificar se é campo de um datasource
+    if (groupDatasource) {
+      var datasource = eval(groupDatasource[1]);
+      if (datasource.isOData()) {
+
+        var regexForField = /.active.([a-zA-Z0-9]*)/g;
+        var groupField = regexForField.exec(field);
+        var fieldName = groupField[1];
+
+        var schemaField = datasource.getFieldSchema(fieldName);
+        if (schemaField && schemaField.type == 'Binary') {
+          datasource.active['__odataFile_' + fieldName] = file;
+          datasource.active[fieldName] = datasource.name + '.active.__odataFile_' +  fieldName;
+        }
+        else {
+          this.cronapi.internal.uploadFileAjax(field, file, progressId);
+        }
+      }
+      else {
+        this.cronapi.internal.uploadFileAjax(field, file, progressId);
+      }
+    }
+    else {
+      this.cronapi.internal.uploadFileAjax(field, file, progressId);
+    }
   };
 
   /**
@@ -3026,7 +3143,7 @@
     for (i = 0; i < value.length; i++) {
       if (withAccents.search(value.substr(i, 1)) >= 0) {
         newValue += withoutAccents.substr(withAccents.search(value
-            .substr(i, 1)), 1);
+        .substr(i, 1)), 1);
       } else {
         newValue += value.substr(i, 1);
       }
