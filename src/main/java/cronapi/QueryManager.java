@@ -220,7 +220,7 @@ public class QueryManager {
             .valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod")
                 .getAsString());
         try {
-          if (query.getAsJsonArray("queryParamsValues") != null) {
+          if (query.getAsJsonArray("queryParamsValues") != null && query.getAsJsonArray("queryParamsValues").size() > 0) {
             callBlocly(event, name, ds);
           } else {
             Operations.callBlockly(name, Var.valueOf(ds));
