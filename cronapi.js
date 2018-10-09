@@ -1654,7 +1654,7 @@
    * @returns {ObjectType.DATETIME}
    */
   this.cronapi.dateTime.getNow = function() {
-    return this.cronapi.dateTime.getMomentObj(new Date().toLocaleString()).toDate();
+    return moment().toDate();
   };
 
   /**
@@ -1667,29 +1667,7 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.dateTime.formatDateTime = function(date, format) {
-    format = format.toLowerCase();
-    if (format.indexOf(':mm') > -1)
-      format = this.cronapi.internal.replaceAll(format, ':mm',':minutes');
-    format = this.cronapi.internal.replaceAll(format, ' ','+" "+');
-    format = this.cronapi.internal.replaceAll(format, ':','+":"+');
-
-    var dateVar = this.cronapi.dateTime.getMomentObj(date);
-    var dd = dateVar.get('date');
-    var mm = dateVar.get('month') + 1;
-    var yyyy = dateVar.get('year');
-    var hh = dateVar.get('hour');
-    var minutes = dateVar.get('minute');
-    var ss = dateVar.get('second');
-    var separator = '';
-    var maskChars = 'dmy';
-    for (var i = 0; i < format.length; i++) {
-      if (!maskChars.includes(format.charAt(i))) {
-        separator = format.charAt(i);
-        var formatLower = this.cronapi.internal.replaceAll(format, separator, '+separator+');
-        return eval(formatLower);
-      }
-    }
-    return '';
+    return moment(new Date()).format(format);
   };
 
   /**
