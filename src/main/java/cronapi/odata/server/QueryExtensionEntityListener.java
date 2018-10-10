@@ -3,9 +3,12 @@ package cronapi.odata.server;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import cronapi.*;
-import org.apache.commons.lang3.StringUtils;
+import cronapi.ClientCommand;
+import cronapi.ErrorResponse;
+import cronapi.QueryManager;
+import cronapi.RestClient;
 import cronapi.Utils;
+import cronapi.Var;
 import java.lang.reflect.Field;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -14,18 +17,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
-
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
-import org.apache.olingo.odata2.api.uri.expression.*;
-import org.apache.olingo.odata2.api.uri.info.*;
+import org.apache.olingo.odata2.api.uri.expression.BinaryExpression;
+import org.apache.olingo.odata2.api.uri.expression.CommonExpression;
+import org.apache.olingo.odata2.api.uri.expression.FilterExpression;
+import org.apache.olingo.odata2.api.uri.expression.MethodExpression;
+import org.apache.olingo.odata2.api.uri.expression.PropertyExpression;
+import org.apache.olingo.odata2.api.uri.info.DeleteUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntityCountUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntitySetCountUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntitySetUriInfo;
+import org.apache.olingo.odata2.api.uri.info.GetEntityUriInfo;
+import org.apache.olingo.odata2.api.uri.info.PostUriInfo;
+import org.apache.olingo.odata2.api.uri.info.PutMergePatchUriInfo;
 import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
@@ -40,18 +51,18 @@ import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.jpa.jpql.parser.*;
+import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
+import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
+import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
+import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
+import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.queries.DatabaseQuery;
 import org.eclipse.persistence.sessions.DatabaseRecord;
 import org.eclipse.persistence.sessions.Session;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.*;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -133,55 +144,55 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         if (!isBlockly) {
           jpqlStatement = QueryManager.getJPQL(customQuery, false);
 
-        JPQLExpression jpqlExpression = new JPQLExpression(
-            jpqlStatement,
-            DefaultEclipseLinkJPQLGrammar.instance(),
-            true
-        );
+          JPQLExpression jpqlExpression = new JPQLExpression(
+              jpqlStatement,
+              DefaultEclipseLinkJPQLGrammar.instance(),
+              true
+          );
 
-        findInputParams(jpqlExpression, inputs);
+          findInputParams(jpqlExpression, inputs);
 
           selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-        String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
+          String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
 
-        String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+          String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
 
-        if (!selection.contains(".") && !selection.contains(",")) {
-          alias = mainAlias;
-        }
-        
-        if ( uriInfo.rawEntity()) {
-           setField(selectStatement, "selectClause", null);
-           if (uriInfo.rawEntity()) {
-             selectExpression = "SELECT " + mainAlias + " ";
-           }
+          if (!selection.contains(".") && !selection.contains(",")) {
+            alias = mainAlias;
+          }
 
-           if (selectStatement.hasOrderByClause()) {
-             setField(selectStatement, "orderByClause", null);
-           }
+          if ( uriInfo.rawEntity()) {
+            setField(selectStatement, "selectClause", null);
+            if (uriInfo.rawEntity()) {
+              selectExpression = "SELECT " + mainAlias + " ";
+            }
 
-           jpqlStatement = selectStatement.toString();
-         }
-         
-         if (uriInfo.isCount() || uriInfo.rawEntity()) {
-           if (selectStatement.hasOrderByClause()) {
-             setField(selectStatement, "orderByClause", null);
-           }
+            if (selectStatement.hasOrderByClause()) {
+              setField(selectStatement, "orderByClause", null);
+            }
 
-           jpqlStatement = selectStatement.toString();
-         }
+            jpqlStatement = selectStatement.toString();
+          }
+
+          if (uriInfo.isCount() || uriInfo.rawEntity()) {
+            if (selectStatement.hasOrderByClause()) {
+              setField(selectStatement, "orderByClause", null);
+            }
+
+            jpqlStatement = selectStatement.toString();
+          }
 
 
-        if (selectStatement.hasOrderByClause()) {
-          orderBy = selectStatement.getOrderByClause().toString();
-          setField(selectStatement, "orderByClause", null);
-          jpqlStatement = selectStatement.toString();
-        }
+          if (selectStatement.hasOrderByClause()) {
+            orderBy = selectStatement.getOrderByClause().toString();
+            setField(selectStatement, "orderByClause", null);
+            jpqlStatement = selectStatement.toString();
+          }
 
-        if (uriInfo.getOrderBy() != null) {
-          String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
-          orderBy = "ORDER BY " + orderExpression;
-        }
+          if (uriInfo.getOrderBy() != null) {
+            String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
+            orderBy = "ORDER BY " + orderExpression;
+          }
 
         }
 
@@ -274,22 +285,22 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
 
         if (!isBlockly) {
-        query = em.createQuery(jpqlStatement);
+          query = em.createQuery(jpqlStatement);
 
-        if (uriInfo.isCount() || uriInfo.rawEntity()) {
-          if (!uriInfo.rawEntity()) {
-            Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
-            DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery();
-            databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
-            String sqlString = databaseQuery.getSQLString();
-            
-            selectExpression = "SELECT count(*) FROM ( ";
-            selectExpression = selectExpression.concat(sqlString);
-            selectExpression = selectExpression.concat(" ) countRecord ");
-            query = em.createNativeQuery(selectExpression);
+          if (uriInfo.isCount() || uriInfo.rawEntity()) {
+            if (!uriInfo.rawEntity()) {
+              Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
+              DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery();
+              databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
+              String sqlString = databaseQuery.getSQLString();
+
+              selectExpression = "SELECT count(*) FROM ( ";
+              selectExpression = selectExpression.concat(sqlString);
+              selectExpression = selectExpression.concat(" ) countRecord ");
+              query = em.createNativeQuery(selectExpression);
+            }
           }
-        }
-        
+
         } else {
           String type = "select";
           if (uriInfo.isCount()) {
@@ -358,10 +369,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
     return null;
   }
-  
+
   private Var getParameterValue(JsonObject customQuery, String param) {
     JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
-    
+
     if (paramValues != null) {
       for (int x = 0; x < paramValues.size(); x++)  {
         JsonElement prv = paramValues.get(x);
@@ -388,9 +399,9 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
 
               Var result = QueryManager.executeBlockly(
-                              jsonCallBlockly, 
-                              method,
-                              blocklyParams
+                  jsonCallBlockly,
+                  method,
+                  blocklyParams
               );
 
               return result;
@@ -401,7 +412,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
       }
     }
-    
+
     return Var.VAR_NULL;
   }
 
@@ -674,6 +685,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     if (infoView != null) {
       try {
         JsonObject query = null;
+        if (data != null)
+          Utils.processCloudFields(data);
 
         try {
           query = QueryManager.getQuery(entityType.getName());
@@ -767,7 +780,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       String blocklyMethod = getBlocklyMethod(infoView, query);
       if (blocklyMethod == null) {
         return null;
-}
+      }
 
       if (query != null && QueryManager.isNull(query.get("entityFullName"))) {
 

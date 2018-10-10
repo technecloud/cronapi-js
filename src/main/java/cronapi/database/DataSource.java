@@ -5,11 +5,27 @@ import com.fasterxml.jackson.databind.JsonSerializable;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.google.gson.JsonObject;
-import cronapi.*;
-import cronapi.cloud.CloudFactory;
-import cronapi.cloud.CloudManager;
+import cronapi.QueryManager;
+import cronapi.RestClient;
+import cronapi.Utils;
+import cronapi.Var;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorQueryManager;
@@ -24,16 +40,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -351,7 +357,7 @@ public class DataSource implements JsonSerializable {
     try {
       Object insertedElement = this.domainClass.newInstance();
       for (Object key : values.keySet()) {
-        updateField(insertedElement, key.toString(), values.get(key));
+        Utils.updateFieldOnFiltered(insertedElement, key.toString(), values.get(key));
       }
 
       return insertedElement;
@@ -395,19 +401,7 @@ public class DataSource implements JsonSerializable {
       toSave = this.insertedElement;
     else
       toSave = this.getObject();
-
-    List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave, "dropbox");
-    List<String> fieldsIds = Utils.getFieldsWithAnnotationId(toSave);
-    if (fieldsAnnotationCloud.size() > 0) {
-
-      String dropAppAccessToken = Utils.getAnnotationCloud(toSave, fieldsAnnotationCloud.get(0)).value();
-      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toFields(fieldsAnnotationCloud.toArray(new String[0]));
-      CloudFactory factory = cloudManager.byEntity(toSave).build();
-      factory.dropbox(dropAppAccessToken).upload();
-      factory.getFiles().forEach(f -> {
-        updateField(toSave, f.getFieldReference(), f.getFileDirectUrl());
-      });
-    }
+    Utils.processCloudFields(toSave);
   }
 
   /**
@@ -511,35 +505,10 @@ public class DataSource implements JsonSerializable {
    * @param fieldValue - value that replaced or inserted in field name passed
    */
   public void updateField(String fieldName, Object fieldValue) {
-    updateField(getObject(), fieldName, fieldValue);
+    Utils.updateFieldOnFiltered(getObject(), fieldName, fieldValue);
   }
 
-  private void updateField(Object obj, String fieldName, Object fieldValue) {
-    try {
 
-      boolean update = true;
-      if (RestClient.getRestClient().isFilteredEnabled()) {
-        update = SecurityBeanFilter.includeProperty(obj.getClass(), fieldName, null);
-      }
-
-      if (update) {
-        Method setMethod = Utils.findMethod(obj, "set" + fieldName);
-        if (setMethod != null) {
-          if (fieldValue instanceof Var) {
-            fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
-          } else {
-            Var tVar = Var.valueOf(fieldValue);
-            fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
-          }
-          setMethod.invoke(obj, fieldValue);
-        } else {
-          throw new RuntimeException("Field " + fieldName + " not found");
-        }
-      }
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    }
-  }
 
   /**
    * Update fields from object in the current index
@@ -601,7 +570,7 @@ public class DataSource implements JsonSerializable {
             try {
               this.updateField(key, data.getField(key));
             } catch (Exception e) {
-              //NoCommand 
+              //NoCommand
             }
           }
         }
@@ -988,13 +957,13 @@ public class DataSource implements JsonSerializable {
       Object insertion = null;
       if (relationMetadata.getAssossiationName() != null) {
         insertion = this.newInstance(relationMetadata.getAssossiationName());
-        updateField(insertion, relationMetadata.getAttribute().getName(),
+        Utils.updateFieldOnFiltered(insertion, relationMetadata.getAttribute().getName(),
             Var.valueOf(data).getObject(forName(relationMetadata.getName())));
-        updateField(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
+        Utils.updateFieldOnFiltered(insertion, relationMetadata.getAssociationAttribute().getName(), getObject());
         result = getObject();
       } else {
         insertion = Var.valueOf(data).getObject(forName(relationMetadata.getName()));
-        updateField(insertion, relationMetadata.getAttribute().getName(), getObject());
+        Utils.updateFieldOnFiltered(insertion, relationMetadata.getAttribute().getName(), getObject());
         result = insertion;
       }
 
