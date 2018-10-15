@@ -256,7 +256,11 @@ public class ODataAgent {
         out.write(buffer, 0, len);
       }
     } finally {
-      stream.close();
+      try {
+        stream.close();
+      } catch(Exception e) {
+        //
+      }
     }
     return contentLength;
   }
