@@ -523,25 +523,27 @@ public class Operations {
 		Var result = new Var();
 		Random random = new Random();
 
+		if(min.equals(max)) return min;
+
 		boolean isDouble = false;
 		if (min.getType() == Var.Type.DOUBLE || max.getType() == Var.Type.DOUBLE)
 			isDouble = true;
+		Var value ;
+		if(max.greaterThanOrEqual(min)){
+			value = max;
+		}else{
+			Var aux = max;
+			max = min;
+			min = aux;
+			value = min;
+		}
 
 		if (isDouble) {
-			int resultado = random.nextInt(max.getObjectAsInt());
-			while ((resultado < min.getObjectAsLong()) || (resultado > max.getObjectAsLong())) {
-				resultado = random.nextInt(max.getObjectAsInt());
-			}
-			result = new Var(resultado);
 
-		} else {
-			int resultado = random.nextInt();
-			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
-				resultado = random.nextInt(max.getObjectAsInt());
-			}
-			result = new Var(resultado);
+			return Var .valueOf ( max.getObjectAsDouble() + (max.getObjectAsDouble() - min.getObjectAsDouble()) * random.nextDouble());
+		}else{
+			return Var.valueOf(random.nextInt(value.getObjectAsInt()));
 		}
-		return result;
 	}
 
 	public static final Var randomFloat() throws Exception {
