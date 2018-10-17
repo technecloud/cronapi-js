@@ -3034,13 +3034,15 @@
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
+    this.cronapi.cordova.database.name = dbName;
     if (!dbName) {
       this.cronapi.cordova.database.name = this.cronapi.cordova.database.nameDefault;
       if (window.BuildInfo) {
         this.cronapi.cordova.database.name = BuildInfo.packageName;
       }
     }
-    this.cronapi.cordova.database.object = window.openDatabase({ name : this.cronapi.cordova.database.name });
+    var nameToBeUsed = this.cronapi.cordova.database.name;
+    this.cronapi.cordova.database.object = window.openDatabase(nameToBeUsed, "1.0", nameToBeUsed, 1000000);
   };
 
   /**
