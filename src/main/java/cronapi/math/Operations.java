@@ -520,7 +520,6 @@ public class Operations {
 	}
 
 	public static final Var randomInt(Var min, Var max) throws Exception {
-		Var result = new Var();
 		Random random = new Random();
 
 		if(min.equals(max)) return min;
