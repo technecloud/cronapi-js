@@ -392,5 +392,7 @@
 	"returnType":"Return Type",
 	"mediaType":"Media Type",
 	"setActiveTab": "Change tab",
-	"setActiveTablDesc": "Function that set active the selected tab"
+	"setActiveTablDesc": "Function that set active the selected tab",
+	"getDeviceInfo":"Obter Informações do Dispositivo",
+	"getDeviceInfoDescription":"Função que obtém as informações do dispositivo"
 }

@@ -2456,6 +2456,21 @@
   this.cronapi.cordova.vibrate = function(vibrateValue){
     navigator.vibrate(vibrateValue);
   };
+  
+  this.cronapi.cordova.device = {};
+
+  /**
+   *  @type function
+   * @platform M
+   * @name {{getDeviceInfo}}
+   * @nameTags device|dispositivo|info
+   * @param {ObjectType.STRING} type {{type}}
+   * @description {{getDeviceInfoDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.device.getDeviceInfo = function( /** @type {ObjectType.STRING} @description {{type}} @blockType util_dropdown @keys uuid|model|platform|version|manufacturer|isVirtual|serial @values uuid|model|platform|version|manufacturer|isVirtual|serial  */ type){
+    window.device[type];
+  };
 
   this.cronapi.cordova.geolocation = {};
 

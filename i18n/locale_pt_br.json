@@ -394,5 +394,7 @@
 	"returnType":"Tipo de Retorno",
 	"mediaType":"Tipo de Mídia",
 	"setActiveTab": "Mudar aba",
-	"setActiveTablDesc": "Função que modifica a aba ativa do componente aba"
+	"setActiveTablDesc": "Função que modifica a aba ativa do componente aba",
+	"getDeviceInfo":"Get Device Info",
+	"getDeviceInfoDescription":"Function that get a device info, i.e  uuid, platform"
 }
