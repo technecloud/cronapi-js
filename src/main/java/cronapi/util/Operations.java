@@ -479,7 +479,7 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{setInSession}}", nameTags = {
 			"setInSession" }, description = "{{setInSessionDescription}}", returnType = ObjectType.STRING)
-	public static final void setValueFromSession(
+	public static final void getValueFromSession(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldName}}") Var fieldName,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{fieldValue}}") Var fieldValue) throws Exception {
 		RestClient.getRestClient().updateSessionValue(fieldName.toString(), fieldValue);
