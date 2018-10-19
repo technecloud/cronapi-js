@@ -419,5 +419,7 @@
   "getLocalStorage":"Obter Item da Sessão do navegador",
   "getLocalStorageDesc":"Função que obtém um item na sessão global do navegador. Esse item é mantido ao fechar o navegador e é visível em todas as abas",
 	"deleteProperty": "Deletar propriedade",
-	"deletePropertyDescription": "Função que deleta uma propriedade de um objeto/json."
+	"deletePropertyDescription": "Função que deleta uma propriedade de um objeto/json.",
+	"getDeviceInfo":"Obter Informações do Dispositivo",
+	"getDeviceInfoDescription":"Função que obtém as informações do dispositivo"
 }

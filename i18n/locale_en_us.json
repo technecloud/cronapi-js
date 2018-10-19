@@ -417,5 +417,7 @@
   "getLocalStorage":"Get Local Storage Item",
   "getLocalStorageDesc":"Function that get an item in session storage on browser (global). This Item is keeped when the browser are closed and are visible to all tabs",
 	"deleteProperty": "Delete property",
-	"deletePropertyDescription": "Function that delete a property from object/json."
+	"deletePropertyDescription": "Function that delete a property from object/json.",
+	"getDeviceInfo":"Get Device Info",
+	"getDeviceInfoDescription":"Function that get a device info, i.e  uuid, platform"
 }
