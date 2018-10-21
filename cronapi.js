@@ -2701,6 +2701,20 @@
   /**
    *  @type function
    * @platform M
+   * @name {{getFirebaseToken}}
+   * @nameTags firebase|token|push|notification
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @description {{getFirebaseTokenDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.device.getFirebaseToken = function(success,error){
+    window.FirebasePlugin.getToken(success,error);
+  };
+
+  /**
+   *  @type function
+   * @platform M
    * @name {{getDeviceInfo}}
    * @nameTags device|dispositivo|info
    * @param {ObjectType.STRING} type {{type}}

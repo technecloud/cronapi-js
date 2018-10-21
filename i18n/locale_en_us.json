@@ -419,5 +419,7 @@
 	"deleteProperty": "Delete property",
 	"deletePropertyDescription": "Function that delete a property from object/json.",
 	"getDeviceInfo":"Get Device Info",
-	"getDeviceInfoDescription":"Function that get a device info, i.e  uuid, platform"
+	"getDeviceInfoDescription":"Function that get a device info, i.e  uuid, platform",
+	"getFirebaseToken":"Get Firebase Token",
+	"getFirebaseTokenDescription":"Function that return a firease token for send push notifications"
 }
