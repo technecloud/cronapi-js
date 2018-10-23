@@ -2825,12 +2825,10 @@
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
     if (!dbName) {
-      this.cronapi.cordova.database.name = this.cronapi.cordova.database.nameDefault;
-      if (window.BuildInfo) {
-        this.cronapi.cordova.database.name = BuildInfo.packageName;
-      }
+      return window.openDatabase(this.cronapi.cordova.database.nameDefault, "1.0",this.cronapi.cordova.database.nameDefault,1000000);
+    }else{
+      return window.openDatabase(dbName, "1.0", dbName, 1000000);
     }
-    this.cronapi.cordova.database.object = window.openDatabase({ name : this.cronapi.cordova.database.name });
   };
 
   /**
@@ -2838,6 +2836,7 @@
    * @platform M
    * @name {{executeSql}}
    * @nameTags executesql
+   * @param {ObjectType.STRING} dbName {{dbName}}
    * @param {ObjectType.STRING} text {{text}}
    * @param {ObjectType.OBJECT} array {{arrayParams}}
    * @param {ObjectType.STATEMENTSENDER} success {{success}}
@@ -2845,16 +2844,15 @@
    * @description {{executeSqlDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.cordova.database.executeSql = function(text, array, success , error){
+  this.cronapi.cordova.database.executeSql = function(dbName,text, array, success , error){
 
     // exist DB
-    if (!this.cronapi.cordova.database.object)
-      this.cronapi.cordova.database.openDatabase(); // create DB
+    var db = this.cronapi.cordova.database.openDatabase(dbName); // create DB
 
     // open transaction
-    this.cronapi.cordova.database.object.transaction(function(connect){
+    db.transaction(function(connect){
       // execute SQL
-      connect.executeSql(text,array, success);
+      connect.executeSql(text,array, function(a,b){success.call(this,Object.values(b.rows))}.bind(this));
     }.bind(this), function(e){
       // error
       console.log(e);

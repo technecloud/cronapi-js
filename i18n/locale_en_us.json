@@ -396,5 +396,6 @@
 	"getDeviceInfo":"Obter Informações do Dispositivo",
 	"getDeviceInfoDescription":"Function that get a device info, i.e  uuid, platform",
 	"getFirebaseToken":"Get Firebase Token",
-	"getFirebaseTokenDescription":"Function that return a firease token for send push notifications"
+	"getFirebaseTokenDescription":"Function that return a firease token for send push notifications",
+	"dbName":"Database Name"
 }
