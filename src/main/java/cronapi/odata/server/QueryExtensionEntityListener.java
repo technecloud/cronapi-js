@@ -154,17 +154,22 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
           selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
           String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
-
+          String distinct = ((SelectClause) selectStatement.getSelectClause()).getActualDistinctIdentifier();
+          boolean hasDistinct = ((SelectClause) selectStatement.getSelectClause()).hasDistinct();
           String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
 
           if (!selection.contains(".") && !selection.contains(",")) {
             alias = mainAlias;
           }
 
-          if ( uriInfo.rawEntity()) {
+          if (uriInfo.isCount() || uriInfo.rawEntity()) {
             setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
               selectExpression = "SELECT " + mainAlias + " ";
+            } if (hasDistinct) {
+              selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
+            } else {
+              selectExpression = "SELECT count( " + mainAlias + ") ";
             }
 
             if (selectStatement.hasOrderByClause()) {
@@ -280,27 +285,12 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         int i = maxParam;
         for (String param : inputs) {
-          i++;
+          i++; 
           jpqlStatement = jpqlStatement.replace(param, "?" + i);
         }
 
         if (!isBlockly) {
           query = em.createQuery(jpqlStatement);
-
-          if (uriInfo.isCount() || uriInfo.rawEntity()) {
-            if (!uriInfo.rawEntity()) {
-              Session sessionEclipseLink = em.unwrap(JpaEntityManager.class).getActiveSession();
-              DatabaseQuery databaseQuery = ((EJBQueryImpl)query).getDatabaseQuery();
-              databaseQuery.prepareCall(sessionEclipseLink, new DatabaseRecord());
-              String sqlString = databaseQuery.getSQLString();
-
-              selectExpression = "SELECT count(*) FROM ( ";
-              selectExpression = selectExpression.concat(sqlString);
-              selectExpression = selectExpression.concat(" ) countRecord ");
-              query = em.createNativeQuery(selectExpression);
-            }
-          }
-
         } else {
           String type = "select";
           if (uriInfo.isCount()) {
