@@ -1120,9 +1120,9 @@
 
   /**
    * @type function
-   * @name {{showModal}}
+   * @name {{showMobileModal}}
    * @nameTags Show| Modal| Exibir| Mostrar
-   * @description {{showModalDesc}}
+   * @description {{showMobileModalDesc}}
    * @platform M
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @multilayer true
@@ -1141,9 +1141,9 @@
 
   /**
    * @type function
-   * @name {{hideModal}}
+   * @name {{hideMobileModal}}
    * @nameTags Hide| Modal| Esconder | Fechar
-   * @description {{hideModalDesc}}
+   * @description {{hideMobileModalDesc}}
    * @platform M
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @multilayer true
