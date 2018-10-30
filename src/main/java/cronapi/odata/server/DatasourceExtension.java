@@ -16,6 +16,7 @@ import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
+import org.eclipse.persistence.internal.expressions.ConstantExpression;
 import org.eclipse.persistence.internal.expressions.SubSelectExpression;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
@@ -529,6 +530,9 @@ public class DatasourceExtension implements JPAEdmExtension {
             } else if (subItens.size() > 1) {
               throw new RuntimeException("Error in JPA subquery!");
             }
+          } else if ((item.getAttributeExpression() instanceof ConstantExpression) &&
+                     (((ConstantExpression)item.getAttributeExpression()).getValue() != null)) {
+            type = ((ConstantExpression)item.getAttributeExpression()).getValue().getClass();
           }
 
           String name = item.getName();
