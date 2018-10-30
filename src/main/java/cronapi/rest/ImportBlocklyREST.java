@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cronapi.util.Operations;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImportBlocklyREST {
 
   private static List<String> imports;
-  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-      .indexOf("-agentlib:jdwp") > 0;
+  private static boolean isDebug = Operations.IS_DEBUG;
 
   private void fill(String base, File folder, List<String> imports) {
     for(File file : folder.listFiles()) {

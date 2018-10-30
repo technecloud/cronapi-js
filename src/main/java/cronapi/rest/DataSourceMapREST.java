@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.QueryManager;
 import cronapi.odata.server.ODataConfiguration;
+import cronapi.util.Operations;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
 import org.eclipse.persistence.jpa.Archive;
@@ -27,8 +28,7 @@ import java.util.regex.Pattern;
 public class DataSourceMapREST {
 
   private static Map<String, DataSourceDetail> mapped;
-  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-      .indexOf("-agentlib:jdwp") > 0;
+  private static boolean isDebug = Operations.IS_DEBUG;
 
   /**
    * Construtor

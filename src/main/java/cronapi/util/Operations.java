@@ -65,7 +65,9 @@ public class Operations {
 		IS_WINDOWS = SO.equalsIgnoreCase("Windows");
 		IS_LINUX = SO.equalsIgnoreCase("Linux");
 
-		IS_DEBUG = ManagementFactory.getRuntimeMXBean().getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
+		String cmd = ManagementFactory.getRuntimeMXBean().getInputArguments().toString();
+
+		IS_DEBUG = cmd.indexOf("-agentlib:jdwp") > 0 || cmd.indexOf("-Xrunjdwp") > 0;
 	}
 
  @CronapiMetaData(type = "function", name = "{{setReturn}}", nameTags = {

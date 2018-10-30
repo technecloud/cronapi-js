@@ -21,20 +21,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cronapi.ErrorResponse;
-import cronapi.util.DataType;
-import cronapi.util.StorageService;
-import cronapi.util.StorageServiceResult;
+import cronapi.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import cronapi.util.LRUCache;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import cronapi.Var;
-import cronapi.util.Callback;
+
 import javax.servlet.ServletException;
 import java.lang.RuntimeException;
 import java.util.LinkedList;
@@ -54,8 +51,7 @@ public class DownloadREST {
   private static int INTERVAL = 1000 * 60 * 10;
   private static LRUCache<String, File> FILES = new LRUCache<>(1000, INTERVAL);
   private static LRUCache<String, Callback> AFTER_UPLOAD = new LRUCache<>(1000, INTERVAL);
-  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-      .indexOf("-agentlib:jdwp") > 0;
+  private static boolean isDebug = Operations.IS_DEBUG;
   public static SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
   public static File TEMP_FOLDER;
 
