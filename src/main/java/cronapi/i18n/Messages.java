@@ -67,6 +67,7 @@ public class Messages {
   }
 
   private static void validateLocale(Locale locale){
+    //TODO [CRONIDE-158] Verificar melhor alternativa para validar locale e utilizar um locale default para determinado idioma
     String localeLanguage = locale.getLanguage();
     String localeCountry = locale.getCountry();
     if (localeCountry == null || localeCountry.isEmpty()) {
