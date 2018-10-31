@@ -14,82 +14,96 @@ import java.util.ResourceBundle;
 public class Messages {
 
   public static final Locale DEFAUL_LOCALE = new Locale("pt", "BR");
-  
+
   private static final String BUNDLE_NAME = "cronapi.i18n.Messages";
-  
-  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME,DEFAUL_LOCALE,
-          new UTF8Control());
-  
+
+  private static final ResourceBundle DEFAULT_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME, DEFAUL_LOCALE,
+      new UTF8Control());
+
   public static final ThreadLocal<ResourceBundle> RESOURCE_BUNDLE = new ThreadLocal<>();
-  
+
   public static String getString(String key) {
     try {
       ResourceBundle bundle = RESOURCE_BUNDLE.get();
-      if(bundle == null)
+      if (bundle == null)
         return DEFAULT_BUNDLE.getString(key);
       else
         return RESOURCE_BUNDLE.get().getString(key);
-    }
-    catch(MissingResourceException e) {
+    } catch (MissingResourceException e) {
       return '!' + key + '!';
     }
   }
-  
-  public static String format(String pattern, Object ... arguments) {
+
+  public static String format(String pattern, Object... arguments) {
     // MessageFormat não aceita apostrofo simples diretamente.
     String fixedPattern = pattern.replace("'", "''");
     return MessageFormat.format(fixedPattern, arguments);
   }
-  
+
   public static void set(Locale locale) {
-    if(cronapi.util.Operations.IS_DEBUG) {
+    if (cronapi.util.Operations.IS_DEBUG) {
       ResourceBundle.clearCache();
     }
+    validateLocale(locale);
     RESOURCE_BUNDLE.set(ResourceBundle.getBundle(BUNDLE_NAME, locale, new UTF8Control()));
   }
-  
+
   public static void remove() {
     RESOURCE_BUNDLE.set(null);
     RESOURCE_BUNDLE.remove();
   }
-  
+
   public static ResourceBundle getBundle(Locale locale) {
+    validateLocale(locale);
     return ResourceBundle.getBundle(BUNDLE_NAME, locale, new UTF8Control());
   }
-  
+
   public static Locale getLocale() {
     ResourceBundle bundle = RESOURCE_BUNDLE.get();
-    if(bundle == null)
+    if (bundle == null)
       bundle = DEFAULT_BUNDLE;
-    
+
     return bundle.getLocale();
   }
-  
+
+  private static void validateLocale(Locale locale){
+    String localeLanguage = locale.getLanguage();
+    String localeCountry = locale.getCountry();
+    if (localeCountry == null || localeCountry.isEmpty()) {
+      switch (localeLanguage) {
+        case "pt":
+          locale = new Locale(localeLanguage, "BR");
+          break;
+        case "en":
+          locale = new Locale(localeLanguage, "US");
+          break;
+      }
+    }
+  }
+
   public static class UTF8Control extends ResourceBundle.Control {
     public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-            throws IllegalAccessException, InstantiationException, IOException {
+        throws IllegalAccessException, InstantiationException, IOException {
       String bundleName = toBundleName(baseName, locale);
       String resourceName = toResourceName(bundleName, "properties");
       ResourceBundle bundle = null;
       InputStream stream = null;
-      if(reload) {
+      if (reload) {
         URL url = loader.getResource(resourceName);
-        if(url != null) {
+        if (url != null) {
           URLConnection connection = url.openConnection();
-          if(connection != null) {
+          if (connection != null) {
             connection.setUseCaches(false);
             stream = connection.getInputStream();
           }
         }
-      }
-      else {
+      } else {
         stream = loader.getResourceAsStream(resourceName);
       }
-      if(stream != null) {
+      if (stream != null) {
         try {
           bundle = new PropertyResourceBundle(new InputStreamReader(stream, "UTF-8"));
-        }
-        finally {
+        } finally {
           stream.close();
         }
       }
