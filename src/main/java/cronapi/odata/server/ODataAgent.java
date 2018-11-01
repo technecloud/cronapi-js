@@ -7,6 +7,7 @@ import cronapi.AppConfig;
 import cronapi.QueryManager;
 import cronapi.Var;
 import cronapi.database.DataSource;
+import cronapi.rest.DataSourceMapREST;
 import cronapi.util.Operations;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.olingo.odata2.api.ODataService;
@@ -107,8 +108,7 @@ public class ODataAgent {
         default:
           if (c > 0x7e) {
             sb.append("&#" + ((int) c) + ";");
-          } else
-            sb.append(c);
+          } else sb.append(c);
       }
     }
     return sb.toString();
@@ -193,16 +193,7 @@ public class ODataAgent {
 
             InputStream ip = new ByteArrayInputStream(new byte[0]);
 
-            ODataRequest odataRequest = ODataRequest.method(ODataHttpMethod.GET)
-                .httpMethod("GET")
-                .contentType(RestUtil.extractRequestContentType(null).toContentTypeString())
-                .acceptHeaders(RestUtil.extractAcceptHeaders("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"))
-                .acceptableLanguages(RestUtil.extractAcceptableLanguage("en-US"))
-                .pathInfo(path)
-                .allQueryParameters(RestUtil.extractAllQueryParameters(queryString, null))
-                .requestHeaders(new HashMap<>())
-                .body(ip)
-                .build();
+            ODataRequest odataRequest = ODataRequest.method(ODataHttpMethod.GET).httpMethod("GET").contentType(RestUtil.extractRequestContentType(null).toContentTypeString()).acceptHeaders(RestUtil.extractAcceptHeaders("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")).acceptableLanguages(RestUtil.extractAcceptableLanguage("en-US")).pathInfo(path).allQueryParameters(RestUtil.extractAllQueryParameters(queryString, null)).requestHeaders(new HashMap<>()).body(ip).build();
 
 
             ODataContextImpl context = new ODataContextImpl(odataRequest, serviceFactory);
@@ -258,12 +249,29 @@ public class ODataAgent {
     } finally {
       try {
         stream.close();
-      } catch(Exception e) {
+      } catch (Exception e) {
         //
       }
     }
     return contentLength;
   }
+
+  public static synchronized void datasourceMap() {
+    try {
+      System.out.println();
+      System.out.write(START_RESULT);
+      DataSourceMapREST.cleanCache();
+      DataSourceMapREST ds = new DataSourceMapREST();
+      StringWriter writer = new StringWriter();
+      ds.writeMap(writer);
+      System.out.print(writer.toString());
+      System.out.write(END_RESULT);
+      System.out.println();
+    } catch (Exception e) {
+      sendError(e.getMessage());
+    }
+  }
+
 
   public static synchronized void jpql(String strJson) {
     try {
@@ -290,8 +298,7 @@ public class ODataAgent {
             if (entry.getValue().isJsonPrimitive()) {
               if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
                 value = entry.getValue().getAsJsonPrimitive().getAsBoolean();
-              }
-              else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
+              } else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
                 value = entry.getValue().getAsJsonPrimitive().getAsNumber();
               } else {
                 value = entry.getValue().getAsJsonPrimitive().getAsString();
@@ -355,6 +362,8 @@ public class ODataAgent {
         odata(input.substring(6).trim());
       } else if (input.startsWith("jpql ")) {
         jpql(input.substring(5).trim());
+      } else if (input.startsWith("datasourcemap")) {
+        datasourceMap();
       } else {
         sendError("Command not found!");
       }

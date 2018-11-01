@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping(value = "/js/dataSourceMap.js")
@@ -36,20 +36,34 @@ public class DataSourceMapREST {
   public DataSourceMapREST() {
   }
 
+  public static void cleanCache() {
+    mapped = null;
+  }
 
-  @RequestMapping(method = RequestMethod.GET)
-  public void register(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    response.setContentType("application/javascript");
-    PrintWriter out = response.getWriter();
-
+  public void writeMap(Writer out) throws Exception {
     if (mapped == null) {
       synchronized (DataSourceMapREST.class) {
         if (mapped == null) {
+
+          Set<Archive> currentArchives = PersistenceUnitProcessor.findPersistenceArchives();
+
+          String defaultNamespace = null;
+          for (Archive archive : currentArchives) {
+            List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+            for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
+              defaultNamespace = pui.getPersistenceUnitName();
+              break;
+            }
+            if (defaultNamespace != null) {
+              break;
+            }
+          }
+
           HashMap<String, DataSourceDetail> mappedAllDs = new HashMap<String, DataSourceDetail>();
           JsonObject customQuery = QueryManager.getJSON();
           for (Map.Entry<String, JsonElement> entry : customQuery.entrySet()) {
             String guid = entry.getKey();
-            DataSourceDetail detail = this.getDetail(guid, entry.getValue().getAsJsonObject());
+            DataSourceDetail detail = this.getDetail(guid, entry.getValue().getAsJsonObject(), defaultNamespace);
             if (detail.namespace.isEmpty()) {
               mappedAllDs.put(detail.customId, detail);
               mappedAllDs.put(guid, detail);
@@ -93,10 +107,16 @@ public class DataSourceMapREST {
     if (mapped != null) {
       write(out, mapped);
     }
-
   }
 
-  private DataSourceDetail getDetail(String guid, JsonObject json) {
+  @RequestMapping(method = RequestMethod.GET)
+  public void register(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    response.setContentType("application/javascript");
+    PrintWriter out = response.getWriter();
+    writeMap(out);
+  }
+
+  private DataSourceDetail getDetail(String guid, JsonObject json, String defaultNamespace) {
 
     String customId = json.get("customId").getAsString();
 
@@ -111,24 +131,29 @@ public class DataSourceMapREST {
       String serviceUrlODATA = String.format(ODataConfiguration.SERVICE_URL + "%s/%s", namespace, customId);
       detail = new DataSourceDetail(namespace, customId, serviceUrl, serviceUrlODATA, false);
     } else {
-      detail = new DataSourceDetail("", customId, serviceUrl, "", false);
+      String namespace = defaultNamespace;
+      if (!QueryManager.isNull(json.get("baseEntity"))) {
+        String entityFullName = json.get("baseEntity").getAsString();
+        namespace = entityFullName.substring(0, entityFullName.indexOf(".entity."));
+      }
+      String serviceUrlODATA = String.format(ODataConfiguration.SERVICE_URL + "%s/%s", namespace, customId);
+      detail = new DataSourceDetail(namespace, customId, serviceUrl, serviceUrlODATA, false);
     }
     return detail;
   }
 
-  private void write(PrintWriter out, Map<String, DataSourceDetail> mapped) {
-    out.println("window.dataSourceMap = window.dataSourceMap || [];");
+  private void write(Writer out, Map<String, DataSourceDetail> mapped) throws IOException {
+    out.write("window.dataSourceMap = window.dataSourceMap || [];\n");
 
     mapped.forEach((k, v) -> {
 
-      String curr = String.format("window.dataSourceMap[\"%s\"] = { customId: \"%s\", serviceUrl: \"%s\", serviceUrlODATA: \"%s\" };",
-          k,
-          v.customId,
-          v.serviceUrl,
-          v.serviceUrlODATA
-      );
+      String curr = String.format("window.dataSourceMap[\"%s\"] = { customId: \"%s\", serviceUrl: \"%s\", serviceUrlODATA: \"%s\" };", k, v.customId, v.serviceUrl, v.serviceUrlODATA);
 
-      out.println(curr);
+      try {
+        out.write(curr + "\n");
+      } catch (IOException e) {
+        //
+      }
     });
   }
 
