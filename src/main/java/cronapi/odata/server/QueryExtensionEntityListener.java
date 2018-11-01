@@ -335,9 +335,9 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             if (strValue != null) {
               Var requestParam = null;
               if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
-                requestParam = Var.valueOf(Var.deserialize(RestClient.getRestClient().getParameter(param.substring(1))));
+                requestParam = Var.valueOf(Var.deserialize(strValue));
               } else {
-                requestParam = Var.valueOf(requestParam);
+                requestParam = Var.valueOf(strValue);
               }
               query.setParameter(i, requestParam.getObject(type));
             } else {

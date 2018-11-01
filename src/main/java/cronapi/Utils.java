@@ -1,49 +1,32 @@
 package cronapi;
 
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.google.gson.*;
 import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.persistence.Id;
-import javax.xml.bind.DatatypeConverter;
-
+import cronapi.database.DataSource;
+import cronapi.i18n.Messages;
+import cronapi.rest.CronapiREST.TranslationPath;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.olingo.odata2.api.edm.EdmLiteralKind;
+import org.apache.olingo.odata2.api.edm.EdmSimpleTypeException;
+import org.apache.olingo.odata2.core.edm.EdmDateTime;
+import org.apache.olingo.odata2.core.edm.EdmDateTimeOffset;
 
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
-import cronapi.database.DataSource;
-import cronapi.i18n.Messages;
-import cronapi.rest.CronapiREST.TranslationPath;
+import javax.persistence.Id;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Classe que representa ...
@@ -51,7 +34,6 @@ import cronapi.rest.CronapiREST.TranslationPath;
  * @author Usuário de Teste
  * @version 1.0
  * @since 2017-03-28
- *
  */
 
 public class Utils {
@@ -66,22 +48,17 @@ public class Utils {
     DATE_FORMATS.put("pt", getGenericParseDateFormat(new Locale("pt", "BR")));
     DATE_FORMATS.put("en", getGenericParseDateFormat(new Locale("en", "US")));
 
-    PARSE_DATETIME_FORMAT.put("pt",
-        new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("ParseDateFormat")));
-    PARSE_DATETIME_FORMAT.put("en",
-        new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("ParseDateFormat")));
+    PARSE_DATETIME_FORMAT.put("pt", new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("ParseDateFormat")));
+    PARSE_DATETIME_FORMAT.put("en", new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("ParseDateFormat")));
 
-    DATETIME_FORMAT.put("pt",
-        new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("DateTimeFormat")));
-    DATETIME_FORMAT.put("en",
-        new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("DateTimeFormat")));
+    DATETIME_FORMAT.put("pt", new SimpleDateFormat(Messages.getBundle(new Locale("pt", "BR")).getString("DateTimeFormat")));
+    DATETIME_FORMAT.put("en", new SimpleDateFormat(Messages.getBundle(new Locale("en", "US")).getString("DateTimeFormat")));
   }
 
   public static boolean deleteFolder(File dir) throws Exception {
     if (dir.isDirectory()) {
       Path rootPath = Paths.get(dir.getPath());
-      Files.walk(rootPath, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile)
-          .peek(System.out::println).forEach(File::delete);
+      Files.walk(rootPath, FileVisitOption.FOLLOW_LINKS).sorted(Comparator.reverseOrder()).map(Path::toFile).peek(System.out::println).forEach(File::delete);
     }
     return dir.delete();
   }
@@ -117,10 +94,8 @@ public class Utils {
 
       return DatatypeConverter.printHexBinary(digest).toUpperCase();
     } finally {
-      if (in != null)
-        in.close();
-      if (fstream != null)
-        fstream.close();
+      if (in != null) in.close();
+      if (fstream != null) fstream.close();
     }
   }
 
@@ -148,8 +123,7 @@ public class Utils {
   }
 
   public static boolean stringToBoolean(final String str) {
-    if (str == null)
-      return false;
+    if (str == null) return false;
     return Boolean.valueOf(str.trim());
   }
 
@@ -186,8 +160,7 @@ public class Utils {
   }
 
   public static Method findMethod(Object obj, String method) {
-    if (obj == null)
-      return null;
+    if (obj == null) return null;
     Method[] methods = obj instanceof Class ? ((Class) obj).getMethods() : obj.getClass().getMethods();
     for (Method m : methods) {
       if (m.getName().equalsIgnoreCase(method)) {
@@ -200,10 +173,8 @@ public class Utils {
   public static List<String> getFieldsWithAnnotationCloud(Object obj, String type) {
     List<String> fields = new ArrayList<String>();
     Class<?> c;
-    if (obj instanceof Class)
-      c = (Class)obj;
-    else
-      c = obj.getClass();
+    if (obj instanceof Class) c = (Class) obj;
+    else c = obj.getClass();
 
     Field[] fieldsArr = c.getDeclaredFields();
     List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
@@ -215,7 +186,7 @@ public class Utils {
         for (int i = 0; i < fieldAnnots.length; i++) {
           if (fieldAnnots[i].toString().contains("CronapiCloud")) {
             CronapiCloud ann = ((CronapiCloud) fieldAnnots[i]);
-            if (ann.type()!=null && type.equals(ann.type().toLowerCase().trim())) {
+            if (ann.type() != null && type.equals(ann.type().toLowerCase().trim())) {
               fields.add(field.getName());
             }
           }
@@ -229,11 +200,9 @@ public class Utils {
     List<String> fields = new LinkedList<>();
     if (obj != null) {
 
-      Class<?> c ;
-      if (obj instanceof Class)
-        c = (Class)obj;
-      else
-        c = obj.getClass();
+      Class<?> c;
+      if (obj instanceof Class) c = (Class) obj;
+      else c = obj.getClass();
 
       Field[] fieldsArr = c.getDeclaredFields();
       List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
@@ -256,10 +225,8 @@ public class Utils {
   public static List<String> getFieldsWithAnnotationId(Object obj) {
     List<String> fields = new ArrayList<String>();
     Class<?> c;
-    if (obj instanceof Class)
-      c = (Class)obj;
-    else
-      c = obj.getClass();
+    if (obj instanceof Class) c = (Class) obj;
+    else c = obj.getClass();
 
     Field[] fieldsArr = c.getDeclaredFields();
     List<Field> allFields = new ArrayList<>(Arrays.asList(fieldsArr));
@@ -280,10 +247,8 @@ public class Utils {
 
   public static CronapiCloud getAnnotationCloud(Object obj, String fieldName) {
     Class<?> c;
-    if (obj instanceof Class)
-      c = (Class)obj;
-    else
-      c = obj.getClass();
+    if (obj instanceof Class) c = (Class) obj;
+    else c = obj.getClass();
     CronapiCloud result = null;
     try {
       Field field = c.getDeclaredField(fieldName);
@@ -305,7 +270,7 @@ public class Utils {
     try {
       fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
       Method getMethod = findMethod(obj, "get" + fieldName);
-      Object result = getMethod.invoke(obj, new Object[] {});
+      Object result = getMethod.invoke(obj, new Object[]{});
       return result;
     } catch (Exception e) {
     }
@@ -315,21 +280,18 @@ public class Utils {
   public static void updateField(Object obj, String fieldName, Object fieldValue) {
     try {
       Method setMethod = Utils.findMethod(obj, "set" + fieldName);
-      if(setMethod != null) {
-        if(fieldValue instanceof Var) {
-          fieldValue = ((Var)fieldValue).getObject(setMethod.getParameterTypes()[0]);
-        }
-        else {
+      if (setMethod != null) {
+        if (fieldValue instanceof Var) {
+          fieldValue = ((Var) fieldValue).getObject(setMethod.getParameterTypes()[0]);
+        } else {
           Var tVar = Var.valueOf(fieldValue);
           fieldValue = tVar.getObject(setMethod.getParameterTypes()[0]);
         }
         setMethod.invoke(obj, fieldValue);
-      }
-      else {
+      } else {
         throw new RuntimeException("Field " + fieldName + " not found");
       }
-    }
-    catch(Exception ex) {
+    } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
   }
@@ -346,6 +308,25 @@ public class Utils {
     }
 
     if (date == null) {
+
+      //Suport a formato ODATA
+
+      if (value.startsWith("datetime'")) {
+        try {
+          return EdmDateTime.getInstance().valueOfString(value, EdmLiteralKind.URI, null, Calendar.class);
+        } catch (EdmSimpleTypeException e) {
+          //
+        }
+      }
+
+      if (value.startsWith("datetimeoffset'")) {
+        try {
+          return EdmDateTimeOffset.getInstance().valueOfString(value, EdmLiteralKind.URI, null, Calendar.class);
+        } catch (EdmSimpleTypeException e) {
+          //
+        }
+      }
+
       DateFormat[] formats = DATE_FORMATS.get(Messages.getLocale().getLanguage());
       if (formats == null) {
         formats = DATE_FORMATS.get("pt");
@@ -410,8 +391,7 @@ public class Utils {
   private static DateFormat[] getGenericParseDateFormat(Locale locale) {
     String datePattern = Messages.getBundle(locale).getString("ParseDateFormat");
 
-    final String[] formats = { (datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"),
-        "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s", "yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m" };
+    final String[] formats = {(datePattern + " H:m:s.SSS"), (datePattern + " H:m:s"), (datePattern + " H:m"), "yyyy-M-d H:m:s.SSS", "yyyy-M-d H:m:s", "yyyy-M-d H:m", datePattern, "yyyy-M-d", "H:m:s", "H:m"};
 
     DateFormat[] dateFormats = new DateFormat[formats.length + 1];
     dateFormats[0] = new ISO8601DateFormat();
@@ -432,8 +412,7 @@ public class Utils {
         indexes.add(index);
         if (searchBrackets.indexOf("]") < (searchBrackets.length() - 1))
           searchBrackets = searchBrackets.substring(searchBrackets.indexOf("]") + 1);
-        else
-          searchBrackets = searchBrackets.substring(searchBrackets.indexOf("]"));
+        else searchBrackets = searchBrackets.substring(searchBrackets.indexOf("]"));
       }
       key = key.substring(0, key.indexOf("["));
     }
@@ -441,17 +420,12 @@ public class Utils {
   }
 
   private static final Object getValueByKey(Object obj, String key) {
-    if (key.equals("this"))
-      return obj;
+    if (key.equals("this")) return obj;
 
-    if (obj instanceof JsonObject)
-      return ((JsonObject) obj).get(key);
-    else if (obj instanceof java.util.Map)
-      return ((Map) obj).get(key);
-    else if (obj instanceof DataSource)
-      return ((DataSource) obj).getObject(key);
-    else
-      return getFieldReflection(obj, key);
+    if (obj instanceof JsonObject) return ((JsonObject) obj).get(key);
+    else if (obj instanceof java.util.Map) return ((Map) obj).get(key);
+    else if (obj instanceof DataSource) return ((DataSource) obj).getObject(key);
+    else return getFieldReflection(obj, key);
   }
 
   private static final Object getFieldReflection(Object obj, String key) {
@@ -459,13 +433,10 @@ public class Utils {
     Object o = null;
     try {
       String keyWithGet = String.format("get%s", Character.toUpperCase(key.charAt(0)));
-      if (key.length() > 1)
-        keyWithGet += key.substring(1);
+      if (key.length() > 1) keyWithGet += key.substring(1);
       Method getMethod = Utils.findMethod(obj, keyWithGet);
-      if (getMethod != null)
-        o = getMethod.invoke(obj, null);
-      else
-        throw new Exception("method not found");
+      if (getMethod != null) o = getMethod.invoke(obj, null);
+      else throw new Exception("method not found");
     } catch (Exception e) {
       try {
         Class c = obj.getClass();
@@ -480,14 +451,10 @@ public class Utils {
 
   private static final Object getValueByIndex(Object obj, int idx) {
     try {
-      if (obj instanceof JsonArray)
-        return ((JsonArray) obj).get(idx);
-      else if (obj instanceof java.util.List)
-        return ((List) obj).get(idx);
-      else if (obj.getClass().isArray())
-        return ((Object[]) obj)[idx];
-      else
-        return obj;
+      if (obj instanceof JsonArray) return ((JsonArray) obj).get(idx);
+      else if (obj instanceof java.util.List) return ((List) obj).get(idx);
+      else if (obj.getClass().isArray()) return ((Object[]) obj)[idx];
+      else return obj;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -496,59 +463,43 @@ public class Utils {
   private static final Object setValueByIndex(Object list, Object valueToSet, int idx) {
 
     Object val = valueToSet;
-    if (val instanceof Var)
-      val = ((Var) val).getObject();
+    if (val instanceof Var) val = ((Var) val).getObject();
 
     if (list instanceof JsonArray) {
 
       if (idx <= (((JsonArray) list).size() - 1)) {
-        if (val instanceof JsonElement)
-          ((JsonArray) list).set(idx, (JsonElement) val);
-        else if (val instanceof Character)
-          ((JsonArray) list).set(idx, new JsonPrimitive((Character) val));
-        else if (val instanceof Number)
-          ((JsonArray) list).set(idx, new JsonPrimitive((Number) val));
-        else if (val instanceof Boolean)
-          ((JsonArray) list).set(idx, new JsonPrimitive((Boolean) val));
-        else if (val instanceof String)
-          ((JsonArray) list).set(idx, new JsonPrimitive((String) val));
+        if (val instanceof JsonElement) ((JsonArray) list).set(idx, (JsonElement) val);
+        else if (val instanceof Character) ((JsonArray) list).set(idx, new JsonPrimitive((Character) val));
+        else if (val instanceof Number) ((JsonArray) list).set(idx, new JsonPrimitive((Number) val));
+        else if (val instanceof Boolean) ((JsonArray) list).set(idx, new JsonPrimitive((Boolean) val));
+        else if (val instanceof String) ((JsonArray) list).set(idx, new JsonPrimitive((String) val));
       } else {
         for (int i = 0; i < idx; i++) {
-          if (i >= ((JsonArray) list).size())
-            ((JsonArray) list).add((JsonObject) null);
+          if (i >= ((JsonArray) list).size()) ((JsonArray) list).add((JsonObject) null);
         }
-        if (val instanceof JsonElement)
-          ((JsonArray) list).add((JsonElement) val);
-        else if (val instanceof Character)
-          ((JsonArray) list).add((Character) val);
-        else if (val instanceof Number)
-          ((JsonArray) list).add((Number) val);
-        else if (val instanceof Boolean)
-          ((JsonArray) list).add((Boolean) val);
-        else if (val instanceof String)
-          ((JsonArray) list).add((String) val);
+        if (val instanceof JsonElement) ((JsonArray) list).add((JsonElement) val);
+        else if (val instanceof Character) ((JsonArray) list).add((Character) val);
+        else if (val instanceof Number) ((JsonArray) list).add((Number) val);
+        else if (val instanceof Boolean) ((JsonArray) list).add((Boolean) val);
+        else if (val instanceof String) ((JsonArray) list).add((String) val);
       }
     } else if (list instanceof java.util.List) {
-      if (idx <= (((List) list).size() - 1))
-        ((List) list).set(idx, val);
+      if (idx <= (((List) list).size() - 1)) ((List) list).set(idx, val);
       else {
         for (int i = 0; i < idx; i++) {
-          if (i >= ((List) list).size())
-            ((List) list).add(null);
+          if (i >= ((List) list).size()) ((List) list).add(null);
         }
         ((List) list).add(val);
       }
     } else {
-      if (idx <= ((Object[]) list).length - 1)
-        ((Object[]) list)[idx] = val;
+      if (idx <= ((Object[]) list).length - 1) ((Object[]) list)[idx] = val;
       else {
         ArrayList<Object> tempToArray = new ArrayList<Object>();
         for (int i = 0; i < ((Object[]) list).length; i++)
           tempToArray.add(((Object[]) list)[i]);
 
         for (int i = 0; i < idx; i++) {
-          if (i >= tempToArray.size())
-            tempToArray.add(null);
+          if (i >= tempToArray.size()) tempToArray.add(null);
         }
         tempToArray.add(val);
         Object newArray = java.lang.reflect.Array.newInstance(val.getClass(), tempToArray.size());
@@ -571,16 +522,11 @@ public class Utils {
     }
 
     if (obj instanceof JsonObject) {
-      if (valueToSet instanceof JsonElement)
-        ((JsonObject) obj).add(key, (JsonElement) valueToSet);
-      else if (valueToSet instanceof Character)
-        ((JsonObject) obj).addProperty(key, (Character) valueToSet);
-      else if (valueToSet instanceof Number)
-        ((JsonObject) obj).addProperty(key, (Number) valueToSet);
-      else if (valueToSet instanceof Boolean)
-        ((JsonObject) obj).addProperty(key, (Boolean) valueToSet);
-      else if (valueToSet instanceof String)
-        ((JsonObject) obj).addProperty(key, (String) valueToSet);
+      if (valueToSet instanceof JsonElement) ((JsonObject) obj).add(key, (JsonElement) valueToSet);
+      else if (valueToSet instanceof Character) ((JsonObject) obj).addProperty(key, (Character) valueToSet);
+      else if (valueToSet instanceof Number) ((JsonObject) obj).addProperty(key, (Number) valueToSet);
+      else if (valueToSet instanceof Boolean) ((JsonObject) obj).addProperty(key, (Boolean) valueToSet);
+      else if (valueToSet instanceof String) ((JsonObject) obj).addProperty(key, (String) valueToSet);
     } else if (obj instanceof java.util.Map) {
       ((Map) obj).put(key, valueToSet);
     } else if (obj instanceof DataSource) {
@@ -593,14 +539,12 @@ public class Utils {
   private static final void setValueInObjByReflection(Object obj, String key, Object valueToSet) {
     try {
       String keyWithSet = String.format("set%s", Character.toUpperCase(key.charAt(0)));
-      if (key.length() > 1)
-        keyWithSet += key.substring(1);
+      if (key.length() > 1) keyWithSet += key.substring(1);
       Method setMethod = Utils.findMethod(obj, keyWithSet);
       if (setMethod != null) {
         valueToSet = Var.valueOf(valueToSet).getObject(setMethod.getParameterTypes()[0]);
         setMethod.invoke(obj, valueToSet);
-      } else
-        throw new Exception("method not found");
+      } else throw new Exception("method not found");
     } catch (Exception e) {
       try {
         Object o = null;
@@ -628,17 +572,14 @@ public class Utils {
   private static Object addOrSetEmptyValueOnArray(Object obj, String keyOrPreviusIdx, int idx) {
     Object value = getPreviousListFromArray(obj, keyOrPreviusIdx);
     if (obj instanceof JsonElement) {
-      if (value == null || !(value instanceof JsonArray))
-        value = new JsonArray();
+      if (value == null || !(value instanceof JsonArray)) value = new JsonArray();
       setValueByIndex(value, new JsonObject(), idx);
     } else {
-      if (value == null || !(value instanceof List))
-        value = new ArrayList();
+      if (value == null || !(value instanceof List)) value = new ArrayList();
       setValueByIndex(value, new HashMap(), idx);
     }
 
-    if (obj instanceof JsonObject || obj instanceof Map)
-      setValueInObj(obj, keyOrPreviusIdx, value);
+    if (obj instanceof JsonObject || obj instanceof Map) setValueInObj(obj, keyOrPreviusIdx, value);
     else if (obj instanceof JsonArray || obj instanceof List)
       setValueByIndex(obj, value, Integer.parseInt(keyOrPreviusIdx));
     return value;
@@ -647,15 +588,11 @@ public class Utils {
   private static Object getPreviousListFromArray(Object obj, String keyOrPreviusIdx) {
     try {
       if (obj instanceof JsonElement) {
-        if (obj instanceof JsonObject)
-          return ((JsonObject) obj).get(keyOrPreviusIdx);
-        else if (obj instanceof JsonArray)
-          return ((JsonArray) obj).get(Integer.parseInt(keyOrPreviusIdx));
+        if (obj instanceof JsonObject) return ((JsonObject) obj).get(keyOrPreviusIdx);
+        else if (obj instanceof JsonArray) return ((JsonArray) obj).get(Integer.parseInt(keyOrPreviusIdx));
       } else {
-        if (obj instanceof Map)
-          return ((Map) obj).get(keyOrPreviusIdx);
-        else if (obj instanceof List)
-          return ((List) obj).get(Integer.parseInt(keyOrPreviusIdx));
+        if (obj instanceof Map) return ((Map) obj).get(keyOrPreviusIdx);
+        else if (obj instanceof List) return ((List) obj).get(Integer.parseInt(keyOrPreviusIdx));
       }
     } catch (Exception e) {
     }
@@ -666,39 +603,31 @@ public class Utils {
     Object value = obj;
     for (int i = 0; i < indexes.size(); i++) {
       String idx = indexes.get(i);
-      if (i == 0)
-        value = addOrSetEmptyValueOnArray(value, key, Integer.parseInt(idx));
-      else
-        value = addOrSetEmptyValueOnArray(value, String.valueOf(indexes.get(i - 1)), Integer.parseInt(idx));
+      if (i == 0) value = addOrSetEmptyValueOnArray(value, key, Integer.parseInt(idx));
+      else value = addOrSetEmptyValueOnArray(value, String.valueOf(indexes.get(i - 1)), Integer.parseInt(idx));
     }
     return getValueByKey(obj, key);
   }
 
   private static Object createObjectPath(Object obj, String key, List<String> indexes) {
     Object value = null;
-    if (indexes.size() == 0)
-      value = addEmptyDefaultValueByKey(obj, key);
-    else
-      value = addEmptyDefaultValuesByIndexes(obj, key, indexes);
+    if (indexes.size() == 0) value = addEmptyDefaultValueByKey(obj, key);
+    else value = addEmptyDefaultValuesByIndexes(obj, key, indexes);
     return value;
   }
 
-  public static final Object mapGetObjectPathExtractElement(Object obj, String key, boolean createIfNotExist)
-      throws Exception {
-    if (obj instanceof Var)
-      obj = ((Var) obj).getObject();
+  public static final Object mapGetObjectPathExtractElement(Object obj, String key, boolean createIfNotExist) throws Exception {
+    if (obj instanceof Var) obj = ((Var) obj).getObject();
 
     List<String> indexes = new ArrayList<String>();
     key = fillIndexesIfExists(indexes, key);
     Object value = getValueByKey(obj, key);
-    if ((value == null || value instanceof JsonNull) && createIfNotExist)
-      value = createObjectPath(obj, key, indexes);
+    if ((value == null || value instanceof JsonNull) && createIfNotExist) value = createObjectPath(obj, key, indexes);
 
     if (indexes.size() > 0) {
       for (String idx : indexes) {
         Object o = value;
-        if (value instanceof Var)
-          o = ((Var) value).getObject();
+        if (value instanceof Var) o = ((Var) value).getObject();
         value = getValueByIndex(o, Integer.parseInt(idx));
         if ((value == null || value instanceof JsonNull) && createIfNotExist) {
           createObjectPath(obj, key, indexes);
@@ -726,14 +655,12 @@ public class Utils {
       for (int i = 0; i < indexes.size(); i++) {
         String idx = indexes.get(i);
         Object o = value;
-        if (value instanceof Var)
-          o = ((Var) value).getObject();
+        if (value instanceof Var) o = ((Var) value).getObject();
         if (i == indexes.size() - 1) {
           Object result = setValueByIndex(o, valueToSet, Integer.parseInt(idx));
           if (result != null) //Se for array, irá gerar um novo array e retornar
             setValueInObj(obj, key, result);
-        } else
-          value = getValueByIndex(o, Integer.parseInt(idx));
+        } else value = getValueByIndex(o, Integer.parseInt(idx));
       }
     }
   }
@@ -742,8 +669,7 @@ public class Utils {
     if (key.endsWith("]")) {
       mapGetObjectPathExtractElement(obj, key, true);
       setValueInArray(obj, key, valueToSet);
-    } else
-      setValueInObj(obj, key, valueToSet);
+    } else setValueInObj(obj, key, valueToSet);
   }
 
   public static final List<Var> getParamsAndExecuteBlockParams(JsonObject query, TranslationPath translationPath) {
@@ -751,7 +677,7 @@ public class Utils {
     int paramTranslationPath = 0;
     List<Var> params = new LinkedList<Var>();
     JsonArray array = query.get("queryParamsValues").getAsJsonArray();
-    for (int i = 0; i < array.size(); i++ ) {
+    for (int i = 0; i < array.size(); i++) {
       JsonObject paramObj = array.get(i).getAsJsonObject();
       if (paramObj.get("fieldValue").isJsonObject()) {
         JsonObject jsonCallBlockly = new JsonObject();
@@ -759,23 +685,18 @@ public class Utils {
         Var result = QueryManager.executeBlockly(jsonCallBlockly, "GET", null).getObjectAsPOJOList();
         params.add(Var.valueOf(result.getObjectAsList().get(0)).getField("value"));
         paramBlockly++;
-      }
-      else if (paramObj.get("fieldValue").isJsonPrimitive()
-          && paramObj.get("fieldValue").getAsString().trim().length()  > 0
-          && !paramObj.get("fieldValue").getAsString().trim().startsWith("{{")
-          && !paramObj.get("fieldValue").getAsString().trim().endsWith("}}")) {
+      } else if (paramObj.get("fieldValue").isJsonPrimitive() && paramObj.get("fieldValue").getAsString().trim().length() > 0 && !paramObj.get("fieldValue").getAsString().trim().startsWith("{{") && !paramObj.get("fieldValue").getAsString().trim().endsWith("}}")) {
         params.add(Var.valueOf(paramObj.get("fieldValue").getAsString()));
         paramBlockly++;
-      }
-      else {
-        if (translationPath.params.length > (params.size() - paramBlockly) ) {
+      } else {
+        if (translationPath.params.length > (params.size() - paramBlockly)) {
           params.add(translationPath.params[params.size() - paramBlockly]);
           paramTranslationPath++;
         }
       }
     }
 
-    if (paramTranslationPath <  translationPath.params.length) {
+    if (paramTranslationPath < translationPath.params.length) {
       Arrays.stream(translationPath.params).forEach(p -> {
         params.add(p);
       });
@@ -799,10 +720,8 @@ public class Utils {
   public static boolean isEntityClass(Object obj) {
     Boolean isEntity = false;
     Class<?> c;
-    if (obj instanceof Class)
-      c = (Class)obj;
-    else
-      c = obj.getClass();
+    if (obj instanceof Class) c = (Class) obj;
+    else c = obj.getClass();
 
     Annotation[] fieldAnnots = c.getDeclaredAnnotations();
     for (int i = 0; i < fieldAnnots.length; i++) {
@@ -826,14 +745,11 @@ public class Utils {
       result = sql.substring(0, indexGroupBy);
       result += " " + filter + " ";
       result += sql.substring(indexGroupBy);
-    }
-    else if (indexOrderBy > -1) {
+    } else if (indexOrderBy > -1) {
       result = sql.substring(0, indexOrderBy);
       result += " " + filter + " ";
       result += sql.substring(indexOrderBy);
-    }
-    else
-      result += sql + " " + filter;
+    } else result += sql + " " + filter;
 
     return result;
   }
@@ -842,13 +758,12 @@ public class Utils {
     Var result = Var.VAR_NULL;
 
     if (!StringUtils.isEmpty(value)) {
-      if (value.startsWith("'") && value.endsWith("'") ||
-          value.startsWith("\"") && value.endsWith("\"")){
+      if (value.startsWith("'") && value.endsWith("'") || value.startsWith("\"") && value.endsWith("\"")) {
         value = value.substring(1);
-        value = value.substring(0, value.length()-1);
+        value = value.substring(0, value.length() - 1);
       }
 
-      if ("null".equalsIgnoreCase(value)){
+      if ("null".equalsIgnoreCase(value)) {
         result = Var.VAR_NULL;
       } else {
         result = Var.valueOf(value);
