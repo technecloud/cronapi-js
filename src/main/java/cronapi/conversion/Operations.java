@@ -1,6 +1,8 @@
 package cronapi.conversion;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -159,5 +161,14 @@ public class Operations {
 					"{{content}}" }, paramsType = { ObjectType.STRING }, returnType = ObjectType.BOOLEAN)
 	public static final Var toBoolean(Var var) throws Exception {
 		return new Var(Utils.stringToBoolean(var.getObjectAsString()));
+	}
+	
+	@CronapiMetaData(type = "function", name = "{{formatDouble}}", nameTags = {
+			"DoubleToString" }, description = "{{functionformatDouble}}", params = { "{{content}}",
+					"{{mask}}" }, paramsType = { ObjectType.STRING,
+							ObjectType.STRING }, returnType = ObjectType.DATETIME)
+	public static final Var formatDouble(Var val, Var mask) throws Exception {
+		NumberFormat _formatter = new DecimalFormat(mask.toString());
+		return Var.valueOf(_formatter.format(val.getObjectAsDouble() ) );
 	}
 }
