@@ -320,7 +320,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
         }
 
-        if (!uriInfo.isCount() && inputs.size() > 0) {
+        if (inputs.size() > 0) {
           AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
           HermesParser parser = new HermesParser();
           DatabaseQuery queryParsed = parser.buildQuery(jpqlStatement, session);
