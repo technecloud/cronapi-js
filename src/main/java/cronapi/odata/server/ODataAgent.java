@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.QueryManager;
+import cronapi.RestClient;
 import cronapi.Var;
 import cronapi.database.DataSource;
 import cronapi.rest.DataSourceMapREST;
@@ -154,6 +155,8 @@ public class ODataAgent {
         String[] urlParts = strPath.split("\\?");
         queryString = urlParts[1];
         strPath = urlParts[0];
+
+        RestClient.getRestClient().setParameters(queryString);
       }
 
       String[] parts = strPath.split("/");
