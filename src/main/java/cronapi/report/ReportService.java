@@ -1,5 +1,10 @@
 package cronapi.report;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import cronapi.QueryManager;
+import cronapi.report.DataSourcesInBand.FieldParam;
+import cronapi.report.DataSourcesInBand.ParamValue;
 import cronapi.rest.DownloadREST;
 import cronapp.reports.PrintDesign;
 import cronapp.reports.ReportExport;
@@ -17,10 +22,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -69,15 +76,15 @@ public class ReportService {
 				Stream.of(jasperDesign.getParameters()).filter(jrParameter -> !jrParameter.isSystemDefined())
 						.filter(jrParameter -> !jrParameter.getName().contains("image_"))
 						.filter(jrParameter -> !jrParameter.getName().contains("sub_")).forEach(jrParameter -> {
-							Parameter parameter = new Parameter();
-							parameter.setName(jrParameter.getName());
-							parameter.setType(ParameterType.toType(jrParameter.getValueClass()));
-							parameter.setDescription(jrParameter.getDescription());
-							JRExpression expression = jrParameter.getDefaultValueExpression();
-							if (expression != null)
-								parameter.setValue(expression.getText());
-							reportResult.addParameter(parameter);
-						});
+					Parameter parameter = new Parameter();
+					parameter.setName(jrParameter.getName());
+					parameter.setType(ParameterType.toType(jrParameter.getValueClass()));
+					parameter.setDescription(jrParameter.getDescription());
+					JRExpression expression = jrParameter.getDefaultValueExpression();
+					if (expression != null)
+						parameter.setValue(expression.getText());
+					reportResult.addParameter(parameter);
+				});
 			}
 		} catch (JRException e) {
 			log.error("Problems to make JasperDesign object.");
@@ -95,6 +102,43 @@ public class ReportService {
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public DataSourcesInBand getDataSourcesParams(DataSourcesInBand dataSourcesInBand) {
+
+		dataSourcesInBand.getDatasources().forEach(dsp -> {
+			JsonObject currentCustomQuery = null;
+			try {
+				currentCustomQuery = QueryManager.getQuery(dsp.getCustomId());
+			}
+			catch (Exception e) {
+				//Abafa
+			}
+			List<ParamValue> dsParams = getDataSourceParamsFromCustomQuery(currentCustomQuery);
+			dsParams.forEach(param -> {
+				//Se nao existir nos parametros, adiciona
+				Optional<FieldParam> exist = dsp.getFieldParams().stream().filter(fp -> param.getFieldName().equals(fp.getField())).findAny();
+				if (!exist.isPresent())
+					dsp.getFieldParams().add(new FieldParam(param.getFieldName(), param.getFieldName(), "String", ""));
+				dsp.getQueryParams().add(new ParamValue(param.getFieldName(), ":" + param.getFieldName()));
+			});
+			if (dsp.getFieldParams().size() > 0)
+				dataSourcesInBand.setHasParam(true);
+		});
+		return dataSourcesInBand;
+	}
+
+	private List<ParamValue> getDataSourceParamsFromCustomQuery(JsonObject customQuery) {
+		List<ParamValue> params = new ArrayList();
+		if (customQuery != null) {
+			for (JsonElement queryParamsValues : customQuery.get("queryParamsValues").getAsJsonArray()) {
+				JsonObject paramNameValue = queryParamsValues.getAsJsonObject();
+				ParamValue paramValue = new ParamValue();
+				paramValue.setFieldName(paramNameValue.get("fieldName").getAsString());
+				params.add(paramValue);
+			}
+		}
+		return params;
 	}
 
 	public String getPDFAsFile(ReportFront reportFront) {
@@ -132,7 +176,7 @@ public class ReportService {
 					pdf = DownloadREST.getTempFile(UUID.randomUUID().toString() + ".pdf");
 					pdf.createNewFile();
 				} else {
-				  pdf = file;
+					pdf = file;
 				}
 			} catch (IOException e) {
 				log.error("Problems to make the temporary report file.");

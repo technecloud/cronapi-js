@@ -1,5 +1,6 @@
 package cronapi.rest;
 
+import cronapi.report.DataSourcesInBand;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,12 +25,12 @@ import cronapp.reports.commons.ReportFront;
 @RestController
 @RequestMapping("/api/rest")
 public class ReportREST {
-  
+
   private static final Logger log = LoggerFactory.getLogger(ReportREST.class);
-  
+
   @Autowired
   private ReportService reportService;
-  
+
   @RequestMapping(value = "/report", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ReportFront> getReport(@RequestBody ReportFront reportFront) {
     if(reportFront == null)
@@ -50,7 +51,18 @@ public class ReportREST {
     String reportResult = reportService.getContentReport(reportName);
     return ResponseEntity.ok().body(reportResult);
   }
-  
+
+  @RequestMapping(value = "/report/getdatasourcesparams", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<DataSourcesInBand> getDataSourcesParams(@RequestBody DataSourcesInBand dataSourcesInBand) {
+    if(dataSourcesInBand == null)
+      return ResponseEntity.badRequest().header("Error", "Datasources is null").body(new DataSourcesInBand());
+    log.debug("Get datasources params");
+    DataSourcesInBand dataSourcesParams = reportService.getDataSourcesParams(dataSourcesInBand);
+    return ResponseEntity.ok().body(dataSourcesParams);
+  }
+
+
+
   @RequestMapping(value = "/report/pdf", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<byte[]> getPDF(@RequestBody ReportFront reportFront, HttpServletResponse response) {
     if(reportFront == null)
@@ -62,7 +74,7 @@ public class ReportREST {
     byte[] reportResult = reportService.getPDF(reportFront);
     return ResponseEntity.ok().body(reportResult);
   }
-  
+
   @RequestMapping(value = "/report/pdfasfile", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> getPDFAsFile(@RequestBody ReportFront reportFront, HttpServletResponse response) {
     if(reportFront == null)
@@ -74,7 +86,7 @@ public class ReportREST {
     String reportResult = reportService.getPDFAsFile(reportFront);
     return ResponseEntity.ok().body(reportResult);
   }
-  
+
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
@@ -82,5 +94,5 @@ public class ReportREST {
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
-  
+
 }
