@@ -341,6 +341,7 @@ public class ODataAgent {
     AppConfig.FORCE_METADATA = true;
     AppConfig.FORCE_LOCAL_ENTITIES = true;
     Operations.IS_DEBUG = true;
+    ODataRequestHandler.PRINT_EXCEPTION = false;
 
     try {
       Class.forName("SpringBootMain");
