@@ -868,7 +868,12 @@
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
-          var v = String(Object.values(params[i])[0]);
+          var v = Object.values(params[i])[0];
+          if (v instanceof Date) {
+            v = v.toISOString();
+          } else {
+            v = String(v);
+          }
           if (queryString != null) {
             queryString += "&";
           }
