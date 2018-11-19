@@ -979,7 +979,7 @@
     $('#modalTemplateCancel').click(onError);
     $( "#modalTemplateSave").unbind( "click" );
     $('#modalTemplateSave').click(onSuccess);
-    $('#modalTemplate').show();
+    this.cronapi.screen.showModal('modalTemplate');
 
   };
 
@@ -994,7 +994,7 @@
    */
   this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
     try{
-      $('#'+id).modal('show');
+      $('#'+id).modal({backdrop: 'static', keyboard: false});
     }catch(e){
       $('#'+id).show();
     }
