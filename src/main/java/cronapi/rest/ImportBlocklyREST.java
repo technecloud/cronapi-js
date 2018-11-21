@@ -20,9 +20,13 @@ public class ImportBlocklyREST {
 
   private static List<String> imports;
   private static boolean isDebug = Operations.IS_DEBUG;
+  private final static List<String> API_PATHS = new ArrayList<String>(){{add("cronapi-js");add("cronapp-framework-js");add("cronapp-framework-mobile-js");}};
+
 
   private void fill(String base, File folder, List<String> imports) {
-    for(File file : folder.listFiles()) {
+    for(File file : folder.listFiles(  (d,s) ->{
+      return !API_PATHS.contains(d.getName());
+    } )) {
       if(file.isDirectory()) {
         fill(base, file, imports);
       }
