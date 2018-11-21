@@ -25,7 +25,15 @@ public class ImportBlocklyREST {
 
   private void fill(String base, File folder, List<String> imports) {
     for(File file : folder.listFiles(  (d,s) ->{
-      return !API_PATHS.contains(d.getName());
+
+       boolean invalid = true;
+        for(String api : API_PATHS){
+            if(d.getName().contains(api)){
+                invalid = true;
+                break;
+            }
+        }
+      return invalid;
     } )) {
       if(file.isDirectory()) {
         fill(base, file, imports);
