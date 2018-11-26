@@ -14,8 +14,8 @@ public class JPQLConverter {
   
   private static Map<String, String> operators = new HashMap<String, String>();
   static {
-    operators.put("in", "IN (%s)");
-    operators.put("not_in", "NOT IN (%s)");
+    operators.put("in", "IN %s");
+    operators.put("not_in", "NOT IN %s");
     operators.put("equal", "= %s");
     operators.put("not_equal", "<> %s");
     operators.put("begins_with", "LIKE (%s)");
