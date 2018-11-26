@@ -585,6 +585,18 @@
 
   };
 
+
+    /**
+     * @type function
+     * @name {getUserToken}}
+     * @nameTags token | auth | autenticaçào | armazenamento
+     * @description {{getUserTokenDesc}}
+     * @returns {ObjectType.STRING}
+     */
+    this.cronapi.util.getUserToken = function() {
+        return JSON.parse(window.localStorage.getItem('_u')).token;
+    };
+
   /**
    * @type function
    * @name {{setSessionStorage}}
