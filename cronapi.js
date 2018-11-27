@@ -795,6 +795,7 @@
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
    * @wizard notify_type
