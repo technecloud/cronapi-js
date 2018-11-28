@@ -1276,4 +1276,17 @@ public class DataSource implements JsonSerializable {
     }
     return instanceDomain;
   }
+
+  public void validate(String jpql) {
+    EntityManager em = getEntityManager(domainClass);
+
+    AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
+
+    HermesParser parser = new HermesParser();
+    try {
+      parser.buildQuery(jpql, session);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

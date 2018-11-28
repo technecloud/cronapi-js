@@ -336,6 +336,32 @@ public class ODataAgent {
     }
   }
 
+  public static synchronized void validateJpql(String strJson) {
+    try {
+      Gson gson = new Gson();
+      JsonObject json = gson.fromJson(strJson, JsonObject.class);
+
+      EntityManagerFactory factory = find(json.get("persistenceUnit").getAsString());
+      EntityManager entityManager = factory.createEntityManager();
+
+      DataSource dataSource = new DataSource(json.get("entity").getAsString(), entityManager);
+
+      String jpql = json.get("sql").getAsString();
+
+      dataSource.validate(jpql);
+
+      System.out.println();
+      System.out.write(START_RESULT);
+
+      System.out.print("[{\"jpqlValid\":true}]");
+
+      System.out.write(END_RESULT);
+      System.out.println();
+    } catch (Exception e) {
+      sendError(e.getMessage());
+    }
+  }
+
   public static void main(String[] args) throws Exception {
     QueryManager.DISABLE_AUTH = true;
     AppConfig.FORCE_METADATA = true;
@@ -368,6 +394,8 @@ public class ODataAgent {
         jpql(input.substring(5).trim());
       } else if (input.startsWith("datasourcemap")) {
         datasourceMap();
+      } else if (input.startsWith("validatejpql ")) {
+        validateJpql(input.substring(13).trim());
       } else {
         sendError("Command not found!");
       }
