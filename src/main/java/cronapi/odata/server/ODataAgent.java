@@ -369,6 +369,13 @@ public class ODataAgent {
     Operations.IS_DEBUG = true;
     ODataRequestHandler.PRINT_EXCEPTION = false;
 
+    System.setErr(new PrintStream(new OutputStream() {
+      @Override
+      public void write(int b) throws IOException {
+        //Faz Nada
+      }
+    }));
+
     try {
       Class.forName("SpringBootMain");
     } catch (ClassNotFoundException exception) {
