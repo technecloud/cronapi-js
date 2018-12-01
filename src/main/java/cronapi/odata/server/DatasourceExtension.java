@@ -3,7 +3,9 @@ package cronapi.odata.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.AppConfig;
+import cronapi.CronapiSearchable;
 import cronapi.QueryManager;
+import java.lang.reflect.Field;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
@@ -234,6 +236,19 @@ public class DatasourceExtension implements JPAEdmExtension {
 
 
   private Property findBestDisplayField(EntityType complexType) {
+    Class clazz = ((JPAEdmMappingImpl) complexType.getMapping()).getJPAType();
+    Field[] fields = clazz.getDeclaredFields();
+    for (Field field: fields) {
+      try {
+        CronapiSearchable searchable = field.getAnnotation(CronapiSearchable.class);
+        if (searchable != null) {
+          return findProperty(complexType, field.getName());
+        }
+      } catch(Exception e) {
+        //
+      }
+    }
+
     Property best = null;
     for (Property p : complexType.getProperties()) {
       JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
