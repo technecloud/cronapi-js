@@ -505,7 +505,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         for (ReportItem item : reportQuery.getItems()) {
           String alias = null;
           Expression expression = expressions.next();
-          if (expression instanceof IdentificationVariable) {
+          if (expression instanceof IdentificationVariable && !(expression.getParent() instanceof CollectionExpression)) {
             expression = expression.getParent();
           }
 
