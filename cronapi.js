@@ -2208,8 +2208,10 @@
           $(cronapiVideoCapture).remove();
         }.bind(this));
 
-        videoDOM.src = window.URL.createObjectURL(stream);
-        videoDOM.play();
+        videoDOM.srcObject = stream;
+        videoDOM.onloadedmetadata = function(e) {
+          videoDOM.play();
+        };
       }.bind(this));
     }
   };
