@@ -274,6 +274,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         SimpleProperty newProp = (SimpleProperty) CloneUtils.getClone(p);
         newProp.setName(newProp.getName() + "_" + best.getName());
         newProp.setType(best.getType());
+        ((Facets) newProp.getFacets()).setNullable(true);
 
         JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
         newMapping.setInternalName(newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf(".")) + "." + best.getName());
