@@ -962,7 +962,7 @@
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
           var v = String(Object.values(params[i])[0]);
-          if (queryString != null) {
+          if (queryString) {
             queryString += "&";
           }
           queryString += encodeURIComponent(k) + "=" + encodeURIComponent(v);
