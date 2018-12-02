@@ -958,6 +958,19 @@
     try {
       var queryString = '';
 
+      var paramsStopEncode = {};
+      paramsStopEncode['%24'] = '$';
+
+      function decodeCharParam(value) {
+        if (value) {
+          for (var param in paramsStopEncode) {
+            var regex = eval('/' + param + '/g' );
+            value = value.replace(regex, paramsStopEncode[param]);
+          }
+        }
+        return value;
+      }
+
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
@@ -965,8 +978,7 @@
           if (queryString) {
             queryString += "&";
           }
-          queryString += encodeURIComponent(k) + "=" + encodeURIComponent(v);
-
+          queryString += decodeCharParam(encodeURIComponent(k)) + "=" + encodeURIComponent(v);
         }
       }
 
