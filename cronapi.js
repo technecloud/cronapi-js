@@ -214,7 +214,7 @@
         .split("-")[0];
 
         if (userLang == "pt" || userLang == "en") {
-          var functionToCall = eval(userLang + "Date");
+          var functionToCall = eval("cronapi.internal." + userLang + "Date");
           return functionToCall(splited);
         } else
           return new Date(value);
