@@ -14,8 +14,8 @@ public class JPQLConverter {
   
   private static Map<String, String> operators = new HashMap<String, String>();
   static {
-    operators.put("in", "IN (%s)");
-    operators.put("not_in", "NOT IN (%s)");
+    operators.put("in", "IN %s");
+    operators.put("not_in", "NOT IN %s");
     operators.put("equal", "= %s");
     operators.put("not_equal", "<> %s");
     operators.put("begins_with", "LIKE (%s)");
@@ -110,7 +110,7 @@ public class JPQLConverter {
     return json;
   }
   
-  public static String sqlFromJson(JsonObject jsonObject) {
+  public static String sqlFromJson(JsonObject jsonObject, boolean checkMultitenant) {
     
     String type = "select";
     if(jsonObject.get("type") != null && !jsonObject.get("type").isJsonNull())
@@ -118,7 +118,7 @@ public class JPQLConverter {
     
     switch(type) {
       case "select":
-        return sqlFromJsonSELECT(jsonObject);
+        return sqlFromJsonSELECT(jsonObject, checkMultitenant);
       case "update":
         return sqlFromJsonUPDATE(jsonObject);
       case "delete":
@@ -148,7 +148,7 @@ public class JPQLConverter {
     return sqlBase.trim();
   }
   
-  private static String sqlFromJsonSELECT(JsonObject jsonObject) {
+  private static String sqlFromJsonSELECT(JsonObject jsonObject, boolean checkMultitenant) {
     String sqlBase = "select %s from %s %s %s %s %s";
     
     String fields = getFields(jsonObject.get("rulesSelect").getAsJsonArray());
@@ -167,7 +167,7 @@ public class JPQLConverter {
     
     sqlBase = String.format(sqlBase, fields, entityWithAlias, where, groupBy, having, orderBy);
 
-    if(jsonObject.get("multiTenant") != null && !jsonObject.get("multiTenant").isJsonNull() && !jsonObject.get("multiTenant").getAsBoolean()) {
+    if(checkMultitenant && jsonObject.get("multiTenant") != null && !jsonObject.get("multiTenant").isJsonNull() && !jsonObject.get("multiTenant").getAsBoolean()) {
       sqlBase = sqlBase.trim() + " /*notenant*/";
     }
 

@@ -15,16 +15,18 @@ class ODataServletV2 extends ODataServlet {
   private static final long serialVersionUID = 1L;
   private EntityManagerFactory entityManagerFactory;
   private String namespace;
+  private int order;
 
-  public ODataServletV2(EntityManagerFactory entityManagerFactory, String namespace) {
+  public ODataServletV2(EntityManagerFactory entityManagerFactory, String namespace, int order) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
+    this.order = order;
   }
 
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
     try {
-      req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace));
+      req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace, order));
       super.service(req, res);
     } finally {
       ODataParameterizedWhereExpressionUtil.clear();

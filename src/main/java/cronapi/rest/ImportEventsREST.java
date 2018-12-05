@@ -65,7 +65,7 @@ public class ImportEventsREST {
     for(Map.Entry<String, JsonElement> entry : getJSON().entrySet()) {
       if(!isNull(entry.getValue())) {
         JsonObject customObj = entry.getValue().getAsJsonObject();
-        if(customObj.get("type").getAsString().equals("client")) {
+        if (customObj.get("type") != null && !customObj.get("type").isJsonNull() && customObj.get("type").getAsString().equals("client")) {
           write(out, entry.getKey(), customObj);
         }
       }

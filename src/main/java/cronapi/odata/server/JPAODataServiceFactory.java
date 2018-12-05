@@ -16,10 +16,12 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
 
   private final EntityManagerFactory entityManagerFactory;
   private final String namespace;
+  private int order;
 
-  public JPAODataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace) {
+  public JPAODataServiceFactory(EntityManagerFactory entityManagerFactory, String namespace, int order) {
     this.entityManagerFactory = entityManagerFactory;
     this.namespace = namespace;
+    this.order = order;
   }
 
   @Override
@@ -28,7 +30,7 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
     context.setEntityManagerFactory(entityManagerFactory);
     context.setPersistenceUnitName(namespace);
 
-    context.setJPAEdmExtension(new DatasourceExtension(context));
+    context.setJPAEdmExtension(new DatasourceExtension(context, order));
     context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
 
     return context;

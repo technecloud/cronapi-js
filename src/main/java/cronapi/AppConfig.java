@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 
 public class AppConfig {
   public static boolean FORCE_METADATA = false;
+  public static boolean FORCE_LOCAL_ENTITIES = false;
   private static JsonObject JSON;
 
   static {
@@ -43,7 +44,7 @@ public class AppConfig {
     JsonObject config = getJSON();
     if (!isNull(config.get("odata"))) {
       JsonElement elem = config.get("odata").getAsJsonObject().get("exposeEntities");
-      return !isNull(elem) && elem.getAsBoolean();
+      return (!isNull(elem) && elem.getAsBoolean()) || FORCE_LOCAL_ENTITIES;
     }
 
     return true;
@@ -89,5 +90,17 @@ public class AppConfig {
     }
 
     return "9SyECk96oDsTmXfogIieDI0cD/8FpnojlYSUJT5U9I/FGVmBz5oskmjOR8cbXTvoPjX+Pq/T/b1PqpHX0lYm0oCBjXWICA==";
+  }
+
+  public static long tokenExpiration() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("security"))) {
+      JsonElement elem = config.get("security").getAsJsonObject().get("tokenExpiration");
+      if (!isNull(elem)) {
+        return elem.getAsLong();
+      }
+    }
+
+    return 3600L;
   }
 }

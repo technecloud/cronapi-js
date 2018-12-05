@@ -2,8 +2,7 @@ package cronapi;
 
 import cronapi.database.DataSourceFilter.DataSourceFilterItem;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,9 +14,9 @@ import cronapi.database.JPQLConverter;
 
 import java.util.Map.Entry;
 
-import cronapi.database.TransactionManager;
 import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
@@ -28,17 +27,15 @@ import cronapi.i18n.Messages;
 import cronapi.util.Operations;
 import org.springframework.util.ReflectionUtils;
 
-import javax.json.Json;
-import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.servlet.http.HttpServletRequest;
-
 public class QueryManager {
 
   private static JsonObject JSON;
 
   private static JsonArray DEFAULT_AUTHORITIES;
+
+  private static File fromFile = null;
+
+  public static boolean DISABLE_AUTH = false;
 
   static {
     JSON = loadJSON();
@@ -47,14 +44,28 @@ public class QueryManager {
   }
 
   private static JsonObject loadJSON() {
-    ClassLoader classLoader = QueryManager.class.getClassLoader();
-    try (InputStream stream = classLoader.getResourceAsStream("META-INF/customQuery.json")) {
-      InputStreamReader reader = new InputStreamReader(stream);
-      JsonElement jsonElement = new JsonParser().parse(reader);
-      return jsonElement.getAsJsonObject();
-    } catch (Exception e) {
-      return new JsonObject();
+    if (fromFile != null) {
+      try (InputStream stream = new FileInputStream(fromFile)) {
+        InputStreamReader reader = new InputStreamReader(stream);
+        JsonElement jsonElement = new JsonParser().parse(reader);
+        return jsonElement.getAsJsonObject();
+      } catch (Exception e) {
+        return new JsonObject();
+      }
+    } else {
+      ClassLoader classLoader = QueryManager.class.getClassLoader();
+      try (InputStream stream = classLoader.getResourceAsStream("META-INF/customQuery.json")) {
+        InputStreamReader reader = new InputStreamReader(stream);
+        JsonElement jsonElement = new JsonParser().parse(reader);
+        return jsonElement.getAsJsonObject();
+      } catch (Exception e) {
+        return new JsonObject();
+      }
     }
+  }
+
+  public static void loadJSONFromFile(File file) throws IOException {
+    fromFile = file;
   }
 
   public static JsonObject getJSON() {
@@ -85,7 +96,7 @@ public class QueryManager {
     return obj;
   }
 
-  public static String getJPQL(JsonObject query) {
+  public static String getJPQL(JsonObject query, boolean checkMultitenant) {
     if (!isNull(query.get("query"))) {
       if (query.get("query").isJsonObject()) {
         JsonObject queryObj = query.get("query").getAsJsonObject();
@@ -93,7 +104,7 @@ public class QueryManager {
             .get("isRawSql").getAsBoolean()) {
           return queryObj.get("sqlContent").getAsString();
         } else {
-          return JPQLConverter.sqlFromJson(queryObj);
+          return JPQLConverter.sqlFromJson(queryObj, checkMultitenant);
         }
       } else {
         return query.get("query").getAsString();
@@ -115,6 +126,10 @@ public class QueryManager {
   }
 
   public static void checkSecurity(JsonObject obj, String verb, boolean checkAuthorities) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!obj.getAsJsonObject("verbs").get(verb).getAsBoolean()) {
       throw new RuntimeException(Messages.format(Messages.getString("verbNotAllowed"), verb));
     }
@@ -205,11 +220,38 @@ public class QueryManager {
             .valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod")
                 .getAsString());
         try {
-          Operations.callBlockly(name, Var.valueOf(ds));
+          if (query.getAsJsonArray("queryParamsValues") != null && query.getAsJsonArray("queryParamsValues").size() > 0) {
+            callBlocly(event, name, ds);
+          } else {
+            Operations.callBlockly(name, Var.valueOf(ds));
+          }
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
+    }
+  }
+
+  private static void callBlocly(JsonObject event, Var methodName, Object ds) {
+    try {
+      if (event.get("blocklyParams") != null) {
+        JsonArray bloclyParams = event.get("blocklyParams").getAsJsonArray();
+        Var params[] = new Var[bloclyParams.size()];
+        for (int i = 0; i < bloclyParams.size(); i++) {
+          JsonObject param = bloclyParams.get(i).getAsJsonObject();
+          if ("entityName".equalsIgnoreCase(param.get("value").getAsString())) {
+            params[i] = Var.valueOf(ds);
+          } else {
+            params[i] = Var.valueOf(Utils.getParserValueType(param.get("value").getAsString()));
+          }
+        }
+
+        Operations.callBlockly(methodName, params);
+      } else {
+        Operations.callBlockly(methodName, Var.VAR_NULL);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -261,8 +303,8 @@ public class QueryManager {
       throws Exception {
     String function = blockly.get("blocklyMethod").getAsString();
 
-    if (!isNull(blockly.get("blockly" + method + "Method"))) {
-      function = blockly.get("blockly" + method + "Method").getAsString();
+    if (method != null && !isNull(blockly.get("blockly" + method.toUpperCase() + "Method"))) {
+      function = blockly.get("blockly" + method.toUpperCase() + "Method").getAsString();
     }
 
     Var name = Var.valueOf(blockly.get("blocklyClass").getAsString() + ":" + function);
@@ -279,6 +321,17 @@ public class QueryManager {
     }
 
     return Var.VAR_NULL;
+  }
+
+  public static String getBlocklyMethod(JsonObject query, String method) {
+    JsonObject blockly = query.getAsJsonObject("blockly");
+    String function = blockly.get("blocklyMethod").getAsString();
+
+    if (method != null && !isNull(blockly.get("blockly" + method.toUpperCase() + "Method"))) {
+      function = blockly.get("blockly" + method.toUpperCase() + "Method").getAsString();
+    }
+
+    return function;
   }
 
   private static void addIgnoreField(String field) {
@@ -357,6 +410,9 @@ public class QueryManager {
   }
 
   public static void checkSecurity(Class clazz, String method) throws Exception {
+    if (DISABLE_AUTH) {
+      return;
+    }
     if (!AppConfig.exposeLocalEntities()) {
       throw new RuntimeException(Messages.getString("notAllowed"));
     }
@@ -445,6 +501,10 @@ public class QueryManager {
 
   public static void checkFieldSecurity(JsonObject query, Object ds, String method)
       throws Exception {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security"))) {
       JsonObject security = query.get("security").getAsJsonObject();
 
@@ -505,6 +565,10 @@ public class QueryManager {
   }
 
   public static void checkFilterSecurity(JsonObject query, DataSourceFilter filter) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security")) && filter != null && filter.getItems().size() > 0) {
       JsonObject security = query.get("security").getAsJsonObject();
 
@@ -551,13 +615,17 @@ public class QueryManager {
   }
 
   public static void checkEntityFilterSecurity(Object obj, List<String> filters) {
-    Class clazz = obj instanceof Class ? (Class)obj : obj.getClass();
+    if (DISABLE_AUTH) {
+      return;
+    }
 
-    for(String filter: filters) {
+    Class clazz = obj instanceof Class ? (Class) obj : obj.getClass();
+
+    for (String filter : filters) {
       Field f = null;
       try {
         f = clazz.getDeclaredField(filter);
-      } catch(Exception e) {
+      } catch (Exception e) {
         //NoCommand
       }
 
@@ -599,6 +667,10 @@ public class QueryManager {
   }
 
   public static void checkFilterSecurity(JsonObject query, List<String> filter) {
+    if (DISABLE_AUTH) {
+      return;
+    }
+
     if (!isNull(query.get("security")) && filter != null && filter.size() > 0) {
       JsonObject security = query.get("security").getAsJsonObject();
 

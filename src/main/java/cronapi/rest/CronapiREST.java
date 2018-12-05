@@ -314,14 +314,13 @@ public class CronapiREST {
           return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
         }
       } else {
-        //TranslationPath translationPath = translatePathVars(id, 0, query.getAsJsonArray("queryParamsValues").size());
         TranslationPath translationPath = translatePathVars(id, 0, -1);
 
         QueryManager.checkFilterSecurity(query, translationPath.filter);
 
         DataSource ds = new DataSource(query);
 
-        String jpql = QueryManager.getJPQL(query);
+        String jpql = QueryManager.getJPQL(query, true);
 
         List<Var> params = Utils.getParamsAndExecuteBlockParams(query, translationPath);
         ds.setDataSourceFilter(translationPath.filter);
@@ -455,7 +454,7 @@ public class CronapiREST {
         TranslationPath translationPath = translatePathVars(id, query.getAsJsonArray("queryParamsValues").size(), -1);
 
         DataSource ds = new DataSource(query);
-        ds.filter(null, null, translationPath.params);
+        ds.filter(null, new PageRequest(1, 1), translationPath.params);
         QueryManager.executeEvent(query, ds.getObject(), "beforeDelete");
         ds.delete();
         QueryManager.executeEvent(query, ds.getObject(), "afterDelete");

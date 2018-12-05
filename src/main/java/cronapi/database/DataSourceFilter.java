@@ -2,9 +2,7 @@ package cronapi.database;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
@@ -151,18 +149,26 @@ public class DataSourceFilter {
   public List<String> findSearchables(Object obj, boolean filterWithAnnotation) {
     List<String> searchable = new ArrayList<>();
     String baseDomain = obj instanceof Class ? ((Class)obj).getName() : obj.getClass().getName();
-    return findSearchables(obj, filterWithAnnotation, searchable, baseDomain, null);
+    Set<String> processed = new HashSet<>();
+    findSearchables(obj, filterWithAnnotation, searchable, baseDomain, null, processed);
+    return searchable;
   }
 
-  public List<String> findSearchables(Object obj, boolean filterWithAnnotation, List<String> searchable, String baseDomain, String baseAttribute) {
+  public void findSearchables(Object obj, boolean filterWithAnnotation, List<String> searchable, String baseDomain, String baseAttribute, Set<String> processed) {
     if (baseAttribute == null)
       baseAttribute = "";
 
-    Field[] fields = obj instanceof Class ? ((Class)obj).getDeclaredFields() : obj.getClass().getDeclaredFields();
+    obj = obj instanceof Class ? ((Class)obj) : obj.getClass();
+
+    if (processed.contains(((Class)obj).getName())) {
+      return;
+    }
+
+    Field[] fields = ((Class)obj).getDeclaredFields();
     EntityManager em = TransactionManager.getEntityManager((Class)obj);
     EntityType type = em.getMetamodel().entity((Class)obj);
 
-
+    processed.add(((Class) obj).getName());
 
     for(Field f : fields) {
       boolean contains = false;
@@ -218,12 +224,10 @@ public class DataSourceFilter {
 
         if (attrCurrent.isAssociation()) {
           Object association = attrCurrent.getType().getJavaType();
-          if (!((Class)association).getName().equalsIgnoreCase(baseDomain))
-            findSearchables(association, filterWithAnnotation, searchable, baseDomain, getNameWithBaseAttribute(baseAttribute, f.getName()));
+          findSearchables(association, filterWithAnnotation, searchable, baseDomain, getNameWithBaseAttribute(baseAttribute, f.getName()), processed);
         }
       }
     }
-    return searchable;
   }
 
   public String getNameWithBaseAttribute(String baseAttribute, String attribute) {

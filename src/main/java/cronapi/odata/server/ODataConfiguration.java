@@ -31,6 +31,7 @@ public class ODataConfiguration implements ServletContextInitializer {
 
     Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
+    int i = 0;
     for (Archive archive : archives) {
 
       List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
@@ -39,13 +40,15 @@ public class ODataConfiguration implements ServletContextInitializer {
 
         String namespace = pui.getPersistenceUnitName();
 
-        ODataServletV2 servlet = new ODataServletV2(Persistence.createEntityManagerFactory(namespace), namespace);
+        ODataServletV2 servlet = new ODataServletV2(Persistence.createEntityManagerFactory(namespace), namespace, i);
 
         ServletRegistration.Dynamic serviceServlet = servletContext.addServlet("ServiceOData" + namespace, servlet);
 
         serviceServlet.addMapping(SERVICE_URL + namespace + "/*");
         serviceServlet.setAsyncSupported(true);
         serviceServlet.setLoadOnStartup(2);
+
+        i++;
       }
     }
   }

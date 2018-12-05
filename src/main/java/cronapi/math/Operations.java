@@ -1,11 +1,6 @@
 package cronapi.math;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import cronapi.Var;
 
@@ -68,8 +63,8 @@ public class Operations {
 		for (Var value : values) {
 			if (value.getType() == Var.Type.LIST) {
 
-				for (Var v : value.getObjectAsList()) {
-					addedValue += v.getObjectAsLong();
+				for (Object v : Var.valueOf(value).getObjectAsList()) {
+					addedValue += Var.valueOf(v).getObjectAsLong();
 				}
 			} else
 				addedValue += value.getObjectAsLong();
@@ -83,8 +78,8 @@ public class Operations {
 
 			if (value.getType() == Var.Type.LIST) {
 
-				for (Var v : value.getObjectAsList()) {
-					addedValue += v.getObjectAsDouble();
+				for (Object v : Var.valueOf(value).getObjectAsList()) {
+					addedValue += Var.valueOf(v).getObjectAsDouble();
 				}
 			} else
 				addedValue += value.getObjectAsDouble();
@@ -525,28 +520,29 @@ public class Operations {
 	}
 
 	public static final Var randomInt(Var min, Var max) throws Exception {
-		Var result = new Var();
 		Random random = new Random();
+
+		if(min.equals(max)) return min;
 
 		boolean isDouble = false;
 		if (min.getType() == Var.Type.DOUBLE || max.getType() == Var.Type.DOUBLE)
 			isDouble = true;
+		Var value ;
+		if(max.greaterThanOrEqual(min)){
+			value = max;
+		}else{
+			Var aux = max;
+			max = min;
+			min = aux;
+			value = min;
+		}
 
 		if (isDouble) {
-			int resultado = random.nextInt(max.getObjectAsInt());
-			while ((resultado < min.getObjectAsLong()) || (resultado > max.getObjectAsLong())) {
-				resultado = random.nextInt(max.getObjectAsInt());
-			}
-			result = new Var(resultado);
 
-		} else {
-			int resultado = random.nextInt();
-			while (resultado < min.getObjectAsLong() || resultado > max.getObjectAsLong()) {
-				resultado = random.nextInt(max.getObjectAsInt());
-			}
-			result = new Var(resultado);
+			return Var .valueOf ( max.getObjectAsDouble() + (max.getObjectAsDouble() - min.getObjectAsDouble()) * random.nextDouble());
+		}else{
+			return Var.valueOf(random.nextInt(value.getObjectAsInt()));
 		}
-		return result;
 	}
 
 	public static final Var randomFloat() throws Exception {
@@ -559,67 +555,67 @@ public class Operations {
 
 	public static final Var listSmaller(Var value) throws Exception {
 
-		Var result;
-		switch (value.getObjectAsList().getFirst().getType()) {
+		Object result;
+		switch (Var.valueOf(value.getObjectAsList()).get(0).getType()) {
 		case DOUBLE: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsDouble());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsDouble() < result.getObjectAsDouble())
+			result = Var.valueOf(value.getObjectAsList().get(0)).getObjectAsDouble();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsDouble() < Var.valueOf(result).getObjectAsDouble())
 					result = v;
 			}
 			break;
 		}
 		case INT: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsLong() < result.getObjectAsLong())
+			result = Var.valueOf(value.getObjectAsList().get(0)).getObjectAsDouble();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsLong() < Var.valueOf(result).getObjectAsLong())
 					result = v;
 			}
 			break;
 		}
 		default: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsLong() < result.getObjectAsLong())
+			result = Var.valueOf(value.getObjectAsList().get(0)).getObjectAsDouble();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsLong() < Var.valueOf(result).getObjectAsLong())
 					result = v;
 			}
 			break;
 		}
 		}
-		return result;
+		return Var.valueOf(result);
 
 	}
 
 	public static final Var listLarger(Var value) throws Exception {
 
-		Var result;
-		switch (value.getObjectAsList().getFirst().getType()) {
+		Object result;
+		switch (Var.valueOf(value.getObjectAsList()).get(0).getType()) {
 		case DOUBLE: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsDouble());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsDouble() > result.getObjectAsDouble())
+			result = Var.valueOf(value.getObjectAsList()).get(0).getObjectAsDouble();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsDouble() > Var.valueOf(result).getObjectAsDouble())
 					result = v;
 			}
 			break;
 		}
 		case INT: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsLong() > result.getObjectAsLong())
+			result = Var.valueOf(value.getObjectAsList()).get(0).getObjectAsLong();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsLong() > Var.valueOf(result).getObjectAsLong())
 					result = v;
 			}
 			break;
 		}
 		default: {
-			result = new Var(value.getObjectAsList().getFirst().getObjectAsLong());
-			for (Var v : value.getObjectAsList()) {
-				if (v.getObjectAsLong() > result.getObjectAsLong())
+			result = Var.valueOf(value.getObjectAsList()).get(0).getObjectAsLong();
+			for (Object v : value.getObjectAsList()) {
+				if (Var.valueOf(v).getObjectAsLong() > Var.valueOf(result).getObjectAsLong())
 					result = v;
 			}
 			break;
 		}
 		}
-		return result;
+		return Var.valueOf(result);
 
 	}
 
@@ -627,8 +623,8 @@ public class Operations {
 
 		Var result;
 		Double sum = 0.0;
-		for (Var v : value.getObjectAsList()) {
-			sum += v.getObjectAsDouble();
+		for (Object v : value.getObjectAsList()) {
+			sum += Var.valueOf(v).getObjectAsDouble();
 		}
 		result = new Var(sum / value.size());
 		return result;
@@ -636,10 +632,10 @@ public class Operations {
 
 	public static final Var listMedium(Var value) throws Exception {
 
-		switch (value.getObjectAsList().getFirst().getType()) {
+		switch (Var.valueOf(value.getObjectAsList().get(0)).getType()) {
 		case DOUBLE: {
 
-			LinkedList<Var> lklist = value.getObjectAsList();
+			List lklist = value.getObjectAsList();
 			Collections.sort(lklist, new Comparator<Var>() {
 				@Override
 				public int compare(Var o1, Var o2) {
@@ -656,16 +652,15 @@ public class Operations {
 			if (lklist.size() % 2 == 1)
 				return new Var(lklist.get(lklist.size() / 2));
 			else {
-				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
-				result = new Var(
-						(result.getObjectAsDouble() + lklist.get(lklist.size() / 2 + 1).getObjectAsDouble()) / 2);
+				Var result = Var.valueOf(lklist.get(lklist.size() / 2 - 1));
+				result = Var.valueOf(Var.valueOf(result).getObjectAsDouble() + Var.valueOf(lklist.get(lklist.size() / 2 + 1)).getObjectAsDouble() / 2);
 				return result;
 			}
 
 		}
 		case INT: {
 
-			LinkedList<Var> lklist = value.getObjectAsList();
+			List lklist = value.getObjectAsList();
 			Collections.sort(lklist, new Comparator<Var>() {
 
 				@Override
@@ -684,13 +679,13 @@ public class Operations {
 				return new Var(lklist.get(lklist.size() / 2));
 			else {
 				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
-				result = new Var((result.getObjectAsLong() + lklist.get(lklist.size() / 2 + 1).getObjectAsLong()) / 2);
+				result = Var.valueOf(Var.valueOf(result).getObjectAsLong() + Var.valueOf(lklist.get(lklist.size() / 2 + 1)).getObjectAsLong() / 2);
 				return result;
 			}
 
 		}
 		default: {
-			LinkedList<Var> lklist = value.getObjectAsList();
+			List lklist = value.getObjectAsList();
 			Collections.sort(lklist, new Comparator<Var>() {
 				@Override
 				public int compare(Var o1, Var o2) {
@@ -708,7 +703,7 @@ public class Operations {
 				return new Var(lklist.get(lklist.size() / 2));
 			else {
 				Var result = new Var(lklist.get(lklist.size() / 2 - 1));
-				result = new Var((result.getObjectAsLong() + lklist.get(lklist.size() / 2 + 1).getObjectAsLong()) / 2);
+				result = Var.valueOf(Var.valueOf(result).getObjectAsLong() + Var.valueOf(lklist.get(lklist.size() / 2 + 1)).getObjectAsLong() / 2);
 				return result;
 			}
 
@@ -721,9 +716,9 @@ public class Operations {
 		Map<Double, Double> countMap = new HashMap<Double, Double>();
 		double max = -1;
 		double d;
-		LinkedList<Var> ll = value.getObjectAsList();
-		for (Var var : ll) {
-			d = var.getObjectAsDouble();
+		List ll = Var.valueOf(value).getObjectAsList();
+		for (Object var : ll) {
+			d = Var.valueOf(var).getObjectAsDouble();
 			double count = 0;
 			if (countMap.containsKey(d)) {
 				count = countMap.get(d) + 1;
@@ -754,13 +749,13 @@ public class Operations {
 		double size = value.size();
 		double temp = 0l;
 		double d;
-		LinkedList<Var> ll = value.getObjectAsList();
+		List ll = value.getObjectAsList();
 
 		if (size == 1) {
 			return Var.valueOf(0.0);
 		} else {
-			for (Var var : ll) {
-				d = var.getObjectAsDouble() - mean;
+			for (Object var : ll) {
+				d = Var.valueOf(var).getObjectAsDouble() - mean;
 				temp = temp + d * d;
 			}
 		}

@@ -59,7 +59,7 @@ public class DatabaseQueryManager {
       }
       else {
         DataSource ds = new DataSource(query);
-        String jpql = QueryManager.getJPQL(query);
+        String jpql = QueryManager.getJPQL(query, false);
         
         ds.filter(jpql, page, params);
         

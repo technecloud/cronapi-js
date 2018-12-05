@@ -9,6 +9,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cronapi.util.Operations;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,11 +19,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class ImportBlocklyREST {
 
   private static List<String> imports;
-  private static boolean isDebug = ManagementFactory.getRuntimeMXBean().getInputArguments().toString()
-      .indexOf("-agentlib:jdwp") > 0;
+  private static boolean isDebug = Operations.IS_DEBUG;
+  private final static List<String> API_PATHS = new ArrayList<String>(){{add("cronapi-js");add("cronapp-framework-js");add("cronapp-framework-mobile-js");}};
+
 
   private void fill(String base, File folder, List<String> imports) {
-    for(File file : folder.listFiles()) {
+    for(File file : folder.listFiles(  (d,s) ->{
+
+       boolean valid = true;
+        for(String api : API_PATHS){
+            if(d.getName().contains(api)){
+                valid = false;
+                break;
+            }
+        }
+      return valid;
+    } )) {
       if(file.isDirectory()) {
         fill(base, file, imports);
       }
