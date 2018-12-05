@@ -585,6 +585,18 @@
 
   };
 
+
+    /**
+     * @type function
+     * @name {getUserToken}}
+     * @nameTags token | auth | autenticaçào | armazenamento
+     * @description {{getUserTokenDesc}}
+     * @returns {ObjectType.STRING}
+     */
+    this.cronapi.util.getUserToken = function() {
+        return JSON.parse(window.localStorage.getItem('_u')).token;
+    };
+
   /**
    * @type function
    * @name {{setSessionStorage}}
@@ -783,6 +795,7 @@
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
    * @wizard notify_type
@@ -945,15 +958,27 @@
     try {
       var queryString = '';
 
+      var paramsStopEncode = {};
+      paramsStopEncode['%24'] = '$';
+
+      function decodeCharParam(value) {
+        if (value) {
+          for (var param in paramsStopEncode) {
+            var regex = eval('/' + param + '/g' );
+            value = value.replace(regex, paramsStopEncode[param]);
+          }
+        }
+        return value;
+      }
+
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
           var v = String(Object.values(params[i])[0]);
-          if (queryString != null) {
+          if (queryString) {
             queryString += "&";
           }
-          queryString += encodeURIComponent(k) + "=" + encodeURIComponent(v);
-
+          queryString += decodeCharParam(encodeURIComponent(k)) + "=" + encodeURIComponent(v);
         }
       }
 
@@ -1059,7 +1084,7 @@
     $('#modalTemplateCancel').click(onError);
     $( "#modalTemplateSave").unbind( "click" );
     $('#modalTemplateSave').click(onSuccess);
-    $('#modalTemplate').show();
+    this.cronapi.screen.showModal('modalTemplate');
 
   };
 
@@ -1074,7 +1099,7 @@
    */
   this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
     try{
-      $('#'+id).modal('show');
+      $('#'+id).modal({backdrop: 'static', keyboard: false});
     }catch(e){
       $('#'+id).show();
     }
@@ -2195,8 +2220,10 @@
           $(cronapiVideoCapture).remove();
         }.bind(this));
 
-        videoDOM.src = window.URL.createObjectURL(stream);
-        videoDOM.play();
+        videoDOM.srcObject = stream;
+        videoDOM.onloadedmetadata = function(e) {
+          videoDOM.play();
+        };
       }.bind(this));
     }
   };

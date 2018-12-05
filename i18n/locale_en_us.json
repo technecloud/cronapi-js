@@ -426,5 +426,7 @@
   "getDeviceInfoDescription": "Function that get a device info, i.e  uuid, platform",
   "getFirebaseToken": "Get Firebase Token",
   "getFirebaseTokenDescription": "Function that return a firease token for send push notifications",
-  "dbName": "Database Name"
+  "dbName": "Database Name",
+  "getUserToken":"Get user logged Token",
+  "getUserTokenDesc":"Function that get an user logged token (X-AUTH-TOKEN)"
 }

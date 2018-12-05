@@ -69,3 +69,4 @@ pom.xml
 .settings*
 .classpath*
 /node_modules
+/.idea/**
