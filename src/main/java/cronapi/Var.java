@@ -82,6 +82,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     System.out.print(new Gson().toJson(var));
   }
 
+
+  public static final ScriptEngineManager factory = new ScriptEngineManager();
+  public static final ScriptEngine engine = factory.getEngineByName("JavaScript");
+
   public static final Pattern ISO_PATTERN = Pattern.compile(
       "(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))");
 
@@ -160,8 +164,6 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public static Var eval(String val) {
-    ScriptEngineManager factory = new ScriptEngineManager();
-    ScriptEngine engine = factory.getEngineByName("JavaScript");
     try {
       return Var.valueOf(engine.eval(val));
     } catch (ScriptException ex) {
