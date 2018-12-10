@@ -790,7 +790,13 @@ public class QueryManager {
             Var value = Var.VAR_NULL;
 
             if (element.isJsonPrimitive()) {
-              value = Var.valueOf(element);
+                if (element.getAsJsonPrimitive().isBoolean()) {
+                  value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
+                } else if (element.getAsJsonPrimitive().isNumber()) {
+                  value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
+                } else {
+                  value = Var.eval(element.getAsJsonPrimitive().getAsString());
+                }
             } else {
               try {
                 value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),

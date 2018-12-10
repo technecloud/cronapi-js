@@ -29,6 +29,7 @@ import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
@@ -36,6 +37,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Pattern;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
@@ -45,7 +50,8 @@ import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
-public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer, VirtualClassInterface {
+public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer,
+    VirtualClassInterface {
 
   @Override
   public String serializeAsJson() {
@@ -76,7 +82,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     System.out.print(new Gson().toJson(var));
   }
 
-    public static final Pattern ISO_PATTERN = Pattern.compile(
+  public static final Pattern ISO_PATTERN = Pattern.compile(
       "(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))");
 
   ;
@@ -151,6 +157,18 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       this.id = var.id;
       setObject(var.getObject());
     }
+  }
+
+  public static Var eval(String val) {
+    ScriptEngineManager factory = new ScriptEngineManager();
+    ScriptEngine engine = factory.getEngineByName("JavaScript");
+    try {
+      return Var.valueOf(engine.eval(val));
+    } catch (ScriptException ex) {
+      ex.printStackTrace();
+    }
+
+    return null;
   }
 
   /**
@@ -316,7 +334,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   public Object getObject(Class type) {
 
-    if(_object == null){
+    if (_object == null) {
       return null;
     }
 
@@ -353,7 +371,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       } catch (Exception e) {
         return getObjectAsRawList(LinkedList.class);
       }
-    }  else {
+    } else {
       //create instance for Entity class
       if (Utils.isEntityClass(type) && _object != null
           && !(_object instanceof java.util.LinkedHashMap)
@@ -667,8 +685,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    * the form {x,y,z,...}
    */
   public String getObjectAsString() {
-    if (isNull())
+    if (isNull()) {
       return "";
+    }
 
     Object object = getObject();
     if (object == null) {
@@ -723,18 +742,18 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } catch (Exception e) {
       result = new LinkedList();
     }
-    for (Object o: list) {
+    for (Object o : list) {
       result.add(Var.valueOf(o).getObject());
     }
 
     return result;
   }
 
-    /**
-     * Get the object as a list.
-     *
-     * @return a LinkedList whose elements are of type Var
-     */
+  /**
+   * Get the object as a list.
+   *
+   * @return a LinkedList whose elements are of type Var
+   */
   public List getObjectAsList() {
 
     if (getObject() instanceof Map) {
@@ -879,9 +898,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       default: {
         if (getObject() instanceof Map) {
           return ((Map) getObject()).size();
-        }
-
-        else if (getObject() instanceof DataSource) {
+        } else if (getObject() instanceof DataSource) {
           return ((DataSource) getObject()).getPage().getContent().size();
         }
       }
