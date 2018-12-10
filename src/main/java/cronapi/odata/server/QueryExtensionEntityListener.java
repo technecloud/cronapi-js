@@ -167,10 +167,12 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
               selectExpression = "SELECT " + mainAlias + " ";
-            } if (hasDistinct) {
-              selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
             } else {
-              selectExpression = "SELECT count( " + mainAlias + ") ";
+              if (hasDistinct) {
+                selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
+              } else {
+                selectExpression = "SELECT count( " + mainAlias + ") ";
+              }
             }
 
             if (selectStatement.hasOrderByClause()) {
