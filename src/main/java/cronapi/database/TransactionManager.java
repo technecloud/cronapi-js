@@ -1,204 +1,158 @@
 package cronapi.database;
 
+import cronapi.RestClient;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.support.Repositories;
-
-import cronapi.RestClient;
+import javax.persistence.Persistence;
+import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
+import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
+import org.eclipse.persistence.jpa.Archive;
 
 public class TransactionManager {
 
-	private static ThreadLocal<Map<EntityManagerFactory, EntityManager>> CACHE = new ThreadLocal<>();
-	private static ThreadLocal<Map<String, EntityManager>> CACHE_NAMESPACE = new ThreadLocal<>();
+  private static ThreadLocal<Map<String, EntityManager>> CACHE_NAMESPACE = new ThreadLocal<>();
 
-	private static RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
+  public static void addNamespace(String namespace, EntityManager entityManager) {
+    Map<String, EntityManager> map = CACHE_NAMESPACE.get();
+    if (map == null) {
+      map = new HashMap<>();
+      CACHE_NAMESPACE.set(map);
+    }
 
-	public static void addNamespace(String namespace, EntityManager entityManager) {
-		Map<String, EntityManager> map = CACHE_NAMESPACE.get();
-		if (map == null) {
-			map = new HashMap<>();
-			CACHE_NAMESPACE.set(map);
-		}
+    map.put(namespace, entityManager);
+  }
 
-		map.put(namespace, entityManager);
-	}
+  public static EntityManager getEntityManager(Class domainClass) {
 
-	public static JpaRepository findRepository(Class domainClass) {
-		ListableBeanFactory factory = (ListableBeanFactory) ApplicationContextHolder.getContext();
-		Repositories repositories = new Repositories(factory);
-		if (repositories.hasRepositoryFor(domainClass)) {
-			return (JpaRepository) repositories.getRepositoryFor(domainClass).orElse(null);
-		}
+    Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
 
-		return null;
-	}
+    if (mapNamespace == null) {
+      mapNamespace = new HashMap<>();
+      CACHE_NAMESPACE.set(mapNamespace);
+    }
 
-	public static EntityManager getEntityManager(Class domainClass) {
+    String namespace = domainClass.getPackage().getName().replace(".entity", "");
+    if (mapNamespace != null) {
+      EntityManager emNamespace = mapNamespace.get(namespace);
+      if (emNamespace != null) {
+        return emNamespace;
+      }
+    }
 
-		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+    EntityManagerFactory factory = findEntityManagerFactory(domainClass);
 
-		if (mapNamespace != null) {
-			String namesapce = domainClass.getPackage().getName().replace(".entity", "");
-			EntityManager emNamespace = mapNamespace.get(namesapce);
-			if (emNamespace != null) {
-				return emNamespace;
-			}
-		}
+    EntityManager em = factory.createEntityManager();
+    CACHE_NAMESPACE.get().put(namespace, em);
 
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map == null) {
-			map = new HashMap<>();
-			CACHE.set(map);
-		}
+    TenantService tenantService = RestClient.getRestClient().getTenantService();
 
-		EntityManagerFactory factory = ru.getEntityManagerFactory(domainClass);
-		EntityManager em = map.get(factory);
+    if (tenantService != null && tenantService.getContextIds() != null) {
+      Set<String> keySet = tenantService.getContextIds().keySet();
+      for (String key : keySet) {
+        em.setProperty(key, tenantService.getId(key));
+      }
+    }
+    return em;
+  }
 
-		if (em == null) {
-			em = factory.createEntityManager();
-			map.put(factory, em);
-		}
+  public static EntityManagerFactory findEntityManagerFactory(Class domainClass) {
+    String namespace = domainClass.getPackage().getName().replace(".entity", "");
 
-		TenantService tenantService = RestClient.getRestClient().getTenantService();
+    Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
-		if (tenantService != null && tenantService.getContextIds() != null) {
-			Set<String> keySet = tenantService.getContextIds().keySet();
-			for (String key : keySet) {
-				em.setProperty(key, tenantService.getId(key));
-			}
-		}
+    for (Archive archive : archives) {
 
-		return em;
-	}
+      List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
 
-	public static EntityManagerFactory findEntityManagerFactory(Class domainClass) {
-		return ru.getEntityManagerFactory(domainClass);
-	}
+      for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
 
-	public static void commit(Class domainClass) {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			EntityManagerFactory factory = findEntityManagerFactory(domainClass);
-			if (factory != null) {
-				EntityManager em = map.get(factory);
-				if (em != null) {
-					if (em.getTransaction().isActive())
-						em.getTransaction().commit();
-				}
-			}
-		}
-	}
+        if (pui.getPersistenceUnitName().equals(namespace)) {
+          EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
+          return factory;
+        }
+      }
+    }
 
-	public static void rollback(Class domainClass) {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			EntityManagerFactory factory = findEntityManagerFactory(domainClass);
-			if (factory != null) {
-				EntityManager em = map.get(factory);
-				if (em != null) {
-					if (em.getTransaction().isActive())
-						em.getTransaction().rollback();
-				}
-			}
-		}
-	}
+    return null;
+  }
 
-	public static void close(Class domainClass) {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			EntityManagerFactory factory = findEntityManagerFactory(domainClass);
-			if (factory != null) {
-				EntityManager em = map.get(factory);
-				if (em != null) {
-					em.close();
-				}
-			}
-		}
-	}
+  public static void commit(Class domainClass) {
+    EntityManager em = getEntityManager(domainClass);
+    if (em != null) {
+      if (em.getTransaction().isActive()) {
+        em.getTransaction().commit();
+      }
+    }
+  }
 
-	public static void commit() {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			for (EntityManager em : map.values()) {
-				if (em.getTransaction().isActive()) {
-					em.getTransaction().commit();
-				}
-			}
-		}
+  public static void rollback(Class domainClass) {
+    EntityManager em = getEntityManager(domainClass);
+    if (em != null) {
+      if (em.getTransaction().isActive()) {
+        em.getTransaction().rollback();
+      }
+    }
+  }
 
-		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
-		if (mapNamespace != null) {
-			for (EntityManager em : mapNamespace.values()) {
-				if (em.getTransaction().isActive()) {
-					em.getTransaction().commit();
-				}
-			}
-		}
-	}
+  public static void close(Class domainClass) {
+    EntityManager em = getEntityManager(domainClass);
+    if (em != null) {
+      em.close();
+    }
+  }
 
-	public static void rollback() {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			for (EntityManager em : map.values()) {
-				if (em.getTransaction().isActive()) {
-					em.getTransaction().rollback();
-				}
-			}
-		}
+  public static void commit() {
+    Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+    if (mapNamespace != null) {
+      for (EntityManager em : mapNamespace.values()) {
+        if (em.getTransaction().isActive()) {
+          em.getTransaction().commit();
+        }
+      }
+    }
+  }
 
-		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
-		if (mapNamespace != null) {
-			for (EntityManager em : mapNamespace.values()) {
-				if (em.getTransaction().isActive()) {
-					em.getTransaction().rollback();
-				}
-			}
-		}
-	}
+  public static void rollback() {
+    Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+    if (mapNamespace != null) {
+      for (EntityManager em : mapNamespace.values()) {
+        if (em.getTransaction().isActive()) {
+          em.getTransaction().rollback();
+        }
+      }
+    }
+  }
 
-	public static void close() {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			for (EntityManager em : map.values()) {
-				if (em.isOpen()) {
-					em.close();
-				}
-			}
-		}
+  public static void close() {
+    Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+    if (mapNamespace != null) {
+      for (EntityManager em : mapNamespace.values()) {
+        if (em.isOpen()) {
+          em.close();
+        }
+      }
+    }
+  }
 
-		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
-		if (mapNamespace != null) {
-			for (EntityManager em : mapNamespace.values()) {
-				if (em.isOpen()) {
-					em.close();
-				}
-			}
-		}
-	}
+  public static void clear() {
+    Map<String, EntityManager> map = CACHE_NAMESPACE.get();
+    if (map != null) {
+      for (EntityManager em : map.values()) {
+        try {
+          em.clear();
+        } catch (Exception e) {
+          //Abafa
+        }
+      }
+      map.clear();
+    }
 
-	public static void clear() {
-		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
-		if (map != null) {
-			for (EntityManager em : map.values()) {
-				try {
-					em.clear();
-				} catch (Exception e) {
-					//Abafa
-				}
-			}
-			map.clear();
-		}
-
-		CACHE.set(null);
-		CACHE.remove();
-		CACHE_NAMESPACE.set(null);
-		CACHE_NAMESPACE.remove();
-	}
+    CACHE_NAMESPACE.set(null);
+    CACHE_NAMESPACE.remove();
+  }
 }
