@@ -16,8 +16,19 @@ import cronapi.RestClient;
 public class TransactionManager {
 
 	private static ThreadLocal<Map<EntityManagerFactory, EntityManager>> CACHE = new ThreadLocal<>();
+	private static ThreadLocal<Map<String, EntityManager>> CACHE_NAMESPACE = new ThreadLocal<>();
 
 	private static RepositoryUtil ru = (RepositoryUtil) ApplicationContextHolder.getContext().getBean("repositoryUtil");
+
+	public static void addNamespace(String namespace, EntityManager entityManager) {
+		Map<String, EntityManager> map = CACHE_NAMESPACE.get();
+		if (map == null) {
+			map = new HashMap<>();
+			CACHE_NAMESPACE.set(map);
+		}
+
+		map.put(namespace, entityManager);
+	}
 
 	public static JpaRepository findRepository(Class domainClass) {
 		ListableBeanFactory factory = (ListableBeanFactory) ApplicationContextHolder.getContext();
@@ -30,6 +41,17 @@ public class TransactionManager {
 	}
 
 	public static EntityManager getEntityManager(Class domainClass) {
+
+		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+
+		if (mapNamespace != null) {
+			String namesapce = domainClass.getPackage().getName().replace(".entity", "");
+			EntityManager emNamespace = mapNamespace.get(namesapce);
+			if (emNamespace != null) {
+				return emNamespace;
+			}
+		}
+
 		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
 		if (map == null) {
 			map = new HashMap<>();
@@ -110,6 +132,15 @@ public class TransactionManager {
 				}
 			}
 		}
+
+		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+		if (mapNamespace != null) {
+			for (EntityManager em : mapNamespace.values()) {
+				if (em.getTransaction().isActive()) {
+					em.getTransaction().commit();
+				}
+			}
+		}
 	}
 
 	public static void rollback() {
@@ -121,14 +152,33 @@ public class TransactionManager {
 				}
 			}
 		}
+
+		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+		if (mapNamespace != null) {
+			for (EntityManager em : mapNamespace.values()) {
+				if (em.getTransaction().isActive()) {
+					em.getTransaction().rollback();
+				}
+			}
+		}
 	}
 
 	public static void close() {
 		Map<EntityManagerFactory, EntityManager> map = CACHE.get();
 		if (map != null) {
 			for (EntityManager em : map.values()) {
-				if (em.isOpen())
+				if (em.isOpen()) {
 					em.close();
+				}
+			}
+		}
+
+		Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+		if (mapNamespace != null) {
+			for (EntityManager em : mapNamespace.values()) {
+				if (em.isOpen()) {
+					em.close();
+				}
 			}
 		}
 	}
@@ -148,5 +198,7 @@ public class TransactionManager {
 
 		CACHE.set(null);
 		CACHE.remove();
+		CACHE_NAMESPACE.set(null);
+		CACHE_NAMESPACE.remove();
 	}
 }

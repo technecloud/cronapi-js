@@ -2,15 +2,14 @@ package cronapi.odata.server;
 
 import cronapi.ErrorResponse;
 import cronapi.RestClient;
-import cronapi.util.Operations;
+import cronapi.database.TransactionManager;
+import javax.persistence.EntityManagerFactory;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.edm.provider.EdmProvider;
 import org.apache.olingo.odata2.api.processor.ODataSingleProcessor;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAServiceFactory;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPARuntimeException;
-
-import javax.persistence.EntityManagerFactory;
 
 public class JPAODataServiceFactory extends ODataJPAServiceFactory {
 
@@ -29,6 +28,8 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
     ODataJPAContext context = getODataJPAContext();
     context.setEntityManagerFactory(entityManagerFactory);
     context.setPersistenceUnitName(namespace);
+
+    TransactionManager.addNamespace(namespace, context.getEntityManager());
 
     context.setJPAEdmExtension(new DatasourceExtension(context, order));
     context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
