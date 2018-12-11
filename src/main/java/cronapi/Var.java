@@ -708,7 +708,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
-    } else if (object instanceof String) {
+    } else if (object instanceof String  || object instanceof File) {
       return object.toString();
     }
 
