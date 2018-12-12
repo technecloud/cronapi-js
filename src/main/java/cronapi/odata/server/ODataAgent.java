@@ -369,6 +369,8 @@ public class ODataAgent {
     Operations.IS_DEBUG = true;
     ODataRequestHandler.PRINT_EXCEPTION = false;
 
+    PrintStream errStream = System.err;
+
     System.setErr(new PrintStream(new OutputStream() {
       @Override
       public void write(int b) throws IOException {
@@ -395,7 +397,11 @@ public class ODataAgent {
     System.out.println("Waiting for commands...");
     while (true) {
       String input = scanner.next();
-      if (input.startsWith("odata ")) {
+      if (input.startsWith("error")) {
+        System.setErr(errStream);
+        ODataRequestHandler.PRINT_EXCEPTION = true;
+        System.out.println("Err sent to printstream");
+      } else if (input.startsWith("odata ")) {
         odata(input.substring(6).trim());
       } else if (input.startsWith("jpql ")) {
         jpql(input.substring(5).trim());

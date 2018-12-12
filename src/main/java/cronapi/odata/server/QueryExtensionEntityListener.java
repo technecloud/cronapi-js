@@ -167,10 +167,12 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
               selectExpression = "SELECT " + mainAlias + " ";
-            } if (hasDistinct) {
-              selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
             } else {
-              selectExpression = "SELECT count( " + mainAlias + ") ";
+              if (hasDistinct) {
+                selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
+              } else {
+                selectExpression = "SELECT count( " + mainAlias + ") ";
+              }
             }
 
             if (selectStatement.hasOrderByClause()) {
@@ -672,7 +674,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   }
 
   @Override
-  public void execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) throws ODataJPARuntimeException {
+  public Object execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) throws ODataJPARuntimeException {
     if (infoView != null) {
       try {
         JsonObject query = null;
@@ -686,7 +688,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
 
         if (query != null) {
-          QueryManager.executeEvent(query, data, type);
+          Var result = QueryManager.executeEvent(query, data, type);
+          if (result != null) {
+            return result.getObject();
+          }
         }
 
         ((UriInfoImpl) infoView).setClientCallbacks(getClientCallbacks());
@@ -695,6 +700,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         throw new RuntimeException(e);
       }
     }
+
+    return null;
   }
 
   @Override

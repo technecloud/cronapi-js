@@ -211,7 +211,7 @@ public class QueryManager {
     }
   }
 
-  public static void executeEvent(JsonObject query, Object ds, String eventName) {
+  public static Var executeEvent(JsonObject query, Object ds, String eventName) {
     JsonObject events = query.getAsJsonObject("events");
     if (!isNull(events)) {
       if (!isNull(events.get(eventName))) {
@@ -221,18 +221,20 @@ public class QueryManager {
                 .getAsString());
         try {
           if (query.getAsJsonArray("queryParamsValues") != null && query.getAsJsonArray("queryParamsValues").size() > 0) {
-            callBlocly(event, name, ds);
+            return callBlocly(event, name, ds);
           } else {
-            Operations.callBlockly(name, Var.valueOf(ds));
+            return Operations.callBlockly(name, Var.valueOf(ds));
           }
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
     }
+
+    return null;
   }
 
-  private static void callBlocly(JsonObject event, Var methodName, Object ds) {
+  private static Var callBlocly(JsonObject event, Var methodName, Object ds) {
     try {
       if (event.get("blocklyParams") != null) {
         JsonArray bloclyParams = event.get("blocklyParams").getAsJsonArray();
@@ -246,9 +248,9 @@ public class QueryManager {
           }
         }
 
-        Operations.callBlockly(methodName, params);
+        return Operations.callBlockly(methodName, params);
       } else {
-        Operations.callBlockly(methodName, Var.VAR_NULL);
+        return Operations.callBlockly(methodName, Var.VAR_NULL);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -790,7 +792,13 @@ public class QueryManager {
             Var value = Var.VAR_NULL;
 
             if (element.isJsonPrimitive()) {
-              value = Var.valueOf(element);
+                if (element.getAsJsonPrimitive().isBoolean()) {
+                  value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
+                } else if (element.getAsJsonPrimitive().isNumber()) {
+                  value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
+                } else {
+                  value = Var.eval(element.getAsJsonPrimitive().getAsString());
+                }
             } else {
               try {
                 value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),
