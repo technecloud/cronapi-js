@@ -494,6 +494,28 @@
     return result;
   };
 
+    /**
+     * @type function
+     * @name {{callServerBlocklyAsync}}
+     * @nameTags callServerBlocklyAsync
+     * @description {{callServerBlocklyAsync}}
+     * @param {ObjectType.OBJECT} params {{params}}
+     * @wizard procedures_callblockly_callreturn_async
+     * @returns {ObjectType.OBJECT}
+     */
+    this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod , callback , params) {
+        if(classNameWithMethod != '' && typeof callback == 'function'){
+            var params = [];
+            params.push(classNameWithMethod);
+            var idx = 2;
+            for(idx; idx < arguments.length ; idx ++){
+                params.push(arguments[idx]);
+            };
+            this.cronapi.util.executeAsynchronous(function(){ callback( this.cronapi.util.callServerBlockly.apply(this,params))}.bind(this) );
+
+        }
+    };
+
   /**
    * @type function
    * @name {{executeJavascriptNoReturnName}}
