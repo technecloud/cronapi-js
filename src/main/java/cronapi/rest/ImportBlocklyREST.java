@@ -80,19 +80,31 @@ public class ImportBlocklyREST {
   }
 
   private void write(PrintWriter out, List<String> imports, String base, File folder) {
-    fillDefaultLanguages();
+    localesJson = new JsonObject();
+    localesKeys = new ArrayList<String>();
+    localesRef = new JsonObject();
     for(File file : folder.listFiles(  (d,s) ->{
-      boolean valid = true;
-      for(String api : API_PATHS){
-        if(d.getName().contains("i18n")){
-          valid = false;
-          break;
+      boolean valid = false;
+        if(s.equals("i18n")){
+          valid = true;
+          return valid;
         }
-      }
       return valid;
     } )) {
+      if(file.isDirectory()) {
+        for(File filee : file.listFiles(  (d,s) ->{
+          boolean valid = false;
+          if(s.startsWith("locale") && s.endsWith(".json")){
+            valid = true;
+            return valid;
+          }
+          return valid;
+        } )) {
+          String localeName = filee.getName().substring(7,  filee.getName().length() - 5);
+          fillLanguageSet(localeName);
+        }
+      }
     }
-    localesKeys = new ArrayList<String>();
     String localesJsonString  = localesJson.toString() + ";";
     String localesKeysString = arrayToString(localesKeys)  + ";";
     String localesRefString = localesRef.toString()  + ";";
@@ -109,16 +121,20 @@ public class ImportBlocklyREST {
     }
   }
 
-  private void fillDefaultLanguages(){
-    localesJson.addProperty("pt_br", "Portugues (Brasil)");
-    localesJson.addProperty("en_us", "English");
-
-    localesKeys.add("pt_br");
-    localesKeys.add("en_us");
-
-    localesRef.addProperty("en*", "en_us");
-    localesRef.addProperty("pt*", "pt_br");
-    localesRef.addProperty("*", "pt_br");
+  private void fillLanguageSet(String localeName){
+    if(localesJson.get(localeName) == null){
+      localesJson.addProperty(localeName, localeName);
+    }
+    if(localesKeys.indexOf(localeName) == -1){
+      localesKeys.add(localeName);
+    }
+    localesRef.addProperty(localeName.substring(0,2) + "*", localeName);
+    if(localesRef.get("*") == null){
+      localesRef.addProperty("*", localeName);
+    }
+    if(localeName.equals("pt_br")){
+      localesRef.addProperty("*", localeName);
+    }
   }
 
   private String arrayToString(List<String> stringList){
