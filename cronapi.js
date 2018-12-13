@@ -721,8 +721,8 @@
   /**
    * @type internal
    */
-  this.cronapi.util.openReport = function(name, params) {
-    this.cronapi.$scope.getReport(name, params);
+  this.cronapi.util.openReport = function(name, params, config) {
+    this.cronapi.$scope.getReport(name, params, config);
   };
 
   /**
