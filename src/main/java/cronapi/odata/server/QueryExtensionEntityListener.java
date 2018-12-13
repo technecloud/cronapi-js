@@ -182,22 +182,13 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             jpqlStatement = selectStatement.toString();
           }
 
-          if (uriInfo.isCount() || uriInfo.rawEntity()) {
-            if (selectStatement.hasOrderByClause()) {
-              setField(selectStatement, "orderByClause", null);
-            }
-
-            jpqlStatement = selectStatement.toString();
-          }
-
-
           if (selectStatement.hasOrderByClause()) {
             orderBy = selectStatement.getOrderByClause().toString();
             setField(selectStatement, "orderByClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
-          if (uriInfo.getOrderBy() != null) {
+          if (uriInfo.getOrderBy() != null && !uriInfo.isCount()) {
             String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
             orderBy = "ORDER BY " + orderExpression;
           }
