@@ -67,44 +67,41 @@ public class ImportBlocklyREST {
             imports = fillImports;
           }
           else {
-            write(out, fillImports, request.getServletContext().getRealPath("/"), folder);
+            fillLanguages(folder);
+            write(out, fillImports);
           }
         }
       }
     }
 
     if(imports != null) {
-      File folder = new File(request.getServletContext().getRealPath("/"));
-      write(out, imports, request.getServletContext().getRealPath("/"), folder);
+      write(out, imports);
     }
   }
 
-  private void write(PrintWriter out, List<String> imports, String base, File folder) {
+  private void fillLanguages(File folder){
     localesJson = new JsonObject();
     localesKeys = new ArrayList<String>();
     localesRef = new JsonObject();
-    for(File file : folder.listFiles(  (d,s) ->{
-      boolean valid = false;
-        if(s.equals("i18n")){
+
+    File folderI18n = new File(folder, "i18n");
+
+    if (folderI18n.exists()) {
+      for(File filee : folderI18n.listFiles(  (d,s) ->{
+        boolean valid = false;
+        if(s.startsWith("locale") && s.endsWith(".json")){
           valid = true;
           return valid;
         }
-      return valid;
-    } )) {
-      if(file.isDirectory()) {
-        for(File filee : file.listFiles(  (d,s) ->{
-          boolean valid = false;
-          if(s.startsWith("locale") && s.endsWith(".json")){
-            valid = true;
-            return valid;
-          }
-          return valid;
-        } )) {
-          String localeName = filee.getName().substring(7,  filee.getName().length() - 5);
-          fillLanguageSet(localeName);
-        }
+        return valid;
+      } )) {
+        String localeName = filee.getName().substring(7,  filee.getName().length() - 5);
+        fillLanguageSet(localeName);
       }
     }
+  }
+
+  private void write(PrintWriter out, List<String> imports) {
     String localesJsonString  = localesJson.toString() + ";";
     String localesKeysString = arrayToString(localesKeys)  + ";";
     String localesRefString = localesRef.toString()  + ";";
