@@ -503,7 +503,7 @@
      * @wizard procedures_callblockly_callreturn_async
      * @returns {ObjectType.OBJECT}
      */
-    this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod , callback , params) {
+    this.cronapi.util.callServerBlocklyAsynchronous = function(classNameWithMethod , callback , params) {
         if(classNameWithMethod != '' && typeof callback == 'function'){
             var params = [];
             params.push(classNameWithMethod);
