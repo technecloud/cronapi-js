@@ -8,7 +8,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.util.Operations;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +21,6 @@ public class ImportBlocklyREST {
   private static List<String> imports;
   private static boolean isDebug = Operations.IS_DEBUG;
   private final static List<String> API_PATHS = new ArrayList<String>(){{add("cronapi-js");add("cronapp-framework-js");add("cronapp-framework-mobile-js");}};
-  private static JsonObject localesJson = new JsonObject();
   private static List<String> localesKeys = new ArrayList<String>();
   private static JsonObject localesRef  = new JsonObject();
 
@@ -80,7 +78,6 @@ public class ImportBlocklyREST {
   }
 
   private void fillLanguages(File folder){
-    localesJson = new JsonObject();
     localesKeys = new ArrayList<String>();
     localesRef = new JsonObject();
 
@@ -102,14 +99,12 @@ public class ImportBlocklyREST {
   }
 
   private void write(PrintWriter out, List<String> imports) {
-    String localesJsonString  = localesJson.toString() + ";";
     String localesKeysString = arrayToString(localesKeys)  + ";";
     String localesRefString = localesRef.toString()  + ";";
     out.println("window.blockly = window.blockly || {};");
     out.println("window.blockly.js = window.blockly.js || {};");
     out.println("window.blockly.js.blockly = window.blockly.js.blockly || {};");
     out.println("window.translations = window.translations || {};");
-    out.println("window.translations.locales = " + localesJsonString);
     out.println("window.translations.localesKeys = " + localesKeysString);
     out.println("window.translations.localesRef =  " + localesRefString);
 
@@ -119,9 +114,6 @@ public class ImportBlocklyREST {
   }
 
   private void fillLanguageSet(String localeName){
-    if(localesJson.get(localeName) == null){
-      localesJson.addProperty(localeName, localeName);
-    }
     if(localesKeys.indexOf(localeName) == -1){
       localesKeys.add(localeName);
     }
