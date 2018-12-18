@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import cronapi.ErrorResponse;
 import cronapi.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,7 @@ import cronapi.i18n.Messages;
 public class DownloadREST {
 
   private static int INTERVAL = 1000 * 60 * 10;
-  private static LRUCache<String, File> FILES = new LRUCache<>(1000, INTERVAL);
+  private static LRUCache<String, FileAndLabel> FILES = new LRUCache<>(1000, INTERVAL);
   private static LRUCache<String, Callback> AFTER_UPLOAD = new LRUCache<>(1000, INTERVAL);
   private static boolean isDebug = Operations.IS_DEBUG;
   public static SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
@@ -96,8 +97,13 @@ public class DownloadREST {
 
   public static String getDownloadUrl(File file) {
     String id = UUID.randomUUID().toString();
-    FILES.put(id, file);
+    FILES.put(id, new FileAndLabel(file));
+    return "api/cronapi/download/" + id;
+  }
 
+  public static String getDownloadUrl(File file, String labelForDownload) {
+    String id = UUID.randomUUID().toString();
+    FILES.put(id, new FileAndLabel(file, labelForDownload));
     return "api/cronapi/download/" + id;
   }
 
@@ -216,31 +222,32 @@ public class DownloadREST {
   @RequestMapping(method = RequestMethod.GET, value = "/download/{id}")
   public void download(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id)
       throws Exception {
-    File resourceFile = FILES.get(id);
+    FileAndLabel resource = FILES.get(id);
 
-    if(resourceFile == null || !resourceFile.exists()) {
+    if(resource == null || resource.file == null || !resource.file.exists()) {
       throw new Exception("File not found!");
     }
     else {
 
-      synchronized (resourceFile.getAbsolutePath().intern()) {
-        response.setContentType(DataType.getContentType(resourceFile));
-        response.setContentLength((int) resourceFile.length());
+      synchronized (resource.file.getAbsolutePath().intern()) {
+        response.setContentType(DataType.getContentType(resource.file));
+        response.setContentLength((int) resource.file.length());
 
         if (request.getParameter("cache") != null && request.getParameter("cache").equalsIgnoreCase("false")) {
           response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
           response.setHeader("Pragma", "no-cache");
           response.setDateHeader("Expires", 0);
         } else {
-          response.addHeader("Last-Modified", (format.format(new Date(resourceFile.lastModified()))));
-          response.addHeader("ETag", String.valueOf(Math.abs(resourceFile.hashCode())));
+          response.addHeader("Last-Modified", (format.format(new Date(resource.file.lastModified()))));
+          response.addHeader("ETag", String.valueOf(Math.abs(resource.file.hashCode())));
         }
         response.addHeader("Connection", "Keep-Alive");
         response.addHeader("Proxy-Connection", "Keep-Alive");
 
         if (request.getParameter("download") == null || request.getParameter("download").isEmpty() ||
             request.getParameter("download").equalsIgnoreCase("true")) {
-          response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceFile.getName() + "\"");
+          response.setHeader("Content-Disposition", "attachment; filename=\"" + (StringUtils
+              .isEmpty(resource.label) ? resource.file.getName() : resource.label) + "\"");
         }
 
         InputStream in = null;
@@ -249,7 +256,7 @@ public class DownloadREST {
         byte[] read = new byte[1024];
         int total = 0;
         try {
-          in = new FileInputStream(resourceFile);
+          in = new FileInputStream(resource.file);
           outs = response.getOutputStream();
 
           while ((total = in.read(read)) >= 0) {
@@ -269,6 +276,22 @@ public class DownloadREST {
         }
       }
     }
+  }
+
+
+  public static class FileAndLabel {
+
+    public FileAndLabel(File file) {
+      this.file = file;
+    }
+
+    public FileAndLabel(File file, String label) {
+      this.file = file;
+      this.label = label;
+    }
+
+    public File file;
+    public String label;
   }
 
 }

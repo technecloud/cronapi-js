@@ -1,7 +1,5 @@
 package cronapi.io;
 
-import cronapi.i18n.Messages;
-
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
@@ -340,13 +338,40 @@ public class Operations {
   }
 
   /**
-   * Download de arquivo
-   */
-  @CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
-      "fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}"}, paramsType = { ObjectType.OBJECT })
-  public static final void fileDownload(Var varFile) throws Exception {
-    RestClient.getRestClient().downloadURL(DownloadREST.getDownloadUrl(varFile.getObjectAsFile()));
-  }
+	 * Download de arquivo
+	 */
+	@CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
+			"fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}"}, paramsType = { ObjectType.OBJECT })
+	public static final void fileDownload(Var varFile) throws Exception {
+		RestClient.getRestClient().downloadURL(DownloadREST.getDownloadUrl(varFile.getObjectAsFile()));
+	}
+//fileDownloadParam1
+@CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
+		"fileTempDir" }, description = "{{fileDownloadDescription}}", params = {"{{fileDownloadParam0}}", "{{fileDownloadParam1}}"}, paramsType = { ObjectType.OBJECT, ObjectType.STRING })
+	public static final void fileDownload(Var varFile, Var varLabel) throws Exception {
+		RestClient.getRestClient().downloadURL(DownloadREST.getDownloadUrl(varFile.getObjectAsFile(), varLabel.getObjectAsString()));
+	}
+
+	/**
+	 * Iniciar download
+	 */
+	@CronapiMetaData(type = "function", name = "{{startDownload}}", nameTags = {
+			"startDownload" }, description = "{{startDownloadDescription}}",
+			params = {"{{startDownloadParam0}}", "{{startDownloadParam1}}"},
+			paramsType = { ObjectType.OBJECT, ObjectType.STRING })
+	public static final void startDownload(Var content, Var nameFile) throws Exception {
+
+		if (content.getObject() instanceof byte[]) {
+			Var filePath = Var.valueOf(fileAppReclycleDir().toString() + fileSeparator().toString() + UUID.randomUUID().toString() +".temp");
+			Var newFile = cronapi.io.Operations.fileOpenToWrite(filePath, Var.VAR_NULL);
+			cronapi.io.Operations.fileAppend(newFile, content);
+			cronapi.io.Operations.fileClose(newFile);
+			fileDownload(filePath, nameFile);
+		}
+		else {
+			fileDownload(content, nameFile);
+		}
+	}
 
 	/**
 	 * Ler todo conteudo do arquivo
