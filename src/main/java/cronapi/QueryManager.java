@@ -196,7 +196,13 @@ public class QueryManager {
               throw new RuntimeException(e);
             }
           } else {
-            value = Var.valueOf(entry.getValue().getAsString());
+            if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
+              value = Var.valueOf(entry.getValue().getAsJsonPrimitive().getAsBoolean());
+            } else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
+              value = Var.valueOf(entry.getValue().getAsJsonPrimitive().getAsNumber());
+            } else {
+              value = Var.eval(entry.getValue().getAsJsonPrimitive().getAsString());
+            }
           }
 
           if (onlyNull) {
