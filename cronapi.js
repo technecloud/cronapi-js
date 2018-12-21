@@ -507,12 +507,13 @@
         if(classNameWithMethod != '' && typeof callback == 'function'){
             var params = [];
             params.push(classNameWithMethod);
+            params.push(callback);
+            params.push(callback);
             var idx = 2;
             for(idx; idx < arguments.length ; idx ++){
                 params.push(arguments[idx]);
             };
-            this.cronapi.util.executeAsynchronous(function(){ callback( this.cronapi.util.callServerBlockly.apply(this,params))}.bind(this) );
-
+          this.cronapi.util.makeCallServerBlocklyAsync.apply(this,params);
         }
     };
 
