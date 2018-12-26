@@ -1715,7 +1715,7 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.dateTime.formatDateTime = function(date, format) {
-    return moment(new Date()).format(format);
+    return moment(date).format(format);
   };
 
   /**
