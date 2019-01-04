@@ -1,7 +1,18 @@
 package cronapi.odata.server;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import cronapi.RestBody;
+import cronapi.RestClient;
+import cronapi.Var;
 import cronapi.database.TransactionManager;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +38,21 @@ class ODataServletV2 extends ODataServlet {
   protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
     try {
       req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace, order));
+      //TODO: Centralizar no cronapp filter e remover dos lugares com código duplicado
+      RestBody restBody = new RestBody();
+      String inputString = req.getHeader("x-datasource-inputs");
+      String fieldString = req.getHeader("x-datasource-fields");
+      if(inputString != null) {
+        JsonElement jsonElementInputs = ((JsonArray) new JsonParser().parse(inputString)).get(0);
+        JsonObject jsonObjectInputs = jsonElementInputs.getAsJsonObject();
+        jsonObjectInputs.remove("__metadata");
+        restBody.setInputs(new Var[]{Var.valueOf(jsonObjectInputs)});
+      }
+      if(fieldString != null) {
+        Gson gson = new Gson();
+        restBody.setFields(gson.fromJson(fieldString, LinkedHashMap.class));
+      }
+      RestClient.getRestClient().setBody(restBody);
       try {
         super.service(req, res);
         TransactionManager.commit();
