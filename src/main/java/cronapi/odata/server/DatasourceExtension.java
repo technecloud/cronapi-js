@@ -409,34 +409,36 @@ public class DatasourceExtension implements JPAEdmExtension {
       List<Property> properties = new ArrayList<>();
       boolean keysSet = false;
 
+      JsonElement defaultValuesPropertiesElement = entity.get("defaultValuesProperties");
+      if (defaultValuesPropertiesElement != null) {
+        JsonObject obj = defaultValuesPropertiesElement.getAsJsonObject();
 
-      JsonObject obj = entity.get("defaultValuesProperties").getAsJsonObject();
+        for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+          JsonObject propObj = entry.getValue().getAsJsonObject();
+          SimpleProperty property = new SimpleProperty();
+          property.setName(entry.getKey());
 
-      for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-        JsonObject propObj = entry.getValue().getAsJsonObject();
-        SimpleProperty property = new SimpleProperty();
-        property.setName(entry.getKey());
+          EdmSimpleTypeKind type = EdmSimpleTypeKind.valueOf(propObj.get("type").getAsString());
+          property.setType(type);
 
-        EdmSimpleTypeKind type = EdmSimpleTypeKind.valueOf(propObj.get("type").getAsString());
-        property.setType(type);
+          JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
+          mapping.setJPAType(String.class);
+          mapping.setVirtualAccess(true);
+          mapping.setInternalExpression(entry.getKey());
+          mapping.setInternalExpression(entry.getKey());
 
-        JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
-        mapping.setJPAType(String.class);
-        mapping.setVirtualAccess(true);
-        mapping.setInternalExpression(entry.getKey());
-        mapping.setInternalExpression(entry.getKey());
+          property.setMapping(mapping);
 
-        property.setMapping(mapping);
+          properties.add(property);
 
-        properties.add(property);
+          if (entry.getValue().getAsJsonObject().get("key").getAsBoolean()) {
+            PropertyRef propertyRef = new PropertyRef();
+            propertyRef.setName(entry.getKey());
+            propertyRefList.add(propertyRef);
+            keysSet = true;
+          }
 
-        if (entry.getValue().getAsJsonObject().get("key").getAsBoolean()) {
-          PropertyRef propertyRef = new PropertyRef();
-          propertyRef.setName(entry.getKey());
-          propertyRefList.add(propertyRef);
-          keysSet = true;
         }
-
       }
 
       boolean canEdit = true;
