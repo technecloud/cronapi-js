@@ -39,20 +39,23 @@ class ODataServletV2 extends ODataServlet {
     try {
       req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace, order));
       //TODO: Centralizar no cronapp filter e remover dos lugares com código duplicado
-      RestBody restBody = new RestBody();
-      String datasourceInputs = req.getHeader("x-datasource-inputs");
-      String datasourceFields = req.getHeader("x-datasource-fields");
-      if(datasourceInputs != null) {
-        JsonElement jsonElementInputs = ((JsonArray) new JsonParser().parse(datasourceInputs)).get(0);
-        JsonObject jsonObjectInputs = jsonElementInputs.getAsJsonObject();
-        jsonObjectInputs.remove("__metadata");
-        restBody.setInputs(new Var[]{Var.valueOf(jsonObjectInputs)});
+      if(req.getMethod().equals("PUT") || req.getMethod().equals("POST")) {
+        RestBody restBody = new RestBody();
+        String datasourceInputs = req.getHeader("x-datasource-inputs");
+        String datasourceFields = req.getHeader("x-datasource-fields");
+        if (datasourceInputs != null) {
+          JsonElement jsonElementInputs = ((JsonArray) new JsonParser().parse(datasourceInputs))
+              .get(0);
+          JsonObject jsonObjectInputs = jsonElementInputs.getAsJsonObject();
+          jsonObjectInputs.remove("__metadata");
+          restBody.setInputs(new Var[]{Var.valueOf(jsonObjectInputs)});
+        }
+        if (datasourceFields != null) {
+          Gson gson = new Gson();
+          restBody.setFields(gson.fromJson(datasourceFields, LinkedHashMap.class));
+        }
+        RestClient.getRestClient().setBody(restBody);
       }
-      if(datasourceFields != null) {
-        Gson gson = new Gson();
-        restBody.setFields(gson.fromJson(datasourceFields, LinkedHashMap.class));
-      }
-      RestClient.getRestClient().setBody(restBody);
       try {
         super.service(req, res);
         TransactionManager.commit();
