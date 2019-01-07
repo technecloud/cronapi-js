@@ -40,17 +40,17 @@ class ODataServletV2 extends ODataServlet {
       req.setAttribute(ODataServiceFactory.FACTORY_INSTANCE_LABEL, new JPAODataServiceFactory(this.entityManagerFactory, namespace, order));
       //TODO: Centralizar no cronapp filter e remover dos lugares com código duplicado
       RestBody restBody = new RestBody();
-      String inputString = req.getHeader("x-datasource-inputs");
-      String fieldString = req.getHeader("x-datasource-fields");
-      if(inputString != null) {
-        JsonElement jsonElementInputs = ((JsonArray) new JsonParser().parse(inputString)).get(0);
+      String datasourceInputs = req.getHeader("x-datasource-inputs");
+      String datasourceFields = req.getHeader("x-datasource-fields");
+      if(datasourceInputs != null) {
+        JsonElement jsonElementInputs = ((JsonArray) new JsonParser().parse(datasourceInputs)).get(0);
         JsonObject jsonObjectInputs = jsonElementInputs.getAsJsonObject();
         jsonObjectInputs.remove("__metadata");
         restBody.setInputs(new Var[]{Var.valueOf(jsonObjectInputs)});
       }
-      if(fieldString != null) {
+      if(datasourceFields != null) {
         Gson gson = new Gson();
-        restBody.setFields(gson.fromJson(fieldString, LinkedHashMap.class));
+        restBody.setFields(gson.fromJson(datasourceFields, LinkedHashMap.class));
       }
       RestClient.getRestClient().setBody(restBody);
       try {
