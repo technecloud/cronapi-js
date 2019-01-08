@@ -44,7 +44,7 @@ public class Operations {
 		notification.addProperty("body", paramBody.getObjectAsString());
 
 		body.add("notification", notification);
-		if(!paramData.isNull()) {
+		if(!paramData.isNull() && paramData.getObjectAsJson() != null) {
 			body.add("data", paramData.getObjectAsJson().getAsJsonObject());
 		}
 		HttpEntity<String> request = new HttpEntity<>(body.toString());
