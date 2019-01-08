@@ -44,8 +44,9 @@ public class Operations {
 		notification.addProperty("body", paramBody.getObjectAsString());
 
 		body.add("notification", notification);
-		body.add("data", (JsonObject) paramData.getObject()); 
-		
+		if(!paramData.isNull() && paramData.getObjectAsJson() != null) {
+			body.add("data", paramData.getObjectAsJson().getAsJsonObject());
+		}
 		HttpEntity<String> request = new HttpEntity<>(body.toString());
 		FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
 		CompletableFuture<String> pushNotification = firebaseService.send(request);
