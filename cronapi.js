@@ -2762,6 +2762,26 @@
     window.FirebasePlugin.getToken(success,error);
   };
 
+
+    /**
+     *  @type function
+     * @platform M
+     * @name {{getFirebaseNotificationData}}
+     * @nameTags firebase|token|push|notification
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{getFirebaseNotificationDataDesc}}
+     * @returns {ObjectType.VOID}
+     */
+    this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
+        window.FirebasePlugin.onNotificationOpen(function(notification) {
+            success(notification.data);
+        }, function(err) {
+            error(err);
+        });
+    };
+
+
   /**
    *  @type function
    * @platform M

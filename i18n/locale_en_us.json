@@ -428,5 +428,7 @@
   "getFirebaseTokenDescription": "Function that return a firease token for send push notifications",
   "dbName": "Database Name",
   "getUserToken":"Get user logged Token",
-  "getUserTokenDesc":"Function that get an user logged token (X-AUTH-TOKEN)"
+  "getUserTokenDesc":"Function that get an user logged token (X-AUTH-TOKEN)",
+  "getFirebaseNotificationData":"Get Push Notification Data",
+  "getFirebaseNotificationDataDesc":"Function that get push notification data"
 }

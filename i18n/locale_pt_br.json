@@ -430,6 +430,8 @@
   "getFirebaseTokenDescription": "Função que retorna o token do firebase para enviar notificações push",
   "dbName": "Nome do Banco",
   "getUserToken":"Obter Token do Usuário",
-  "getUserTokenDesc":"Função que retonar o  Token do Usuário (X-AUTH-TOKEN)"
+  "getUserTokenDesc":"Função que retonar o  Token do Usuário (X-AUTH-TOKEN)",
+  "getFirebaseNotificationData":"Obter Dados de notificações push",
+  "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification"
 
 }
