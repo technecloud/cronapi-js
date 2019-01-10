@@ -3,6 +3,7 @@ package cronapi.pushnotification;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import com.google.gson.Gson;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import com.google.gson.JsonObject;
@@ -13,6 +14,8 @@ import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import org.springframework.web.client.RestTemplate;
+
+import javax.json.Json;
 
 /**
  * Classe que representa ...
@@ -31,7 +34,7 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseServerKey}}") Var serverKey,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{FirebaseTo}}") Var paramTo,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseTitle}}") Var paramTitle,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseBody}}") Var paramSubtitle,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseSubtitle}}") Var paramSubtitle,
 			@ParamMetaData(type = ObjectType.JSON, description = "{{FirebaseData}}") Var paramData)
 			throws Exception {
 
@@ -50,6 +53,32 @@ public class Operations {
 			body.add("data", paramData.getObjectAsJson().getAsJsonObject());
 		}
 
+		HttpEntity<String> request = new HttpEntity<>(body.toString());
+		FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
+		CompletableFuture<String> pushNotification = firebaseService.send(request);
+		CompletableFuture.allOf(pushNotification).join();
+
+		try {
+			String firebaseResponse = pushNotification.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	@CronapiMetaData(type = "function", name = "{{firebaseSendRawNotification}}", nameTags = {
+			"SendNotification" }, description = "{{firebaseSendRawNotificationDescription}}" )
+	public static final void sendRawNotification(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseServerKey}}") Var serverKey,
+			@ParamMetaData(type = ObjectType.OBJECT, description = "{{FirebaseTo}}") Var paramTo,
+			@ParamMetaData(type = ObjectType.JSON, description = "{{FirebaseBody}}") Var paramBody)
+			throws Exception {
+
+		JsonObject body = new Gson().fromJson(paramBody.getObjectAsString(), JsonObject.class);
+		body.addProperty("to", paramTo.getObjectAsString());
+		body.addProperty("priority", "high");
 		HttpEntity<String> request = new HttpEntity<>(body.toString());
 		FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
 		CompletableFuture<String> pushNotification = firebaseService.send(request);
