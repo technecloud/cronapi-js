@@ -2774,11 +2774,13 @@
      * @returns {ObjectType.VOID}
      */
     this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
-        window.FirebasePlugin.onNotificationOpen(function(notification) {
-            success(notification.data);
+        function onDeviceReady() { window.FirebasePlugin.onNotificationOpen(function(notification) {
+            success(notification);
         }, function(err) {
             error(err);
         });
+        };
+        document.addEventListener("deviceready", onDeviceReady, false);
     };
 
 
