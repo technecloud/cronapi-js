@@ -31,27 +31,30 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseServerKey}}") Var serverKey,
 			@ParamMetaData(type = ObjectType.OBJECT, description = "{{FirebaseTo}}") Var paramTo,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseTitle}}") Var paramTitle,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseBody}}") Var paramBody,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{FirebaseBody}}") Var paramSubtitle,
 			@ParamMetaData(type = ObjectType.JSON, description = "{{FirebaseData}}") Var paramData)
 			throws Exception {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("to", paramTo.getObjectAsString());
 		body.addProperty("priority", "high");
-		
-		JsonObject notification = new JsonObject();
-		notification.addProperty("title", paramTitle.getObjectAsString());
-		notification.addProperty("body", paramBody.getObjectAsString());
 
-		body.add("notification", notification);
+		if(!paramTitle.isEmptyOrNull() && !paramSubtitle.isEmptyOrNull()){
+			JsonObject notification = new JsonObject();
+			notification.addProperty("title", paramTitle.getObjectAsString());
+			notification.addProperty("body", paramSubtitle.getObjectAsString());
+			body.add("notification", notification);
+		}
+
 		if(!paramData.isNull() && paramData.getObjectAsJson() != null) {
 			body.add("data", paramData.getObjectAsJson().getAsJsonObject());
 		}
+
 		HttpEntity<String> request = new HttpEntity<>(body.toString());
 		FirebasePushNotificationService firebaseService = new FirebasePushNotificationService(serverKey.getObjectAsString());
 		CompletableFuture<String> pushNotification = firebaseService.send(request);
 		CompletableFuture.allOf(pushNotification).join();
-		
+
 		try {
 			String firebaseResponse = pushNotification.get();
 		} catch (InterruptedException e) {
