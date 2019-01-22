@@ -311,6 +311,10 @@ public class Utils {
 
       //Suport a formato ODATA
 
+      if (value.startsWith("cronapi.toDate(") && value.endsWith(")")) {
+        value = value.substring(16, value.length()-2);
+      }
+
       if (value.startsWith("datetime'")) {
         try {
           return EdmDateTime.getInstance().valueOfString(value, EdmLiteralKind.URI, null, Calendar.class);
