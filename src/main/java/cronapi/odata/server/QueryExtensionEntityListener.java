@@ -288,7 +288,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         int i = maxParam;
         for (String param : inputs) {
-          i++; 
+          i++;
           jpqlStatement = jpqlStatement.replace(param, "?" + i);
         }
 
@@ -572,7 +572,18 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
 
       if (query != null && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
-        return QueryManager.getDefaultValues(query, data);
+
+        Map<String, Object> defaults = QueryManager.getDefaultValues(query, data);
+        if (defaults != null) {
+          for (String key : defaults.keySet()) {
+            Class clazz = (Class<?>) ((JPAEdmMappingImpl) ((EdmSimplePropertyImplProv) entityType.getProperty(key)).getMapping()).getJPAType();
+            Object value = defaults.get(key);
+            value = Var.valueOf(value).getObject(clazz);
+            defaults.put(key, value);
+          }
+        }
+
+        return defaults;
       }
 
     } catch (Exception e) {
