@@ -559,6 +559,19 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
   }
 
+  private Map<String, Object> convertValues(Map<String, Object> defaults, EdmEntityType entityType) throws Exception {
+    if (defaults != null) {
+      for (String key : defaults.keySet()) {
+        Class clazz = ((JPAEdmMappingImpl) ((EdmSimplePropertyImplProv) entityType.getProperty(key)).getMapping()).getJPAType();
+        Object value = defaults.get(key);
+        value = Var.valueOf(value).getObject(clazz);
+        defaults.put(key, value);
+      }
+    }
+
+    return defaults;
+  }
+
   @Override
   public Map<String, Object> getDefaultFieldValues(final EdmEntityType entityType, Object data) throws ODataJPARuntimeException {
     JsonObject query = null;
@@ -572,18 +585,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
 
       if (query != null && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
-
-        Map<String, Object> defaults = QueryManager.getDefaultValues(query, data);
-        if (defaults != null) {
-          for (String key : defaults.keySet()) {
-            Class clazz = (Class<?>) ((JPAEdmMappingImpl) ((EdmSimplePropertyImplProv) entityType.getProperty(key)).getMapping()).getJPAType();
-            Object value = defaults.get(key);
-            value = Var.valueOf(value).getObject(clazz);
-            defaults.put(key, value);
-          }
-        }
-
-        return defaults;
+        return convertValues(QueryManager.getDefaultValues(query, data), entityType);
       }
 
     } catch (Exception e) {
@@ -606,7 +608,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
 
       if (query != null && RestClient.getRestClient() != null && RestClient.getRestClient().getRequest() != null) {
-        return QueryManager.getCalcFieldValues(query, data);
+        return convertValues(QueryManager.getCalcFieldValues(query, data), entityType);
       }
 
     } catch (Exception e) {
