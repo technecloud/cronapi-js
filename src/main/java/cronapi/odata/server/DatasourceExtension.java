@@ -11,6 +11,7 @@ import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
 import org.apache.olingo.odata2.core.CloneUtils;
+import org.apache.olingo.odata2.core.edm.EdmSimpleTypeFacadeImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPAModelException;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
@@ -214,16 +215,18 @@ public class DatasourceExtension implements JPAEdmExtension {
     if (addFields != null) {
       for (CalcField field : addFields) {
         SimpleProperty property = new SimpleProperty();
+        EdmSimpleTypeKind kind;
         if (field.type != null && !field.type.isEmpty()) {
-          property.setType(EdmSimpleTypeKind.valueOf(field.type));
+          kind = EdmSimpleTypeKind.valueOf(field.type);
         } else {
-          property.setType(EdmSimpleTypeKind.Auto);
+          kind = EdmSimpleTypeKind.Auto;
         }
+        property.setType(kind);
         property.setName(field.name);
 
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setInternalName(field.name);
-        mapping.setJPAType(Object.class);
+        mapping.setJPAType(EdmSimpleTypeFacadeImpl.getEdmClassType(kind));
         mapping.setVirtualAccess(true);
         mapping.setCalculated(true);
 
