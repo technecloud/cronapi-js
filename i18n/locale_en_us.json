@@ -258,6 +258,7 @@
   "getPictureDescription": "Function to get an image of the Camera, Gallery, Album of the device.",
   "destinationType": "Target type",
   "pictureSourceType": "Image Source",
+  "allowEdit": "Allow Edition",
   "clearWatch": "Stop Observe",
   "idsFromScreen": "Get Identifier: Identifier (id) to be gotten from a selected form",
   "attrName": "Attribute name: Attribute name on a identifier. Example: src='test' returns src",
