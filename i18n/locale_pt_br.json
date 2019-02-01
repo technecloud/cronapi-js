@@ -429,5 +429,10 @@
   "getDeviceInfoDescription": "Função que obtém as informações do dispositivo",
   "getFirebaseToken": "Obter Token do Firebase",
   "getFirebaseTokenDescription": "Função que retorna o token do firebase para enviar notificações push",
-  "dbName": "Nome do Banco"
+  "dbName": "Nome do Banco",
+  "getUserToken":"Obter Token do Usuário",
+  "getUserTokenDesc":"Função que retonar o  Token do Usuário (X-AUTH-TOKEN)",
+  "getFirebaseNotificationData":"Obter Dados de notificações push",
+  "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification"
+
 }

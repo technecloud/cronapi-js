@@ -214,7 +214,7 @@
         .split("-")[0];
 
         if (userLang == "pt" || userLang == "en") {
-          var functionToCall = eval(userLang + "Date");
+          var functionToCall = eval("cronapi.internal." + userLang + "Date");
           return functionToCall(splited);
         } else
           return new Date(value);
@@ -494,6 +494,29 @@
     return result;
   };
 
+    /**
+     * @type function
+     * @name {{callServerBlocklyAsync}}
+     * @nameTags callServerBlocklyAsync
+     * @description {{callServerBlocklyAsync}}
+     * @param {ObjectType.OBJECT} params {{params}}
+     * @wizard procedures_callblockly_callreturn_async
+     * @returns {ObjectType.OBJECT}
+     */
+    this.cronapi.util.callServerBlocklyAsynchronous = function(classNameWithMethod , callback , params) {
+        if(classNameWithMethod != '' && typeof callback == 'function'){
+            var params = [];
+            params.push(classNameWithMethod);
+            params.push(callback);
+            params.push(callback);
+            var idx = 2;
+            for(idx; idx < arguments.length ; idx ++){
+                params.push(arguments[idx]);
+            };
+          this.cronapi.util.makeCallServerBlocklyAsync.apply(this,params);
+        }
+    };
+
   /**
    * @type function
    * @name {{executeJavascriptNoReturnName}}
@@ -584,6 +607,18 @@
     }).success(success.bind(this)).error(error.bind(this));
 
   };
+
+
+    /**
+     * @type function
+     * @name {getUserToken}}
+     * @nameTags token | auth | autenticaçào | armazenamento
+     * @description {{getUserTokenDesc}}
+     * @returns {ObjectType.STRING}
+     */
+    this.cronapi.util.getUserToken = function() {
+        return JSON.parse(window.localStorage.getItem('_u')).token;
+    };
 
   /**
    * @type function
@@ -687,8 +722,8 @@
   /**
    * @type internal
    */
-  this.cronapi.util.openReport = function(name, params) {
-    this.cronapi.$scope.getReport(name, params);
+  this.cronapi.util.openReport = function(name, params, config) {
+    this.cronapi.$scope.getReport(name, params, config);
   };
 
   /**
@@ -783,6 +818,7 @@
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação
    * @param {ObjectType.STRING} type {{screenNotifyParam0}}
    * @param {ObjectType.STRING} message {{screenNotifyParam1}}
    * @wizard notify_type
@@ -945,15 +981,27 @@
     try {
       var queryString = '';
 
+      var paramsStopEncode = {};
+      paramsStopEncode['%24'] = '$';
+
+      function decodeCharParam(value) {
+        if (value) {
+          for (var param in paramsStopEncode) {
+            var regex = eval('/' + param + '/g' );
+            value = value.replace(regex, paramsStopEncode[param]);
+          }
+        }
+        return value;
+      }
+
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
           var v = String(Object.values(params[i])[0]);
-          if (queryString != null) {
+          if (queryString) {
             queryString += "&";
           }
-          queryString += encodeURIComponent(k) + "=" + encodeURIComponent(v);
-
+          queryString += decodeCharParam(encodeURIComponent(k)) + "=" + encodeURIComponent(v);
         }
       }
 
@@ -1667,7 +1715,7 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.dateTime.formatDateTime = function(date, format) {
-    return moment(new Date()).format(format);
+    return moment(date).format(format);
   };
 
   /**
@@ -2195,8 +2243,10 @@
           $(cronapiVideoCapture).remove();
         }.bind(this));
 
-        videoDOM.src = window.URL.createObjectURL(stream);
-        videoDOM.play();
+        videoDOM.srcObject = stream;
+        videoDOM.onloadedmetadata = function(e) {
+          videoDOM.play();
+        };
       }.bind(this));
     }
   };
@@ -2711,6 +2761,28 @@
   this.cronapi.cordova.device.getFirebaseToken = function(success,error){
     window.FirebasePlugin.getToken(success,error);
   };
+
+
+    /**
+     *  @type function
+     * @platform M
+     * @name {{getFirebaseNotificationData}}
+     * @nameTags firebase|token|push|notification
+     * @param {ObjectType.STATEMENTSENDER} success {{success}}
+     * @param {ObjectType.STATEMENTSENDER} error {{error}}
+     * @description {{getFirebaseNotificationDataDesc}}
+     * @returns {ObjectType.VOID}
+     */
+    this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
+        function onDeviceReady() { window.FirebasePlugin.onNotificationOpen(function(notification) {
+            success(notification);
+        }, function(err) {
+            error(err);
+        });
+        };
+        document.addEventListener("deviceready", onDeviceReady, false);
+    };
+
 
   /**
    *  @type function
