@@ -2854,9 +2854,10 @@
    * @returns {ObjectType.VOID}
    */
 
-  this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType) {
+  this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType, /** @type {ObjectType.BOOLEAN} @description {{allowEdit}} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}  */ allowEdit) {
     if(mediaType === undefined || mediaType === null) mediaType = 0 ;
-    navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType , mediaType: mediaType });
+    allowEdit = (allowEdit === 'true');
+    navigator.camera.getPicture(success, error, { destinationType: destinationType , sourceType : pictureSourceType , mediaType: mediaType , allowEdit: allowEdit});
   };
 
   /**
