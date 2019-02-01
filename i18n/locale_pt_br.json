@@ -259,6 +259,7 @@
   "getPictureDescription": "Função para obter uma imagem da Camera, Galeria, Album do dispositivo.",
   "destinationType": "Tipo de destino",
   "pictureSourceType": "Fonte da imagem",
+  "allowEdit": "Permitir edição",
   "seconds": "Segundos",
   "clearWatch": "Parar Observador",
   "idsFromScreen": "Obter identificador: Identificador (id) a ser obtido do Formulário selecionado",
