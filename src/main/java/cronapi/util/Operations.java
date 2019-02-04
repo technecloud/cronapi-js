@@ -518,8 +518,8 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{generateUUIDName}}", nameTags = {
 			"generateUUID" }, description = "{{generateUUIDDescription}}", paramsType = { ObjectType.STRING })
-	public static final Var generateUUID() throws Exception {
-		return new Var(UUID.randomUUID());
+	public static final Var generateUUID(){
+		return  Var.valueOf(UUID.randomUUID().toString());
 	}
 
 	// Poolsize ExecutorService
