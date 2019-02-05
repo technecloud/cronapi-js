@@ -66,7 +66,7 @@
   "hour": "Hora",
   "minute": "Minuto",
   "second": "Segundo",
-  "callServerBlocklyAsync": "Chamar block servidor assíncrono",
+  "callServerBlocklyAsync": "Chamar bloco servidor assíncrono",
   "functionToCallServerBlocklyAsync": "Função para chamar bloco do servidor assíncrono",
   "classNameWithMethod": "Nome do Bloco",
   "callbackSuccess": "Callback sucesso: função para callback quando for sucesso",
