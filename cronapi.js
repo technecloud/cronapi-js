@@ -2378,11 +2378,12 @@
         else if (data && this.cronapi.internal.isBase64(data)) {
           var fileName = 'download';
           var fileExtesion = this.cronapi.internal.getExtensionBase64(data);
+          var contentType = this.cronapi.internal.getContentTypeFromExtension(fileExtesion);
           fileName += fileExtesion;
           json = {};
           json.fileExtension = fileExtesion;
           json.name = fileName;
-          json.contentType = 'unknown';
+          json.contentType = contentType;
         }
       }
     }
@@ -2394,6 +2395,35 @@
       result += "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>";
       result += "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>";
       return result;
+    }
+  };
+
+  this.cronapi.internal.getContentTypeFromExtension = function(extension) {
+    if (extension) {
+      switch (extension.toLowerCase()) {
+        case '.png':
+          return 'image/png';
+        case '.jpg':
+          return 'image/jpeg';
+        case '.mp4':
+          return 'video/mp4';
+        case '.pdf':
+          return 'application/pdf';
+        case '.ico':
+          return 'image/vnd.microsoft.icon';
+        case '.rar':
+          return 'application/x-rar-compressed';
+        case '.rtf':
+          return 'application/rtf';
+        case '.txt':
+          return 'text/plain';
+        case '.zip':
+          return 'application/zip';
+        case '.srt':
+          return 'text/srt';
+        default:
+          return 'unknown';
+      }
     }
   };
 
