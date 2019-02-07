@@ -101,6 +101,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       restMethod = "FILTER";
     }
 
+    if (uriInfo.isCount()) {
+      restMethod = "COUNT";
+    }
+
     return restMethod;
   }
 
@@ -343,7 +347,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
               query.setParameter(i, requestParam.getObject(type));
             } else {
-              query.setParameter(i, getParameterValue(customQuery, param.substring(1)).getObject(type));
+              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1)).getObject(type));
             }
           }
         }
@@ -361,52 +365,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
 
     return null;
-  }
-
-  private Var getParameterValue(JsonObject customQuery, String param) {
-    JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
-
-    if (paramValues != null) {
-      for (int x = 0; x < paramValues.size(); x++)  {
-        JsonElement prv = paramValues.get(x);
-        if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
-          if (((JsonObject) prv).get("fieldValue") instanceof JsonPrimitive) {
-            return Var.valueOf(((JsonObject) prv).get("fieldValue"));
-          } else {
-            JsonObject obj = ((JsonObject) prv).getAsJsonObject("fieldValue");
-            if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
-              try {
-                JsonObject jsonCallBlockly = new JsonObject();
-                jsonCallBlockly.add("blockly", ((JsonObject) prv).getAsJsonObject("fieldValue"));
-                String method = obj.get("blocklyMethod").getAsString();
-
-                JsonArray params = obj.getAsJsonArray("blocklyParams");
-                Var[] blocklyParams = null;
-                if (params != null) {
-                  blocklyParams = new Var[params.size()];
-                  for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
-                    JsonObject value = params.get(countBlocklys).getAsJsonObject();
-                    if ("entityName".equalsIgnoreCase(value.get("value").getAsString())) {
-                      blocklyParams[countBlocklys] = Var.valueOf(customQuery.get("entityFullName").getAsString());
-                    } else {
-                      blocklyParams[countBlocklys] = Utils.getParserValueType(value.get("value").getAsString());
-                    }
-                  }
-                }
-
-                Var result = QueryManager.executeBlockly(jsonCallBlockly, method, blocklyParams);
-
-                return result;
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return Var.VAR_NULL;
   }
 
   @Override

@@ -196,13 +196,7 @@ public class QueryManager {
               throw new RuntimeException(e);
             }
           } else {
-            if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
-              value = Var.valueOf(entry.getValue().getAsJsonPrimitive().getAsBoolean());
-            } else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
-              value = Var.valueOf(entry.getValue().getAsJsonPrimitive().getAsNumber());
-            } else {
-              value = Var.eval(entry.getValue().getAsJsonPrimitive().getAsString());
-            }
+            value = getPrimitiveValue(entry.getValue());
           }
 
           if (onlyNull) {
@@ -325,6 +319,52 @@ public class QueryManager {
         return doExecuteBlockly(query.getAsJsonObject("blockly"), method, vars);
       } catch (Exception e) {
         throw new RuntimeException(e);
+      }
+    }
+
+    return Var.VAR_NULL;
+  }
+
+  public static Var getParameterValue(JsonObject customQuery, String param) {
+    JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
+
+    if (paramValues != null) {
+      for (int x = 0; x < paramValues.size(); x++)  {
+        JsonElement prv = paramValues.get(x);
+        if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
+          if (((JsonObject) prv).get("fieldValue") instanceof JsonPrimitive) {
+            return getPrimitiveValue(((JsonObject) prv).get("fieldValue"));
+          } else {
+            JsonObject obj = ((JsonObject) prv).getAsJsonObject("fieldValue");
+            if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
+              try {
+                JsonObject jsonCallBlockly = new JsonObject();
+                jsonCallBlockly.add("blockly", ((JsonObject) prv).getAsJsonObject("fieldValue"));
+                String method = obj.get("blocklyMethod").getAsString();
+
+                JsonArray params = obj.getAsJsonArray("blocklyParams");
+                Var[] blocklyParams = null;
+                if (params != null) {
+                  blocklyParams = new Var[params.size()];
+                  for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
+                    JsonObject value = params.get(countBlocklys).getAsJsonObject();
+                    if ("entityName".equalsIgnoreCase(value.get("value").getAsString())) {
+                      blocklyParams[countBlocklys] = Var.valueOf(customQuery.get("entityFullName").getAsString());
+                    } else {
+                      blocklyParams[countBlocklys] = Utils.getParserValueType(value.get("value").getAsString());
+                    }
+                  }
+                }
+
+                Var result = QueryManager.executeBlockly(jsonCallBlockly, method, blocklyParams);
+
+                return result;
+              } catch (Exception e) {
+                throw new RuntimeException(e);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -798,13 +838,7 @@ public class QueryManager {
             Var value = Var.VAR_NULL;
 
             if (element.isJsonPrimitive()) {
-                if (element.getAsJsonPrimitive().isBoolean()) {
-                  value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
-                } else if (element.getAsJsonPrimitive().isNumber()) {
-                  value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
-                } else {
-                  value = Var.eval(element.getAsJsonPrimitive().getAsString());
-                }
+                value = getPrimitiveValue(element);
             } else {
               try {
                 value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),
@@ -825,6 +859,21 @@ public class QueryManager {
     }
 
     return result;
+  }
+
+  public static Var getPrimitiveValue(JsonElement element) {
+    Var value = Var.VAR_NULL;
+    if (isNull(element) && element.isJsonPrimitive()) {
+      if (element.getAsJsonPrimitive().isBoolean()) {
+        value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
+      } else if (element.getAsJsonPrimitive().isNumber()) {
+        value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
+      } else {
+        value = Var.eval(element.getAsJsonPrimitive().getAsString());
+      }
+    }
+
+    return value;
   }
 
   public static void addCalcFields(JsonObject query, DataSource ds) {
