@@ -17,4 +17,11 @@ public class Operations {
     return cronapi.map.Operations.getJsonOrMapField(Var.valueOf(RestClient.getRestClient().getBody().getFields()),
         field);
   }
+
+  @CronapiMetaData(type = "function", name = "{{getParam}}", nameTags = {
+      "getParam", "Parametro" }, description = "{{getParamDescription}}", returnType = ObjectType.STRING)
+  public static final Var getParam(
+      @ParamMetaData( type = ObjectType.STRING, description="{{getValueOfFieldParam0}}") Var name) throws Exception {
+    return  Var.valueOf(RestClient.getRestClient().getParameter(name.getObjectAsString()));
+  }
 }
