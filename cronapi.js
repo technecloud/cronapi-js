@@ -1005,7 +1005,11 @@
         }
       }
 
-      window.location.hash = view + (queryString?"?"+queryString:"");
+    var oldHash = window.location.hash;
+    window.location.hash = view + (queryString?"?"+queryString:"");
+    if(oldHash.indexOf(view) >= 0){
+        window.location.reload();
+      }
     }
     catch (e) {
       alert(e);
