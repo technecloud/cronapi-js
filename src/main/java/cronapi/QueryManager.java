@@ -1,30 +1,35 @@
 package cronapi;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import cronapi.database.DataSource;
+import cronapi.database.DataSourceFilter;
 import cronapi.database.DataSourceFilter.DataSourceFilterItem;
-
-import java.io.*;
+import cronapi.database.JPQLConverter;
+import cronapi.i18n.Messages;
+import cronapi.rest.security.CronappSecurity;
+import cronapi.util.Operations;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
-
-import com.google.gson.*;
-import cronapi.database.DataSourceFilter;
-import cronapi.database.JPQLConverter;
-
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-
-import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.springframework.security.core.GrantedAuthority;
-
-import cronapi.database.DataSource;
-import cronapi.i18n.Messages;
-import cronapi.util.Operations;
 import org.springframework.util.ReflectionUtils;
 
 public class QueryManager {
@@ -196,7 +201,7 @@ public class QueryManager {
               throw new RuntimeException(e);
             }
           } else {
-            value = getPrimitiveValue(entry.getValue());
+            value = parseExpressionValue(entry.getValue());
           }
 
           if (onlyNull) {
@@ -241,11 +246,18 @@ public class QueryManager {
         Var params[] = new Var[bloclyParams.size()];
         for (int i = 0; i < bloclyParams.size(); i++) {
           JsonObject param = bloclyParams.get(i).getAsJsonObject();
-          if ("entityName".equalsIgnoreCase(param.get("value").getAsString())) {
-            params[i] = Var.valueOf(ds);
+          Map<String, Var> customValues = new LinkedHashMap<>();
+          if (ds instanceof DataSource) {
+            customValues.put("datasource", Var.valueOf(ds));
+            customValues.put("entityName", Var.valueOf(((DataSource) ds).getEntity()));
+            customValues.put("primaryKeys", ((DataSource) ds).getIds());
+            customValues.put("primaryKey", ((DataSource) ds).getId());
           } else {
-            params[i] = Var.valueOf(Utils.getParserValueType(param.get("value").getAsString()));
+            customValues.put("entityName", Var.valueOf(ds));
           }
+
+          params[i] = parseExpressionValue(param.get("value"), customValues);
+
         }
 
         return Operations.callBlockly(methodName, params);
@@ -329,41 +341,20 @@ public class QueryManager {
     JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
 
     if (paramValues != null) {
-      for (int x = 0; x < paramValues.size(); x++)  {
+      for (int x = 0; x < paramValues.size(); x++) {
         JsonElement prv = paramValues.get(x);
         if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
-          if (((JsonObject) prv).get("fieldValue") instanceof JsonPrimitive) {
-            return getPrimitiveValue(((JsonObject) prv).get("fieldValue"));
-          } else {
-            JsonObject obj = ((JsonObject) prv).getAsJsonObject("fieldValue");
-            if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
-              try {
-                JsonObject jsonCallBlockly = new JsonObject();
-                jsonCallBlockly.add("blockly", ((JsonObject) prv).getAsJsonObject("fieldValue"));
-                String method = obj.get("blocklyMethod").getAsString();
 
-                JsonArray params = obj.getAsJsonArray("blocklyParams");
-                Var[] blocklyParams = null;
-                if (params != null) {
-                  blocklyParams = new Var[params.size()];
-                  for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
-                    JsonObject value = params.get(countBlocklys).getAsJsonObject();
-                    if ("entityName".equalsIgnoreCase(value.get("value").getAsString())) {
-                      blocklyParams[countBlocklys] = Var.valueOf(customQuery.get("entityFullName").getAsString());
-                    } else {
-                      blocklyParams[countBlocklys] = Utils.getParserValueType(value.get("value").getAsString());
-                    }
-                  }
-                }
-
-                Var result = QueryManager.executeBlockly(jsonCallBlockly, method, blocklyParams);
-
-                return result;
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            }
+          if (isNull(prv.getAsJsonObject().get("fieldValue"))) {
+            return Var.VAR_NULL;
           }
+
+          Map<String, Var> customValues = new LinkedHashMap<>();
+          if (!((JsonObject) prv).get("fieldValue").isJsonPrimitive()) {
+            customValues.put("entityName", Var.valueOf(customQuery.get("entityFullName").getAsString()));
+          }
+
+          return parseExpressionValue(((JsonObject) prv).get("fieldValue"), customValues);
         }
       }
     }
@@ -421,8 +412,9 @@ public class QueryManager {
                     for (String role : authorities) {
                       if (role.equalsIgnoreCase("authenticated")) {
                         authorized = RestClient.getRestClient().getUser() != null;
-                        if (authorized)
+                        if (authorized) {
                           break;
+                        }
                       }
                       if (role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
                         authorized = true;
@@ -435,8 +427,9 @@ public class QueryManager {
                         }
                       }
 
-                      if (authorized)
+                      if (authorized) {
                         break;
+                      }
                     }
 
                     if (!authorized) {
@@ -482,8 +475,9 @@ public class QueryManager {
         for (String role : authorities) {
           if (role.equalsIgnoreCase("authenticated")) {
             authorized = RestClient.getRestClient().getUser() != null;
-            if (authorized)
+            if (authorized) {
               break;
+            }
           }
           if (role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
             authorized = true;
@@ -496,8 +490,9 @@ public class QueryManager {
             }
           }
 
-          if (authorized)
+          if (authorized) {
             break;
+          }
         }
       }
     }
@@ -690,8 +685,9 @@ public class QueryManager {
             for (String role : authorities) {
               if (role.equalsIgnoreCase("authenticated")) {
                 authorized = RestClient.getRestClient().getUser() != null;
-                if (authorized)
+                if (authorized) {
                   break;
+                }
               }
               if (role.equalsIgnoreCase("permitAll") || role.equalsIgnoreCase("public")) {
                 authorized = true;
@@ -838,7 +834,7 @@ public class QueryManager {
             Var value = Var.VAR_NULL;
 
             if (element.isJsonPrimitive()) {
-                value = getPrimitiveValue(element);
+              value = parseExpressionValue(element);
             } else {
               try {
                 value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),
@@ -861,19 +857,53 @@ public class QueryManager {
     return result;
   }
 
-  public static Var getPrimitiveValue(JsonElement element) {
+  public static Var parseExpressionValue(JsonElement element, Map<String, Var> customValues) {
     Var value = Var.VAR_NULL;
-    if (isNull(element) && element.isJsonPrimitive()) {
-      if (element.getAsJsonPrimitive().isBoolean()) {
-        value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
-      } else if (element.getAsJsonPrimitive().isNumber()) {
-        value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
-      } else {
-        value = Var.eval(element.getAsJsonPrimitive().getAsString());
+    if (!isNull(element)) {
+      if (element.isJsonPrimitive()) {
+        if (element.getAsJsonPrimitive().isBoolean()) {
+          value = Var.valueOf(element.getAsJsonPrimitive().getAsBoolean());
+        } else if (element.getAsJsonPrimitive().isNumber()) {
+          value = Var.valueOf(element.getAsJsonPrimitive().getAsNumber());
+        } else {
+          if (!element.getAsJsonPrimitive().getAsString().isEmpty()) {
+            if (customValues != null && customValues.containsKey(element.getAsJsonPrimitive().getAsString())) {
+              value = customValues.get(element.getAsJsonPrimitive().getAsString());
+            } else {
+              value = Var.eval(element.getAsJsonPrimitive().getAsString());
+            }
+          }
+        }
+      } else if (element.isJsonObject()) {
+        JsonObject blockly = element.getAsJsonObject();
+
+        if ("java".equals(blockly.get("blocklyLanguage").getAsString())) {
+
+          JsonObject jsonCallBlockly = new JsonObject();
+          jsonCallBlockly.add("blockly", blockly);
+          String method = blockly.get("blocklyMethod").getAsString();
+
+          Var[] blocklyParams = new Var[0];
+
+          if (!isNull(blockly.get("blocklyParams"))) {
+            JsonArray params = blockly.getAsJsonArray("blocklyParams");
+            blocklyParams = new Var[params.size()];
+            for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
+              JsonObject valueObj = params.get(countBlocklys).getAsJsonObject();
+              blocklyParams[countBlocklys] = parseExpressionValue(valueObj.get("value"));
+            }
+          }
+
+          value = QueryManager.executeBlockly(jsonCallBlockly, method, blocklyParams);
+        }
       }
     }
 
     return value;
+  }
+
+  public static Var parseExpressionValue(JsonElement element) {
+    return parseExpressionValue(element, null);
   }
 
   public static void addCalcFields(JsonObject query, DataSource ds) {

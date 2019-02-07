@@ -754,25 +754,6 @@ public class Utils {
     return result;
   }
 
-  public static Var getParserValueType(String value) {
-    Var result = Var.VAR_NULL;
-
-    if (!StringUtils.isEmpty(value)) {
-      if (value.startsWith("'") && value.endsWith("'") || value.startsWith("\"") && value.endsWith("\"")) {
-        value = value.substring(1);
-        value = value.substring(0, value.length() - 1);
-      }
-
-      if ("null".equalsIgnoreCase(value)) {
-        result = Var.VAR_NULL;
-      } else {
-        result = Var.valueOf(value);
-      }
-    }
-
-    return result;
-  }
-
   public static void processCloudFields(Object toSaveParam) {
     Object toSave = toSaveParam;
 

@@ -46,30 +46,24 @@ public class BlocklyQuery implements Query {
         JsonObject prv = paramValues.get(x).getAsJsonObject();
         if (prv.get("fieldName").getAsString() != null) {
           String name = prv.get("fieldName").getAsString();
-          String value = prv.get("fieldValue").getAsString();
+          if (!isNull(prv.get("fieldValue"))) {
+            String value = prv.get("fieldValue").getAsString();
 
-          if (value.equals("queryType")) {
-            params[x] = Var.valueOf(type);
-          }
-
-          else if (value.equals("queryStatement")) {
-            params[x] = Var.valueOf(queryStatement);
-          }
-
-          else if (value.equals("queryFilter")) {
-            params[x] = Var.valueOf(originalFilter);
-          }
-
-          else if (value.equals("queryParameters")) {
-            params[x] = Var.valueOf(parameters);
-          }
-
-          else {
-            String strValue = RestClient.getRestClient().getParameter(name);
-            if (strValue != null) {
-              params[x] = Var.valueOf(strValue);
+            if (value.equals("queryType")) {
+              params[x] = Var.valueOf(type);
+            } else if (value.equals("queryStatement")) {
+              params[x] = Var.valueOf(queryStatement);
+            } else if (value.equals("queryFilter")) {
+              params[x] = Var.valueOf(originalFilter);
+            } else if (value.equals("queryParameters")) {
+              params[x] = Var.valueOf(parameters);
             } else {
-              params[x] = QueryManager.getParameterValue(query, name);
+              String strValue = RestClient.getRestClient().getParameter(name);
+              if (strValue != null) {
+                params[x] = Var.valueOf(strValue);
+              } else {
+                params[x] = QueryManager.getParameterValue(query, name);
+              }
             }
           }
         }
