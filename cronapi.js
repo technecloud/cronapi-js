@@ -1359,8 +1359,21 @@
     $('#'+id).attr(attrName , attrValue);
   };
 
+    /**
+     * @type function
+     * @name {{changeContent}}
+     * @nameTags change|content|conteudo|moficiar
+     * @description {{changeContentDesc}}
+     * @param {ObjectType.STRING} id {{idsFromScreen}}
+     * @param {ObjectType.STRING} content {{content}}
+     * @multilayer true
+     */
+    this.cronapi.screen.changeContent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ content) {
+        $('#'+id).html(content);
+    };
 
-  /**
+
+    /**
    * @type function
    * @name {{logoutName}}
    * @nameTags logout

@@ -433,6 +433,8 @@
   "getUserToken":"Obter Token do Usuário",
   "getUserTokenDesc":"Função que retonar o  Token do Usuário (X-AUTH-TOKEN)",
   "getFirebaseNotificationData":"Obter Dados de notificações push",
-  "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification"
+  "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification",
+  "changeContent":"Modificar conteúdo",
+  "changeContentDesc":"Função que altera o conteúdo pelo id, por exemplo, o conteúdo de um rótulo"
 
 }
