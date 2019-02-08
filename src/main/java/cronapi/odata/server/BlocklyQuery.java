@@ -6,9 +6,18 @@ import com.google.gson.JsonObject;
 import cronapi.QueryManager;
 import cronapi.RestClient;
 import cronapi.Var;
-
-import javax.persistence.*;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
+import javax.persistence.Parameter;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
 
 public class BlocklyQuery implements Query {
 
@@ -75,9 +84,9 @@ public class BlocklyQuery implements Query {
     if (query.get("baseEntity") != null) {
       try {
         parameters.put("baseEntity", query.get("baseEntity").getAsString());
-        return (List) result.getObjectAsRawList(Class.forName(query.get("baseEntity").getAsString()));
-      } catch(Exception e) {
-        new RuntimeException(e);
+        return (List) result.getObjectAsRawList(LinkedList.class);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     }
 

@@ -217,6 +217,10 @@ public class QueryManager {
   }
 
   public static Var executeEvent(JsonObject query, Object ds, String eventName) {
+    return executeEvent(query, ds, eventName, null, null);
+  }
+
+  public static Var executeEvent(JsonObject query, Object ds, String eventName, List<Object> keys, String entityName) {
     JsonObject events = query.getAsJsonObject("events");
     if (!isNull(events)) {
       if (!isNull(events.get(eventName))) {
@@ -226,7 +230,7 @@ public class QueryManager {
                 .getAsString());
         try {
           if (query.getAsJsonArray("queryParamsValues") != null && query.getAsJsonArray("queryParamsValues").size() > 0) {
-            return callBlocly(event, name, ds);
+            return callBlocly(event, name, ds, keys, entityName, eventName);
           } else {
             return Operations.callBlockly(name, Var.valueOf(ds));
           }
@@ -239,7 +243,7 @@ public class QueryManager {
     return null;
   }
 
-  private static Var callBlocly(JsonObject event, Var methodName, Object ds) {
+  private static Var callBlocly(JsonObject event, Var methodName, Object ds, List<Object> keys, String entityName, String eventName) {
     try {
       if (event.get("blocklyParams") != null) {
         JsonArray bloclyParams = event.get("blocklyParams").getAsJsonArray();
@@ -247,14 +251,13 @@ public class QueryManager {
         for (int i = 0; i < bloclyParams.size(); i++) {
           JsonObject param = bloclyParams.get(i).getAsJsonObject();
           Map<String, Var> customValues = new LinkedHashMap<>();
-          if (ds instanceof DataSource) {
-            customValues.put("datasource", Var.valueOf(ds));
-            customValues.put("entityName", Var.valueOf(((DataSource) ds).getEntity()));
-            customValues.put("primaryKeys", ((DataSource) ds).getIds());
-            customValues.put("primaryKey", ((DataSource) ds).getId());
-          } else {
-            customValues.put("entityName", Var.valueOf(ds));
+          customValues.put("data", Var.valueOf(ds));
+          if (keys != null && keys.size() > 0) {
+            customValues.put("primaryKeys", Var.valueOf(keys));
+            customValues.put("primaryKey", Var.valueOf(keys.get(0)));
           }
+          customValues.put("entityName", Var.valueOf(entityName));
+          customValues.put("eventName", Var.valueOf(eventName));
 
           params[i] = parseExpressionValue(param.get("value"), customValues);
 
