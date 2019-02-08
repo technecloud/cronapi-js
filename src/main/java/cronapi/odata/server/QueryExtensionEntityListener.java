@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -295,7 +296,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           if (uriInfo.isCount()) {
             type = "count";
           }
-          query = new BlocklyQuery(customQuery, restMethod, type, jpqlStatement, (uriInfo.getFilter() != null ? uriInfo.getFilter().getExpressionString() : ""));
+          query = new BlocklyQuery(customQuery, restMethod, type, jpqlStatement, (uriInfo.getFilter() != null ? uriInfo.getFilter().getExpressionString() : ""), uriInfo.getTargetEntitySet().getName());
         }
 
         if (parameterizedMap != null && parameterizedMap.size() > 0) {
@@ -339,7 +340,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
               query.setParameter(i, requestParam.getObject(type));
             } else {
-              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1)).getObject(type));
+              Map<String, Var> customValues = new LinkedHashMap<>();
+              customValues.put("entityName", Var.valueOf(uriInfo.getTargetEntitySet().getName()));
+
+              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1), customValues).getObject(type));
             }
           }
         }

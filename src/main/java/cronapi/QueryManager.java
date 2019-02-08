@@ -340,7 +340,7 @@ public class QueryManager {
     return Var.VAR_NULL;
   }
 
-  public static Var getParameterValue(JsonObject customQuery, String param) {
+  public static Var getParameterValue(JsonObject customQuery, String param, Map<String, Var> customValues) {
     JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
 
     if (paramValues != null) {
@@ -350,11 +350,6 @@ public class QueryManager {
 
           if (isNull(prv.getAsJsonObject().get("fieldValue"))) {
             return Var.VAR_NULL;
-          }
-
-          Map<String, Var> customValues = new LinkedHashMap<>();
-          if (!((JsonObject) prv).get("fieldValue").isJsonPrimitive()) {
-            customValues.put("entityName", Var.valueOf(customQuery.get("entityFullName").getAsString()));
           }
 
           return parseExpressionValue(((JsonObject) prv).get("fieldValue"), customValues);
