@@ -1,9 +1,6 @@
 package cronapi.odata.server;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import cronapi.ClientCommand;
 import cronapi.ErrorResponse;
 import cronapi.QueryManager;
@@ -47,11 +44,9 @@ import org.apache.olingo.odata2.jpa.processor.core.ODataParameterizedWhereExpres
 import org.apache.olingo.odata2.jpa.processor.core.access.data.ReflectionUtil;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
-import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
 import org.eclipse.persistence.jpa.jpql.parser.Expression;
 import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
@@ -62,8 +57,6 @@ import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
 import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
 import org.eclipse.persistence.queries.DatabaseQuery;
-import org.eclipse.persistence.sessions.DatabaseRecord;
-import org.eclipse.persistence.sessions.Session;
 
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
 
@@ -99,6 +92,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     String restMethod = RestClient.getRestClient().getMethod();
     if (uriInfo.getFilter() != null || (uriInfo.getKeyPredicates() != null && uriInfo.getKeyPredicates().size() > 0)) {
       restMethod = "FILTER";
+    }
+
+    if (uriInfo.isCount()) {
+      restMethod = "COUNT";
     }
 
     return restMethod;
@@ -189,7 +186,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
             jpqlStatement = selectStatement.toString();
           }
-
 
           if (selectStatement.hasOrderByClause()) {
             orderBy = selectStatement.getOrderByClause().toString();
@@ -343,7 +339,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
               query.setParameter(i, requestParam.getObject(type));
             } else {
-              query.setParameter(i, getParameterValue(customQuery, param.substring(1)).getObject(type));
+              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1)).getObject(type));
             }
           }
         }
@@ -361,52 +357,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
 
     return null;
-  }
-
-  private Var getParameterValue(JsonObject customQuery, String param) {
-    JsonArray paramValues = customQuery.getAsJsonArray("queryParamsValues");
-
-    if (paramValues != null) {
-      for (int x = 0; x < paramValues.size(); x++)  {
-        JsonElement prv = paramValues.get(x);
-        if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
-          if (((JsonObject) prv).get("fieldValue") instanceof JsonPrimitive) {
-            return Var.valueOf(((JsonObject) prv).get("fieldValue"));
-          } else {
-            JsonObject obj = ((JsonObject) prv).getAsJsonObject("fieldValue");
-            if ("java".equals(obj.get("blocklyLanguage").getAsString())) {
-              try {
-                JsonObject jsonCallBlockly = new JsonObject();
-                jsonCallBlockly.add("blockly", ((JsonObject) prv).getAsJsonObject("fieldValue"));
-                String method = obj.get("blocklyMethod").getAsString();
-
-                JsonArray params = obj.getAsJsonArray("blocklyParams");
-                Var[] blocklyParams = null;
-                if (params != null) {
-                  blocklyParams = new Var[params.size()];
-                  for (int countBlocklys = 0; countBlocklys < params.size(); countBlocklys++) {
-                    JsonObject value = params.get(countBlocklys).getAsJsonObject();
-                    if ("entityName".equalsIgnoreCase(value.get("value").getAsString())) {
-                      blocklyParams[countBlocklys] = Var.valueOf(customQuery.get("entityFullName").getAsString());
-                    } else {
-                      blocklyParams[countBlocklys] = Utils.getParserValueType(value.get("value").getAsString());
-                    }
-                  }
-                }
-
-                Var result = QueryManager.executeBlockly(jsonCallBlockly, method, blocklyParams);
-
-                return result;
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return Var.VAR_NULL;
   }
 
   @Override
@@ -677,7 +627,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   @Override
   public List<ClientCallback> getClientCallbacks() {
     List<ClientCallback> callbacks = null;
-    for (ClientCommand command: RestClient.getRestClient().getCommands()) {
+    for (ClientCommand command : RestClient.getRestClient().getCommands()) {
       if (callbacks == null) {
         callbacks = new LinkedList<>();
       }
@@ -691,8 +641,9 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     if (infoView != null) {
       try {
         JsonObject query = null;
-        if (data != null)
+        if (data != null) {
           Utils.processCloudFields(data);
+        }
 
         try {
           query = QueryManager.getQuery(entityType.getName());
@@ -701,7 +652,15 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         }
 
         if (query != null) {
-          Var result = QueryManager.executeEvent(query, data, type);
+          List<Object> keys = new LinkedList<>();
+          try {
+            for (String key : entityType.getKeyPropertyNames()) {
+              keys.add(ReflectionUtil.getter(data, key));
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          Var result = QueryManager.executeEvent(query, data, type, keys, entityType.getName());
           if (result != null) {
             return result.getObject();
           }
@@ -748,7 +707,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         VirtualClass virtualClass = new VirtualClass();
 
-        for (String name: entityType.getPropertyNames()) {
+        for (String name : entityType.getPropertyNames()) {
           EdmSimplePropertyImplProv type = (EdmSimplePropertyImplProv) entityType.getProperty(name);
           if (type.getMapping() != null && type.getMapping().getInternalExpression() != null) {
             String expression = type.getMapping().getInternalExpression();
@@ -771,7 +730,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       }
 
-    } catch(Exception e) {
+    } catch (Exception e) {
 
     }
 

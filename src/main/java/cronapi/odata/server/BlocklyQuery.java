@@ -1,11 +1,23 @@
 package cronapi.odata.server;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import cronapi.QueryManager;
+import cronapi.RestClient;
 import cronapi.Var;
-
-import javax.persistence.*;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.persistence.FlushModeType;
+import javax.persistence.LockModeType;
+import javax.persistence.Parameter;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
 
 public class BlocklyQuery implements Query {
 
@@ -14,25 +26,67 @@ public class BlocklyQuery implements Query {
   private String queryStatement;
   private Map<String, Object> parameters = new LinkedHashMap<>();
   private String type;
+  private String originalFilter;
 
   public BlocklyQuery(JsonObject query, String method, String type, String queryStatement, String originalFilter) {
     this.type = type;
-    this.parameters.put("OriginalFilter", originalFilter);
+    this.originalFilter = originalFilter;
+    this.parameters.put("queryType", type);
+    this.parameters.put("queryStatement", queryStatement);
+    this.parameters.put("queryFilter", originalFilter);
     this.query = query;
     this.method = method;
     this.queryStatement = queryStatement;
   }
 
+  public static boolean isNull(JsonElement value) {
+    return value == null || value.isJsonNull();
+  }
+
   @Override
   public List getResultList() {
-    Var result = QueryManager.executeBlockly(query, this.method, Var.valueOf(type), Var.valueOf(this.queryStatement), Var.valueOf(parameters));
+
+    Var[] params = new Var[0];
+
+    if (!isNull(query.get("queryParamsValues"))) {
+      JsonArray paramValues = query.getAsJsonArray("queryParamsValues");
+      params = new Var[paramValues.size()];
+      for (int x = 0; x < paramValues.size(); x++) {
+        JsonObject prv = paramValues.get(x).getAsJsonObject();
+        if (prv.get("fieldName").getAsString() != null) {
+          String name = prv.get("fieldName").getAsString();
+          if (!isNull(prv.get("fieldValue"))) {
+            String value = prv.get("fieldValue").getAsString();
+
+            if (value.equals("queryType")) {
+              params[x] = Var.valueOf(type);
+            } else if (value.equals("queryStatement")) {
+              params[x] = Var.valueOf(queryStatement);
+            } else if (value.equals("queryFilter")) {
+              params[x] = Var.valueOf(originalFilter);
+            } else if (value.equals("queryParameters")) {
+              params[x] = Var.valueOf(parameters);
+            } else {
+              String strValue = RestClient.getRestClient().getParameter(name);
+              if (strValue != null) {
+                params[x] = Var.valueOf(strValue);
+              } else {
+                params[x] = QueryManager.getParameterValue(query, name);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    Var result = QueryManager.executeBlockly(query, this.method, params);
 
     if (query.get("baseEntity") != null) {
       try {
         parameters.put("baseEntity", query.get("baseEntity").getAsString());
-        return (List) result.getObjectAsRawList(Class.forName(query.get("baseEntity").getAsString()));
-      } catch(Exception e) {
-        new RuntimeException(e);
+        return (List) result.getObjectAsRawList(LinkedList.class);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     }
 
