@@ -73,6 +73,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     return this;
   }
 
+  public boolean isString() {
+    return getType() == Type.STRING;
+  }
+
   public static class JsonAdapter {
 
   }
@@ -164,13 +168,16 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   }
 
   public static Var eval(String val) {
+    if (val == null || val.equalsIgnoreCase("null")) {
+      return Var.VAR_NULL;
+    }
     try {
       return Var.valueOf(engine.eval(val));
     } catch (ScriptException ex) {
       ex.printStackTrace();
     }
 
-    return null;
+    return Var.VAR_NULL;
   }
 
   /**

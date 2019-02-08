@@ -1256,6 +1256,44 @@ public class DataSource implements JsonSerializable {
     return this.filter;
   }
 
+  public Var getIds() {
+    if (getObject() == null) {
+      return Var.VAR_NULL;
+    }
+
+    EntityManager em = getEntityManager(domainClass);
+    EntityType type = em.getMetamodel().entity(domainClass);
+
+    LinkedList result = new LinkedList<>();
+
+    for (Object obj : getAjustedAttributes(type)) {
+      SingularAttribute field = (SingularAttribute) obj;
+      if (field.isId()) {
+        result.add(getObject(field.getName()));
+      }
+    }
+
+    return Var.valueOf(result);
+  }
+
+  public Var getId() {
+    if (getObject() == null) {
+      return Var.VAR_NULL;
+    }
+
+    EntityManager em = getEntityManager(domainClass);
+    EntityType type = em.getMetamodel().entity(domainClass);
+
+    for (Object obj : getAjustedAttributes(type)) {
+      SingularAttribute field = (SingularAttribute) obj;
+      if (field.isId()) {
+        return Var.valueOf(getObject(field.getName()));
+      }
+    }
+
+    return Var.VAR_NULL;
+  }
+
   public Object getObjectWithId(Var[] ids) {
     EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);

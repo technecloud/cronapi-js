@@ -311,6 +311,10 @@ public class Utils {
 
       //Suport a formato ODATA
 
+      if (value.startsWith("cronapi.toDate(") && value.endsWith(")")) {
+        value = value.substring(16, value.length()-2);
+      }
+
       if (value.startsWith("datetime'")) {
         try {
           return EdmDateTime.getInstance().valueOfString(value, EdmLiteralKind.URI, null, Calendar.class);
@@ -750,25 +754,6 @@ public class Utils {
       result += " " + filter + " ";
       result += sql.substring(indexOrderBy);
     } else result += sql + " " + filter;
-
-    return result;
-  }
-
-  public static Var getParserValueType(String value) {
-    Var result = Var.VAR_NULL;
-
-    if (!StringUtils.isEmpty(value)) {
-      if (value.startsWith("'") && value.endsWith("'") || value.startsWith("\"") && value.endsWith("\"")) {
-        value = value.substring(1);
-        value = value.substring(0, value.length() - 1);
-      }
-
-      if ("null".equalsIgnoreCase(value)) {
-        result = Var.VAR_NULL;
-      } else {
-        result = Var.valueOf(value);
-      }
-    }
 
     return result;
   }
