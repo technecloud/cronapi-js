@@ -133,7 +133,7 @@
   "datasourceFilterDescription": "Function that filter a datasource concat '/' and the path on parameter",
   "datasourceFilterParam0": "Datasource",
   "datasourceFilterParam1": "Caminho",
-  "getParam": "Get param",
+  "getParam": "Get param from query string",
   "functionToGetParam": "Function to get param from query string",
   "paramName": "Param name",
   "changeView": "Change view",
