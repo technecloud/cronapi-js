@@ -27,10 +27,12 @@ public class BlocklyQuery implements Query {
   private Map<String, Object> parameters = new LinkedHashMap<>();
   private String type;
   private String originalFilter;
+  private String entityName;
 
-  public BlocklyQuery(JsonObject query, String method, String type, String queryStatement, String originalFilter) {
+  public BlocklyQuery(JsonObject query, String method, String type, String queryStatement, String originalFilter, String entityName) {
     this.type = type;
     this.originalFilter = originalFilter;
+    this.entityName = entityName;
     this.parameters.put("queryType", type);
     this.parameters.put("queryStatement", queryStatement);
     this.parameters.put("queryFilter", originalFilter);
@@ -53,26 +55,24 @@ public class BlocklyQuery implements Query {
       params = new Var[paramValues.size()];
       for (int x = 0; x < paramValues.size(); x++) {
         JsonObject prv = paramValues.get(x).getAsJsonObject();
-        if (prv.get("fieldName").getAsString() != null) {
+        if (!isNull(prv.get("fieldName"))) {
           String name = prv.get("fieldName").getAsString();
+          params[x] = Var.VAR_NULL;
           if (!isNull(prv.get("fieldValue"))) {
-            String value = prv.get("fieldValue").getAsString();
 
-            if (value.equals("queryType")) {
-              params[x] = Var.valueOf(type);
-            } else if (value.equals("queryStatement")) {
-              params[x] = Var.valueOf(queryStatement);
-            } else if (value.equals("queryFilter")) {
-              params[x] = Var.valueOf(originalFilter);
-            } else if (value.equals("queryParameters")) {
-              params[x] = Var.valueOf(parameters);
+            Map<String, Var> customValues = new LinkedHashMap<>();
+            customValues.put("entityName", Var.valueOf(this.entityName));
+
+            customValues.put("queryType", Var.valueOf(type));
+            customValues.put("queryStatement", Var.valueOf(queryStatement));
+            customValues.put("queryFilter", Var.valueOf(originalFilter));
+            customValues.put("queryParameters", Var.valueOf(parameters));
+
+            String strValue = RestClient.getRestClient().getParameter(name);
+            if (strValue != null) {
+              params[x] = Var.valueOf(strValue);
             } else {
-              String strValue = RestClient.getRestClient().getParameter(name);
-              if (strValue != null) {
-                params[x] = Var.valueOf(strValue);
-              } else {
-                params[x] = QueryManager.getParameterValue(query, name);
-              }
+              params[x] = QueryManager.getParameterValue(query, name, customValues);
             }
           }
         }
