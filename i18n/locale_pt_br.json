@@ -133,7 +133,7 @@
   "datasourceFilterDescription": "Função que filtra uma Fonte de dados concatenando '/' e o caminho do parâmetro",
   "datasourceFilterParam0": "Fonte de dados",
   "datasourceFilterParam1": "Caminho",
-  "getParam": "Obter parâmetro",
+  "getParam": "Obter parâmetro da query string",
   "functionToGetParam": "Função para obter parâmetro da query string",
   "paramName": "Nome do parâmetro",
   "changeView": "Mudar formulário",
