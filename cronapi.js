@@ -896,6 +896,40 @@
 
   /**
    * @type function
+   * @name {{firstRecordName}}
+   * @nameTags firstRecord
+   * @description {{firstRecordDescription}}
+   * @param {ObjectType.STRING} datasource {{firstRecordParam0}}
+   * @multilayer true
+   */
+
+  this.cronapi.screen.firstRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    getDatasource(datasource).$apply( new function(){
+      var ds = getDatasource(datasource);
+      ds.cursor = -1;
+      ds.next();
+    } );
+  };
+
+  /**
+   * @type function
+   * @name {{lastRecordName}}
+   * @nameTags lastRecord
+   * @description {{lastRecordDescription}}
+   * @param {ObjectType.STRING} datasource {{lastRecordParam0}}
+   * @multilayer true
+   */
+
+  this.cronapi.screen.lastRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    getDatasource(datasource).$apply( new function(){
+      var ds = getDatasource(datasource);
+      ds.cursor = ds.data.length-2;
+      ds.next();
+    } );
+  };
+
+  /**
+   * @type function
    * @name {{removeRecordName}}
    * @nameTags removeRecord
    * @description {{removeRecordDescription}}

@@ -435,6 +435,12 @@
   "getFirebaseNotificationData":"Obter Dados de notificações push",
   "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification",
   "changeContent":"Modificar conteúdo",
-  "changeContentDesc":"Função que altera o conteúdo pelo id, por exemplo, o conteúdo de um rótulo"
+  "changeContentDesc":"Função que altera o conteúdo pelo id, por exemplo, o conteúdo de um rótulo",
+  "firstRecordName": "Go to First Record",
+  "firstRecordDescription": "Function that points to the first datasource cursor",
+  "firstRecordParam0": "Datasource",
+  "lastRecordName": "Go to Last Record",
+  "lastRecordDescription": "Function that points to the last datasource cursor",
+  "lastRecordParam0": "Datasource"
 
 }
