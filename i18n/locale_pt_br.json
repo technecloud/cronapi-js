@@ -436,11 +436,10 @@
   "getFirebaseNotificationDataDesc":"Função que obtem os dados de push notification",
   "changeContent":"Modificar conteúdo",
   "changeContentDesc":"Função que altera o conteúdo pelo id, por exemplo, o conteúdo de um rótulo",
-  "firstRecordName": "Go to First Record",
-  "firstRecordDescription": "Function that points to the first datasource cursor",
-  "firstRecordParam0": "Datasource",
-  "lastRecordName": "Go to Last Record",
-  "lastRecordDescription": "Function that points to the last datasource cursor",
-  "lastRecordParam0": "Datasource"
-
+  "firstRecordName": "Ir para Primeiro Registro",
+  "firstRecordDescription": "Função que põe o cursor no primeiro registro da Fonte de dados",
+  "firstRecordParam0": "Fonte de dados",
+  "lastRecordName": "Ir para Último registro",
+  "lastRecordDescription": "Função que põe o cursor no último registro da Fonte de dados",
+  "lastRecordParam0": "Fonte de dados"
 }
