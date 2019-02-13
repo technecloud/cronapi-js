@@ -433,5 +433,11 @@
   "getFirebaseNotificationData":"Get Push Notification Data",
   "getFirebaseNotificationDataDesc":"Function that get push notification data",
   "changeContent":"Change content",
-  "changeContentDesc":"Function that change the content, i.e: label"
+  "changeContentDesc":"Function that change the content, i.e: label",
+  "firstRecordName": "Go to First Record",
+  "firstRecordDescription": "Function that points to the first datasource cursor",
+  "firstRecordParam0": "Datasource",
+  "lastRecordName": "Go to Last Record",
+  "lastRecordDescription": "Function that points to the last datasource cursor",
+  "lastRecordParam0": "Datasource"
 }
