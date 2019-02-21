@@ -128,10 +128,10 @@ public class AppConfig {
     return null;
   }
 
-  public static String ldapHostname() {
+  public static String hostname() {
     JsonObject config = loadJSON();
     if (!isNull(config.get("auth"))) {
-      JsonElement elem = config.get("auth").getAsJsonObject().get("ldapHostname");
+      JsonElement elem = config.get("auth").getAsJsonObject().get("hostname");
       if (!isNull(elem)) {
         return elem.getAsString();
       }
