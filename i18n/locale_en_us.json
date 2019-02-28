@@ -439,5 +439,14 @@
   "firstRecordParam0": "Datasource",
   "lastRecordName": "Go to Last Record",
   "lastRecordDescription": "Function that points to the last datasource cursor",
-  "lastRecordParam0": "Datasource"
+  "lastRecordParam0": "Datasource",
+  "createNewObject": "Create new object",
+  "functionToCreateNewObject": "Function to create new object",
+  "getObjectField": "Get field of",
+  "functionToGetObjectField": "Function to get object field",
+  "obj": "Object",
+  "createObjectJson": "Create Json object",
+  "createObjectJsonDescription": "Function to create Json object",
+  "json": "Json",
+  "CategoryType.JSON": "Json"
 }

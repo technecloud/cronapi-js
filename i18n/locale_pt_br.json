@@ -441,5 +441,14 @@
   "firstRecordParam0": "Fonte de dados",
   "lastRecordName": "Ir para Último registro",
   "lastRecordDescription": "Função que põe o cursor no último registro da Fonte de dados",
-  "lastRecordParam0": "Fonte de dados"
+  "lastRecordParam0": "Fonte de dados",
+  "createNewObject": "Criar novo objeto",
+  "functionToCreateNewObject": "Função para criar novo objeto",
+  "getObjectField": "Obter campo do",
+  "functionToGetObjectField": "Função para obter campo do objeto",
+  "obj": "Objeto",
+  "createObjectJson": "Criar objeto Json",
+  "createObjectJsonDescription": "Função para criar objeto Json",
+  "json": "Json",
+  "CategoryType.JSON": "Json"
 }

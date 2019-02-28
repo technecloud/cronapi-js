@@ -2809,6 +2809,101 @@
   };
 
   /**
+   * @type function
+   * @name {{createNewObject}}
+   * @nameTags createNewObject
+   * @description {{functionToCreateNewObject}}
+   * @arbitraryParams true
+   * @wizard procedures_createnewobject_callreturn
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.object.newObject = function() {
+    var result = {};
+
+    if (arguments && arguments.length > 0) {
+      for (var i = 0; i < arguments.length; i++) {
+        var param = arguments[i];
+        if (param.name)
+          result[param.name] = param.value;
+      }
+    }
+    return result;
+  };
+
+  /**
+   * @type function
+   * @name {{getObjectField}}
+   * @nameTags getObjectField
+   * @description {{functionToGetObjectField}}
+   * @param {ObjectType.OBJECT} obj {{obj}}
+   * @param {ObjectType.STRING} field {{field}}
+   * @wizard procedures_get_field
+   */
+  this.cronapi.object.getObjectField = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ obj, /** @type {ObjectType.STRING} @blockType procedures_get_field_object */ field) {
+    var result = undefined;
+    if (obj && field)
+      result = obj[field];
+    return result;
+  };
+
+  /**
+   * @category CategoryType.JSON
+   * @categoryTags JSON|json
+   */
+  this.cronapi.json = {};
+
+  /**
+   * @type function
+   * @name {{createObjectJson}}
+   * @description {{createObjectJsonDescription}}
+   * @nameTags object
+   * @param {ObjectType.STRING} string {{string}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.json.createObjectFromString = function(string) {
+    return this.cronapi.object.createObjectFromString(string);
+  };
+
+  /**
+   * @type function
+   * @name {{setProperty}}
+   * @nameTags setProperty
+   * @param {ObjectType.OBJECT} object {{json}}
+   * @param {ObjectType.STRING} property {{property}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   * @description {{setPropertyDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.json.setProperty = function(object, property, value) {
+    this.cronapi.object.setProperty(object, property, value)
+  };
+
+  /**
+   * @type function
+   * @name {{deleteProperty}}
+   * @description {{deletePropertyDescription}}
+   * @nameTags object
+   * @param {ObjectType.OBJECT} object {{json}}
+   * @param {ObjectType.STRING} key {{key}}
+   */
+  this.cronapi.json.deleteProperty = function(obj, key) {
+    this.cronapi.object.deleteProperty(obj, key);
+  };
+
+  /**
+   * @type function
+   * @name {{getProperty}}
+   * @nameTags getProperty
+   * @param {ObjectType.OBJECT} object {{json}}
+   * @param {ObjectType.STRING} property {{property}}
+   * @description {{getPropertyDescription}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.json.getProperty = function(object, property) {
+    return this.cronapi.object.getProperty(object, property);
+  };
+
+  /**
    * @category CategoryType.DEVICE
    * @categoryTags CORDOVA|cordova|Dispositivos|device|Device
    */
