@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 
 import cronapi.CronapiMetaData;
@@ -64,11 +65,25 @@ public class Operations {
         
       }
       String pageFromRequest = RestClient.getRestClient().getRequest().getParameter("page");
-      if (pageFromRequest == null || pageFromRequest.isEmpty())
-        pageFromRequest = "0";
+      Boolean isODataParam = StringUtils.isNotEmpty(RestClient.getRestClient().getRequest().getParameter("$skip"));
+      if (StringUtils.isEmpty(pageFromRequest)) {
+        pageFromRequest = RestClient.getRestClient().getRequest().getParameter("$skip");
+        if (StringUtils.isEmpty(pageFromRequest))
+          pageFromRequest = "0";
+      }
+
       String pageSizeFromRequest = RestClient.getRestClient().getRequest().getParameter("size");
-      if (pageSizeFromRequest == null || pageSizeFromRequest.isEmpty())
-        pageSizeFromRequest = "100";
+      if (StringUtils.isEmpty(pageSizeFromRequest)) {
+        pageSizeFromRequest = RestClient.getRestClient().getRequest().getParameter("$top");
+        if (StringUtils.isEmpty(pageSizeFromRequest))
+          pageSizeFromRequest = "100";
+      }
+
+      if (isODataParam) {
+        String pageFrom = pageFromRequest.equals("0") ? "0" : String.valueOf((Integer.parseInt(pageSizeFromRequest) / Integer.parseInt(pageFromRequest)) );
+        pageFromRequest = pageFrom;
+      }
+
       int pageNumber = Integer.parseInt(pageFromRequest);
       int pageSize = Integer.parseInt(pageSizeFromRequest);
       page = new PageRequest(pageNumber, pageSize);

@@ -103,4 +103,52 @@ public class AppConfig {
 
     return 3600L;
   }
+
+  public static String type() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("auth"))) {
+      JsonElement elem = config.get("auth").getAsJsonObject().get("type");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+
+    return null;
+  }
+
+  public static String defaultDomain() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("auth"))) {
+      JsonElement elem = config.get("auth").getAsJsonObject().get("defaultDomain");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+
+    return null;
+  }
+
+  public static String hostname() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("auth"))) {
+      JsonElement elem = config.get("auth").getAsJsonObject().get("hostname");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+
+    return null;
+  }
+
+  public static boolean autoSignUp() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("auth"))) {
+      JsonElement elem = config.get("auth").getAsJsonObject().get("autoSignUp");
+      if (!isNull(elem)) {
+        return elem.getAsBoolean();
+      }
+    }
+
+    return false;
+  }
 }

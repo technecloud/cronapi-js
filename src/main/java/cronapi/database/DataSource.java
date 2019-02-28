@@ -395,13 +395,16 @@ public class DataSource implements JsonSerializable {
 
   private void processCloudFields(Object toSaveParam) {
     Object toSave;
-    if (toSaveParam != null)
+    if (toSaveParam != null) {
       toSave = toSaveParam;
-    else if (this.insertedElement != null)
+    } else if (this.insertedElement != null) {
       toSave = this.insertedElement;
-    else
+    } else {
       toSave = this.getObject();
-    Utils.processCloudFields(toSave);
+    }
+    if (toSave != null) {
+      Utils.processCloudFields(toSave);
+    }
   }
 
   /**
