@@ -317,7 +317,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties, List<PropertyRef> propertyRefList) {
+  private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties, List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
 
@@ -330,12 +330,12 @@ public class DatasourceExtension implements JPAEdmExtension {
         SimpleProperty first = null;
         for (PropertyRef key : keys) {
           Property prop = findProperty(complexType, key.getName());
-          first = addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(), "[name]." + key.getName(), expression + "." + key.getName(), properties, propertyRefList);
+          first = addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(), "[name]." + key.getName(), expression + "." + key.getName(), properties, propertyRefList, extras, first != null);
         }
 
         if (first != null) {
           SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-          addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) best.getMapping()).getJPAType(), alias != null ? alias + "_" + best.getName() : internalExpression.replace(".", "_") + "_" + best.getName(), first.getName() + "." + best.getName(), expression + "." + best.getName(), properties, propertyRefList);
+          addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) best.getMapping()).getJPAType(), alias != null ? alias + "_" + best.getName() : internalExpression.replace(".", "_") + "_" + best.getName(), first.getName() + "." + best.getName(), expression + "." + best.getName(), properties, propertyRefList, extras, true);
         }
 
       }
@@ -380,7 +380,11 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       property.setMapping(mapping);
 
-      properties.add(property);
+      if (isExtra) {
+        extras.add(property);
+      } else {
+        properties.add(property);
+      }
 
       return property;
     }
@@ -522,6 +526,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         key.setKeys(propertyRefList);
 
         List<Property> properties = new ArrayList<>();
+        List<Property> extras = new ArrayList<>();
         boolean keysSet = false;
         for (ReportItem item : reportQuery.getItems()) {
           String alias = null;
@@ -562,7 +567,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             name = "expression";
           }
 
-          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name, expression.toString(), properties, propertyRefList);
+          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name, expression.toString(), properties, propertyRefList, extras, false);
 
           if (added != null) {
             if (findKey(mainType, added.getName()) != null) {
@@ -574,6 +579,8 @@ public class DatasourceExtension implements JPAEdmExtension {
           }
 
         }
+
+        properties.addAll(extras);
 
         boolean canEdit = true;
         if (!keysSet || propertyRefList.size() != mainType.getKey().getKeys().size()) {

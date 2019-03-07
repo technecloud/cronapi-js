@@ -516,7 +516,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   private Map<String, Object> convertValues(Map<String, Object> defaults, EdmEntityType entityType) throws Exception {
     if (defaults != null) {
       for (String key : defaults.keySet()) {
-        Class clazz = ((JPAEdmMappingImpl) ((EdmSimplePropertyImplProv) entityType.getProperty(key)).getMapping()).getJPAType();
+        Class clazz = ((JPAEdmMappingImpl) ((EdmSimplePropertyImplProv) entityType.getProperty(key)).getMapping()).getOriginaType();
         Object value = defaults.get(key);
         value = Var.valueOf(value).getObject(clazz);
         defaults.put(key, value);
