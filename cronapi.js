@@ -611,7 +611,7 @@
 
     /**
      * @type function
-     * @name {getUserToken}}
+     * @name {{getUserToken}}
      * @nameTags token | auth | autenticaçào | armazenamento
      * @description {{getUserTokenDesc}}
      * @returns {ObjectType.STRING}
@@ -634,7 +634,7 @@
 
   /**
    * @type function
-   * @name {getSessionStorage}}
+   * @name {{getSessionStorage}}
    * @nameTags storage | session | sessão | armazenamento
    * @description {{getSessionStorageDesc}}
    * @param {ObjectType.STRING} key {{key}}
