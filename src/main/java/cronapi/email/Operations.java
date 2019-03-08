@@ -45,8 +45,7 @@ public class Operations {
 			@ParamMetaData(defaultValue = "email@techne.com.br", type = ObjectType.STRING, description = "{{sendEmailParam10}}") Var login,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam11}}") Var password,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam12}}", blockType = "util_dropdown", keys = {
-					"SSL", "TLS", "PLAIN",
-					"SSL","TLS", "PLAIN" }, values = { "SSL", "TLS", "PLAIN"}) Var ssl)
+					"SSL", "TLS", "PLAIN"}, values = { "SSL", "TLS", "PLAIN"}) Var ssl)
 			{
 		try {
 			HtmlEmail email = new HtmlEmail();
