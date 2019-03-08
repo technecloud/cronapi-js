@@ -27,14 +27,17 @@ import org.apache.commons.io.IOUtils;
 public class Operations {
 
 	private static String APP_FOLDER;
+	private static String CLASSES_FOLDER;
 
 	static {
 		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParent();
+			APP_FOLDER = new File(System.getProperty("cronos.bin")).toURI().toString();
+			CLASSES_FOLDER = new File(System.getProperty("cronos.bin")).toURI().resolve("classes").getPath();
 		} else {
 			try {
 				URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
 				String file = new File(location.getFile()).getAbsolutePath();
+				CLASSES_FOLDER = file;
 				APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
 			} catch (Exception e) {
 				//Abafa
@@ -337,7 +340,16 @@ public class Operations {
     return new Var(DownloadREST.TEMP_FOLDER.getAbsolutePath());
   }
 
-  /**
+	/**
+	 * Diretorio de classes da aplicação
+	 */
+	@CronapiMetaData(type = "function", name = "{{applicationClassesFolder}}", nameTags = {
+			"fileClassesDir" }, description = "{{applicationClassesFolderDescription}}", params = {}, returnType = ObjectType.STRING)
+	public static final Var fileAppClassesDir() throws Exception {
+		return new Var(CLASSES_FOLDER);
+	}
+
+	/**
 	 * Download de arquivo
 	 */
 	@CronapiMetaData(type = "function", name = "{{fileDownloadName}}", nameTags = {
