@@ -44,17 +44,23 @@ public class Operations {
 			@ParamMetaData(defaultValue = "587", type = ObjectType.STRING, description = "{{sendEmailParam9}}") Var smtpPort,
 			@ParamMetaData(defaultValue = "email@techne.com.br", type = ObjectType.STRING, description = "{{sendEmailParam10}}") Var login,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam11}}") Var password,
-			@ParamMetaData(type = ObjectType.BOOLEAN, description = "{{sendEmailParam12}}", defaultValue = "false") Var ssl)
-			throws Exception {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{sendEmailParam12}}", blockType = "util_dropdown", keys = {
+					"SSL", "TLS", "PLAIN",
+					"SSL","TLS", "PLAIN" }, values = { "SSL", "TLS", "PLAIN"}) Var ssl)
+			{
 		try {
 			HtmlEmail email = new HtmlEmail();
 			email.setCharset(cronapi.CronapiConfigurator.ENCODING);
-			if (ssl.getObjectAsBoolean() == true) {
+			if ( ssl.getObjectAsString().equals("SSL") ||  ssl.getObjectAsBoolean()) {
 				email.setSSLOnConnect(true);
 				email.setSslSmtpPort(smtpPort.getObjectAsString());
-			} else {
-				email.setTLS(true);
+			} else if(ssl.getObjectAsString().equals("TLS")  || ssl.getObjectAsString().equals("false")){
+				email.setStartTLSRequired(true);
 				email.setSSLOnConnect(false);
+				email.setSmtpPort(smtpPort.getObjectAsInt());
+			}else if(ssl.getObjectAsString().equals("PLAIN")){
+                email.setStartTLSRequired(false);
+                email.setSSLOnConnect(false);
 				email.setSmtpPort(smtpPort.getObjectAsInt());
 			}
 
