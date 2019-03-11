@@ -39,7 +39,7 @@ public class Operations {
 
 		}
 		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParentFile().toURI().toString();
+			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParentFile().toString();
 		} else {
 			try {
 				URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
