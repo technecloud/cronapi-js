@@ -30,20 +30,32 @@ public class Operations {
 	private static String CLASSES_FOLDER;
 
 	static {
+
+		try {
+			URL urlClasses = Class.forName("SpringBootMain").getProtectionDomain().getCodeSource().getLocation();
+			String classesFolder = new File(urlClasses.getFile()).getAbsolutePath();
+			CLASSES_FOLDER = classesFolder;
+		} catch(Exception e) {
+
+		}
 		if (System.getProperty("cronos.bin") != null && !System.getProperty("cronos.bin").isEmpty()) {
-			APP_FOLDER = new File(System.getProperty("cronos.bin")).toURI().toString();
-			CLASSES_FOLDER = new File(System.getProperty("cronos.bin")).toURI().resolve("classes").getPath();
+			APP_FOLDER = new File(System.getProperty("cronos.bin")).getParentFile().toURI().toString();
 		} else {
 			try {
 				URL location = Operations.class.getProtectionDomain().getCodeSource().getLocation();
 				String file = new File(location.getFile()).getAbsolutePath();
-				CLASSES_FOLDER = file;
-				APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
+				if (file.contains("WEB-INF")) {
+					APP_FOLDER = file.substring(0, file.indexOf("WEB-INF") - 1);
+				} else {
+					APP_FOLDER = new File("").getAbsolutePath();
+				}
 			} catch (Exception e) {
 				//Abafa
 			}
 		}
 	}
+
+
 
 	/**
 	 * Criar nova pasta 
