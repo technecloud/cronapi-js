@@ -12,6 +12,8 @@ import cronapi.CronapiMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import org.json.JSONObject;
+import org.json.XML;
 
 /**
  * Classe que representa ...
@@ -343,6 +345,16 @@ public class Operations {
 	public static final Var xmlFromStrng(Var string) throws Exception {
 		SAXBuilder builder = new SAXBuilder();
 		return new Var(builder.build(new StringReader( string.getObjectAsString())));
+	}
+
+	@CronapiMetaData(type = "function", name = "{{XMLToJSON}}", nameTags = {
+			"xml","JSON" }, description = "{{XMLToJSONDescription}}", params = {
+			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var xmltoJson(Var xml) throws Exception {
+
+		JSONObject json = XML.toJSONObject(xml.getObjectAsString());
+		return Var.valueOf(cronapi.json.Operations.toJson(Var.valueOf(json.toString())));
+
 	}
 
 }
