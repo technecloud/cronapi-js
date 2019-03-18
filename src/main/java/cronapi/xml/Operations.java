@@ -1,6 +1,7 @@
 package cronapi.xml;
 
 import java.io.File;
+import java.io.StringReader;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -333,6 +334,15 @@ public class Operations {
 				return Var.VAR_FALSE;
 		}
 		return Var.VAR_FALSE;
+	}
+
+
+	@CronapiMetaData(type = "function", name = "{{XMLOpenFromString}}", nameTags = {
+			"XMLOpenFromFile" }, description = "{{XMLOpenFromStringDescription}}", params = {
+			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var xmlFromStrng(Var string) throws Exception {
+		SAXBuilder builder = new SAXBuilder();
+		return new Var(builder.build(new StringReader( string.getObjectAsString())));
 	}
 
 }
