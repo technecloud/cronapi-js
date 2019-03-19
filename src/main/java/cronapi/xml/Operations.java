@@ -1,6 +1,7 @@
 package cronapi.xml;
 
 import java.io.File;
+import java.io.StringReader;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -11,6 +12,8 @@ import cronapi.CronapiMetaData;
 import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import org.json.JSONObject;
+import org.json.XML;
 
 /**
  * Classe que representa ...
@@ -333,6 +336,25 @@ public class Operations {
 				return Var.VAR_FALSE;
 		}
 		return Var.VAR_FALSE;
+	}
+
+
+	@CronapiMetaData(type = "function", name = "{{XMLOpenFromString}}", nameTags = {
+			"XMLOpenFromFile" }, description = "{{XMLOpenFromStringDescription}}", params = {
+			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var xmlFromStrng(Var string) throws Exception {
+		SAXBuilder builder = new SAXBuilder();
+		return new Var(builder.build(new StringReader( string.getObjectAsString())));
+	}
+
+	@CronapiMetaData(type = "function", name = "{{XMLToJSON}}", nameTags = {
+			"xml","JSON" }, description = "{{XMLToJSONDescription}}", params = {
+			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
+	public static final Var xmltoJson(Var xml) throws Exception {
+
+		JSONObject json = XML.toJSONObject(xml.getObjectAsString());
+		return Var.valueOf(cronapi.json.Operations.toJson(Var.valueOf(json.toString())));
+
 	}
 
 }

@@ -383,13 +383,21 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } else {
       //create instance for Entity class
       if (Utils.isEntityClass(type) && _object != null
-          && !(_object instanceof java.util.LinkedHashMap)
           && !type.equals(_object.getClass())) {
         try {
           List<String> ids = Utils.getFieldsWithAnnotationId(type);
           Object instanceClass = type.newInstance();
-          for (String id : ids) {
-            Utils.updateField(instanceClass, id, _object);
+
+          if (_object instanceof java.util.LinkedHashMap) {
+            java.util.LinkedHashMap hashmap = (java.util.LinkedHashMap)_object;
+            for (String id : ids) {
+              Utils.updateField(instanceClass, id, hashmap.get(id));
+            }
+          }
+          else {
+            for (String id : ids) {
+              Utils.updateField(instanceClass, id, _object);
+            }
           }
           return instanceClass;
         } catch (Exception e) {
