@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cronapi.*;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -32,17 +33,13 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.eclipse.rap.json.JsonObject;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import cronapi.ClientCommand;
-import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.ParamMetaData;
-import cronapi.RestClient;
-import cronapi.Var;
 import cronapi.clazz.CronapiClassLoader;
 import cronapi.i18n.Messages;
 import cronapi.rest.DownloadREST;
@@ -356,8 +353,13 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
 			throws Exception {
-		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("HEADER"));
+		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("HEADER"), Var.VAR_NULL);
 	}
+
+  public static final Var getURLFromOthers(Var method, Var contentType, Var address, Var params,Var cookieContainer)
+      throws Exception {
+    return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY"), Var.VAR_NULL);
+  }
 
 	@CronapiMetaData(type = "function", name = "{{getURLFromOthersName}}", nameTags = {
 			"getURLFromOthersName" }, description = "{{getURLFromOthersDescription}}", returnType = ObjectType.STRING)
@@ -373,16 +375,17 @@ public class Operations {
 
 			@ParamMetaData(type = ObjectType.STRING, description = "{{URLAddress}}") Var address,
 			@ParamMetaData(type = ObjectType.MAP, description = "{{paramsHTTP}}") Var params,
-			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer)
+			@ParamMetaData(type = ObjectType.MAP, description = "{{cookieContainer}}") Var cookieContainer,
+      @ParamMetaData(type = ObjectType.MAP, description = "{{postData}}") Var postData)
 			throws Exception {
-		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY"));
+		return Operations.getContentFromURL(method, contentType, address, params, cookieContainer, new Var("BODY"), postData);
 	}
 
   private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
   private static final String APPLICATION_JSON = "application/json";
 
 	private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
-    Var cookieContainer, Var returnType) throws Exception {
+    Var cookieContainer, Var returnType, Var postData) throws Exception {
 
     HttpClient httpClient = HttpClients.createDefault();
     final HttpRequestBase httpMethod;
@@ -413,7 +416,36 @@ public class Operations {
       });
     }
 
-    if (!params.isNull()) {
+    Var toReturn;
+    HttpResponse httpResponse;
+    Map<String, String> responseMap = new HashMap<String, String>();
+
+    if (!postData.isNull() && params.isNull()
+        && (method.getObjectAsString().equalsIgnoreCase("DELETE")
+        || method.getObjectAsString().equalsIgnoreCase("GET"))) {
+
+      StringEntity postDataList = new StringEntity(postData.getObjectAsString(),
+          Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+      postDataList.setContentType(contentType.getObjectAsString());
+
+      if (method.getObjectAsString().equalsIgnoreCase("DELETE")) {
+        HttpDeleteWithBody deleteWithBody = new HttpDeleteWithBody(address.getObjectAsString());
+        deleteWithBody.setEntity(postDataList);
+
+        URI uri = new URIBuilder(deleteWithBody.getURI()).build();
+        deleteWithBody.setURI(uri);
+        httpResponse = httpClient.execute(deleteWithBody);
+      }
+      else{
+        HttpGetWithBody getWithBody = new HttpGetWithBody(address.getObjectAsString());
+        getWithBody.setEntity(postDataList);
+
+        URI uri = new URIBuilder(getWithBody.getURI()).build();
+        getWithBody.setURI(uri);
+        httpResponse = httpClient.execute(getWithBody);
+      }
+    }
+    else if (!params.isNull() && postData.isNull()) {
       if (httpMethod instanceof HttpEntityEnclosingRequestBase) {
 
         HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
@@ -436,20 +468,62 @@ public class Operations {
           httpEntityEnclosingRequestBase.setEntity(paramsData);
         }
       } else {
-        Map<?, ?> mapObject = params.getObjectAsMap();
+
         List<NameValuePair> paramsData = new LinkedList<>();
+
+          Map<?, ?> mapObject = params.getObjectAsMap();
+          mapObject.entrySet().stream().forEach((entry) -> {
+            paramsData.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+                Var.valueOf(entry.getValue()).getObjectAsString()));
+          });
+          URI uri = new URIBuilder(httpMethod.getURI()).addParameters(paramsData).build();
+          httpMethod.setURI(uri);
+      }
+      httpResponse = httpClient.execute(httpMethod);
+    }
+    else {
+      List<NameValuePair> paramsData = new LinkedList<>();
+      List<NameValuePair> postDataList = new LinkedList<>();
+      List<NameValuePair> bothDataList = new LinkedList<>();
+      if(!params.isNull() && params.getObject() instanceof Map) {
+        Map<?, ?> mapObject = params.getObjectAsMap();
         mapObject.entrySet().stream().forEach((entry) -> {
           paramsData.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
               Var.valueOf(entry.getValue()).getObjectAsString()));
         });
-        URI uri = new URIBuilder(httpMethod.getURI()).addParameters(paramsData).build();
+      }
+      if(!postData.isNull() && postData.getObject() instanceof Map) {
+        Map<?, ?> mapObject = postData.getObjectAsMap();
+        mapObject.entrySet().stream().forEach((entry) -> {
+          postDataList.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
+              Var.valueOf(entry.getValue()).getObjectAsString()));
+        });
+      }
+      bothDataList.addAll(paramsData);
+      bothDataList.addAll(postDataList);
+
+      if (httpMethod instanceof HttpEntityEnclosingRequestBase) {
+
+        HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
+
+        if (contentType.getObjectAsString().equals(APPLICATION_X_WWW_FORM_URLENCODED)) {
+          httpEntityEnclosingRequestBase.setEntity(new UrlEncodedFormEntity(bothDataList, cronapi.CronapiConfigurator.ENCODING));
+        } else {
+          JsonObject fusionObject = new JsonObject();
+          for(NameValuePair nameValuePair: bothDataList){
+            fusionObject.add(nameValuePair.getName(), nameValuePair.getValue());
+          }
+          StringEntity postToData = new StringEntity(fusionObject.toString(),
+              Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+          postToData.setContentType(contentType.getObjectAsString());
+          httpEntityEnclosingRequestBase.setEntity(postToData);
+        }
+      } else {
+        URI uri = new URIBuilder(httpMethod.getURI()).addParameters(bothDataList).build();
         httpMethod.setURI(uri);
       }
+      httpResponse = httpClient.execute(httpMethod);
     }
-
-    Var toReturn;
-    HttpResponse httpResponse = httpClient.execute(httpMethod);
-    Map<String, String> responseMap = new HashMap<String, String>();
 
     if (returnType != null && returnType.equals("HEADER")) {
       Header[] headers = httpResponse.getAllHeaders();
@@ -470,6 +544,7 @@ public class Operations {
     }
     httpMethod.completed();
     return toReturn;
+
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getFromSession}}", nameTags = {
