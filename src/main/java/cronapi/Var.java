@@ -559,11 +559,11 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
         return Utils.toCalendar(s, null);
       case INT:
         Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(getObjectAsInt());
+        c.setTimeInMillis(getObjectAsLong());
         return c;
       case DOUBLE:
         Calendar cd = Calendar.getInstance();
-        cd.setTimeInMillis(getObjectAsInt());
+        cd.setTimeInMillis(getObjectAsLong());
         return cd;
       case DATETIME:
         return (Calendar) getObject();
