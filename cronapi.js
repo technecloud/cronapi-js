@@ -1039,11 +1039,16 @@
         }
       }
 
-    var oldHash = window.location.hash;
-    window.location.hash = view + (queryString?"?"+queryString:"");
-    if(oldHash.indexOf(view) >= 0){
+      var oldHash = window.location.hash;
+      window.location.hash = view + (queryString?"?"+queryString:"");
+
+      var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
+      var viewToCheck = view + (view.indexOf("?") > -1 ? "": "?");
+
+      if(oldHashToCheck.indexOf(viewToCheck) >= 0){
         window.location.reload();
       }
+
     }
     catch (e) {
       alert(e);
