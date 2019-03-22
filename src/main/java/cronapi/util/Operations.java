@@ -532,12 +532,19 @@ public class Operations {
       }
       toReturn = Var.valueOf(responseMap);
     } else {
-      Scanner scanner = new Scanner(httpResponse.getEntity().getContent(),
-          cronapi.CronapiConfigurator.ENCODING);
+      Scanner scanner;
+      if(httpResponse.getEntity() != null && httpResponse.getEntity().getContent() != null) {
+        scanner = new Scanner(httpResponse.getEntity().getContent(),
+            cronapi.CronapiConfigurator.ENCODING);
+      }
+      else{
+        scanner = new Scanner("");
+      }
       String response = "";
       try {
         response = scanner.useDelimiter("\\A").next();
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
       }
       scanner.close();
       toReturn = Var.valueOf(response);
