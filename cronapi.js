@@ -3809,17 +3809,19 @@
   this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork) {
       var that = this;
       var u = window.hostApp+"signin/"+socialNetwork+"/";
+      var cref;
       if(cordova.InAppBrowser){
-          var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
-          cref.addEventListener('loadstart', function(event) {
-              if (event.url.indexOf("_ctk") > -1) {
-                  cref.close();
-                  that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
-              }
-          });
+        cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
       }else{
-          //TODO LOGIN ON WEB
+          var cref = window.open(u, '_blank', 'location=no');
       }
+      cref.addEventListener('loadstart', function(event) {
+          if (event.url.indexOf("_ctk") > -1) {
+              cref.close();
+              that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
+          }
+      });
+
   }
 
 
