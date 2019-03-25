@@ -173,7 +173,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     try {
       return JPATypeConverter.convertToEdmSimpleType(fieldClass, null);
     } catch (ODataJPAModelException e) {
-      return EdmSimpleTypeKind.String;
+      return EdmSimpleTypeKind.Auto;
     }
   }
 
@@ -320,26 +320,23 @@ public class DatasourceExtension implements JPAEdmExtension {
   private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties, List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
-
+    EntityType complexType = null;
     if (isComplex) {
-      EntityType complexType = findEntityType(edmSchema, type.getSimpleName());
-      if (complexType != null) {
-
-        String internalExpression = expression.substring(expression.indexOf(".") + 1);
-        List<PropertyRef> keys = complexType.getKey().getKeys();
-        SimpleProperty first = null;
-        for (PropertyRef key : keys) {
-          Property prop = findProperty(complexType, key.getName());
-          first = addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(), "[name]." + key.getName(), expression + "." + key.getName(), properties, propertyRefList, extras, first != null);
-        }
-
-        if (first != null) {
-          SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-          addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) best.getMapping()).getJPAType(), alias != null ? alias + "_" + best.getName() : internalExpression.replace(".", "_") + "_" + best.getName(), first.getName() + "." + best.getName(), expression + "." + best.getName(), properties, propertyRefList, extras, true);
-        }
-
+      complexType = findEntityType(edmSchema, type.getSimpleName());
+    }
+    if (complexType != null) {
+      String internalExpression = expression.substring(expression.indexOf(".") + 1);
+      List<PropertyRef> keys = complexType.getKey().getKeys();
+      SimpleProperty first = null;
+      for (PropertyRef key : keys) {
+        Property prop = findProperty(complexType, key.getName());
+        first = addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(), "[name]." + key.getName(), expression + "." + key.getName(), properties, propertyRefList, extras, first != null);
       }
 
+      if (first != null) {
+        SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
+        addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) best.getMapping()).getJPAType(), alias != null ? alias + "_" + best.getName() : internalExpression.replace(".", "_") + "_" + best.getName(), first.getName() + "." + best.getName(), expression + "." + best.getName(), properties, propertyRefList, extras, true);
+      }
     } else {
 
       int count = StringUtils.countMatches(expression, ".");

@@ -330,20 +330,26 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             i++;
             String strValue = RestClient.getRestClient().getParameter(param.substring(1));
             int idx = argsNames.indexOf(String.valueOf(i));
-            Class type = argsTypes.get(idx);
-            if (strValue != null) {
-              Var requestParam = null;
-              if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
-                requestParam = Var.valueOf(Var.deserialize(strValue));
-              } else {
-                requestParam = Var.valueOf(strValue);
-              }
-              query.setParameter(i, requestParam.getObject(type));
-            } else {
-              Map<String, Var> customValues = new LinkedHashMap<>();
-              customValues.put("entityName", Var.valueOf(uriInfo.getTargetEntitySet().getName()));
+            Class type = null;
+            if (idx != -1) {
+              type = argsTypes.get(idx);
 
-              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1), customValues).getObject(type));
+              if (strValue != null) {
+                Var requestParam = null;
+                if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
+                  requestParam = Var.valueOf(Var.deserialize(strValue));
+                } else {
+                  requestParam = Var.valueOf(strValue);
+                }
+                query.setParameter(i, requestParam.getObject(type));
+              } else {
+                Map<String, Var> customValues = new LinkedHashMap<>();
+                customValues.put("entityName", Var.valueOf(uriInfo.getTargetEntitySet().getName()));
+
+                query.setParameter(i,
+                    QueryManager.getParameterValue(customQuery, param.substring(1), customValues)
+                        .getObject(type));
+              }
             }
           }
         }
