@@ -3756,4 +3756,71 @@
     return dataset;
   }
 
+
+
+  /**
+   * @category CategoryType.SOCIAL
+   * @categoryTags login|social|network|facebook|github|google|linkedin
+   */
+  this.cronapi.social = {};
+
+
+  this.cronapi.social.gup = function(name,url){
+      if (!url) url = location.href;
+      name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+      var regexS = "[\\?&]"+name+"=([^&#]*)";
+      var regex = new RegExp( regexS );
+      var results = regex.exec( url );
+      return results == null ? null : results[1];
+  }
+
+  this.cronapi.social.login = function(login,password,options){
+      var item;
+      this.cronapi.screen.showLoading();
+      if (!this.cronapi.logic.isNullOrEmpty(this.cronapi.screen.getHostapp())) {
+          this.cronapi.util.getURLFromOthers('POST', 'application/x-www-form-urlencoded', String(this.cronapi.screen.getHostapp()) + String('auth'), this.cronapi.object.createObjectFromString(['{ \"username\": \"',login,'\" , \"password\": \"',password,'\" } '].join('')), this.cronapi.object.createObjectFromString(['{ \"X-AUTH-TOKEN\": \"',options,'\" } '].join('')), function(sender_item) {
+              item = sender_item;
+              this.cronapi.screen.hide();
+              this.cronapi.util.setLocalStorage('_u', this.cronapi.object.serializeObject(item));
+              this.cronapi.screen.changeView("#/app/logged/home",[  ]);
+          }.bind(this), function(sender_item) {
+              item = sender_item;
+              if (this.cronapi.object.getProperty(item, 'status') == '403' || this.cronapi.object.getProperty(item, 'status') == '401') {
+                  this.cronapi.screen.notify('error',this.cronapi.i18n.translate("LoginViewInvalidpassword",[  ]));
+              } else {
+                  this.cronapi.screen.notify('error',this.cronapi.object.getProperty(item, 'responseJSON.message'));
+              }
+              this.cronapi.screen.hide();
+          }.bind(this));
+      } else {
+          this.cronapi.screen.hide();
+          this.cronapi.screen.notify('error','HostApp is Required');
+      }
+  }
+
+  /**
+   * @type function
+   * @name Login With Facebook
+   * @nameTags login|social|network|facebook|github|google|linkedin
+   * @description {{createSerieDescription}}
+   * @param {ObjectType.STRING} socialNetwork {{socialNetwork}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork) {
+      var that = this;
+      var u = window.hostApp+"signin/"+socialNetwork+"/";
+      if(cordova.InAppBrowser){
+          var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
+          cref.addEventListener('loadstart', function(event) {
+              if (event.url.indexOf("_ctk") > -1) {
+                  cref.close();
+                  that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
+              }
+          });
+      }else{
+          //TODO LOGIN ON WEB
+      }
+  }
+
+
 }).bind(window)();

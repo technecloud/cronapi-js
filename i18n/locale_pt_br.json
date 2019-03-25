@@ -450,5 +450,9 @@
   "createObjectJson": "Criar objeto Json",
   "createObjectJsonDescription": "Função para criar objeto Json",
   "json": "Json",
-  "CategoryType.JSON": "Json"
+  "CategoryType.JSON": "Json",
+  "CategoryType.SOCIAL": "Social",
+  "sociaLoginDescription":"Função que realiza o login a partir de uma determinada  rede social",
+  "socialNetwork":"Rede Social",
+  "socialLogin":"Login"
 }
