@@ -116,11 +116,15 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       EdmEntityType entityType = uriInfo.getTargetEntitySet().getEntityType();
 
-      if (customQuery != null) {
+      boolean isJPQL = entityType.getName().equals("jpql");
 
-        QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
+      if (customQuery != null || isJPQL) {
 
-        boolean isBlockly = QueryManager.isNull(customQuery.get("entityFullName"));
+        if (!isJPQL) {
+          QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
+        }
+
+        boolean isBlockly = !isJPQL && QueryManager.isNull(customQuery.get("entityFullName"));
 
         String restMethod = getRestMehtod(uriInfo);
 
@@ -141,7 +145,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         List<String> inputs = new LinkedList<>();
 
         if (!isBlockly) {
-          jpqlStatement = QueryManager.getJPQL(customQuery, false);
+          if (isJPQL) {
+            jpqlStatement = RestClient.getRestClient().getParameter("jpql");
+          } else {
+            jpqlStatement = QueryManager.getJPQL(customQuery, false);
+          }
 
           JPQLExpression jpqlExpression = new JPQLExpression(
               jpqlStatement,
