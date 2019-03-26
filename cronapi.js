@@ -3822,5 +3822,26 @@
       }
   }
 
+  /**
+   * @type function
+   * @name {{getSelectedRowsGrid}}
+   * @nameTags getSelectedRowsGrid|Obter linhas selecionadas da grade
+   * @description {{functionToGetSelectedRowsGrid}}
+   * @param {ObjectType.STRING} field {{field}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.screen.getSelectedRowsGrid = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field) {
+    var result = [];
+    var grid = $('[ng-model="'+ field  +'"]').children().data('kendoGrid');
+    if (grid) {
+      var selected = grid.select();
+      selected.each(function() {
+        var dataItem = grid.dataItem(this);
+        result.push(dataItem);
+      });
+    }
+    return result;
+  };
+
 
 }).bind(window)();

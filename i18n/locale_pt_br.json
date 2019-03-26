@@ -454,5 +454,7 @@
   "CategoryType.SOCIAL": "Social",
   "sociaLoginDescription":"Função que realiza o login a partir de uma determinada  rede social",
   "socialNetwork":"Rede Social",
-  "socialLogin":"Login"
+  "socialLogin":"Login",
+  "getSelectedRowsGrid": "Obter Linhas Selecionadas da Grade",
+  "functionToGetSelectedRowsGrid": "Função para obter linhas selecionadas de uma grade"
 }
