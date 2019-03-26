@@ -10,6 +10,35 @@ import cronapi.Var;
 import cronapi.database.DataSource;
 import cronapi.rest.DataSourceMapREST;
 import cronapi.util.Operations;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.net.URI;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.regex.Pattern;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.commons.ODataHttpMethod;
@@ -29,21 +58,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import java.io.*;
-import java.net.URI;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.regex.Pattern;
-
 public class ODataAgent {
 
   private static final String ERROR_TEMPLATE = "<?xml version=\"1.0\" ?><error xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\"><code></code><message xml:lang=\"en\">{0}</message></error>";
@@ -55,9 +69,9 @@ public class ODataAgent {
   private static final String DEFAULT_READ_CHARSET = "utf-8";
 
   private static void bind(File contextFile) throws Exception {
-    System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "cronapi.osjava.sj.memory.MemoryContextFactory");
+    System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+        "cronapi.osjava.sj.memory.MemoryContextFactory");
     System.setProperty("org.osjava.sj.jndi.shared", "true");
-
 
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(contextFile);
     XPath xpath = XPathFactory.newInstance().newXPath();
@@ -71,7 +85,8 @@ public class ODataAgent {
 
         final BasicDataSource ds = new BasicDataSource();
         ds.setUrl(elem.getAttributes().getNamedItem("url").getTextContent());
-        ds.setDriverClassName(elem.getAttributes().getNamedItem("driverClassName").getTextContent());
+        ds.setDriverClassName(
+            elem.getAttributes().getNamedItem("driverClassName").getTextContent());
         ds.setUsername(elem.getAttributes().getNamedItem("username").getTextContent());
         ds.setPassword(elem.getAttributes().getNamedItem("password").getTextContent());
 
@@ -109,7 +124,9 @@ public class ODataAgent {
         default:
           if (c > 0x7e) {
             sb.append("&#" + ((int) c) + ";");
-          } else sb.append(c);
+          } else {
+            sb.append(c);
+          }
       }
     }
     return sb.toString();
@@ -126,10 +143,10 @@ public class ODataAgent {
   public static EntityManagerFactory find(String pu) {
     Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
-
     for (Archive archive : archives) {
 
-      List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+      List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor
+          .getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
 
       for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
 
@@ -157,6 +174,8 @@ public class ODataAgent {
         strPath = urlParts[0];
 
         RestClient.getRestClient().setParameters(queryString);
+      } else {
+        RestClient.getRestClient().setParameters("");
       }
 
       String[] parts = strPath.split("/");
@@ -169,7 +188,8 @@ public class ODataAgent {
       int idx = 0;
       for (Archive archive : archives) {
 
-        List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+        List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor
+            .getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
 
         for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
 
@@ -180,7 +200,8 @@ public class ODataAgent {
             Properties properties = pui.getProperties();
             properties.setProperty("eclipselink.ddl-generation", "none");
 
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory(namespace, properties);
+            EntityManagerFactory emf = Persistence
+                .createEntityManagerFactory(namespace, properties);
             JPAODataServiceFactory serviceFactory = new JPAODataServiceFactory(emf, namespace, idx);
 
             idx++;
@@ -196,16 +217,27 @@ public class ODataAgent {
 
             InputStream ip = new ByteArrayInputStream(new byte[0]);
 
-            ODataRequest odataRequest = ODataRequest.method(ODataHttpMethod.GET).httpMethod("GET").contentType(RestUtil.extractRequestContentType(null).toContentTypeString()).acceptHeaders(RestUtil.extractAcceptHeaders("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")).acceptableLanguages(RestUtil.extractAcceptableLanguage("en-US")).pathInfo(path).allQueryParameters(RestUtil.extractAllQueryParameters(queryString, null)).requestHeaders(new HashMap<>()).body(ip).build();
-
+            ODataRequest odataRequest = ODataRequest.method(ODataHttpMethod.GET).httpMethod("GET")
+                .contentType(RestUtil.extractRequestContentType(null).toContentTypeString())
+                .acceptHeaders(RestUtil.extractAcceptHeaders(
+                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"))
+                .acceptableLanguages(RestUtil.extractAcceptableLanguage("en-US")).pathInfo(path)
+                .allQueryParameters(RestUtil.extractAllQueryParameters(queryString, null))
+                .requestHeaders(new HashMap<>()).body(ip).build();
 
             ODataContextImpl context = new ODataContextImpl(odataRequest, serviceFactory);
-
             ODataService service = serviceFactory.createService(context);
             context.setService(service);
             service.getProcessor().setContext(context);
 
-            ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service, context);
+            String jpql = RestClient.getRestClient().getParameter("jpql");
+
+            if (jpql != null && !jpql.isEmpty()) {
+              serviceFactory.getODataJPAContext().getJPAEdmExtension().jpql(jpql);
+            }
+
+            ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service,
+                context);
             final ODataResponse odataResponse = requestHandler.handle(odataRequest);
 
             Object entity = odataResponse.getEntity();
@@ -220,7 +252,8 @@ public class ODataAgent {
                 final byte[] entityBytes = body.getBytes(DEFAULT_READ_CHARSET);
                 System.out.write(entityBytes);
               } else {
-                System.out.print("Illegal entity object in ODataResponse of type '" + entity.getClass() + "'");
+                System.out.print(
+                    "Illegal entity object in ODataResponse of type '" + entity.getClass() + "'");
               }
 
             }
@@ -296,7 +329,8 @@ public class ODataAgent {
         }
 
         if (json.get("parameters").isJsonObject()) {
-          for (Map.Entry<String, JsonElement> entry : json.get("parameters").getAsJsonObject().entrySet()) {
+          for (Map.Entry<String, JsonElement> entry : json.get("parameters").getAsJsonObject()
+              .entrySet()) {
             Object value = null;
             if (entry.getValue().isJsonPrimitive()) {
               if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
