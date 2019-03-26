@@ -27,6 +27,7 @@
     "gulp-notify": "^3.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
-    "gulp-util": "^3.0.8"
+    "gulp-util": "^3.0.8",
+    "gulp-babel-minify": "^0.5.0"
   }
 }

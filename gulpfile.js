@@ -1,12 +1,16 @@
 var gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
-    uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
-    notify = require('gulp-notify');
+    notify = require('gulp-notify'),
+    minify = require("gulp-babel-minify");
 
 gulp.task('minify', function () {
-    return gulp.src('cronapi.js')
-        .pipe(uglify())
+    return gulp.src('cronapi.js')	
+        .pipe(minify({
+	      mangle: {
+		keepClassName: true
+	      }
+	    }))
         .pipe(rename('cronapi.min.js'))
         .pipe(gulp.dest('dist/'));
 });
