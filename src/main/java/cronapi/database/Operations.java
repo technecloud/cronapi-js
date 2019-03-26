@@ -15,6 +15,8 @@ import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
 
+import javax.persistence.EntityManager;
+
 /**
  * Classe que representa operações de acesso ao banco
  * 
@@ -266,5 +268,45 @@ public class Operations {
 		}
 		return Var.valueOf(dst);
 	}
+
+  @CronapiMetaData(type = "function", name = "{{commitEntity}}", nameTags = {"commitEntity",
+      "commitEntidade"}, description = "{{commitEntityDescription}}", params = {"{{entity}}"}, paramsType = {
+      ObjectType.STRING}, returnType = ObjectType.VOID, wizard = "procedures_createnewobject_callnoreturn")
+  public static final void commitTransaction(Var object) throws Exception {
+    if (!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      DataSource ds = new DataSource(className);
+      EntityManager em = ds.getEntityManager(c);
+      em.getTransaction().begin();
+      em.getTransaction().commit();
+    }
+  }
+
+  @CronapiMetaData(type = "function", name = "{{rollbackEntity}}", nameTags = {"rollbackEntity",
+      "rollbackEntidade"}, description = "{{rollbackEntityDescription}}", params = {"{{entity}}"}, paramsType = {
+      ObjectType.STRING }, returnType = ObjectType.VOID, wizard = "procedures_createnewobject_callnoreturn")
+  public static final void rollbackTransaction(Var object) throws Exception {
+    if (!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      DataSource ds = new DataSource(className);
+      EntityManager em = ds.getEntityManager(c);
+      em.getTransaction().rollback();
+    }
+  }
+
+    @CronapiMetaData(type = "function", name = "{{flushEntity}}", nameTags = {"flushEntity",
+        "flushEntidade"}, description = "{{flushEntityDescription}}", params = {"{{entity}}"}, paramsType = {
+        ObjectType.STRING}, returnType = ObjectType.VOID, wizard = "procedures_createnewobject_callnoreturn")
+    public static final void flushTransaction(Var object) throws Exception {
+      if (!object.equals(Var.VAR_NULL)) {
+        String className = object.getObjectAsString();
+        Class<?> c = Class.forName(className);
+        DataSource ds = new DataSource(className);
+        EntityManager em = ds.getEntityManager(c);
+        em.flush();
+      }
+    }
   
 }

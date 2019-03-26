@@ -109,7 +109,7 @@ public class DataSource implements JsonSerializable {
     this.instantiateRepository();
   }
 
-  private EntityManager getEntityManager(Class domainClass) {
+  public EntityManager getEntityManager(Class domainClass) {
     EntityManager em;
     if (customEntityManager != null)
       em = customEntityManager;
