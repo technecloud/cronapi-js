@@ -452,6 +452,7 @@
   "CategoryType.SOCIAL": "Social",
   "sociaLoginDescription":"Function that login with selected social network",
   "socialNetwork":"Social Network",
-  "socialLogin":"Login"
-
+  "socialLogin":"Login",
+  "getSelectedRowsGrid": "Get Selected Rows from Grid",
+  "functionToGetSelectedRowsGrid": "Function to get selected rows from a grid"
 }
