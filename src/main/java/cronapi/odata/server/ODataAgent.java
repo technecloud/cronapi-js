@@ -233,7 +233,7 @@ public class ODataAgent {
             String jpql = RestClient.getRestClient().getParameter("jpql");
 
             if (jpql != null && !jpql.isEmpty()) {
-              serviceFactory.getODataJPAContext().getJPAEdmExtension().jpql(jpql);
+              ((DatasourceExtension) serviceFactory.getODataJPAContext().getJPAEdmExtension()).jpql(jpql);
             }
 
             ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service,
