@@ -310,17 +310,33 @@ public class ODataAgent {
     }
   }
 
-  public static synchronized void datasource(String context, String jpql) {
+  public static synchronized void datasource(String strPath) {
     try {
-      EntityManagerFactory factory = find(context);
+
+      String queryString = null;
+
+      if (strPath.contains("?")) {
+        String[] urlParts = strPath.split("\\?");
+        strPath = urlParts[0];
+        queryString = urlParts[1];
+        RestClient.getRestClient().setParameters(queryString);
+      } else {
+        RestClient.getRestClient().setParameters("");
+      }
+
+      String[] parts = strPath.split("/");
+      String pu = parts[0];
+
+      EntityManagerFactory factory = find(pu);
       EntityManager entityManager = factory.createEntityManager();
-      PageRequest p = new PageRequest(0, 100);
+      PageRequest p = new PageRequest(RestClient.getRestClient().getParameterAsInt("$skip", 0), RestClient.getRestClient().getParameterAsInt("$top", 100));
 
       DataSource ds = new DataSource(((EntityTypeImpl) entityManager.getMetamodel().getEntities().toArray()[0]).getJavaTypeName(), entityManager);
       ds.disableMultiTenant();
-      ds.setPlainData(true);
+      ds.setUseUrlParams(true);
+      ds.setPlainData(RestClient.getRestClient().getParameterAsBoolean("plain", true));
 
-      ds.filter(jpql, p);
+      ds.filter(RestClient.getRestClient().getParameter("jpql"), p);
 
       System.out.println();
       System.out.write(START_RESULT);
@@ -469,10 +485,7 @@ public class ODataAgent {
       } else if (input.startsWith("validatejpql ")) {
         validateJpql(input.substring(13).trim());
       } else if (input.startsWith("ds ")) {
-        String context = input.substring(input.indexOf(" ")).trim();
-        String jpql = context.substring(context.indexOf(" ") + 1).trim();
-        context = context.substring(0, context.indexOf(" ")).trim();
-        datasource(context, jpql);
+        datasource(input.substring(3).trim());
       } else {
         sendError("Command not found!");
       }

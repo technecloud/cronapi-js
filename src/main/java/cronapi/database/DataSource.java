@@ -71,6 +71,7 @@ public class DataSource implements JsonSerializable {
   private DataSourceFilter dsFilter;
   private boolean multiTenant = true;
   private boolean plainData = false;
+  private boolean useUrlParams = false;
 
   /**
    * Init a datasource with a page size equals 100
@@ -250,7 +251,7 @@ public class DataSource implements JsonSerializable {
 
     try {
 
-      boolean namedParams = params.length > 0 && params[0].getId() != null;
+      boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
 
       List<String> parsedParams = parseParams(jpql);
 
@@ -264,11 +265,16 @@ public class DataSource implements JsonSerializable {
 
       if (namedParams) {
         paramsValues = new LinkedHashMap<>();
-        for (Var p : params) {
-          paramsValues.put(p.getId(), p);
+        if (useUrlParams) {
+          for (String key: parsedParams) {
+            paramsValues.put(key, Var.valueOf(RestClient.getRestClient().getParameter(key)));
+          }
+        } else {
+          for (Var p : params) {
+            paramsValues.put(p.getId(), p);
+          }
         }
       }
-
 
       EntityManager em = getEntityManager(domainClass);
 
@@ -1405,5 +1411,13 @@ public class DataSource implements JsonSerializable {
 
   public void setPlainData(boolean plainData) {
     this.plainData = plainData;
+  }
+
+  public boolean useUrlParams() {
+    return useUrlParams;
+  }
+
+  public void setUseUrlParams(boolean useUrlParams) {
+    this.useUrlParams = useUrlParams;
   }
 }

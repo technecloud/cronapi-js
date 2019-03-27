@@ -215,6 +215,28 @@ public class RestClient {
     return getRequest().getParameter(key);
   }
 
+  public String getParameter(String key, String defaultValue) {
+    String result;
+    if (parameters != null) {
+      result = parameters.get(key);
+    } else {
+      result = getRequest().getParameter(key);
+    }
+    if (result == null) {
+      return defaultValue;
+    }
+
+    return result;
+  }
+
+  public int getParameterAsInt(String key, int defaultValue) {
+    return Integer.valueOf(getParameter(key, String.valueOf(defaultValue)));
+  }
+
+  public boolean getParameterAsBoolean(String key, boolean defaultValue) {
+    return Boolean.valueOf(getParameter(key, String.valueOf(defaultValue)));
+  }
+
   public String getMethod() {
     if (getRequest() == null) return "";
     return getRequest().getMethod();
