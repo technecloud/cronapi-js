@@ -52,6 +52,7 @@ import org.apache.olingo.odata2.core.PathInfoImpl;
 import org.apache.olingo.odata2.core.servlet.RestUtil;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
+import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
 import org.eclipse.persistence.jpa.Archive;
 import org.springframework.data.domain.PageRequest;
 import org.w3c.dom.Document;
@@ -233,7 +234,8 @@ public class ODataAgent {
             String jpql = RestClient.getRestClient().getParameter("jpql");
 
             if (jpql != null && !jpql.isEmpty()) {
-              ((DatasourceExtension) serviceFactory.getODataJPAContext().getJPAEdmExtension()).jpql(jpql);
+              ((DatasourceExtension) serviceFactory.getODataJPAContext().getJPAEdmExtension())
+                  .jpql(jpql);
             }
 
             ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service,
@@ -308,6 +310,29 @@ public class ODataAgent {
     }
   }
 
+  public static synchronized void datasource(String context, String jpql) {
+    try {
+      EntityManagerFactory factory = find(context);
+      EntityManager entityManager = factory.createEntityManager();
+      PageRequest p = new PageRequest(0, 100);
+
+      DataSource ds = new DataSource(((EntityTypeImpl) entityManager.getMetamodel().getEntities().toArray()[0]).getJavaTypeName(), entityManager);
+      ds.disableMultiTenant();
+      ds.setPlainData(true);
+
+      ds.filter(jpql, p);
+
+      System.out.println();
+      System.out.write(START_RESULT);
+      Gson gson = new Gson();
+      System.out.print(gson.toJson(ds.getPage().getContent()));
+
+      System.out.write(END_RESULT);
+      System.out.println();
+    } catch (Exception e) {
+      sendError(e.getMessage());
+    }
+  }
 
   public static synchronized void jpql(String strJson) {
     try {
@@ -443,6 +468,11 @@ public class ODataAgent {
         datasourceMap();
       } else if (input.startsWith("validatejpql ")) {
         validateJpql(input.substring(13).trim());
+      } else if (input.startsWith("ds ")) {
+        String context = input.substring(input.indexOf(" ")).trim();
+        String jpql = context.substring(context.indexOf(" ") + 1).trim();
+        context = context.substring(0, context.indexOf(" ")).trim();
+        datasource(context, jpql);
       } else {
         sendError("Command not found!");
       }

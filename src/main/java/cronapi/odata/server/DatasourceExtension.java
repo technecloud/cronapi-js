@@ -57,17 +57,26 @@ import org.eclipse.persistence.queries.ReportQuery;
 public class DatasourceExtension implements JPAEdmExtension {
 
   public static final String JPQL = "jpql";
-  private final ODataJPAContext context;
+  private final EntityManagerImpl em;
   private int order;
   private String jpql;
+  private EntityType jpqlEntity;
 
   public DatasourceExtension(ODataJPAContext context, int order) {
-    this.context = context;
+    this((EntityManagerImpl) context.getEntityManager(), order);
+  }
+
+  public DatasourceExtension(EntityManagerImpl em, int order) {
+    this.em = em;
     this.order = order;
   }
 
   public void jpql(String jpql) {
     this.jpql = jpql;
+  }
+
+  public EntityType getJpqlEntity() {
+    return this.jpqlEntity;
   }
 
   @Override
@@ -77,7 +86,10 @@ public class DatasourceExtension implements JPAEdmExtension {
 
   @Override
   public void extendJPAEdmSchema(JPAEdmSchemaView view) {
-    Schema edmSchema = view.getEdmSchema();
+    extendJPAEdmSchema(view.getEdmSchema());
+  }
+
+  public void extendJPAEdmSchema(Schema edmSchema) {
 
     if (jpql != null) {
       createJpqlDataSource(edmSchema, JPQL, jpql, null, null);
@@ -85,6 +97,8 @@ public class DatasourceExtension implements JPAEdmExtension {
       for (EntityType type : edmSchema.getEntityTypes()) {
         if (!type.getName().equals(JPQL)) {
           type.setShowMetadata(false);
+        } else {
+          this.jpqlEntity = type;
         }
       }
 
@@ -367,11 +381,11 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private static Pattern PLAIN_EXPRESSION = Pattern.compile("^[a-zA-Z0-9_.-]*$");
+  public static Pattern PLAIN_EXPRESSION = Pattern.compile("^[a-zA-Z0-9_.-]*$");
 
   private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema,
       Class type, String orgName, String internalName, String expression, List<Property> properties,
-      List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra) {
+      List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra, String complexPath, int complexIndex) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
     EntityType complexType = null;
@@ -379,6 +393,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       complexType = findEntityType(edmSchema, type.getSimpleName());
     }
     if (complexType != null) {
+      int tmpComplexIndex = properties.size();
       String internalExpression = expression.substring(expression.indexOf(".") + 1);
       List<PropertyRef> keys = complexType.getKey().getKeys();
       SimpleProperty first = null;
@@ -388,7 +403,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(),
             alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(),
             "[name]." + key.getName(), expression + "." + key.getName(), properties,
-            propertyRefList, extras, first != null);
+            propertyRefList, extras, first != null, expression, tmpComplexIndex);
       }
 
       if (first != null) {
@@ -398,7 +413,7 @@ public class DatasourceExtension implements JPAEdmExtension {
             alias != null ? alias + "_" + best.getName()
                 : internalExpression.replace(".", "_") + "_" + best.getName(),
             first.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
-            propertyRefList, extras, true);
+            propertyRefList, extras, true, expression, tmpComplexIndex);
       }
     } else {
 
@@ -413,8 +428,10 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       property.setType(toEdmSimpleTypeKind(type));
 
+      boolean plainExpression = PLAIN_EXPRESSION.matcher(expression).matches();
+
       if (useExpression) {
-        if (PLAIN_EXPRESSION.matcher(expression).matches()) {
+        if (plainExpression) {
           orgName = expression.substring(expression.indexOf(".") + 1).replace(".", "_");
         }
         internalName = orgName;
@@ -439,6 +456,17 @@ public class DatasourceExtension implements JPAEdmExtension {
       mapping.setInternalName(internalName.replace("[name]", property.getName()));
       mapping.setJPAType(type);
       mapping.setVirtualAccess(true);
+      if (complexPath != null) {
+        String path = complexPath.substring(complexPath.indexOf(".")+1);
+        mapping.setComplexPath(path);
+        mapping.setComplexIndex(complexIndex);
+      }
+      if (plainExpression && count > 1) {
+        mapping.setIsPath(true);
+        String path = expression.substring(expression.indexOf(".")+1);
+        path = path.substring(path.indexOf(".")+1);
+        mapping.setPath(path);
+      }
 
       property.setMapping(mapping);
 
@@ -556,7 +584,6 @@ public class DatasourceExtension implements JPAEdmExtension {
       List<CalcField> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
-    EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
     AbstractSession session = em.getActiveSessionIfExists();
 
     HermesParser parser = new HermesParser();
@@ -641,7 +668,7 @@ public class DatasourceExtension implements JPAEdmExtension {
           }
 
           SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name,
-              expression.toString(), properties, propertyRefList, extras, false);
+              expression.toString(), properties, propertyRefList, extras, false, null, -1);
 
           if (added != null) {
             if (findKey(mainType, added.getName()) != null) {
