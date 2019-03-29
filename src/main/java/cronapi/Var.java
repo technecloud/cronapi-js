@@ -786,6 +786,21 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return (List) getObject();
     } else if (getObject() instanceof DataSource) {
       return toList(((DataSource) getObject()).getPage().getContent());
+    } else if (getObject() instanceof String) {
+      String parsed = _object.toString();
+      if (_object.toString().startsWith("[") && _object.toString().endsWith("]")) {
+        parsed = parsed.substring(1, parsed.length()-1);
+      }
+
+      String[] values = parsed.split(",");
+
+      List<String> list = new LinkedList<>();
+      for (String v: values) {
+        if (!v.trim().isEmpty()) {
+          list.add(v.trim());
+        }
+      }
+      return list;
     }
 
     return getSingleList(getObject());
