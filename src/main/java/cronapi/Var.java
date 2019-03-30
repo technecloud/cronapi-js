@@ -105,10 +105,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public static final Var VAR_DATE_ZERO;
   private static final NumberFormat _formatter = new DecimalFormat("0.00000");
   public static String[] ALLOWED_TYPES = {"text", "datetime", "date", "number", "integer",
-      "boolean"};
+      "boolean", "list"};
   public static Class[] MAPPED_TYPES = {java.lang.String.class, java.util.Date.class,
       java.util.Date.class,
-      java.lang.Double.class, java.lang.Long.class, java.lang.Boolean.class};
+      java.lang.Double.class, java.lang.Long.class, java.lang.Boolean.class, java.util.Collection.class};
 
   static {
     Calendar calendar = Calendar.getInstance();
@@ -222,6 +222,20 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     }
 
     return ALLOWED_TYPES[0];
+  }
+
+  public static Class getType(String key) {
+    if (key == null) {
+      return null;
+    }
+
+    for (int i = 0; i < ALLOWED_TYPES.length; i++) {
+      if (key.endsWith("__" + ALLOWED_TYPES[i]) || key.endsWith("@@" + ALLOWED_TYPES[i])) {
+        return MAPPED_TYPES[i];
+      }
+    }
+
+    return null;
   }
 
   public static Object deserialize(String value) {
@@ -803,7 +817,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return list;
     }
 
-    return getSingleList(getObject());
+    List list = new LinkedList<>();
+    list.add(getObject());
+    return list;
   }
 
   public Map getObjectAsMap() {

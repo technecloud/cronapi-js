@@ -349,6 +349,12 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
                 } else {
                   requestParam = Var.valueOf(strValue);
                 }
+
+                if (param.indexOf("__") > 0) {
+                  Class paramClass = Var.getType(param.substring(1));
+                  type = paramClass;
+                }
+
                 query.setParameter(i, requestParam.getObject(type));
               } else {
                 Map<String, Var> customValues = new LinkedHashMap<>();
