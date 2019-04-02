@@ -115,7 +115,7 @@ public class DataSource implements JsonSerializable {
     this.instantiateRepository();
   }
 
-  private EntityManager getEntityManager(Class domainClass) {
+  public EntityManager getEntityManager(Class domainClass) {
     EntityManager em;
     if (customEntityManager != null)
       em = customEntityManager;
@@ -1419,5 +1419,10 @@ public class DataSource implements JsonSerializable {
 
   public void setUseUrlParams(boolean useUrlParams) {
     this.useUrlParams = useUrlParams;
+  }
+
+  public void flush() {
+    EntityManager em = getEntityManager(domainClass);
+    em.flush();
   }
 }

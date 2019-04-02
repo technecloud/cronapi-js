@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
@@ -90,6 +91,24 @@ public class TransactionManager {
     }
   }
 
+  public static void flush(Class domainClass) {
+    EntityManager em = getEntityManager(domainClass);
+    if (em != null) {
+      if (em.getTransaction().isActive()) {
+        em.flush();
+      }
+    }
+  }
+
+  public static void begin(Class domainClass) {
+    EntityManager em = getEntityManager(domainClass);
+    if (em != null) {
+      if (!em.getTransaction().isActive()) {
+        em.getTransaction().begin();
+      }
+    }
+  }
+
   public static void rollback(Class domainClass) {
     EntityManager em = getEntityManager(domainClass);
     if (em != null) {
@@ -113,6 +132,15 @@ public class TransactionManager {
         if (em.getTransaction().isActive()) {
           em.getTransaction().commit();
         }
+      }
+    }
+  }
+
+  public static void flush() {
+    Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
+    if (mapNamespace != null) {
+      for (EntityManager em : mapNamespace.values()) {
+        em.flush();
       }
     }
   }
