@@ -158,6 +158,7 @@ public class Operations {
       DataSource ds = new DataSource(entity.getObjectAsString());
       ds.insert(object.getObjectAsMap());
       Object saved = ds.save();
+      ds.flush();
       object.updateWith(saved);
     }
   }

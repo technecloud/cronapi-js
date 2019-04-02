@@ -15,8 +15,6 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import org.springframework.web.client.RestTemplate;
 
-import javax.json.Json;
-
 /**
  * Classe que representa ...
  * 
