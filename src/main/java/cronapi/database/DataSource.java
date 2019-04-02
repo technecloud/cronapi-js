@@ -1330,4 +1330,9 @@ public class DataSource implements JsonSerializable {
       throw new RuntimeException(e);
     }
   }
+
+  public void flush() {
+    EntityManager em = getEntityManager(domainClass);
+    em.flush();
+  }
 }
