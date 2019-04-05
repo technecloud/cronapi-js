@@ -1443,6 +1443,32 @@
       this[datasource].search("", this[datasource].caseInsensitive);
   };
 
+
+
+    /**
+     * @type function
+     * @name {{loadMoreName}}
+     * @nameTags load|datasource|next|page
+     * @description {{loadMoreNameDescription}}
+     * @param {ObjectType.STRING} datasource {{datasource}}
+     */
+    this.cronapi.screen.loadMore = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+        getDatasource(datasource).$apply( function() { getDatasource(datasource).nextPage();});
+    };
+
+
+    /**
+     * @type function
+     * @name {{hasNextPageName}}
+     * @nameTags load|datasource|next|page
+     * @description {hasNextPageDescription}}
+     * @param {ObjectType.STRING} datasource {{datasource}}
+     * @returns {ObjectType.BOOLEAN}
+     */
+    this.cronapi.screen.hasNextPage = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+        return getDatasource(datasource).hasNextPage();
+    };
+
   /**
    * @category CategoryType.DATETIME
    * @categoryTags Date|Datetime|Data|Hora

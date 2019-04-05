@@ -454,5 +454,9 @@
   "socialNetwork":"Social Network",
   "socialLogin":"Login",
   "getSelectedRowsGrid": "Get Selected Rows from Grid",
-  "functionToGetSelectedRowsGrid": "Function to get selected rows from a grid"
+  "functionToGetSelectedRowsGrid": "Function to get selected rows from a grid",
+  "loadMoreName":"Load more itens",
+  "loadMoreNameDescription":"Function that invoke the next page from selected datasource",
+  "hasNextPageName":"Has next page?",
+  "hasNextPageDescription":"Function that return if has a next page on selected datasource"
 }

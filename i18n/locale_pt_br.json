@@ -456,5 +456,9 @@
   "socialNetwork":"Rede Social",
   "socialLogin":"Login",
   "getSelectedRowsGrid": "Obter Linhas Selecionadas da Grade",
-  "functionToGetSelectedRowsGrid": "Função para obter linhas selecionadas de uma grade"
+  "functionToGetSelectedRowsGrid": "Função para obter linhas selecionadas de uma grade",
+  "loadMoreName":"Carregar mais registros",
+  "loadMoreNameDescription":"Função que chama a próxima página de registros do datasource",
+  "hasNextPageName":"Existem mais registros?",
+  "hasNextPageDescription":"Função de retorna se existe mais itens a serem carregados pela fonte de dados"
 }
