@@ -143,6 +143,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         String alias = null;
         String orderBy = null;
         List<String> inputs = new LinkedList<>();
+        boolean hasGroupBy = false;
 
         if (!isBlockly) {
           if (isJPQL) {
@@ -164,6 +165,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           String distinct = ((SelectClause) selectStatement.getSelectClause()).getActualDistinctIdentifier();
           boolean hasDistinct = ((SelectClause) selectStatement.getSelectClause()).hasDistinct();
           String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+          hasGroupBy = selectStatement.getGroupByClause().getLength() > 0 || uriInfo.getOrderBy() != null;
 
           if (!selection.contains(".") && !selection.contains(",")) {
             alias = mainAlias;
@@ -181,14 +183,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
             }
 
-            if (selectStatement.hasOrderByClause()) {
-              setField(selectStatement, "orderByClause", null);
-            }
-
-            jpqlStatement = selectStatement.toString();
-          }
-
-          if (uriInfo.isCount() || uriInfo.rawEntity()) {
             if (selectStatement.hasOrderByClause()) {
               setField(selectStatement, "orderByClause", null);
             }
@@ -366,6 +360,13 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
               }
             }
           }
+        }
+
+        if (uriInfo.isCount() && hasGroupBy) {
+          List result = query.getResultList();
+          int count = result.size();
+          selectExpression = "SELECT " + count;
+          query = em.createNativeQuery(selectExpression);
         }
 
         return query;
