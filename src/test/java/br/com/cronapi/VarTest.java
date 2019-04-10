@@ -52,4 +52,13 @@ public class VarTest {
     Assert.assertEquals(Var.valueOf(iso).getObjectAsDateTime().getTimeInMillis(), calendar.getTimeInMillis());
 
   }
+
+
+  @Test
+  public void dateConversion(){
+    Assert.assertTrue(Var.deserialize("2019-04-10T00:00:00.000Z") instanceof Date);
+  }
+
+
+
 }

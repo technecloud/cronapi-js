@@ -255,6 +255,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     Var var = null;
     if (type == 0 && ISO_PATTERN.matcher(value).matches()) {
       var = Var.valueOf(Var.valueOf(value).getObjectAsDateTime());
+      type = Arrays.asList(ALLOWED_TYPES).indexOf("datetime");
     } else {
       var = Var.valueOf(value);
     }
