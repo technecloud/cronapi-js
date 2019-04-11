@@ -829,14 +829,16 @@ public class QueryManager {
         if (authorized) {
           JsonElement element = calcObj.get(name);
           if (!isNull(element)) {
-            Var value = Var.VAR_NULL;
+            Var value;
 
             if (element.isJsonPrimitive()) {
               value = parseExpressionValue(element);
             } else {
               try {
-                value = QueryManager.doExecuteBlockly(element.getAsJsonObject(),
-                    RestClient.getRestClient().getMethod(), Var.valueOf(bean));
+                JsonObject object = element.getAsJsonObject();
+                String method = object.get("blocklyMethod").getAsString();
+                Var call = Var.valueOf(object.get("blocklyClass").getAsString() + ":" + method);
+                value = callBlocly(object, call, bean, null, null, null);
               } catch (Exception e) {
                 value = Var.valueOf("ERROR: " + e.getMessage());
               }
