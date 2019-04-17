@@ -2252,7 +2252,7 @@
 
   this.cronapi.internal.startCamera = function(field) {
     //verify if user is on Browser or not
-    if(cordova && cordova.platformId && cordova.platformId !== 'browser') {
+    if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
       // If in mobile devices use native camera cordova plugin
       var that = this;
       navigator.camera.getPicture(function (result) {
