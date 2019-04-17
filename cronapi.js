@@ -2251,89 +2251,106 @@
   };
 
   this.cronapi.internal.startCamera = function(field) {
-    var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
-                                    <div class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
-                                        <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
-                                    </div>\
-                                    <div class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
-                                        <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
-                                    </div>\
-                                    <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
-                            </div>';
+    //verify if user is on Browser or not
+    if(cordova && cordova.platformId && cordova.platformId !== 'browser') {
+      // If in mobile devices use native camera cordova plugin
+      var that = this;
+      navigator.camera.getPicture(function (result) {
+        that.cronapi.screen.changeValueOfField(field, result);
+      }, function (error) {
+        console.error(error);
+        that.cronapi.$scope.Notification.error(message);
+      }, {
+        quality: 60, //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
+        destinationType: Camera.DestinationType.DATA_URL,
+        encodingType: Camera.EncodingType.PNG,
+        correctOrientation: true
+      });
+    }else{
+      var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
+                                      <div class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
+                                          <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
+                                      </div>\
+                                      <div class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                          <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
+                                      </div>\
+                                      <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
+                              </div>';
 
 
-    function getMaxResolution(width, height) {
-      var maxWidth = window.innerWidth;
-      var maxHeight = window.innerHeight;
-      var ratio = 0;
+      function getMaxResolution(width, height) {
+        var maxWidth = window.innerWidth;
+        var maxHeight = window.innerHeight;
+        var ratio = 0;
 
-      ratio = maxWidth / width;
-      height = height * ratio;
-      width = width * ratio;
-
-      if(width > maxWidth){
         ratio = maxWidth / width;
         height = height * ratio;
         width = width * ratio;
-      }
 
-      if(height > maxHeight){
-        ratio = maxHeight / height;
-        width = width * ratio;
-        height = height * ratio;
-      }
-
-      return { width: width, height: height };
-    }
-
-    var streaming = null;
-    var mediaConfig =  { video: true };
-    var errBack = function(e) {
-      console.log('An error has occurred!', e)
-    };
-
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-        streaming = stream;
-
-        var res = getMaxResolution(stream.getTracks()[0].getSettings().width, stream.getTracks()[0].getSettings().height);
-        var halfWidth = res.width;
-        var halfHeight = res.height;
-        try {
-          halfWidth = parseInt(halfWidth/2);
-          halfHeight = parseInt(halfHeight/2);
+        if(width > maxWidth){
+          ratio = maxWidth / width;
+          height = height * ratio;
+          width = width * ratio;
         }
-        catch (e) { }
 
-        cameraContainer =
-            cameraContainer
-            .split('$height$').join(res.height+'px')
-            .split('$width$').join(res.width+'px')
-            .split('$marginleft$').join(halfWidth+'px')
-            .split('$margintop$').join(halfHeight+'px')
-        ;
-        var cronapiVideoCapture = $(cameraContainer);
-        cronapiVideoCapture.prependTo("body");
-        var videoDOM = document.getElementById('cronapiVideoCapture');
+        if(height > maxHeight){
+          ratio = maxHeight / height;
+          width = width * ratio;
+          height = height * ratio;
+        }
 
-        cronapiVideoCapture.find('#cronapiVideoCaptureCancel').on('click',function() {
-          if (streaming!= null && streaming.getTracks().length > 0)
-            streaming.getTracks()[0].stop();
-          $(cronapiVideoCapture).remove();
+        return { width: width, height: height };
+      }
+
+      var streaming = null;
+      var mediaConfig =  { video: true };
+      var errBack = function(e) {
+        console.log('An error has occurred!', e)
+      };
+
+      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+          streaming = stream;
+
+          var res = getMaxResolution(stream.getTracks()[0].getSettings().width, stream.getTracks()[0].getSettings().height);
+          var halfWidth = res.width;
+          var halfHeight = res.height;
+          try {
+            halfWidth = parseInt(halfWidth/2);
+            halfHeight = parseInt(halfHeight/2);
+          }
+          catch (e) { }
+
+          cameraContainer =
+              cameraContainer
+              .split('$height$').join(res.height+'px')
+              .split('$width$').join(res.width+'px')
+              .split('$marginleft$').join(halfWidth+'px')
+              .split('$margintop$').join(halfHeight+'px')
+          ;
+          var cronapiVideoCapture = $(cameraContainer);
+          cronapiVideoCapture.prependTo("body");
+          var videoDOM = document.getElementById('cronapiVideoCapture');
+
+          cronapiVideoCapture.find('#cronapiVideoCaptureCancel').on('click',function() {
+            if (streaming!= null && streaming.getTracks().length > 0)
+              streaming.getTracks()[0].stop();
+            $(cronapiVideoCapture).remove();
+          }.bind(this));
+
+          cronapiVideoCapture.find('#cronapiVideoCaptureOk').on('click',function() {
+            this.cronapi.internal.captureFromCamera(field, res.width, res.height);
+            if (streaming!= null && streaming.getTracks().length > 0)
+              streaming.getTracks()[0].stop();
+            $(cronapiVideoCapture).remove();
+          }.bind(this));
+
+          videoDOM.srcObject = stream;
+          videoDOM.onloadedmetadata = function(e) {
+            videoDOM.play();
+          };
         }.bind(this));
-
-        cronapiVideoCapture.find('#cronapiVideoCaptureOk').on('click',function() {
-          this.cronapi.internal.captureFromCamera(field, res.width, res.height);
-          if (streaming!= null && streaming.getTracks().length > 0)
-            streaming.getTracks()[0].stop();
-          $(cronapiVideoCapture).remove();
-        }.bind(this));
-
-        videoDOM.srcObject = stream;
-        videoDOM.onloadedmetadata = function(e) {
-          videoDOM.play();
-        };
-      }.bind(this));
+      }
     }
   };
 
