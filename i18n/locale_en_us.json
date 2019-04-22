@@ -456,8 +456,8 @@
   "getSelectedRowsGrid": "Get Selected Rows from Grid",
   "functionToGetSelectedRowsGrid": "Function to get selected rows from a grid",
   "loadMoreName":"Load more itens",
-  "loadMoreNameDescription":"Function that invoke the next page from selected datasource",
+  "loadMoreNameDescription":"Function that invokes the next page from the selected datasource",
   "hasNextPageName":"Has next page?",
-  "hasNextPageDescription":"Function that return if has a next page on selected datasource",
+  "hasNextPageDescription":"Function that returns if exists a next page on selected datasource",
   "compile": "Compile?"
 }
