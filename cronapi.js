@@ -1416,10 +1416,10 @@
       $('#'+id).html(content);
       if(compile === true || compile === 'true'){
         var $injector = angular.injector(['ng']);
-        $injector.invoke(function($compile) {
+        $injector.invoke(['$compile', function($compile) {
           var scope = angular.element('#'+id).scope();
           $compile('#'+id)(scope);
-        });
+        }]);
       }
     };
     
