@@ -458,5 +458,6 @@
   "loadMoreName":"Load more itens",
   "loadMoreNameDescription":"Function that invoke the next page from selected datasource",
   "hasNextPageName":"Has next page?",
-  "hasNextPageDescription":"Function that return if has a next page on selected datasource"
+  "hasNextPageDescription":"Function that return if has a next page on selected datasource",
+  "compile": "Compile?"
 }
