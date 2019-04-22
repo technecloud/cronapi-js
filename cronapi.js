@@ -1409,13 +1409,20 @@
      * @description {{changeContentDesc}}
      * @param {ObjectType.STRING} id {{idsFromScreen}}
      * @param {ObjectType.STRING} content {{content}}
+     * @param {ObjectType.BOOLEAN} compile {{compile}}
      * @multilayer true
      */
-    this.cronapi.screen.changeContent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ content) {
-        $('#'+id).html(content);
+    this.cronapi.screen.changeContent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ content, /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}*/ compile) {
+      $('#'+id).html(content);
+      if(compile === true || compile === 'true'){
+        var $injector = angular.injector(['ng']);
+        $injector.invoke(function($compile) {
+          var scope = angular.element('#'+id).scope();
+          $compile('#'+id)(scope);
+        });
+      }
     };
-
-
+    
     /**
    * @type function
    * @name {{logoutName}}
