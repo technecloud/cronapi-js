@@ -1416,9 +1416,9 @@
       $('#'+id).html(content);
       if(compile === true || compile === 'true'){
         var $injector = angular.injector(['ng']);
+        var that = this;
         $injector.invoke(['$compile', function($compile) {
-          var scope = angular.element('#'+id).scope();
-          $compile('#'+id)(scope);
+          $compile(document.querySelector('#'+id))(that.cronapi.$scope);
         }]);
       }
     };
