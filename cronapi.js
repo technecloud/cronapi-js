@@ -776,7 +776,7 @@
    * @returns {ObjectType.OBJECT}
    * @displayInline true
    */
-  this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field,  /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  global ) {
+  this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field,  /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}  */  global ) {
     try {
       if (field && field.length > 0) {
         if (field.indexOf('.active.') > -1)
