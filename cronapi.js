@@ -772,16 +772,39 @@
    * @nameTags getValueOfField|getFieldValue
    * @description {{functionToGetValueOfField}}
    * @param {ObjectType.STRING} field {{field}}
+   * @param {ObjectType.BOOLEAN} global {{global}}
    * @returns {ObjectType.OBJECT}
    * @displayInline true
    */
-  this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field) {
+  this.cronapi.screen.getValueOfField = function(/** @type {ObjectType.STRING} @blockType field_from_screen*/ field,  /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  global ) {
     try {
       if (field && field.length > 0) {
         if (field.indexOf('.active.') > -1)
           return eval(field);
-        else
-          return eval('this.'+field);
+        else{
+          if(global === true || global === 'true'){
+            var scope = eval('this');
+            var recursiveLookup = function(scope) {
+              var fieldValue;
+              try {
+                fieldValue = eval("scope." + field);
+              }
+              catch (e) {
+              }
+              if(fieldValue){
+                return fieldValue;
+              }
+              else if(scope && scope.$parent ) {
+                return recursiveLookup(scope.$parent);
+              }
+              return '';
+            };
+            return recursiveLookup(scope);
+          }
+          else{
+            return eval('this.'+field);
+          }
+        }
       }
       return '';
     }
