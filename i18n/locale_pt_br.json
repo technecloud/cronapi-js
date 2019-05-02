@@ -461,6 +461,5 @@
   "loadMoreNameDescription":"Função que chama a próxima página de registros do datasource",
   "hasNextPageName":"Existem mais registros?",
   "hasNextPageDescription":"Função que retorna se existem mais itens a serem carregados pela fonte de dados",
-  "compile": "Compilar?",
-  "global": "Global"
+  "compile": "Compilar?"
 }
