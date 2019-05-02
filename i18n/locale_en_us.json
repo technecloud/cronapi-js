@@ -442,7 +442,7 @@
   "lastRecordParam0": "Datasource",
   "createNewObject": "Create new object",
   "functionToCreateNewObject": "Function to create new object",
-  "getObjectField": "Get field of",
+  "getObjectField": "Get field of Screen",
   "functionToGetObjectField": "Function to get object field",
   "obj": "Object",
   "createObjectJson": "Create Json object",
@@ -459,5 +459,6 @@
   "loadMoreNameDescription":"Function that invokes the next page from the selected datasource",
   "hasNextPageName":"Has next page?",
   "hasNextPageDescription":"Function that returns if exists a next page on selected datasource",
-  "compile": "Compile?"
+  "compile": "Compile?",
+  "global": "Global"
 }
