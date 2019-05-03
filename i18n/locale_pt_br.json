@@ -88,7 +88,7 @@
   "CategoryType.SCREEN": "Formulário",
   "CategoryType.DATETIME": "Data e hora",
   "CategoryType.XML": "Xml",
-  "getValueOfField": "Obter valor do",
+  "getValueOfField": "Obter valor do Campo",
   "functionToGetValueOfField": "Função para obter valor do campo",
   "fieldNameFromScreen": "Obter nome do campo",
   "functionToGetFieldNameFromScreen": "Função para obter nome do campo (É necessário associar o bloco ao formulário)",
