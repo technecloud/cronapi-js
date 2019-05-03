@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,6 +36,7 @@ public class RestClient {
   private JsonObject query = null;
   private boolean filteredEnabled = false;
   private Locale locale;
+  private Integer utcOffset;
   private Map<String, String> parameters;
 
   private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
@@ -65,6 +67,7 @@ public class RestClient {
     newClient.setFilteredEnabled(filteredEnabled);
     newClient.setRequest(getRequest());
     newClient.setResponse(getResponse());
+    newClient.setUtcOffset(getUtcOffset());
 
     return newClient;
   }
@@ -215,6 +218,13 @@ public class RestClient {
     return getRequest().getParameter(key);
   }
 
+  public boolean hasParameter(String key) {
+    if (parameters != null) {
+      return parameters.containsKey(key);
+    }
+    return getRequest().getParameterMap().containsKey(key);
+  }
+
   public String getParameter(String key, String defaultValue) {
     String result;
     if (parameters != null) {
@@ -324,5 +334,24 @@ public class RestClient {
 
   public Object getSessionValue(String name) {
     return getSession().getAttribute(name);
+  }
+
+  public Integer getUtcOffset() {
+    if (utcOffset != null) return utcOffset;
+    else {
+      if (getRequest() != null && !StringUtils.isEmpty(getRequest().getHeader("timezone"))) {
+        return Integer.valueOf(getRequest().getHeader("timezone"));
+      }
+    }
+
+    return TimeZone.getDefault().getRawOffset() / 1000 / 60;
+  }
+
+  public void setUtcOffset(Integer utcOffset) {
+    this.utcOffset = utcOffset;
+  }
+
+  public boolean isDefined() {
+    return getRequest() != null;
   }
 }
