@@ -329,14 +329,31 @@
       }
     }
 
-    for (var key in this.cronapi.$scope.vars) {
-      if (this.cronapi.$scope.vars[key]) {
-        if (!fields.vars) {
-          fields.vars = {};
-        }
-        fields.vars[key] = this.cronapi.$scope.vars[key];
+    var scope = this.cronapi.$scope;
+    var recursiveLookup = function(scope) {
+      var fieldValue;
+      try {
+        fieldValue = eval(scope.vars);
       }
-    }
+      catch (e) {
+      }
+      if(fieldValue && Object.keys(fieldValue).length !== 0) {
+        var keys = Object.keys(fieldValue);
+        keys.forEach(function(key){
+          if (fieldValue[key]) {
+            if (!fields.vars) {
+              fields.vars = {};
+            }
+            fields.vars[key] = fieldValue[key];
+          }
+        });
+      }
+      else if(scope && scope.$parent ) {
+        return recursiveLookup(scope.$parent);
+      }
+      return;
+    };
+    recursiveLookup(scope);
 
     for (var key in this.cronapi.$scope.params) {
       if (this.cronapi.$scope.params[key]) {
@@ -780,8 +797,25 @@
       if (field && field.length > 0) {
         if (field.indexOf('.active.') > -1)
           return eval(field);
-        else
-          return eval('this.'+field);
+        else{
+            var scope = eval('this');
+            var recursiveLookup = function(scope) {
+              var fieldValue;
+              try {
+                fieldValue = eval("scope." + field);
+              }
+              catch (e) {
+              }
+              if(fieldValue){
+                return fieldValue;
+              }
+              else if(scope && scope.$parent ) {
+                return recursiveLookup(scope.$parent);
+              }
+              return '';
+            };
+            return recursiveLookup(scope);
+        }
       }
       return '';
     }
