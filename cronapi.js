@@ -1516,7 +1516,8 @@
    */
   this.cronapi.dateTime = {};
 
-  this.cronapi.dateTime.utcTimestamp = window.utcTimeZone === undefined || window.utcTimeZone === null ? true : window.blockly.utcTimeZone;
+
+  this.cronapi.dateTime.utcTimestamp = true
 
   this.cronapi.dateTime.formats = function() {
     var formats = [];
@@ -1828,11 +1829,7 @@
    * @returns {ObjectType.DATETIME}
    */
   this.cronapi.dateTime.getNow = function() {
-    var momentDate = moment();
-    if (this.cronapi.dateTime.utcTimestamp) {
-      momentDate.add(momentDate.utcOffset(), 'm');
-    }
-    return momentDate.toDate();
+    return moment().toDate();
   };
 
   /**
@@ -1845,7 +1842,7 @@
    * @returns {ObjectType.STRING}
    */
   this.cronapi.dateTime.formatDateTime = function(date, format) {
-    return this.cronapi.dateTime.getMomentObj(date).format(format);
+    return moment(date).format(format);
   };
 
   /**
