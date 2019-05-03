@@ -1,3 +1,21 @@
+if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
+  window.fixedTimeZone = true;
+}
+
+if (window.timeZone === undefined || window.timeZone === null) {
+  window.timeZone = "UTC";
+}
+
+if (window.timeZoneOffset === undefined || window.timeZoneOffset === null) {
+  window.timeZoneOffset = 0;
+}
+
+if (window.fixedTimeZone) {
+  window.timeZoneOffset = window.timeZoneOffset;
+} else {
+  window.timeZoneOffset = moment().utcOffset();
+}
+
 (function() {
   'use strict';
 
@@ -308,7 +326,8 @@
       headers : {
         'Content-Type' : 'application/json',
         'X-AUTH-TOKEN' : token,
-        'toJS' : true
+        'toJS' : true,
+        'timezone': moment().utcOffset()
       },
       success : callbackSuccess,
       error : callbackError
@@ -475,7 +494,8 @@
       headers : {
         'Content-Type' : 'application/json',
         'X-AUTH-TOKEN' : token,
-        'toJS' : true
+        'toJS' : true,
+        'timezone': moment().utcOffset()
       }
     });
 
@@ -494,28 +514,28 @@
     return result;
   };
 
-    /**
-     * @type function
-     * @name {{callServerBlocklyAsync}}
-     * @nameTags callServerBlocklyAsync
-     * @description {{callServerBlocklyAsync}}
-     * @param {ObjectType.OBJECT} params {{params}}
-     * @wizard procedures_callblockly_callreturn_async
-     * @returns {ObjectType.OBJECT}
-     */
-    this.cronapi.util.callServerBlocklyAsynchronous = function(classNameWithMethod , callback , params) {
-        if(classNameWithMethod != '' && typeof callback == 'function'){
-            var params = [];
-            params.push(classNameWithMethod);
-            params.push(callback);
-            params.push(callback);
-            var idx = 2;
-            for(idx; idx < arguments.length ; idx ++){
-                params.push(arguments[idx]);
-            };
-          this.cronapi.util.makeCallServerBlocklyAsync.apply(this,params);
-        }
-    };
+  /**
+   * @type function
+   * @name {{callServerBlocklyAsync}}
+   * @nameTags callServerBlocklyAsync
+   * @description {{callServerBlocklyAsync}}
+   * @param {ObjectType.OBJECT} params {{params}}
+   * @wizard procedures_callblockly_callreturn_async
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.util.callServerBlocklyAsynchronous = function(classNameWithMethod , callback , params) {
+    if(classNameWithMethod != '' && typeof callback == 'function'){
+      var params = [];
+      params.push(classNameWithMethod);
+      params.push(callback);
+      params.push(callback);
+      var idx = 2;
+      for(idx; idx < arguments.length ; idx ++){
+        params.push(arguments[idx]);
+      };
+      this.cronapi.util.makeCallServerBlocklyAsync.apply(this,params);
+    }
+  };
 
   /**
    * @type function
@@ -609,16 +629,16 @@
   };
 
 
-    /**
-     * @type function
-     * @name {{getUserToken}}
-     * @nameTags token | auth | autenticaçào | armazenamento
-     * @description {{getUserTokenDesc}}
-     * @returns {ObjectType.STRING}
-     */
-    this.cronapi.util.getUserToken = function() {
-        return JSON.parse(window.localStorage.getItem('_u')).token;
-    };
+  /**
+   * @type function
+   * @name {{getUserToken}}
+   * @nameTags token | auth | autenticaçào | armazenamento
+   * @description {{getUserTokenDesc}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getUserToken = function() {
+    return JSON.parse(window.localStorage.getItem('_u')).token;
+  };
 
   /**
    * @type function
@@ -1354,7 +1374,7 @@
     if($('#'+id).data("kendoComboBox")){
       $('#'+id).data("kendoComboBox").enable(false);
     }else{
-    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
+      $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
     }
   };
 
@@ -1402,18 +1422,18 @@
     $('#'+id).attr(attrName , attrValue);
   };
 
-    /**
-     * @type function
-     * @name {{changeContent}}
-     * @nameTags change|content|conteudo|moficiar
-     * @description {{changeContentDesc}}
-     * @param {ObjectType.STRING} id {{idsFromScreen}}
-     * @param {ObjectType.STRING} content {{content}}
+  /**
+   * @type function
+   * @name {{changeContent}}
+   * @nameTags change|content|conteudo|moficiar
+   * @description {{changeContentDesc}}
+   * @param {ObjectType.STRING} id {{idsFromScreen}}
+   * @param {ObjectType.STRING} content {{content}}
      * @param {ObjectType.BOOLEAN} compile {{compile}}
-     * @multilayer true
-     */
+   * @multilayer true
+   */
     this.cronapi.screen.changeContent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id , /** @type {ObjectType.STRING} */ content, /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}*/ compile) {
-      $('#'+id).html(content);
+    $('#'+id).html(content);
       if(compile === true || compile === 'true'){
         var $injector = angular.injector(['ng']);
         var that = this;
@@ -1421,9 +1441,9 @@
           $compile(document.querySelector('#'+id))(that.cronapi.$scope);
         }]);
       }
-    };
-    
-    /**
+  };
+
+  /**
    * @type function
    * @name {{logoutName}}
    * @nameTags logout
@@ -1482,8 +1502,6 @@
    */
   this.cronapi.dateTime = {};
 
-  this.cronapi.dateTime.utcTimestamp = window.utcTimeZone === undefined || window.utcTimeZone === null ? true : window.blockly.utcTimeZone;
-
   this.cronapi.dateTime.formats = function() {
     var formats = [];
 
@@ -1501,14 +1519,12 @@
 
   this.cronapi.dateTime.getMomentObj = function(value) {
     var currentMoment = moment;
-    if (this.cronapi.dateTime.utcTimestamp)
-      currentMoment = moment.utc;
 
     if (value  instanceof moment) {
       return value;
     }
     else if (value instanceof Date) {
-      return currentMoment(value);
+      return currentMoment(value).utcOffset(window.timeZoneOffset);
     }
     else  {
       var formats = this.cronapi.dateTime.formats();
@@ -1795,9 +1811,6 @@
    */
   this.cronapi.dateTime.getNow = function() {
     var momentDate = moment();
-    if (this.cronapi.dateTime.utcTimestamp) {
-      momentDate.add(momentDate.utcOffset(), 'm');
-    }
     return momentDate.toDate();
   };
 
@@ -3001,25 +3014,25 @@
   };
 
 
-    /**
-     *  @type function
-     * @platform M
-     * @name {{getFirebaseNotificationData}}
-     * @nameTags firebase|token|push|notification
-     * @param {ObjectType.STATEMENTSENDER} success {{success}}
-     * @param {ObjectType.STATEMENTSENDER} error {{error}}
-     * @description {{getFirebaseNotificationDataDesc}}
-     * @returns {ObjectType.VOID}
-     */
-    this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
-        function onDeviceReady() { window.FirebasePlugin.onNotificationOpen(function(notification) {
-            success(notification);
-        }, function(err) {
-            error(err);
-        });
-        };
-        document.addEventListener("deviceready", onDeviceReady, false);
+  /**
+   *  @type function
+   * @platform M
+   * @name {{getFirebaseNotificationData}}
+   * @nameTags firebase|token|push|notification
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @description {{getFirebaseNotificationDataDesc}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
+    function onDeviceReady() { window.FirebasePlugin.onNotificationOpen(function(notification) {
+      success(notification);
+    }, function(err) {
+      error(err);
+    });
     };
+    document.addEventListener("deviceready", onDeviceReady, false);
+  };
 
 
   /**
@@ -3819,36 +3832,36 @@
 
 
   this.cronapi.social.gup = function(name,url){
-      if (!url) url = location.href;
-      name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-      var regexS = "[\\?&]"+name+"=([^&#]*)";
-      var regex = new RegExp( regexS );
-      var results = regex.exec( url );
-      return results == null ? null : results[1];
+    if (!url) url = location.href;
+    name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+    var regexS = "[\\?&]"+name+"=([^&#]*)";
+    var regex = new RegExp( regexS );
+    var results = regex.exec( url );
+    return results == null ? null : results[1];
   }
 
   this.cronapi.social.login = function(login,password,options){
-      var item;
-      this.cronapi.screen.showLoading();
-      if (!this.cronapi.logic.isNullOrEmpty(this.cronapi.screen.getHostapp())) {
-          this.cronapi.util.getURLFromOthers('POST', 'application/x-www-form-urlencoded', String(this.cronapi.screen.getHostapp()) + String('auth'), this.cronapi.object.createObjectFromString(['{ \"username\": \"',login,'\" , \"password\": \"',password,'\" } '].join('')), this.cronapi.object.createObjectFromString(['{ \"X-AUTH-TOKEN\": \"',options,'\" } '].join('')), function(sender_item) {
-              item = sender_item;
-              this.cronapi.screen.hide();
-              this.cronapi.util.setLocalStorage('_u', this.cronapi.object.serializeObject(item));
-              this.cronapi.screen.changeView("#/app/logged/home",[  ]);
-          }.bind(this), function(sender_item) {
-              item = sender_item;
-              if (this.cronapi.object.getProperty(item, 'status') == '403' || this.cronapi.object.getProperty(item, 'status') == '401') {
-                  this.cronapi.screen.notify('error',this.cronapi.i18n.translate("LoginViewInvalidpassword",[  ]));
-              } else {
-                  this.cronapi.screen.notify('error',this.cronapi.object.getProperty(item, 'responseJSON.message'));
-              }
-              this.cronapi.screen.hide();
-          }.bind(this));
-      } else {
-          this.cronapi.screen.hide();
-          this.cronapi.screen.notify('error','HostApp is Required');
-      }
+    var item;
+    this.cronapi.screen.showLoading();
+    if (!this.cronapi.logic.isNullOrEmpty(this.cronapi.screen.getHostapp())) {
+      this.cronapi.util.getURLFromOthers('POST', 'application/x-www-form-urlencoded', String(this.cronapi.screen.getHostapp()) + String('auth'), this.cronapi.object.createObjectFromString(['{ \"username\": \"',login,'\" , \"password\": \"',password,'\" } '].join('')), this.cronapi.object.createObjectFromString(['{ \"X-AUTH-TOKEN\": \"',options,'\" } '].join('')), function(sender_item) {
+        item = sender_item;
+        this.cronapi.screen.hide();
+        this.cronapi.util.setLocalStorage('_u', this.cronapi.object.serializeObject(item));
+        this.cronapi.screen.changeView("#/app/logged/home",[  ]);
+      }.bind(this), function(sender_item) {
+        item = sender_item;
+        if (this.cronapi.object.getProperty(item, 'status') == '403' || this.cronapi.object.getProperty(item, 'status') == '401') {
+          this.cronapi.screen.notify('error',this.cronapi.i18n.translate("LoginViewInvalidpassword",[  ]));
+        } else {
+          this.cronapi.screen.notify('error',this.cronapi.object.getProperty(item, 'responseJSON.message'));
+        }
+        this.cronapi.screen.hide();
+      }.bind(this));
+    } else {
+      this.cronapi.screen.hide();
+      this.cronapi.screen.notify('error','HostApp is Required');
+    }
   }
 
   /**
@@ -3860,19 +3873,19 @@
    * @returns {ObjectType.VOID}
    */
   this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork) {
-      var that = this;
-      var u = window.hostApp+"signin/"+socialNetwork+"/";
-      if(cordova.InAppBrowser){
-          var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
-          cref.addEventListener('loadstart', function(event) {
-              if (event.url.indexOf("_ctk") > -1) {
-                  cref.close();
-                  that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
-              }
-          });
-      }else{
-          //TODO LOGIN ON WEB
-      }
+    var that = this;
+    var u = window.hostApp+"signin/"+socialNetwork+"/";
+    if(cordova.InAppBrowser){
+      var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
+      cref.addEventListener('loadstart', function(event) {
+        if (event.url.indexOf("_ctk") > -1) {
+          cref.close();
+          that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
+        }
+      });
+    }else{
+      //TODO LOGIN ON WEB
+    }
   }
 
   /**
