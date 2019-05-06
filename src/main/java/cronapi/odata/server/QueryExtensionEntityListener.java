@@ -116,11 +116,15 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
       EdmEntityType entityType = uriInfo.getTargetEntitySet().getEntityType();
 
-      if (customQuery != null) {
+      boolean isJPQL = entityType.getName().equals("jpql");
 
-        QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
+      if (customQuery != null || isJPQL) {
 
-        boolean isBlockly = QueryManager.isNull(customQuery.get("entityFullName"));
+        if (!isJPQL) {
+          QueryManager.checkSecurity(customQuery, RestClient.getRestClient().getMethod());
+        }
+
+        boolean isBlockly = !isJPQL && QueryManager.isNull(customQuery.get("entityFullName"));
 
         String restMethod = getRestMehtod(uriInfo);
 
@@ -142,7 +146,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         boolean hasGroupBy = false;
 
         if (!isBlockly) {
-          jpqlStatement = QueryManager.getJPQL(customQuery, false);
+          if (isJPQL) {
+            jpqlStatement = RestClient.getRestClient().getParameter("jpql");
+          } else {
+            jpqlStatement = QueryManager.getJPQL(customQuery, false);
+          }
 
           JPQLExpression jpqlExpression = new JPQLExpression(
               jpqlStatement,
@@ -324,20 +332,32 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             i++;
             String strValue = RestClient.getRestClient().getParameter(param.substring(1));
             int idx = argsNames.indexOf(String.valueOf(i));
-            Class type = argsTypes.get(idx);
-            if (strValue != null) {
-              Var requestParam = null;
-              if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
-                requestParam = Var.valueOf(Var.deserialize(strValue));
-              } else {
-                requestParam = Var.valueOf(strValue);
-              }
-              query.setParameter(i, requestParam.getObject(type));
-            } else {
-              Map<String, Var> customValues = new LinkedHashMap<>();
-              customValues.put("entityName", Var.valueOf(uriInfo.getTargetEntitySet().getName()));
+            Class type = null;
+            if (idx != -1) {
+              type = argsTypes.get(idx);
 
-              query.setParameter(i, QueryManager.getParameterValue(customQuery, param.substring(1), customValues).getObject(type));
+              if (strValue != null) {
+                Var requestParam = null;
+                if (strValue.contains("@@") || type.getSimpleName().equals("Object")) {
+                  requestParam = Var.valueOf(Var.deserialize(strValue));
+                } else {
+                  requestParam = Var.valueOf(strValue);
+                }
+
+                if (param.indexOf("__") > 0) {
+                  Class paramClass = Var.getType(param.substring(1));
+                  type = paramClass;
+                }
+
+                query.setParameter(i, requestParam.getObject(type));
+              } else {
+                Map<String, Var> customValues = new LinkedHashMap<>();
+                customValues.put("entityName", Var.valueOf(uriInfo.getTargetEntitySet().getName()));
+
+                query.setParameter(i,
+                    QueryManager.getParameterValue(customQuery, param.substring(1), customValues)
+                        .getObject(type));
+              }
             }
           }
         }

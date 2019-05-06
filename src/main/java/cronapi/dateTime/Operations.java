@@ -1,14 +1,13 @@
 package cronapi.dateTime;
 
+import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
+import cronapi.Utils;
+import cronapi.Var;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import cronapi.CronapiMetaData;
-import cronapi.Utils;
-import cronapi.Var;
-import cronapi.CronapiMetaData.CategoryType;
-import cronapi.CronapiMetaData.ObjectType;
 
 /**
  * Classe que representa ...
@@ -262,13 +261,14 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{getNow}}", nameTags = { "getNow", "now",
       "getDate" }, description = "{{functionToGetNow}}", returnType = ObjectType.DATETIME)
   public static final Var getNow() throws Exception {
-    return new Var(new Date());
+    Calendar cal = Calendar.getInstance();
+    return new Var(cal.getTime());
   }
 
   @CronapiMetaData(type = "function", name = "{{getNowNoHour}}", nameTags = { "getNow", "now",
       "getDate" }, description = "{{functionToGetNowNoHour}}", returnType = ObjectType.DATETIME)
   public static final Var getNowNoHour() throws Exception {
-    Calendar cal = Calendar.getInstance();
+    Calendar cal = (Calendar) getNow().getObject();
     cal.set(Calendar.HOUR_OF_DAY, 0);
     cal.set(Calendar.MINUTE, 0);
     cal.set(Calendar.SECOND, 0);

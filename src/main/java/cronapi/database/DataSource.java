@@ -10,6 +10,7 @@ import cronapi.RestClient;
 import cronapi.Utils;
 import cronapi.Var;
 import cronapi.i18n.Messages;
+import cronapi.odata.server.DatasourceExtension;
 import cronapi.rest.security.CronappSecurity;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -26,6 +27,9 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
+import org.apache.olingo.odata2.api.edm.provider.Property;
+import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
+import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmModel;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.descriptors.ClassDescriptor;
 import org.eclipse.persistence.descriptors.DescriptorQueryManager;
@@ -66,6 +70,8 @@ public class DataSource implements JsonSerializable {
   private EntityManager customEntityManager;
   private DataSourceFilter dsFilter;
   private boolean multiTenant = true;
+  private boolean plainData = false;
+  private boolean useUrlParams = false;
 
   /**
    * Init a datasource with a page size equals 100
@@ -109,7 +115,7 @@ public class DataSource implements JsonSerializable {
     this.instantiateRepository();
   }
 
-  private EntityManager getEntityManager(Class domainClass) {
+  public EntityManager getEntityManager(Class domainClass) {
     EntityManager em;
     if (customEntityManager != null)
       em = customEntityManager;
@@ -245,7 +251,7 @@ public class DataSource implements JsonSerializable {
 
     try {
 
-      boolean namedParams = params.length > 0 && params[0].getId() != null;
+      boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
 
       List<String> parsedParams = parseParams(jpql);
 
@@ -259,11 +265,16 @@ public class DataSource implements JsonSerializable {
 
       if (namedParams) {
         paramsValues = new LinkedHashMap<>();
-        for (Var p : params) {
-          paramsValues.put(p.getId(), p);
+        if (useUrlParams) {
+          for (String key: parsedParams) {
+            paramsValues.put(key, Var.valueOf(RestClient.getRestClient().getParameter(key)));
+          }
+        } else {
+          for (Var p : params) {
+            paramsValues.put(p.getId(), p);
+          }
         }
       }
-
 
       EntityManager em = getEntityManager(domainClass);
 
@@ -323,6 +334,18 @@ public class DataSource implements JsonSerializable {
 
       List<?> resultsInPage = query.getResultList();
 
+      if (plainData) {
+        String context = this.entity.substring(0, this.entity.indexOf("."));
+        JPAEdmModel model = new JPAEdmModel(em.getMetamodel(), context);
+        model.getBuilder().build();
+
+        DatasourceExtension extension = new DatasourceExtension((EntityManagerImpl) em, 1);
+        extension.jpql(jpql);
+        extension.extendJPAEdmSchema(model.getEdmSchemaView().getEdmSchema());
+
+        resultsInPage = normalizeList(resultsInPage, extension.getJpqlEntity());
+      }
+
       this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -335,6 +358,57 @@ public class DataSource implements JsonSerializable {
       this.current = 0;
 
     return this.page.getContent().toArray();
+  }
+
+  private List normalizeList(List entities,
+      org.apache.olingo.odata2.api.edm.provider.EntityType entityType) {
+    if (entities != null && !entities.isEmpty()) {
+      try {
+
+        List<Object> newEntities = new LinkedList<Object>();
+        Var entity = Var.valueOf(new LinkedHashMap<>());
+        for (Object obj : entities) {
+
+          if (obj.getClass().isArray()) {
+            int i = 0;
+
+            for (Object o : (Object[]) obj) {
+              JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) entityType.getProperties().get(i).getMapping();
+              String key = entityType.getProperties().get(i).getName();
+              if (mapping != null && mapping.isPath()) {
+                Var sub;
+                if (mapping.getComplexIndex() != -1) {
+                  sub = Var.valueOf(((Object[]) obj)[mapping.getComplexIndex()]);
+                } else {
+                  sub = Var.valueOf(o);
+                }
+                entity.set(key, sub.get(mapping.getPath()));
+              } else {
+                entity.set(key, o);
+              }
+
+              i++;
+            }
+          } else {
+            Var sub = Var.valueOf(obj);
+            for (Property property : entityType.getProperties()) {
+              JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) property.getMapping();
+              String key = property.getName();
+              entity.set(key, sub.get(mapping.getInternalName()));
+            }
+          }
+        }
+
+        newEntities.add(entity);
+
+        entities = newEntities;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return entities;
+
   }
 
   public EntityMetadata getMetadata() {
@@ -1329,6 +1403,22 @@ public class DataSource implements JsonSerializable {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public boolean isPlainData() {
+    return plainData;
+  }
+
+  public void setPlainData(boolean plainData) {
+    this.plainData = plainData;
+  }
+
+  public boolean useUrlParams() {
+    return useUrlParams;
+  }
+
+  public void setUseUrlParams(boolean useUrlParams) {
+    this.useUrlParams = useUrlParams;
   }
 
   public void flush() {

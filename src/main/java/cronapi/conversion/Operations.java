@@ -5,11 +5,13 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 
@@ -170,5 +172,11 @@ public class Operations {
 	public static final Var formatDouble(Var val, Var mask) throws Exception {
 		NumberFormat _formatter = new DecimalFormat(mask.toString());
 		return Var.valueOf(_formatter.format(val.getObjectAsDouble() ) );
+	}
+
+
+	@CronapiMetaData(type = "function", name = "{{convertLongToDate}}", description = "{{convertLongToDateDescription}}", returnType = ObjectType.DATETIME)
+	public static Var convertLongToDate(@ParamMetaData(type = ObjectType.STRING, description = "{{content}}") Var input) {
+		return Var.valueOf( new Date(Long.parseLong(input.getObjectAsString())));
 	}
 }

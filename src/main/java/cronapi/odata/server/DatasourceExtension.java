@@ -5,11 +5,28 @@ import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.CronapiSearchable;
 import cronapi.QueryManager;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeKind;
 import org.apache.olingo.odata2.api.edm.FullQualifiedName;
-import org.apache.olingo.odata2.api.edm.provider.*;
+import org.apache.olingo.odata2.api.edm.provider.AssociationSet;
+import org.apache.olingo.odata2.api.edm.provider.AssociationSetEnd;
+import org.apache.olingo.odata2.api.edm.provider.EntityContainer;
+import org.apache.olingo.odata2.api.edm.provider.EntitySet;
+import org.apache.olingo.odata2.api.edm.provider.EntityType;
+import org.apache.olingo.odata2.api.edm.provider.Facets;
+import org.apache.olingo.odata2.api.edm.provider.Key;
+import org.apache.olingo.odata2.api.edm.provider.Property;
+import org.apache.olingo.odata2.api.edm.provider.PropertyRef;
+import org.apache.olingo.odata2.api.edm.provider.Schema;
+import org.apache.olingo.odata2.api.edm.provider.SimpleProperty;
 import org.apache.olingo.odata2.core.CloneUtils;
 import org.apache.olingo.odata2.core.edm.EdmSimpleTypeFacadeImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
@@ -25,21 +42,41 @@ import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.queries.ReportItem;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.jpa.jpql.parser.*;
+import org.eclipse.persistence.jpa.jpql.parser.CollectionExpression;
+import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
+import org.eclipse.persistence.jpa.jpql.parser.Expression;
+import org.eclipse.persistence.jpa.jpql.parser.IdentificationVariable;
+import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
+import org.eclipse.persistence.jpa.jpql.parser.ResultVariable;
+import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
+import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
 import org.eclipse.persistence.jpa.jpql.utility.iterable.ListIterable;
+import org.eclipse.persistence.queries.ReadAllQuery;
 import org.eclipse.persistence.queries.ReportQuery;
-
-import java.io.InputStream;
-import java.util.*;
 
 public class DatasourceExtension implements JPAEdmExtension {
 
-  private final ODataJPAContext context;
+  public static final String JPQL = "jpql";
+  private final EntityManagerImpl em;
   private int order;
+  private String jpql;
+  private EntityType jpqlEntity;
 
   public DatasourceExtension(ODataJPAContext context, int order) {
-    this.context = context;
+    this((EntityManagerImpl) context.getEntityManager(), order);
+  }
+
+  public DatasourceExtension(EntityManagerImpl em, int order) {
+    this.em = em;
     this.order = order;
+  }
+
+  public void jpql(String jpql) {
+    this.jpql = jpql;
+  }
+
+  public EntityType getJpqlEntity() {
+    return this.jpqlEntity;
   }
 
   @Override
@@ -49,66 +86,76 @@ public class DatasourceExtension implements JPAEdmExtension {
 
   @Override
   public void extendJPAEdmSchema(JPAEdmSchemaView view) {
-    Schema edmSchema = view.getEdmSchema();
+    extendJPAEdmSchema(view.getEdmSchema());
+  }
 
-    for (EntitySet set : edmSchema.getEntityContainers().get(0).getEntitySets()) {
-      set.setShowMetadata(AppConfig.exposeLocalEntities());
-    }
+  public void extendJPAEdmSchema(Schema edmSchema) {
 
-    List<EntityType> localEntities = new LinkedList<>();
+    if (jpql != null) {
+      createJpqlDataSource(edmSchema, JPQL, jpql, null, null);
 
-    for (EntityType type : edmSchema.getEntityTypes()) {
-      localEntities.add(type);
-    }
-
-    List<EntitySet> queryDatasource = new LinkedList<>();
-
-    JsonObject queries = QueryManager.getJSON();
-    for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
-      JsonObject customObj = entry.getValue().getAsJsonObject();
-
-      LinkedList<CalcField> calcFields = new LinkedList<>();
-
-      if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
-        if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
-          JsonObject calcObj = customObj.get("calcFieldsProperties").getAsJsonObject();
-          for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
-            CalcField field = new CalcField();
-            field.name = entryObj.getKey();
-            field.type = entryObj.getValue().getAsJsonObject().get("type").getAsString();
-            calcFields.add(field);
-          }
-        }
-      } else {
-        //Suporte ao legado
-        if (!QueryManager.isNull(customObj.get("calcFields"))) {
-          JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
-          for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
-            CalcField field = new CalcField();
-            field.name = entryObj.getKey();
-            calcFields.add(field);
-          }
+      for (EntityType type : edmSchema.getEntityTypes()) {
+        if (!type.getName().equals(JPQL)) {
+          type.setShowMetadata(false);
+        } else {
+          this.jpqlEntity = type;
         }
       }
 
-      if (!QueryManager.isNull(customObj.get("entityFullName"))) {
-        String clazz = customObj.get("entityFullName").getAsString();
-        if (clazz.startsWith(edmSchema.getNamespace() + ".")) {
-          try {
-            EntitySet set = createDataSource(edmSchema, customObj.get("customId").getAsString(), customObj.get("entitySimpleName").getAsString(), calcFields);
-            if (set != null) {
-              queryDatasource.add(set);
+      for (EntityContainer container : edmSchema.getEntityContainers()) {
+        for (EntitySet entitySet : container.getEntitySets()) {
+          entitySet.setShowMetadata(false);
+        }
+      }
+
+    } else {
+
+      for (EntitySet set : edmSchema.getEntityContainers().get(0).getEntitySets()) {
+        set.setShowMetadata(AppConfig.exposeLocalEntities());
+      }
+
+      List<EntityType> localEntities = new LinkedList<>();
+
+      for (EntityType type : edmSchema.getEntityTypes()) {
+        localEntities.add(type);
+      }
+
+      List<EntitySet> queryDatasource = new LinkedList<>();
+
+      JsonObject queries = QueryManager.getJSON();
+      for (Map.Entry<String, JsonElement> entry : queries.entrySet()) {
+        JsonObject customObj = entry.getValue().getAsJsonObject();
+
+        LinkedList<CalcField> calcFields = new LinkedList<>();
+
+        if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
+          if (!QueryManager.isNull(customObj.get("calcFieldsProperties"))) {
+            JsonObject calcObj = customObj.get("calcFieldsProperties").getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
+              CalcField field = new CalcField();
+              field.name = entryObj.getKey();
+              field.type = entryObj.getValue().getAsJsonObject().get("type").getAsString();
+              calcFields.add(field);
             }
-          } catch (Exception e) {
-            e.printStackTrace();
+          }
+        } else {
+          //Suporte ao legado
+          if (!QueryManager.isNull(customObj.get("calcFields"))) {
+            JsonObject calcObj = customObj.get("calcFields").getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entryObj : calcObj.entrySet()) {
+              CalcField field = new CalcField();
+              field.name = entryObj.getKey();
+              calcFields.add(field);
+            }
           }
         }
-      } else {
-        if (!QueryManager.isNull(customObj.get("baseEntity"))) {
-          String baseEntity = customObj.get("baseEntity").getAsString();
-          if (baseEntity.startsWith(edmSchema.getNamespace() + ".")) {
+
+        if (!QueryManager.isNull(customObj.get("entityFullName"))) {
+          String clazz = customObj.get("entityFullName").getAsString();
+          if (clazz.startsWith(edmSchema.getNamespace() + ".")) {
             try {
-              EntitySet set = createBlocklyDataSource(edmSchema, customObj.get("customId").getAsString(), customObj, calcFields);
+              EntitySet set = createDataSource(edmSchema, customObj.get("customId").getAsString(),
+                  customObj.get("entitySimpleName").getAsString(), calcFields);
               if (set != null) {
                 queryDatasource.add(set);
               }
@@ -117,45 +164,61 @@ public class DatasourceExtension implements JPAEdmExtension {
             }
           }
         } else {
-          if (order == 0) {
-            try {
-              EntitySet set = createBlocklyDataSource(edmSchema, customObj.get("customId").getAsString(), customObj, calcFields);
-              if (set != null) {
-                queryDatasource.add(set);
+          if (!QueryManager.isNull(customObj.get("baseEntity"))) {
+            String baseEntity = customObj.get("baseEntity").getAsString();
+            if (baseEntity.startsWith(edmSchema.getNamespace() + ".")) {
+              try {
+                EntitySet set = createBlocklyDataSource(edmSchema,
+                    customObj.get("customId").getAsString(), customObj, calcFields);
+                if (set != null) {
+                  queryDatasource.add(set);
+                }
+              } catch (Exception e) {
+                e.printStackTrace();
               }
-            } catch (Exception e) {
-              e.printStackTrace();
             }
+          } else {
+            if (order == 0) {
+              try {
+                EntitySet set = createBlocklyDataSource(edmSchema,
+                    customObj.get("customId").getAsString(), customObj, calcFields);
+                if (set != null) {
+                  queryDatasource.add(set);
+                }
+              } catch (Exception e) {
+                e.printStackTrace();
+              }
+            }
+          }
+        }
+
+      }
+
+      if (!AppConfig.exposeLocalEntities()) {
+        edmSchema.getEntityContainers().get(0).getAssociationSets().clear();
+
+        for (EntityType type : edmSchema.getEntityTypes()) {
+          if (type.getNavigationProperties() != null) {
+            type.getNavigationProperties().clear();
           }
         }
       }
 
-    }
-
-    if (!AppConfig.exposeLocalEntities()) {
-      edmSchema.getEntityContainers().get(0).getAssociationSets().clear();
-
-      for (EntityType type : edmSchema.getEntityTypes()) {
-        if (type.getNavigationProperties() != null) {
-          type.getNavigationProperties().clear();
+      for (EntityType type : localEntities) {
+        JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) type.getMapping();
+        if (mapping != null && !mapping.isVirtualAccess()) {
+          addDisplayFields(edmSchema, type);
         }
       }
-    }
 
-    for (EntityType type : localEntities) {
-      JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) type.getMapping();
-      if (mapping != null && !mapping.isVirtualAccess()) {
-        addDisplayFields(edmSchema, type);
+      for (EntityType type : edmSchema.getEntityTypes()) {
+        type.setShowMetadata(AppConfig.exposeMetadada());
       }
-    }
 
-    for (EntityType type : edmSchema.getEntityTypes()) {
-      type.setShowMetadata(AppConfig.exposeMetadada());
-    }
-
-    for (EntityContainer container : edmSchema.getEntityContainers()) {
-      for (EntitySet set : container.getEntitySets()) {
-        set.setShowMetadata(AppConfig.exposeMetadada());
+      for (EntityContainer container : edmSchema.getEntityContainers()) {
+        for (EntitySet set : container.getEntitySets()) {
+          set.setShowMetadata(AppConfig.exposeMetadada());
+        }
       }
     }
   }
@@ -173,7 +236,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     try {
       return JPATypeConverter.convertToEdmSimpleType(fieldClass, null);
     } catch (ODataJPAModelException e) {
-      return EdmSimpleTypeKind.String;
+      return EdmSimpleTypeKind.Auto;
     }
   }
 
@@ -241,13 +304,13 @@ public class DatasourceExtension implements JPAEdmExtension {
   private Property findBestDisplayField(EntityType complexType) {
     Class clazz = ((JPAEdmMappingImpl) complexType.getMapping()).getJPAType();
     Field[] fields = clazz.getDeclaredFields();
-    for (Field field: fields) {
+    for (Field field : fields) {
       try {
         CronapiSearchable searchable = field.getAnnotation(CronapiSearchable.class);
         if (searchable != null) {
           return findProperty(complexType, field.getName());
         }
-      } catch(Exception e) {
+      } catch (Exception e) {
         //
       }
     }
@@ -295,7 +358,9 @@ public class DatasourceExtension implements JPAEdmExtension {
         ((Facets) newProp.getFacets()).setNullable(true);
 
         JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
-        newMapping.setInternalName(newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf(".")) + "." + best.getName());
+        newMapping.setInternalName(
+            newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf("."))
+                + "." + best.getName());
         newProp.setMapping(newMapping);
 
         int total = 0;
@@ -310,36 +375,46 @@ public class DatasourceExtension implements JPAEdmExtension {
           newProp.setName(name + "_" + total);
         }
 
-
         type.getProperties().add(newProp);
 
       }
     }
   }
 
-  private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema, Class type, String orgName, String internalName, String expression, List<Property> properties, List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra) {
+  public static Pattern PLAIN_EXPRESSION = Pattern.compile("^[a-zA-Z0-9_.-]*$");
+
+  private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema,
+      Class type, String orgName, String internalName, String expression, List<Property> properties,
+      List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra, String complexPath, int complexIndex) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
-
+    EntityType complexType = null;
     if (isComplex) {
-      EntityType complexType = findEntityType(edmSchema, type.getSimpleName());
-      if (complexType != null) {
-
-        String internalExpression = expression.substring(expression.indexOf(".") + 1);
-        List<PropertyRef> keys = complexType.getKey().getKeys();
-        SimpleProperty first = null;
-        for (PropertyRef key : keys) {
-          Property prop = findProperty(complexType, key.getName());
-          first = addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(), alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(), "[name]." + key.getName(), expression + "." + key.getName(), properties, propertyRefList, extras, first != null);
-        }
-
-        if (first != null) {
-          SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-          addProperty(orgName, mainType, edmSchema, ((JPAEdmMappingImpl) best.getMapping()).getJPAType(), alias != null ? alias + "_" + best.getName() : internalExpression.replace(".", "_") + "_" + best.getName(), first.getName() + "." + best.getName(), expression + "." + best.getName(), properties, propertyRefList, extras, true);
-        }
-
+      complexType = findEntityType(edmSchema, type.getSimpleName());
+    }
+    if (complexType != null) {
+      int tmpComplexIndex = properties.size();
+      String internalExpression = expression.substring(expression.indexOf(".") + 1);
+      List<PropertyRef> keys = complexType.getKey().getKeys();
+      SimpleProperty first = null;
+      for (PropertyRef key : keys) {
+        Property prop = findProperty(complexType, key.getName());
+        first = addProperty(orgName, mainType, edmSchema,
+            ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(),
+            alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(),
+            "[name]." + key.getName(), expression + "." + key.getName(), properties,
+            propertyRefList, extras, first != null, expression, tmpComplexIndex);
       }
 
+      if (first != null) {
+        SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
+        addProperty(orgName, mainType, edmSchema,
+            ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
+            alias != null ? alias + "_" + best.getName()
+                : internalExpression.replace(".", "_") + "_" + best.getName(),
+            first.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
+            propertyRefList, extras, true, expression, tmpComplexIndex);
+      }
     } else {
 
       int count = StringUtils.countMatches(expression, ".");
@@ -353,8 +428,12 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       property.setType(toEdmSimpleTypeKind(type));
 
+      boolean plainExpression = PLAIN_EXPRESSION.matcher(expression).matches();
+
       if (useExpression) {
-        orgName = expression.substring(expression.indexOf(".") + 1).replace(".", "_");
+        if (plainExpression) {
+          orgName = expression.substring(expression.indexOf(".") + 1).replace(".", "_");
+        }
         internalName = orgName;
       }
 
@@ -377,6 +456,17 @@ public class DatasourceExtension implements JPAEdmExtension {
       mapping.setInternalName(internalName.replace("[name]", property.getName()));
       mapping.setJPAType(type);
       mapping.setVirtualAccess(true);
+      if (complexPath != null) {
+        String path = complexPath.substring(complexPath.indexOf(".")+1);
+        mapping.setComplexPath(path);
+        mapping.setComplexIndex(complexIndex);
+      }
+      if (plainExpression && count > 1) {
+        mapping.setIsPath(true);
+        String path = expression.substring(expression.indexOf(".")+1);
+        path = path.substring(path.indexOf(".")+1);
+        mapping.setPath(path);
+      }
 
       property.setMapping(mapping);
 
@@ -392,7 +482,8 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private EntitySet createBlocklyDataSource(Schema edmSchema, String id, JsonObject entity, List<CalcField> addFields) {
+  private EntitySet createBlocklyDataSource(Schema edmSchema, String id, JsonObject entity,
+      List<CalcField> addFields) {
     if (entity.get("baseEntity") != null) {
       String baseEntity = entity.get("baseEntity").getAsString();
       if (baseEntity.contains(".")) {
@@ -482,12 +573,17 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
-  private EntitySet createDataSource(Schema edmSchema, String id, String entity, List<CalcField> addFields) {
-
-    String edmNamespace = edmSchema.getNamespace();
-    EntityManagerImpl em = (EntityManagerImpl) context.getEntityManager();
+  private EntitySet createDataSource(Schema edmSchema, String id, String entity,
+      List<CalcField> addFields) {
     JsonObject queryJson = QueryManager.getQuery(id);
     String jpql = QueryManager.getJPQL(queryJson, false);
+    return createJpqlDataSource(edmSchema, id, jpql, entity, addFields);
+  }
+
+  public EntitySet createJpqlDataSource(Schema edmSchema, String id, String jpql, String entity,
+      List<CalcField> addFields) {
+
+    String edmNamespace = edmSchema.getNamespace();
     AbstractSession session = em.getActiveSessionIfExists();
 
     HermesParser parser = new HermesParser();
@@ -498,7 +594,8 @@ public class DatasourceExtension implements JPAEdmExtension {
       ReportQuery reportQuery = (ReportQuery) parser.buildQuery(jpql, session);
       reportQuery.prepareInternal(session);
 
-      if (reportQuery.getItems().size() == 1 && reportQuery.getItems().get(0).getDescriptor() != null) {
+      if (reportQuery.getItems().size() == 1
+          && reportQuery.getItems().get(0).getDescriptor() != null) {
         entity = reportQuery.getItems().get(0).getDescriptor().getJavaClass().getSimpleName();
         return createEntityDataSource(edmSchema, id, entity, addFields);
       } else {
@@ -519,7 +616,8 @@ public class DatasourceExtension implements JPAEdmExtension {
 
         edmSchema.getEntityContainers().get(0).getEntitySets().add(set);
 
-        ListIterable<Expression> children = ((SelectClause) ((SelectStatement) jpqlExpression.getQueryStatement()).getSelectClause()).getSelectExpression().children();
+        ListIterable<Expression> children = ((SelectClause) ((SelectStatement) jpqlExpression
+            .getQueryStatement()).getSelectClause()).getSelectExpression().children();
         ListIterator<Expression> expressions = children.iterator();
         Key key = new Key();
         List<PropertyRef> propertyRefList = new ArrayList<>();
@@ -531,7 +629,8 @@ public class DatasourceExtension implements JPAEdmExtension {
         for (ReportItem item : reportQuery.getItems()) {
           String alias = null;
           Expression expression = expressions.next();
-          if (expression instanceof IdentificationVariable && !(expression.getParent() instanceof CollectionExpression)) {
+          if (expression instanceof IdentificationVariable && !(expression
+              .getParent() instanceof CollectionExpression)) {
             expression = expression.getParent();
           }
 
@@ -550,15 +649,16 @@ public class DatasourceExtension implements JPAEdmExtension {
           } else if (item.getResultType() != null) {
             type = item.getResultType();
           } else if (item.getAttributeExpression() instanceof SubSelectExpression) {
-            List<ReportItem> subItens = ((SubSelectExpression)item.getAttributeExpression()).getSubQuery().getItems();
+            List<ReportItem> subItens = ((SubSelectExpression) item.getAttributeExpression())
+                .getSubQuery().getItems();
             if (subItens.size() == 1) {
               type = subItens.get(0).getResultType();
             } else if (subItens.size() > 1) {
               throw new RuntimeException("Error in JPA subquery!");
             }
           } else if ((item.getAttributeExpression() instanceof ConstantExpression) &&
-                     (((ConstantExpression)item.getAttributeExpression()).getValue() != null)) {
-            type = ((ConstantExpression)item.getAttributeExpression()).getValue().getClass();
+              (((ConstantExpression) item.getAttributeExpression()).getValue() != null)) {
+            type = ((ConstantExpression) item.getAttributeExpression()).getValue().getClass();
           }
 
           String name = item.getName();
@@ -567,7 +667,8 @@ public class DatasourceExtension implements JPAEdmExtension {
             name = "expression";
           }
 
-          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name, expression.toString(), properties, propertyRefList, extras, false);
+          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name,
+              expression.toString(), properties, propertyRefList, extras, false, null, -1);
 
           if (added != null) {
             if (findKey(mainType, added.getName()) != null) {
@@ -614,11 +715,15 @@ public class DatasourceExtension implements JPAEdmExtension {
         return set;
       }
     } else {
+      if (entity == null && query instanceof ReadAllQuery) {
+        entity = ((ReadAllQuery) query).getExpressionBuilder().getQueryClass().getSimpleName();
+      }
       return createEntityDataSource(edmSchema, id, entity, addFields);
     }
   }
 
-  private EntitySet createEntityDataSource(Schema edmSchema, String id, String entity, List<CalcField> addFields) {
+  private EntitySet createEntityDataSource(Schema edmSchema, String id, String entity,
+      List<CalcField> addFields) {
 
     String edmNamespace = edmSchema.getNamespace();
 
@@ -692,6 +797,7 @@ public class DatasourceExtension implements JPAEdmExtension {
   }
 
   public static class CalcField {
+
     String name = null;
     String type = null;
   }

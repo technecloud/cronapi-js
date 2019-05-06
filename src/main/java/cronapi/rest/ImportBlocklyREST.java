@@ -1,5 +1,6 @@
 package cronapi.rest;
 
+import cronapi.AppConfig;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -101,6 +102,9 @@ public class ImportBlocklyREST {
   private void write(PrintWriter out, List<String> imports) {
     String localesKeysString = arrayToString(localesKeys)  + ";";
     String localesRefString = localesRef.toString()  + ";";
+    out.println("window.fixedTimeZone = "+ AppConfig.fixedTimeZone() +";");
+    out.println("window.timeZone = '"+ AppConfig.timeZone() +"';");
+    out.println("window.timeZoneOffset = "+ AppConfig.timeZoneOffset() +";");
     out.println("window.blockly = window.blockly || {};");
     out.println("window.blockly.js = window.blockly.js || {};");
     out.println("window.blockly.js.blockly = window.blockly.js.blockly || {};");

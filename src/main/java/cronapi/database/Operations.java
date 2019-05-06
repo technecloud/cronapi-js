@@ -1,9 +1,6 @@
 package cronapi.database;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +11,8 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
+
+import javax.persistence.EntityManager;
 
 /**
  * Classe que representa operações de acesso ao banco
@@ -152,7 +151,7 @@ public class Operations {
     ds.updateFields(params);
     ds.save();
   }
-  
+
   public static void insert(Var entity, Var object) {
     if(!object.equals(Var.VAR_NULL)) {
       DataSource ds = new DataSource(entity.getObjectAsString());
@@ -162,7 +161,7 @@ public class Operations {
       object.updateWith(saved);
     }
   }
-  
+
   @CronapiMetaData(type = "function", name = "{{update}}", nameTags = { "update", "edit", "editar",
       "alterar" }, description = "{{functionToUpdateObjectInDatasource}}", params = { "{{datasource}}",
           "{{entity}}" }, paramsType = { ObjectType.DATASET,
@@ -267,5 +266,49 @@ public class Operations {
 		}
 		return Var.valueOf(dst);
 	}
+
+  @CronapiMetaData(type = "function", name = "{{commitTransaction}}", nameTags = {"commitTransaction",
+      "commitTransação"}, description = "{{commitTransactionDescription}}", params = {"{{entity}}"}, paramsType = {
+      ObjectType.STRING}, returnType = ObjectType.VOID, wizard = "procedures_setentity_callnoreturn")
+  public static final void commitTransaction(Var object) throws Exception {
+    if (!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      TransactionManager.commit(c);
+    }
+  }
+
+  @CronapiMetaData(type = "function", name = "{{rollbackTransaction}}", nameTags = {"rollbackTransaction",
+      "rollbackTransação"}, description = "{{rollbackTransactionDescription}}", params = {"{{entity}}"}, paramsType = {
+      ObjectType.STRING }, returnType = ObjectType.VOID, wizard = "procedures_setentity_callnoreturn")
+  public static final void rollbackTransaction(Var object) throws Exception {
+    if (!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      TransactionManager.rollback(c);
+    }
+  }
+
+    @CronapiMetaData(type = "function", name = "{{flushTransaction}}", nameTags = {"flushTransaction",
+        "flushTransação"}, description = "{{flushTransactionDescription}}", params = {"{{entity}}"}, paramsType = {
+        ObjectType.STRING}, returnType = ObjectType.VOID, wizard = "procedures_setentity_callnoreturn")
+    public static final void flushTransaction(Var object) throws Exception {
+      if (!object.equals(Var.VAR_NULL)) {
+        String className = object.getObjectAsString();
+        Class<?> c = Class.forName(className);
+        TransactionManager.flush(c);
+      }
+    }
+
+  @CronapiMetaData(type = "function", name = "{{beginTransaction}}", nameTags = {"beginTransaction",
+      "iniciarTransação"}, description = "{{beginTransaction}}", params = {"{{entity}}"}, paramsType = {
+      ObjectType.STRING}, returnType = ObjectType.VOID, wizard = "procedures_setentity_callnoreturn")
+  public static final void beginTransaction(Var object) throws Exception {
+    if (!object.equals(Var.VAR_NULL)) {
+      String className = object.getObjectAsString();
+      Class<?> c = Class.forName(className);
+      TransactionManager.begin(c);
+    }
+  }
   
 }

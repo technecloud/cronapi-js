@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class AppConfig {
+
   public static boolean FORCE_METADATA = false;
   public static boolean FORCE_LOCAL_ENTITIES = false;
   private static JsonObject JSON;
@@ -150,5 +151,32 @@ public class AppConfig {
     }
 
     return false;
+  }
+
+  public static boolean fixedTimeZone() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("fixedTimeZone"))) {
+      return config.get("fixedTimeZone").getAsBoolean();
+    }
+
+    return true;
+  }
+
+  public static String timeZone() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("timeZone"))) {
+      return config.get("timeZone").getAsString();
+    }
+
+    return "UTC";
+  }
+
+  public static int timeZoneOffset() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("timeZoneOffset"))) {
+      return config.get("timeZoneOffset").getAsInt();
+    }
+
+    return 0;
   }
 }

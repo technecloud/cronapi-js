@@ -105,10 +105,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public static final Var VAR_DATE_ZERO;
   private static final NumberFormat _formatter = new DecimalFormat("0.00000");
   public static String[] ALLOWED_TYPES = {"text", "datetime", "date", "number", "integer",
-      "boolean"};
+      "boolean", "list"};
   public static Class[] MAPPED_TYPES = {java.lang.String.class, java.util.Date.class,
       java.util.Date.class,
-      java.lang.Double.class, java.lang.Long.class, java.lang.Boolean.class};
+      java.lang.Double.class, java.lang.Long.class, java.lang.Boolean.class, java.util.Collection.class};
 
   static {
     Calendar calendar = Calendar.getInstance();
@@ -224,6 +224,20 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     return ALLOWED_TYPES[0];
   }
 
+  public static Class getType(String key) {
+    if (key == null) {
+      return null;
+    }
+
+    for (int i = 0; i < ALLOWED_TYPES.length; i++) {
+      if (key.endsWith("__" + ALLOWED_TYPES[i]) || key.endsWith("@@" + ALLOWED_TYPES[i])) {
+        return MAPPED_TYPES[i];
+      }
+    }
+
+    return null;
+  }
+
   public static Object deserialize(String value) {
     if (value == null) {
       return null;
@@ -241,6 +255,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     Var var = null;
     if (type == 0 && ISO_PATTERN.matcher(value).matches()) {
       var = Var.valueOf(Var.valueOf(value).getObjectAsDateTime());
+      type = Arrays.asList(ALLOWED_TYPES).indexOf("datetime");
     } else {
       var = Var.valueOf(value);
     }
@@ -786,9 +801,26 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return (List) getObject();
     } else if (getObject() instanceof DataSource) {
       return toList(((DataSource) getObject()).getPage().getContent());
+    } else if (getObject() instanceof String) {
+      String parsed = _object.toString();
+      if (_object.toString().startsWith("[") && _object.toString().endsWith("]")) {
+        parsed = parsed.substring(1, parsed.length()-1);
+      }
+
+      String[] values = parsed.split(",");
+
+      List<String> list = new LinkedList<>();
+      for (String v: values) {
+        if (!v.trim().isEmpty()) {
+          list.add(v.trim());
+        }
+      }
+      return list;
     }
 
-    return getSingleList(getObject());
+    List list = new LinkedList<>();
+    list.add(getObject());
+    return list;
   }
 
   public Map getObjectAsMap() {
