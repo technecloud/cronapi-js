@@ -2412,6 +2412,16 @@ if (window.fixedTimeZone) {
   };
 
   this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData) {
+
+    function downloadUrl(url, fileName) {
+      var link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute("download", fileName);
+      var event = document.createEvent('MouseEvents');
+      event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+      link.dispatchEvent(event);
+    }
+
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -2443,33 +2453,52 @@ if (window.fixedTimeZone) {
       window.open(valueContent, '_system');
     }
     else {
-      var url = '/api/cronapi/downloadFile';
-      var splited = datasource.entity.split('/');
+      if (datasource.isOData()) {
+        var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
+        var bytesOrFileInput;
+        var fileName = 'download';
 
-      var entity = splited[splited.length-1];
-      if (entity.indexOf(":") > -1) {
-        //Siginifica que é relacionamento, pega a entidade do relacionamento
-        var entityRelation = '';
-        var splitedDomainBase = splited[3].split('.');
-        for (var i=0; i<splitedDomainBase.length-1;i++)
-          entityRelation += splitedDomainBase[i]+'.';
-        var entityRelationSplited = entity.split(':');
-        entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
+        if (valueContent.match(/__odataFile_/g)) {
+          bytesOrFileInput = eval(valueContent);
+          fileName = bytesOrFileInput.name
+        }
+        else {
+          fileName += this.cronapi.internal.getExtensionBase64(valueContent);
+          valueContent = window.atob(valueContent);
+          bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
+        }
+        var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput], {type: 'application/octet-stream'}));
+        downloadUrl(url, fileName);
       }
-      url += '/' + entity;
-      url += '/' + field;
-      var object = itemActive;
-      var ids = datasource.getKeyValues(object);
-      var currentIdxId = 0;
-      for (var attr in ids) {
-        if (currentIdxId == 0)
-          url  = url + '/' + object[attr];
-        else
-          url  = url + ':' + object[attr];
-        currentIdxId++;
+      else {
+        var url = '/api/cronapi/downloadFile';
+        var splited = datasource.entity.split('/');
+
+        var entity = splited[splited.length - 1];
+        if (entity.indexOf(":") > -1) {
+          //Siginifica que é relacionamento, pega a entidade do relacionamento
+          var entityRelation = '';
+          var splitedDomainBase = splited[3].split('.');
+          for (var i = 0; i < splitedDomainBase.length - 1; i++)
+            entityRelation += splitedDomainBase[i] + '.';
+          var entityRelationSplited = entity.split(':');
+          entity = entityRelation + entityRelationSplited[entityRelationSplited.length - 1];
+        }
+        url += '/' + entity;
+        url += '/' + field;
+        var object = itemActive;
+        var ids = datasource.getKeyValues(object);
+        var currentIdxId = 0;
+        for (var attr in ids) {
+          if (currentIdxId == 0)
+            url = url + '/' + object[attr];
+          else
+            url = url + ':' + object[attr];
+          currentIdxId++;
+        }
+        var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
+        window.open(finalUrl, '_system');
       }
-      var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
-      window.open(finalUrl, '_system');
     }
   };
 
