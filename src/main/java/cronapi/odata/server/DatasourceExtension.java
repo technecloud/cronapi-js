@@ -762,9 +762,9 @@ public class DatasourceExtension implements JPAEdmExtension {
       List<AssociationSet> addAssociationSet = new LinkedList<>();
 
       for (AssociationSet association : container.getAssociationSets()) {
-        if (association.getEnd1().getRole().equals(entity)) {
+        if (!(association instanceof DSAssociationSet) && association.getEnd1().getRole().equals(entity)) {
 
-          AssociationSet newAssociation = new AssociationSet();
+          AssociationSet newAssociation = new DSAssociationSet();
           newAssociation.setName(association.getName() + "_" + id);
           newAssociation.setAnnotationAttributes(association.getAnnotationAttributes());
           newAssociation.setAnnotationElements(association.getAnnotationElements());
@@ -800,5 +800,9 @@ public class DatasourceExtension implements JPAEdmExtension {
 
     String name = null;
     String type = null;
+  }
+
+  public static class DSAssociationSet extends AssociationSet {
+
   }
 }
