@@ -44,6 +44,7 @@ public class Operations {
 			JsonObject notification = new JsonObject();
 			notification.addProperty("title", paramTitle.getObjectAsString());
 			notification.addProperty("body", paramSubtitle.getObjectAsString());
+			notification.addProperty("icon", "notification_icon");
 			body.add("notification", notification);
 		}
 
