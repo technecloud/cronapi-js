@@ -757,4 +757,19 @@ public class Operations {
 	    return Var.valueOf(DownloadREST.getDownloadUrl(new File(file.toString())));
   }
 
+	@CronapiMetaData(type = "function", name = "{{getSystemParam}}", nameTags = { "system", "parameter" }, description = "{{getSystemParam}}")
+	public static Var getSystemParameter(@ParamMetaData(type = ObjectType.STRING, description = "{{getSystemParamKey}}") Var key) {
+		try {
+			return Var.valueOf(RestClient.getRestClient().getRequest().getServletContext().getInitParameter(key.toString()));
+		} catch(Exception e) {
+			//
+		}
+
+		return Var.VAR_EMPTY;
+	}
+
+	@CronapiMetaData(type = "function", name = "{{getSystemProfile}}", nameTags = { "system", "profile" }, description = "{{getSystemProfile}}")
+	public static Var getSystemProfile() {
+		return getSystemParameter(Var.valueOf("app.profile"));
+	}
 }
