@@ -233,8 +233,9 @@ public class Operations {
               ObjectType.STRING,
               ObjectType.MAP }, returnType = ObjectType.DATASET)
   public static Var executeQuery(Var entity, Var query, Var params) {
-    Var[] vars = new Var[params.length()];
-    LinkedHashMap<String, Var> map = (LinkedHashMap<String, Var>) params.getObject();  
+    Map<String, Var> map = params.getObjectAsMap();
+    Var[] vars = new Var[map.size()];
+
     int i = 0;
     for (Map.Entry<String, Var> entry : map.entrySet()) {
       vars[i] = new Var(entry.getKey(), entry.getValue());
