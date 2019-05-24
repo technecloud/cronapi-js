@@ -23,7 +23,7 @@ public class ODataConfiguration implements ServletContextInitializer {
   public static final String SERVICE_URL = "/api/cronapi/odata/v2/";
 
   @Override
-  public void onStartup(ServletContext servletContext) throws ServletException {
+  public void onStartup(ServletContext servletContext) {
     registerServlet(servletContext);
   }
 
