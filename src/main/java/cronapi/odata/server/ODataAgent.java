@@ -313,7 +313,7 @@ public class ODataAgent {
   public static synchronized void datasource(String strPath) {
     try {
 
-      String queryString = null;
+      String queryString;
 
       if (strPath.contains("?")) {
         String[] urlParts = strPath.split("\\?");
@@ -448,7 +448,7 @@ public class ODataAgent {
 
     System.setErr(new PrintStream(new OutputStream() {
       @Override
-      public void write(int b) throws IOException {
+      public void write(int b) {
         //Faz Nada
       }
     }));
