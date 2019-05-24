@@ -1,7 +1,6 @@
 package cronapi.rest;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,13 +60,13 @@ public class CronapiREST {
 
   @Autowired
   private HttpServletRequest request;
-  
+
   @Autowired
 	private HttpServletResponse response;
 
   @Autowired
   private TenantService tenantService;
-  
+
   private int paramBlockly;
 
   public class TranslationPath {
@@ -208,7 +208,7 @@ public class CronapiREST {
     RestResult result = runIntoTransaction(() -> {
       DataSource ds = new DataSource(entity);
       TranslationPath translationPath = translatePathVars(entity);
-      
+
       if(translationPath.relationClass == null) {
         ds.checkRESTSecurity("PUT");
         ds.filter(data, null);
@@ -301,7 +301,7 @@ public class CronapiREST {
   public HttpEntity<?> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
-      
+
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "GET");
       if (QueryManager.getType(query).equals("blockly")) {
@@ -370,7 +370,7 @@ public class CronapiREST {
         return inserted.getPOJO();
       } else {
         DataSource ds = new DataSource(query);
-        
+
         ds.insert(entity.getObject());
 
         QueryManager.addDefaultValues(query, Var.valueOf(ds), true);
@@ -504,10 +504,32 @@ public class CronapiREST {
     });
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**")
-  public Var postRest(@RequestBody(required = false) Var[] vars, @PathVariable("class") String clazz) throws Exception {
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/raw/{class}/**")
+  public Var postRestRaw(@RequestBody(required = false) String body, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransactionVar(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), Var.valueOf(body));
+    });
+  }
+
+
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**", consumes = MediaType.TEXT_PLAIN_VALUE)
+  public Var postRestBinary(@RequestBody(required = false) String body, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), Var.valueOf(body));
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public Var postRestForm(@RequestParam Map<String, String> body, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), Var.valueOf(body));
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**", consumes ={ MediaType.APPLICATION_JSON_VALUE,  MediaType.APPLICATION_ATOM_XML_VALUE})
+  public Var postRest(@RequestBody(required = false) Var var, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), var);
     });
   }
 
@@ -565,13 +587,13 @@ public class CronapiREST {
 		responseOutputStream.flush();
 		responseOutputStream.close();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/downloadFile/{entity}/{field}/{ids}/**")
 	public void downloadFileGet(@PathVariable("entity") String entity, @PathVariable("field") String field,
 			@PathVariable("ids") String ids) throws Exception {
-		
+
 		DataSource ds = new DataSource(entity);
-		
+
 		List<Var> varIds = new LinkedList<Var>();
 		String[] idsSplited = ids.split(Pattern.quote(":"));
 		for (String id: idsSplited) {
@@ -580,7 +602,7 @@ public class CronapiREST {
 	  Object domainInstance = ds.getObjectWithId(varIds.toArray(new Var[0]));
 		ds.filter(Var.valueOf(domainInstance) , null);
 		Object obj = ds.getObject();
-		
+
 		byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
 		StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
 		response.setContentType(fileObject.contentType);
