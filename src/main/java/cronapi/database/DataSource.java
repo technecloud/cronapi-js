@@ -27,6 +27,8 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.olingo.odata2.api.edm.provider.Property;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmModel;
@@ -228,6 +230,10 @@ public class DataSource implements JsonSerializable {
    * @return a array of Object
    */
   public Object[] fetch() {
+    return fetch(false);
+  }
+
+  public Object[] fetch(boolean isCount) {
 
     String jpql = this.filter;
     Var[] params = this.params;
@@ -327,7 +333,7 @@ public class DataSource implements JsonSerializable {
         }
       }
 
-      if (this.pageRequest != null) {
+      if ((this.pageRequest != null) && (!isCount)) {
         query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
         query.setMaxResults(this.pageRequest.getPageSize());
       }
@@ -346,7 +352,15 @@ public class DataSource implements JsonSerializable {
         resultsInPage = normalizeList(resultsInPage, extension.getJpqlEntity());
       }
 
-      this.page = new PageImpl(resultsInPage, this.pageRequest, 0);
+      Long count = 0L;
+      if (!isCount) {
+        Object[] countResult = fetch(true);
+        if (!ArrayUtils.isEmpty(countResult)) {
+          count = (Long)countResult[0];
+        }
+      }
+
+      this.page = new PageImpl(resultsInPage, this.pageRequest, count);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     } finally {
@@ -354,10 +368,15 @@ public class DataSource implements JsonSerializable {
     }
 
     // has data, moves cursor to first position
-    if (this.page.getNumberOfElements() > 0)
+    if (this.page.getNumberOfElements() > 0) {
       this.current = 0;
+    }
 
-    return this.page.getContent().toArray();
+    if (isCount) {
+      return new Long[]{Long.valueOf(this.page.getContent().size())};
+    } else {
+      return this.page.getContent().toArray();
+    }
   }
 
   private List normalizeList(List entities,
