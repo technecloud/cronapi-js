@@ -1893,7 +1893,7 @@ if (window.fixedTimeZone) {
    * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
    * @param {ObjectType.LONG} year {{year}}
    * @param {ObjectType.LONG} month {{month}}
-   * @param {ObjectType.LONG} dia {{day}}
+   * @param {ObjectType.LONG} day {{day}}
    * @param {ObjectType.LONG} hour {{hour}}
    * @param {ObjectType.LONG} minute {{minute}}
    * @param {ObjectType.LONG} second {{second}}
