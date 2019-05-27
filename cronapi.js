@@ -1893,16 +1893,16 @@ if (window.fixedTimeZone) {
    * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
    * @param {ObjectType.LONG} year {{year}}
    * @param {ObjectType.LONG} month {{month}}
-   * @param {ObjectType.LONG} month {{day}}
+   * @param {ObjectType.LONG} dia {{day}}
    * @param {ObjectType.LONG} hour {{hour}}
    * @param {ObjectType.LONG} minute {{minute}}
    * @param {ObjectType.LONG} second {{second}}
-   * @param {ObjectType.LONG} second {{millisecond}}
+   * @param {ObjectType.LONG} millisecond {{millisecond}}
    * @returns {ObjectType.DATETIME}
    */
   this.cronapi.dateTime.updateDate = function(value, year, month, day, hour, minute, second, millisecond) {
     var date = this.cronapi.dateTime.getMomentObj(value).toDate();
-    if (date) {
+    if (date && !isNaN(date.getTime())) {
       date.setYear(year);
       date.setMonth(month - 1);
       date.setDate(day);
@@ -1912,7 +1912,8 @@ if (window.fixedTimeZone) {
       date.setMilliseconds(millisecond);
     }
     else{
-      date = new Date();
+      this.cronapi.screen.notify('error',this.cronapi.i18n.translate("InvalidDate",[  ]));
+      return;
     }
     return this.cronapi.dateTime.getMomentObj(date).toDate();
   };
