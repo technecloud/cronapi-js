@@ -103,6 +103,26 @@ public class Operations {
 		date.set(y, m, d, h, min, s);
 		return new Var(date.getTime());
 	}
+
+  @CronapiMetaData(type = "function", name = "{{updateDate}}", nameTags = { "updateDate",
+      "setDate" }, description = "{{functionToUpdateDate}}", params = { "{{date}}", "{{year}}", "{{month}}", "{{day}}",
+      "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}, paramsType = { ObjectType.LONG, ObjectType.LONG,
+      ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
+      ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.DATETIME)
+  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) throws Exception {
+    Calendar updatedDate = Calendar.getInstance();
+    updatedDate.setTime(((Calendar) date.getObject()).getTime());
+    int y = year.getObjectAsInt();
+    int m = month.getObjectAsInt() - 1;
+    int d = day.getObjectAsInt();
+    int h = hour.getObjectAsInt();
+    int min = minute.getObjectAsInt();
+    int s = second.getObjectAsInt();
+    int mili = millisecond.getObjectAsInt();
+    updatedDate.set(y, m, d, h, min, s);
+    updatedDate.set(Calendar.MILLISECOND, mili);
+    return new Var(updatedDate.getTime());
+  }
 	
 	@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
 			"getSecondsDiffDate", "diffDatesSeconds" }, description = "{{functionToGetSecondsBetweenDates}}", params = {
