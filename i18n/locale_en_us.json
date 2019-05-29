@@ -462,5 +462,8 @@
   "compile": "Compile?",
   "updateDate": "Update date",
   "functionToUpdateDate": "Function to update an date",
-  "millisecond": "Millisecond"
+  "millisecond": "Millisecond",
+  "socialLogin": "Social Login",
+  "socialLoginDescription": "Function to login with social media(Facebook/Github|Google|Linkedin)",
+  "clearCacheBeforeOpen": "Clean Login Data on Logoff"
 }

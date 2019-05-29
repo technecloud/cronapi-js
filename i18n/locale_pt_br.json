@@ -464,5 +464,8 @@
   "compile": "Compilar?",
   "updateDate": "Alterar data",
   "functionToUpdateDate": "Função para alterar data",
-  "millisecond": "Millisegundo"
+  "millisecond": "Millisegundo",
+  "socialLogin": "Login por Redes Sociais",
+  "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
+  "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair"
 }
