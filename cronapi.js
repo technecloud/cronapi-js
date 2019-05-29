@@ -1456,7 +1456,7 @@
         }]);
       }
     };
-    
+
     /**
    * @type function
    * @name {{logoutName}}
@@ -3884,26 +3884,31 @@
 
   /**
    * @type function
-   * @name Login With Facebook
+   * @name {{socialLogin}}
    * @nameTags login|social|network|facebook|github|google|linkedin
-   * @description {{createSerieDescription}}
+   * @description {{socialLoginDescription}}
    * @param {ObjectType.STRING} socialNetwork {{socialNetwork}}
+   * @param {ObjectType.BOOLEAN} clearCacheBeforeOpen {{clearCacheBeforeOpen}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork) {
-      var that = this;
-      var u = window.hostApp+"signin/"+socialNetwork+"/";
-      if(cordova.InAppBrowser){
-          var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no');
-          cref.addEventListener('loadstart', function(event) {
-              if (event.url.indexOf("_ctk") > -1) {
-                  cref.close();
-                  that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
-              }
-          });
-      }else{
-          //TODO LOGIN ON WEB
+  this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork, /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true*/ clearCache) {
+    var that = this;
+    var u = window.hostApp+"signin/"+socialNetwork+"/";
+    if(cordova.InAppBrowser){
+      var clearCacheString = '';
+      if(clearCache === true || clearCache === 'true'){
+        clearCacheString = ',clearcache=yes';
       }
+      var cref = cordova.InAppBrowser.open(u, '_blank', 'location=no' + clearCacheString);
+      cref.addEventListener('loadstart', function(event) {
+        if (event.url.indexOf("_ctk") > -1) {
+          cref.close();
+          that.cronapi.social.login.bind(that)('#OAUTH#', '#OAUTH#', that.cronapi.social.gup('_ctk',event.url));
+        }
+      });
+    }else{
+      //TODO LOGIN ON WEB
+    }
   }
 
   /**

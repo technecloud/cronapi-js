@@ -459,5 +459,6 @@
   "loadMoreNameDescription": "Function that invokes the next page from the selected datasource",
   "hasNextPageName": "Has next page?",
   "hasNextPageDescription": "Function that returns if exists a next page on selected datasource",
-  "compile": "Compile?"
+  "compile": "Compile?",
+  "socialLogin": "Social Login"
 }
