@@ -759,10 +759,9 @@ public class Operations {
 
 	@CronapiMetaData(type = "function", name = "{{getSystemParam}}", nameTags = { "system", "parameter" }, description = "{{getSystemParam}}")
 	public static Var getSystemParameter(@ParamMetaData(type = ObjectType.STRING, description = "{{getSystemParamKey}}") Var key) {
-		try {
-			return Var.valueOf(RestClient.getRestClient().getRequest().getServletContext().getInitParameter(key.toString()));
-		} catch(Exception e) {
-			//
+		Var value = CronapiBeanConfigurator.INIT_PARAMS.get(key.toString());
+		if (value != null) {
+			return value;
 		}
 
 		return Var.VAR_EMPTY;
