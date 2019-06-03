@@ -29,16 +29,13 @@ import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
-import java.security.Security;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Pattern;
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -55,7 +52,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     VirtualClassInterface {
 
   static {
-    Security.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,TLSv1");
+    System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,TLSv1");
   }
 
   @Override
