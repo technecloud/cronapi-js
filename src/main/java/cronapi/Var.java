@@ -33,6 +33,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
+import java.security.Security;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -52,6 +53,10 @@ import org.jdom2.output.XMLOutputter;
 @JsonAdapter(VarSerializer.class)
 public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer,
     VirtualClassInterface {
+
+  static {
+    Security.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,TLSv1");
+  }
 
   @Override
   public String serializeAsJson() {
