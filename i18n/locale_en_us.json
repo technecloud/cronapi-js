@@ -460,5 +460,7 @@
   "hasNextPageName": "Has next page?",
   "hasNextPageDescription": "Function that returns if exists a next page on selected datasource",
   "compile": "Compile?",
-  "socialLogin": "Social Login"
+  "socialLogin": "Social Login",
+  "socialLoginDescription": "Function to login with social media(Facebook/Github|Google|Linkedin)",
+  "clearCacheBeforeOpen": "Clean Login Data on Logoff"
 }

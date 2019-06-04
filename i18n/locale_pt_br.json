@@ -463,5 +463,6 @@
   "hasNextPageDescription":"Função que retorna se existem mais itens a serem carregados pela fonte de dados",
   "compile": "Compilar?",
   "socialLogin": "Login por Redes Sociais",
-  "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)"
+  "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
+  "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair"
 }
