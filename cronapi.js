@@ -3174,7 +3174,7 @@ if (window.fixedTimeZone) {
    * @returns {ObjectType.LONG}
    */
   this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
-    return navigator.geolocation.watchPosition(callbackSuccess, callbackError, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
+    return navigator.geolocation.watchPosition(success, error, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
   };
 
   /**
