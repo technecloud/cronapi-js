@@ -221,11 +221,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           ODataExpressionParser.reInitializePositionalParameters();
         }
 
-        String where = null;
         String having = null;
         String groupBy = null;
 
         if (whereExpression != null) {
+          String where = null;
 
           if (selectStatement != null && selectStatement.hasWhereClause()) {
             where = ((WhereClause) selectStatement.getWhereClause()).getConditionalExpression().toString();
@@ -245,7 +245,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             jpqlStatement = selectStatement.toString();
           }
 
-          if (where != null) {
+          if (where != null && uriInfo.composeWhere()) {
             jpqlStatement += " WHERE (" + where + ") AND " + whereExpression;
           } else {
             jpqlStatement += " WHERE " + whereExpression;
