@@ -124,10 +124,6 @@
           <artifactId>hibernate-entitymanager</artifactId>
           <groupId>org.hibernate</groupId>
         </exclusion>
-        <exclusion>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -180,6 +176,12 @@
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>eclipselink</artifactId>
       <version>2.7.4</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.persistence</groupId>
+          <artifactId>jakarta.persistence</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
