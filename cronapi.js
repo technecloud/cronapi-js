@@ -1868,7 +1868,7 @@ if (window.fixedTimeZone) {
    * @description {{functionToNewDate}}
    * @param {ObjectType.LONG} year {{year}}
    * @param {ObjectType.LONG} month {{month}}
-   * @param {ObjectType.LONG} month {{day}}
+   * @param {ObjectType.LONG} day {{day}}
    * @param {ObjectType.LONG} hour {{hour}}
    * @param {ObjectType.LONG} minute {{minute}}
    * @param {ObjectType.LONG} second {{second}}
@@ -1882,7 +1882,7 @@ if (window.fixedTimeZone) {
     date.setHours(hour);
     date.setMinutes(minute);
     date.setSeconds(second);
-    return this.cronapi.dateTime.getMomentObj(date.toLocaleString()).toDate();
+    return this.cronapi.dateTime.getMomentObj(date).toDate();
   };
 
   /**
