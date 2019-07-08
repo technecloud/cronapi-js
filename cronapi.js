@@ -65,7 +65,17 @@ if (window.fixedTimeZone) {
         return this;
       },
       run: function() {
-        var bk = eval('blockly.'+pack);
+        var bk;
+        try {
+          bk = eval('blockly.'+pack);
+        } catch(e) {
+          //
+        }
+
+        if (!bk) {
+          bk = eval(pack);
+        }
+
         return bk.apply(this, arguments);
       }.bind(this)
     }

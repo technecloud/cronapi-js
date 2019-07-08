@@ -29,5 +29,8 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
     "gulp-util": "^3.0.8"
+  },
+  "dependencies": {
+    "gulp-cli": "^2.2.0"
   }
 }
