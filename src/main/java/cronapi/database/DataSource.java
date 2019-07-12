@@ -385,9 +385,9 @@ public class DataSource implements JsonSerializable {
       try {
 
         List<Object> newEntities = new LinkedList<Object>();
-        Var entity = Var.valueOf(new LinkedHashMap<>());
         for (Object obj : entities) {
 
+          Var entity = Var.valueOf(new LinkedHashMap<>());
           if (obj.getClass().isArray()) {
             int i = 0;
 
@@ -416,9 +416,9 @@ public class DataSource implements JsonSerializable {
               entity.set(key, sub.get(mapping.getInternalName()));
             }
           }
-        }
 
-        newEntities.add(entity);
+          newEntities.add(entity);
+        }
 
         entities = newEntities;
       } catch (Exception e) {
