@@ -311,7 +311,17 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
                 } else if (param.getValue() instanceof Time) {
                   query.setParameter(param.getKey(), (Time) param.getValue(), TemporalType.TIME);
                 } else {
-                  query.setParameter(param.getKey(), param.getValue());
+                  try {
+                    query.setParameter(param.getKey(), param.getValue());
+                  } catch(Exception e) {
+                    Class clazz = query.getParameter(param.getKey()).getParameterType();
+
+                    if (clazz != null) {
+                      query.setParameter(param.getKey(), convert(param.getValue(), clazz));
+                    } else {
+                      throw new RuntimeException(e);
+                    }
+                  }
                 }
               }
               parameterizedMap.remove(parameterEntry.getKey());
@@ -861,6 +871,11 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
 
     return false;
+  }
+
+  @Override
+  public Object convert(Object obj, Class clazz) {
+    return Var.valueOf(obj).getObject(clazz);
   }
 
 }
