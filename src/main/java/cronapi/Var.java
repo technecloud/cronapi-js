@@ -614,7 +614,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     switch (getType()) {
       case STRING:
         String s = (String) getObject();
-        if (s.equals("1") || s.equalsIgnoreCase("true")) {
+        if (s.equals("1") || s.equalsIgnoreCase("true") || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("sim") || s.equalsIgnoreCase("y") || s.equalsIgnoreCase("s") || s.equalsIgnoreCase("t")) {
           s = "true";
         } else {
           s = "false";
@@ -1237,6 +1237,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } else if (_object instanceof Integer) {
       _type = Type.INT;
       _object = Long.valueOf((Integer) _object);
+    } else if (_object instanceof Byte) {
+      _type = Type.INT;
+      _object = Long.valueOf((Byte) _object);
     } else if (_object instanceof Double) {
       _type = Type.DOUBLE;
     } else if (_object instanceof Float) {
