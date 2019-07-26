@@ -130,9 +130,11 @@ if (window.fixedTimeZone) {
               serverMap[key] = error;
             }
           });
+          if (error)
+            this.cronapi.$scope.Notification.error(error);
         }.bind(this);
 
-        var args = [blocklyName, error, success];
+        var args = [blocklyName, success, error];
 
         for (var i = 0;i <arguments.length;i++) {
           args.push(arguments[i]);
