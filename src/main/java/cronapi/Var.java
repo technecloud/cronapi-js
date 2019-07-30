@@ -473,6 +473,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Integer getObjectAsInt() {
     switch (getType()) {
       case STRING:
+        if (isEmptyOrNull()) {
+          return 0;
+        }
         try {
           return Integer.parseInt((String) getObject());
         } catch (Exception e) {
@@ -504,6 +507,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Long getObjectAsLong() {
     switch (getType()) {
       case STRING:
+        if (isEmptyOrNull()) {
+          return 0L;
+        }
         try {
           return Long.parseLong((String) getObject());
         } catch (Exception e) {
@@ -661,6 +667,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Double getObjectAsDouble() {
     switch (getType()) {
       case STRING:
+        if (isEmptyOrNull()) {
+          return 0.0;
+        }
         return Double.parseDouble((String) getObject());
       case INT:
         return new Long((Long) getObject()).doubleValue();
