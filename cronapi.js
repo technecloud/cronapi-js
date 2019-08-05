@@ -2871,7 +2871,7 @@ if (window.fixedTimeZone) {
       var datasource = eval(groupDatasource[1]);
       if (datasource.isOData()) {
 
-        var regexForField = /.active.([a-zA-Z0-9]*)/g;
+        var regexForField = /.active.([a-zA-Z0-9_-]*)/g;
         var groupField = regexForField.exec(field);
         var fieldName = groupField[1];
 
