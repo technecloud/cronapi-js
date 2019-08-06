@@ -1064,7 +1064,12 @@ if (window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.filter = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource,/** @type {ObjectType.STRING}*/ path) {
-    getDatasource(datasource).filter("/"+path);
+    if(getDatasource(datasource).isOData()){
+      getDatasource(datasource).search(path);
+    }
+    else{
+      getDatasource(datasource).filter('/' + path);
+    }
   };
 
   /**
