@@ -467,5 +467,7 @@
   "millisecond": "Millisegundo",
   "socialLogin": "Login por Redes Sociais",
   "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
-  "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair"
+  "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair",
+  "classNameWithMethod": "Nome da função do bloco que deverá ser chamada",
+  "callbackFinish": "Função que deverá ser executada, quando finalizar a execução"
 }
