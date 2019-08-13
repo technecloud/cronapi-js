@@ -3246,7 +3246,6 @@ if (window.fixedTimeZone) {
           preferFrontCamera : false,
           showFlipCameraButton : true,
           showTorchButton : true,
-          torchOn: true,
           saveHistory: true,
           prompt : message,
           resultDisplayDuration: 500,
