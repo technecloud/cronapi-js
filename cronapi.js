@@ -48,13 +48,13 @@ if (window.fixedTimeZone) {
 
   this.cronapi.evalInContext = function(js) {
     var result = eval('this.cronapi.doEval('+js+')');
-    if (result && result.commands) {
-      for (var i=0;i<result.commands.length;i++) {
-        var func = eval(result.commands[i].function);
-        func.apply(this, result.commands[i].params);
+    if (result) {
+      if (result.commands) {
+        for (var i = 0; i < result.commands.length; i++) {
+          var func = eval(result.commands[i].function);
+          func.apply(this, result.commands[i].params);
+        }
       }
-    }
-    if (result && result.value) {
       return result.value;
     }
   }
