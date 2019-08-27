@@ -471,23 +471,13 @@ public class Operations {
         result.getObjectAsString().substring(0, result.getObjectAsString().length() - 1));
   }
 
-  public static final Var getListFromText(Var text, Var limiter) throws Exception {
-    text = ensureIsList(text);
-    List linked = new LinkedList<Var>();
-    if (text.getType() == Var.Type.LIST) {
-      for (Object v : text.getObjectAsList()) {
-        if (!Var.valueOf(v).getObjectAsString().equals(limiter.getObjectAsString())) {
-          linked.add(v);
-        }
-      }
-      return Var.valueOf(linked);
-    } else {
-      String[] list = text.getObjectAsString().split(limiter.getObjectAsString());
-      for (String s : list) {
-        linked.add(Var.valueOf(s));
-      }
-      return Var.valueOf(linked);
+  public static final Var getListFromText(Var text, Var limiter) {
+    List<Var> linked = new LinkedList<>();
+    String[] list = text.getObjectAsString().split(limiter.getObjectAsString());
+    for (String s : list) {
+      linked.add(Var.valueOf(s));
     }
+    return Var.valueOf(linked);
   }
 
   public static final Var orderListNumericGrowing(Var list) throws Exception {

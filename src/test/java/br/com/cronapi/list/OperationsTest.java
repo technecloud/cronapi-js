@@ -1,21 +1,20 @@
 package br.com.cronapi.list;
 
 
-import static cronapi.json.Operations.GSON_CONFIGURATION;
-import static cronapi.json.Operations.toJson;
-
-import com.google.gson.JsonElement;
 import com.jayway.jsonpath.JsonPath;
 import cronapi.Var;
 import cronapi.list.Operations;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static cronapi.json.Operations.GSON_CONFIGURATION;
+import static cronapi.json.Operations.toJson;
 
 public class OperationsTest {
 
@@ -53,6 +52,13 @@ public class OperationsTest {
   void sizeFromJsonTest() {
     Var listVar = Var.valueOf(BOOKS_JSON);
     Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 4);
+  }
+
+  @Test
+  void listFromTextTest() {
+    Var listVar = Operations.getListFromText(Var.valueOf("Cronapp/Platform"), Var.valueOf("/"));
+    Assert.assertTrue(listVar.getObject() instanceof List);
+    Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 2);
   }
 
 }
