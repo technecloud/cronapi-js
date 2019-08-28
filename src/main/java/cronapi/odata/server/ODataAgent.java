@@ -1,44 +1,12 @@
 package cronapi.odata.server;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import cronapi.AppConfig;
 import cronapi.QueryManager;
 import cronapi.RestClient;
-import cronapi.Var;
 import cronapi.database.DataSource;
 import cronapi.rest.DataSourceMapREST;
 import cronapi.util.Operations;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.net.URI;
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.commons.ODataHttpMethod;
@@ -59,6 +27,21 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import java.io.*;
+import java.net.URI;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.regex.Pattern;
+
 public class ODataAgent {
 
   private static final String ERROR_TEMPLATE = "<?xml version=\"1.0\" ?><error xmlns=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\"><code></code><message xml:lang=\"en\">{0}</message></error>";
@@ -69,25 +52,23 @@ public class ODataAgent {
   private static final int DEFAULT_BUFFER_SIZE = 32768;
   private static final String DEFAULT_READ_CHARSET = "utf-8";
 
-  private static void bind(File contextFile) throws Exception {
-    System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-        "cronapi.osjava.sj.memory.MemoryContextFactory");
+  private static void bind(File contextFile, String activeProfile) throws Exception {
+    System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "cronapi.osjava.sj.memory.MemoryContextFactory");
     System.setProperty("org.osjava.sj.jndi.shared", "true");
 
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(contextFile);
     XPath xpath = XPathFactory.newInstance().newXPath();
     NodeList nodes = (NodeList) xpath.evaluate("//Resource", doc, XPathConstants.NODESET);
 
-    HashSet added = new HashSet();
+    Set<String> added = new HashSet<>();
     for (int i = 0; i < nodes.getLength(); i++) {
       Node elem = nodes.item(i);
       String name = elem.getAttributes().getNamedItem("name").getTextContent();
-      if (!added.contains(name)) {
-
+      String profile = elem.getAttributes().getNamedItem("profile").getTextContent();
+      if (activeProfile.equalsIgnoreCase(profile) && !added.contains(name)) {
         final BasicDataSource ds = new BasicDataSource();
         ds.setUrl(elem.getAttributes().getNamedItem("url").getTextContent());
-        ds.setDriverClassName(
-            elem.getAttributes().getNamedItem("driverClassName").getTextContent());
+        ds.setDriverClassName(elem.getAttributes().getNamedItem("driverClassName").getTextContent());
         ds.setUsername(elem.getAttributes().getNamedItem("username").getTextContent());
         ds.setPassword(elem.getAttributes().getNamedItem("password").getTextContent());
 
@@ -95,11 +76,8 @@ public class ODataAgent {
         context.bind("java:comp/env/" + name, ds);
 
         added.add(name);
-
       }
-
     }
-
   }
 
   private static String xmlEscapeText(String t) {
@@ -124,7 +102,7 @@ public class ODataAgent {
           break;
         default:
           if (c > 0x7e) {
-            sb.append("&#" + ((int) c) + ";");
+            sb.append("&#").append((int) c).append(";");
           } else {
             sb.append(c);
           }
@@ -133,7 +111,7 @@ public class ODataAgent {
     return sb.toString();
   }
 
-  public static void sendError(String msg) {
+  private static void sendError(String msg) {
     System.out.println();
     System.out.write(START_RESULT);
     System.out.print(MessageFormat.format(ERROR_TEMPLATE, xmlEscapeText(msg)));
@@ -141,16 +119,17 @@ public class ODataAgent {
     System.out.println();
   }
 
-  public static EntityManagerFactory find(String pu) {
+  private static List<SEPersistenceUnitInfo> getPersistenceUnits(Archive archive) {
+    return PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+  }
+
+  private static EntityManagerFactory find(String pu) {
     Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
     for (Archive archive : archives) {
-
-      List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor
-          .getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+      List<SEPersistenceUnitInfo> persistenceUnitInfos = getPersistenceUnits(archive);
 
       for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
-
         String namespace = pui.getPersistenceUnitName();
 
         if (pu == null || namespace.equalsIgnoreCase(pu)) {
@@ -165,7 +144,7 @@ public class ODataAgent {
     return null;
   }
 
-  public static synchronized void odata(String strPath) {
+  private static synchronized void odata(String strPath) {
     try {
       String queryString = null;
 
@@ -188,12 +167,9 @@ public class ODataAgent {
 
       int idx = 0;
       for (Archive archive : archives) {
-
-        List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor
-            .getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
+        List<SEPersistenceUnitInfo> persistenceUnitInfos = getPersistenceUnits(archive);
 
         for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
-
           String namespace = pui.getPersistenceUnitName();
 
           if (pu == null || namespace.equalsIgnoreCase(pu)) {
@@ -201,8 +177,7 @@ public class ODataAgent {
             Properties properties = pui.getProperties();
             properties.setProperty("eclipselink.ddl-generation", "none");
 
-            EntityManagerFactory emf = Persistence
-                .createEntityManagerFactory(namespace, properties);
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory(namespace, properties);
             JPAODataServiceFactory serviceFactory = new JPAODataServiceFactory(emf, namespace, idx);
 
             idx++;
@@ -234,12 +209,10 @@ public class ODataAgent {
             String jpql = RestClient.getRestClient().getParameter("jpql");
 
             if (jpql != null && !jpql.isEmpty()) {
-              ((DatasourceExtension) serviceFactory.getODataJPAContext().getJPAEdmExtension())
-                  .jpql(jpql);
+              ((DatasourceExtension) serviceFactory.getODataJPAContext().getJPAEdmExtension()).jpql(jpql);
             }
 
-            ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service,
-                context);
+            ODataRequestHandler requestHandler = new ODataRequestHandler(serviceFactory, service, context);
             final ODataResponse odataResponse = requestHandler.handle(odataRequest);
 
             Object entity = odataResponse.getEntity();
@@ -248,16 +221,14 @@ public class ODataAgent {
 
             if (entity != null) {
               if (entity instanceof InputStream) {
-                handleStream((InputStream) entity, System.out);
+                handleStream((InputStream) entity);
               } else if (entity instanceof String) {
                 String body = (String) entity;
                 final byte[] entityBytes = body.getBytes(DEFAULT_READ_CHARSET);
                 System.out.write(entityBytes);
               } else {
-                System.out.print(
-                    "Illegal entity object in ODataResponse of type '" + entity.getClass() + "'");
+                System.out.print("Illegal entity object in ODataResponse of type '" + entity.getClass() + "'");
               }
-
             }
             System.out.write(END_RESULT);
             System.out.println();
@@ -268,33 +239,23 @@ public class ODataAgent {
       if (!found) {
         sendError("No persistence provided found!");
       }
-
     } catch (Exception e) {
       sendError(e.getMessage());
     }
   }
 
-  private static int handleStream(InputStream stream, OutputStream out) throws IOException {
-    int contentLength = 0;
+  private static void handleStream(InputStream stream) throws IOException {
     byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 
-    try {
+    try (InputStream closeableStream = stream) {
       int len;
-      while ((len = stream.read(buffer)) != -1) {
-        contentLength += len;
-        out.write(buffer, 0, len);
-      }
-    } finally {
-      try {
-        stream.close();
-      } catch (Exception e) {
-        //
+      while ((len = closeableStream.read(buffer)) != -1) {
+        System.out.write(buffer, 0, len);
       }
     }
-    return contentLength;
   }
 
-  public static synchronized void datasourceMap() {
+  private static synchronized void datasourceMap() {
     try {
       System.out.println();
       System.out.write(START_RESULT);
@@ -310,9 +271,8 @@ public class ODataAgent {
     }
   }
 
-  public static synchronized void datasource(String strPath) {
+  private static synchronized void datasource(String strPath) {
     try {
-
       String queryString;
 
       if (strPath.contains("?")) {
@@ -328,8 +288,8 @@ public class ODataAgent {
       String pu = parts[0];
 
       EntityManagerFactory factory = find(pu);
-      EntityManager entityManager = factory.createEntityManager();
-      PageRequest p = new PageRequest(RestClient.getRestClient().getParameterAsInt("$skip", 0), RestClient.getRestClient().getParameterAsInt("$top", 100));
+      EntityManager entityManager = Objects.requireNonNull(factory).createEntityManager();
+      PageRequest p = PageRequest.of(RestClient.getRestClient().getParameterAsInt("$skip", 0), RestClient.getRestClient().getParameterAsInt("$top", 100));
 
       DataSource ds = new DataSource(((EntityTypeImpl) entityManager.getMetamodel().getEntities().toArray()[0]).getJavaTypeName(), entityManager);
       ds.disableMultiTenant();
@@ -342,93 +302,6 @@ public class ODataAgent {
       System.out.write(START_RESULT);
       Gson gson = new Gson();
       System.out.print(gson.toJson(ds.getPage().getContent()));
-
-      System.out.write(END_RESULT);
-      System.out.println();
-    } catch (Exception e) {
-      sendError(e.getMessage());
-    }
-  }
-
-  public static synchronized void jpql(String strJson) {
-    try {
-
-      Gson gson = new Gson();
-      JsonObject json = gson.fromJson(strJson, JsonObject.class);
-
-      EntityManagerFactory factory = find(json.get("persistenceUnit").getAsString());
-      EntityManager entityManager = factory.createEntityManager();
-
-      String jpql = json.get("sql").getAsString();
-
-      Set<Var> params = new HashSet<Var>();
-      if (json.get("parameters") != null && !json.get("parameters").isJsonNull()) {
-        if (json.get("parameters").isJsonArray()) {
-          json.get("parameters").getAsJsonArray().forEach(p -> {
-            params.add(Var.valueOf(p.getAsString()));
-          });
-        }
-
-        if (json.get("parameters").isJsonObject()) {
-          for (Map.Entry<String, JsonElement> entry : json.get("parameters").getAsJsonObject()
-              .entrySet()) {
-            Object value = null;
-            if (entry.getValue().isJsonPrimitive()) {
-              if (entry.getValue().getAsJsonPrimitive().isBoolean()) {
-                value = entry.getValue().getAsJsonPrimitive().getAsBoolean();
-              } else if (entry.getValue().getAsJsonPrimitive().isNumber()) {
-                value = entry.getValue().getAsJsonPrimitive().getAsNumber();
-              } else {
-                value = entry.getValue().getAsJsonPrimitive().getAsString();
-              }
-            }
-            params.add(Var.valueOf(entry.getKey(), value));
-          }
-        }
-      }
-
-      PageRequest p = new PageRequest(0, json.get("rows").getAsInt());
-
-      DataSource ds = new DataSource(json.get("entity").getAsString(), entityManager);
-      ds.disableMultiTenant();
-
-      if (params.size() > 0) {
-        ds.filter(jpql, p, params.toArray(new Var[0]));
-
-      } else {
-        ds.filter(jpql, p);
-      }
-
-      System.out.println();
-      System.out.write(START_RESULT);
-
-      System.out.print(gson.toJson(ds.getPage().getContent()));
-
-      System.out.write(END_RESULT);
-      System.out.println();
-    } catch (Exception e) {
-      sendError(e.getMessage());
-    }
-  }
-
-  public static synchronized void validateJpql(String strJson) {
-    try {
-      Gson gson = new Gson();
-      JsonObject json = gson.fromJson(strJson, JsonObject.class);
-
-      EntityManagerFactory factory = find(json.get("persistenceUnit").getAsString());
-      EntityManager entityManager = factory.createEntityManager();
-
-      DataSource dataSource = new DataSource(json.get("entity").getAsString(), entityManager);
-
-      String jpql = json.get("sql").getAsString();
-
-      dataSource.validate(jpql);
-
-      System.out.println();
-      System.out.write(START_RESULT);
-
-      System.out.print("[{\"jpqlValid\":true}]");
 
       System.out.write(END_RESULT);
       System.out.println();
@@ -460,11 +333,10 @@ public class ODataAgent {
     }
 
     System.out.println("Starting CronApp Data Agent");
-    bind(new File(args[0]));
 
-    if (args.length > 1) {
-      QueryManager.loadJSONFromFile(new File(args[1]));
-    }
+    bind(new File(args[0]), args[2]);
+
+    QueryManager.loadJSONFromFile(new File(args[1]));
 
     Scanner scanner = new Scanner(System.in);
     scanner.useDelimiter(Pattern.compile("[\\n]+"));
@@ -478,12 +350,8 @@ public class ODataAgent {
         System.out.println("Err sent to printstream");
       } else if (input.startsWith("odata ")) {
         odata(input.substring(6).trim());
-      } else if (input.startsWith("jpql ")) {
-        jpql(input.substring(5).trim());
       } else if (input.startsWith("datasourcemap")) {
         datasourceMap();
-      } else if (input.startsWith("validatejpql ")) {
-        validateJpql(input.substring(13).trim());
       } else if (input.startsWith("ds ")) {
         datasource(input.substring(3).trim());
       } else {
@@ -491,5 +359,4 @@ public class ODataAgent {
       }
     }
   }
-
 }
