@@ -23,62 +23,62 @@ import java.util.Date;
 public class Operations {
 
 	private static Var getFromCalendar(Var date, int type) {
-		return new Var(Utils.getFromCalendar(((Calendar) date.getObject()).getTime(), type));
+		return new Var(date.getObjectAsDateTime().get(type));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getSecondFromDate}}", nameTags = {
 			"getSecond" }, description = "{{functionToGetSecondFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getSecond(Var value) throws Exception {
+	public static final Var getSecond(Var value) {
 		return getFromCalendar(value, Calendar.SECOND);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getMinuteFromDate}}", nameTags = {
 			"getMinute" }, description = "{{functionToGetMinuteFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getMinute(Var value) throws Exception {
+	public static final Var getMinute(Var value) {
 		return getFromCalendar(value, Calendar.MINUTE);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getHourFromDate}}", nameTags = {
 			"getHour" }, description = "{{functionToGetHourFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getHour(Var value) throws Exception {
+	public static final Var getHour(Var value) {
 		return getFromCalendar(value, Calendar.HOUR_OF_DAY);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getYearFromDate}}", nameTags = {
 			"getYear" }, description = "{{functionToGetYearFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getYear(Var value) throws Exception {
+	public static final Var getYear(Var value) {
 		return getFromCalendar(value, Calendar.YEAR);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getMonthFromDate}}", nameTags = {
 			"getMonth" }, description = "{{functionToGetMonthFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getMonth(Var value) throws Exception {
+	public static final Var getMonth(Var value) {
 		return new Var(getFromCalendar(value, Calendar.MONTH).getObjectAsInt()+1);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getDayFromDate}}", nameTags = {
 			"getDay" }, description = "{{functionToGetDayFromDate}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getDay(Var value) throws Exception {
+	public static final Var getDay(Var value) {
 		return getFromCalendar(value, Calendar.DAY_OF_MONTH);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getDayOfWeek}}", nameTags = {
 			"getDayOfWeek" }, description = "{{functionToGetDayOfWeek}}", params = {
 					"{{date}}" }, paramsType = { ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getDayOfWeek(Var value) throws Exception {
+	public static final Var getDayOfWeek(Var value) {
 		return getFromCalendar(value, Calendar.DAY_OF_WEEK);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getLastDayFromMonth}}", nameTags = {
 			"getLastDayFromMonth" }, description = "{{functionToGetLastDayFromMonth}}", params = { "{{month}}",
 					"{{year}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.LONG)
-	public static final Var getLastDayFromMonth(Var month, Var year) throws Exception {
+	public static final Var getLastDayFromMonth(Var month, Var year) {
 		Calendar c = java.util.Calendar.getInstance();
 		c.set(Calendar.DAY_OF_MONTH, 1);
 		c.set(Calendar.MONTH, month.getObjectAsInt() - 1);
@@ -92,7 +92,7 @@ public class Operations {
 					"{{hour}}", "{{minute}}", "{{second}}" }, paramsType = { ObjectType.LONG, ObjectType.LONG,
 							ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var newDate(Var year, Var month, Var day, Var hour, Var minute, Var second) throws Exception {
+	public static final Var newDate(Var year, Var month, Var day, Var hour, Var minute, Var second) {
 		int y = year.getObjectAsInt();
 		int m = month.getObjectAsInt() - 1;
 		int d = day.getObjectAsInt();
@@ -101,6 +101,7 @@ public class Operations {
 		int s = second.getObjectAsInt();
 		Calendar date = Calendar.getInstance();
 		date.set(y, m, d, h, min, s);
+		date.set(Calendar.MILLISECOND, 0);
 		return new Var(date.getTime());
 	}
 
@@ -109,9 +110,9 @@ public class Operations {
       "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}, paramsType = { ObjectType.LONG, ObjectType.LONG,
       ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
       ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.DATETIME)
-  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) throws Exception {
+  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) {
     Calendar updatedDate = Calendar.getInstance();
-    updatedDate.setTime(((Calendar) date.getObject()).getTime());
+    updatedDate.setTime(date.getObjectAsDateTime().getTime());
     int y = year.getObjectAsInt();
     int m = month.getObjectAsInt() - 1;
     int d = day.getObjectAsInt();
@@ -128,10 +129,10 @@ public class Operations {
 			"getSecondsDiffDate", "diffDatesSeconds" }, description = "{{functionToGetSecondsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getSecondsBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getSecondsBetweenDates(Var dateVar, Var date2Var) {
 		final long SECOND_IN_MILLIS = 1000;
-		Date date = ((Calendar) dateVar.getObject()).getTime();
-		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		Date date = (dateVar.getObjectAsDateTime()).getTime();
+		Date date2 = (date2Var.getObjectAsDateTime()).getTime();
 		int resultBetween = (int) ((date.getTime() - date2.getTime()) / SECOND_IN_MILLIS);
 		return new Var(resultBetween);
 	}
@@ -140,10 +141,10 @@ public class Operations {
 			"getMinutesDiffDate", "diffDatesMinutes" }, description = "{{functionToGetMinutesBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getMinutesBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getMinutesBetweenDates(Var dateVar, Var date2Var) {
 		final long MINUTE_IN_MILLIS = 1000 * 60;
-		Date date = ((Calendar) dateVar.getObject()).getTime();
-		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		Date date = (dateVar.getObjectAsDateTime()).getTime();
+		Date date2 = (date2Var.getObjectAsDateTime()).getTime();
 		int resultBetween = (int) ((date.getTime() - date2.getTime()) / MINUTE_IN_MILLIS);
 		return new Var(resultBetween);
 	}
@@ -152,10 +153,10 @@ public class Operations {
 			"getHoursDiffDate", "diffDatesHours" }, description = "{{functionToGetHoursBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getHoursBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getHoursBetweenDates(Var dateVar, Var date2Var) {
 		final long HOUR_IN_MILLIS = 1000 * 60 * 60;
-		Date date = ((Calendar) dateVar.getObject()).getTime();
-		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		Date date = (dateVar.getObjectAsDateTime()).getTime();
+		Date date2 = (date2Var.getObjectAsDateTime()).getTime();
 		int resultBetween = (int) ((date.getTime() - date2.getTime()) / HOUR_IN_MILLIS);
 		return new Var(resultBetween);
 	}
@@ -164,10 +165,10 @@ public class Operations {
 			"getDaysDiffDate", "diffDatesDays" }, description = "{{functionToGetDaysBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getDaysBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getDaysBetweenDates(Var dateVar, Var date2Var) {
 		final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-		Date date = ((Calendar) dateVar.getObject()).getTime();
-		Date date2 = ((Calendar) date2Var.getObject()).getTime();
+		Date date = (dateVar.getObjectAsDateTime()).getTime();
+		Date date2 = (date2Var.getObjectAsDateTime()).getTime();
 		int daysBetween = (int) ((date.getTime() - date2.getTime()) / DAY_IN_MILLIS);
 		return new Var(daysBetween);
 	}
@@ -176,11 +177,11 @@ public class Operations {
 			"getMonthsDiffDate", "diffDatesMonths" }, description = "{{functionToGetMonthsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getMonthsBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getMonthsBetweenDates(Var dateVar, Var date2Var) {
 		int yearBetween = 0, monthBetween = 0;
 		Calendar date = Calendar.getInstance(), date2 = Calendar.getInstance();
-		date.setTime(((Calendar) dateVar.getObject()).getTime());
-		date2.setTime(((Calendar) date2Var.getObject()).getTime());
+		date.setTime((dateVar.getObjectAsDateTime()).getTime());
+		date2.setTime((date2Var.getObjectAsDateTime()).getTime());
 		yearBetween = (date.get(Calendar.YEAR) - date2.get(Calendar.YEAR)) * 12;
 		monthBetween = date.get(Calendar.MONTH) - date2.get(Calendar.MONTH);
 		monthBetween += yearBetween;
@@ -195,10 +196,10 @@ public class Operations {
 			"getYearsDiffDate", "diffDatesYears" }, description = "{{functionToGetYearsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
-	public static final Var getYearsBetweenDates(Var dateVar, Var date2Var) throws Exception {
+	public static final Var getYearsBetweenDates(Var dateVar, Var date2Var) {
 		Calendar date = Calendar.getInstance(), date2 = Calendar.getInstance();
-		date.setTime(((Calendar) dateVar.getObject()).getTime());
-		date2.setTime(((Calendar) date2Var.getObject()).getTime());
+		date.setTime((dateVar.getObjectAsDateTime()).getTime());
+		date2.setTime((date2Var.getObjectAsDateTime()).getTime());
 			double diference = ((date.get(Calendar.YEAR) * 12 * 30) + (date.get(Calendar.MONTH) * 30)
 					+ date.get(Calendar.DAY_OF_MONTH))
 					- ((date2.get(Calendar.YEAR) * 12 * 30) + (date2.get(Calendar.MONTH) * 30)
@@ -216,9 +217,9 @@ public class Operations {
 			"increaseSecond" }, description = "{{functionToIncSecond}}", params = { "{{date}}",
 					"{{secondsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incSeconds(Var value, Var second) throws Exception {
+	public static final Var incSeconds(Var value, Var second) {
 		Calendar d = Calendar.getInstance();
-		d.setTime(((Calendar) value.getObject()).getTime());
+		d.setTime((value.getObjectAsDateTime()).getTime());
 		d.add(Calendar.SECOND , second.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -227,9 +228,9 @@ public class Operations {
 			"increaseMinute" }, description = "{{functionToIncMinute}}", params = { "{{date}}",
 					"{{minutesToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incMinute(Var value, Var minute) throws Exception {
+	public static final Var incMinute(Var value, Var minute) {
 		Calendar d = Calendar.getInstance();
-		d.setTime(((Calendar) value.getObject()).getTime());
+		d.setTime((value.getObjectAsDateTime()).getTime());
 		d.add(Calendar.MINUTE , minute.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -238,9 +239,9 @@ public class Operations {
 			"increaseHour" }, description = "{{functionToIncHour}}", params = { "{{date}}",
 					"{{hoursToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incHour(Var value, Var hour) throws Exception {
+	public static final Var incHour(Var value, Var hour) {
 		Calendar d = Calendar.getInstance();
-		d.setTime(((Calendar) value.getObject()).getTime());
+		d.setTime((value.getObjectAsDateTime()).getTime());
 		d.add(Calendar.HOUR_OF_DAY , hour.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -249,9 +250,9 @@ public class Operations {
 			"increaseDay" }, description = "{{functionToIncDay}}", params = { "{{date}}",
 					"{{daysToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incDay(Var value, Var day) throws Exception {
+	public static final Var incDay(Var value, Var day) {
 		Calendar d = Calendar.getInstance();
-		d.setTime(((Calendar) value.getObject()).getTime());
+		d.setTime((value.getObjectAsDateTime()).getTime());
 		d.add(Calendar.DAY_OF_MONTH, day.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -260,9 +261,9 @@ public class Operations {
 			"increaseMonth" }, description = "{{functionToIncMonth}}", params = { "{{date}}",
 					"{{monthsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incMonth(Var value, Var month) throws Exception {
+	public static final Var incMonth(Var value, Var month) {
 		Calendar d = Calendar.getInstance();
-		d.setTime( ((Calendar) value.getObject()).getTime() );
+		d.setTime( (value.getObjectAsDateTime()).getTime() );
 		d.add(Calendar.MONTH, month.getObjectAsInt());
 		return new Var(d.getTime());
 	}
@@ -271,24 +272,24 @@ public class Operations {
 			"increaseYear" }, description = "{{functionToIncYear}}", params = { "{{date}}",
 					"{{yearsToIncrement}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.LONG }, returnType = ObjectType.DATETIME)
-	public static final Var incYear(Var value, Var year) throws Exception {
+	public static final Var incYear(Var value, Var year) {
 		Calendar d = Calendar.getInstance();
-		d.setTime( ((Calendar) value.getObject()).getTime() );
+		d.setTime( (value.getObjectAsDateTime()).getTime() );
 		d.add(Calendar.YEAR, year.getObjectAsInt());
 		return new Var(d.getTime());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{getNow}}", nameTags = { "getNow", "now",
       "getDate" }, description = "{{functionToGetNow}}", returnType = ObjectType.DATETIME)
-  public static final Var getNow() throws Exception {
+  public static final Var getNow() {
     Calendar cal = Calendar.getInstance();
     return new Var(cal.getTime());
   }
 
   @CronapiMetaData(type = "function", name = "{{getNowNoHour}}", nameTags = { "getNow", "now",
       "getDate" }, description = "{{functionToGetNowNoHour}}", returnType = ObjectType.DATETIME)
-  public static final Var getNowNoHour() throws Exception {
-    Calendar cal = (Calendar) getNow().getObject();
+  public static final Var getNowNoHour() {
+    Calendar cal = getNow().getObjectAsDateTime();
     cal.set(Calendar.HOUR_OF_DAY, 0);
     cal.set(Calendar.MINUTE, 0);
     cal.set(Calendar.SECOND, 0);
@@ -299,9 +300,9 @@ public class Operations {
   
     @CronapiMetaData(type = "function", name = "{{getNowInMilliseconds}}", nameTags = { "getNow", "now",
       "getDate","milliseconds" }, description = "{{getNowInMillisecondsDescription}}", returnType = ObjectType.LONG)
-  public static final Var getNowInMilliseconds() throws Exception {
+  public static final Var getNowInMilliseconds() {
     Calendar cal = Calendar.getInstance();
-	cal.setTime(new Date());
+	  cal.setTime(new Date());
     return new Var(cal.getTimeInMillis());
   }
 
@@ -309,11 +310,8 @@ public class Operations {
 			"formatDateTime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
 					"{{mask}}" }, paramsType = { ObjectType.DATETIME,
 							ObjectType.STRING }, returnType = ObjectType.STRING)
-	public static final Var formatDateTime(Var value, Var format) throws Exception {
+	public static final Var formatDateTime(Var value, Var format) {
 		SimpleDateFormat sdf = new SimpleDateFormat(format.getObjectAsString());
-		if (value.getObject() instanceof Calendar) {
-			return new Var(sdf.format(((Calendar) value.getObject()).getTime()));
-		}
-		return new Var(sdf.format((Date) value.getObject()));
+		return new Var(sdf.format(value.getObjectAsDateTime().getTime()));
 	}
 }
