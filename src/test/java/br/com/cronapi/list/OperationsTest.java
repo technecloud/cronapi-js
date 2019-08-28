@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static cronapi.json.Operations.GSON_CONFIGURATION;
@@ -59,6 +60,21 @@ public class OperationsTest {
     Var listVar = Operations.getListFromText(Var.valueOf("Cronapp/Platform"), Var.valueOf("/"));
     Assert.assertTrue(listVar.getObject() instanceof List);
     Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 2);
+  }
+
+  @Test
+  void listFromTextUsingListAsParameterTest() {
+    Var listParam = Var.valueOf(Arrays.asList("Cronapp", "/", "Platform"));
+    Var listVar = Operations.getListFromText(listParam, Var.valueOf("/"));
+    Assert.assertTrue(listVar.getObject() instanceof List);
+    Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 2);
+  }
+
+  @Test
+  void listFromTextNullAsParameterTest() {
+    Var listVar = Operations.getListFromText(Var.VAR_NULL, Var.VAR_NULL);
+    Assert.assertTrue(listVar.getObject() instanceof List);
+    Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 1);
   }
 
 }
