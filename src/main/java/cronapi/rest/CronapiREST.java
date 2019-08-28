@@ -547,6 +547,39 @@ public class CronapiREST {
       return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
     });
   }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/legacyrest/{class}/**")
+  public Var postRestLegacy(@RequestBody(required = false) Var[] vars, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+    });
+  }
+
+  //Legacy
+
+  @RequestMapping(method = RequestMethod.GET, value = "/legacyrest/{class}/**")
+  public Var getRestLegacy(@PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      TranslationPath translationPath = translatePathVars(clazz);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.PUT, value = "/legacyrest/{class}/**")
+  public Var putRestLegacy(@RequestBody(required = false) Var[] vars, @PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+    });
+  }
+
+  @RequestMapping(method = RequestMethod.DELETE, value = "/legacyrest/{class}/**")
+  public Var deleteRestLegacy(@PathVariable("class") String clazz) throws Exception {
+    return runIntoTransactionVar(() -> {
+      TranslationPath translationPath = translatePathVars(clazz);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), translationPath.params);
+    });
+  }
+
   //Fim api REST
 
   //Api de segurança
