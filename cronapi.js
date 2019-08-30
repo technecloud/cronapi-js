@@ -371,7 +371,7 @@ if (window.fixedTimeZone) {
       if(fieldValue && Object.keys(fieldValue).length !== 0) {
         var keys = Object.keys(fieldValue);
         keys.forEach(function(key){
-          if (fieldValue[key]) {
+          if (fieldValue[key] !== undefined && fieldValue[key] !== null) {
             if (!fields.vars) {
               fields.vars = {};
             }
