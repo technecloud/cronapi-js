@@ -10,9 +10,9 @@ if (window.timeZoneOffset === undefined || window.timeZoneOffset === null) {
   window.timeZoneOffset = 0;
 }
 
-if (window.fixedTimeZone) {
-  window.timeZoneOffset = window.timeZoneOffset;
-} else {
+window.systemTimeZoneOffset = window.timeZoneOffset;
+
+if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
