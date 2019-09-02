@@ -467,5 +467,7 @@
   "socialLoginDescription": "Function to login with social media(Facebook/Github|Google|Linkedin)",
   "clearCacheBeforeOpen": "Clean Login Data on Logoff",
   "classNameWithMethod": "Name of block function to be called",
-  "callbackFinish": "Function to be executed when execution is finished"
+  "callbackFinish": "Function to be executed when execution is finished",
+  "newline": "Newline",
+  "newlineDescription": "Function that returns a newline '\\n'"
 }
