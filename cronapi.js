@@ -1951,6 +1951,16 @@ if (window.fixedTimeZone) {
     return null;
   }
 
+     /**
+   * @type function
+   * @name {{newline}}
+   * @description {{newlineDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.text.newline = function() {
+    return "\n";
+  }
+
   /**
    * @category CategoryType.XML
    * @categoryTags XML|xml
