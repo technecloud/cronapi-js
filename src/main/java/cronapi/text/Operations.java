@@ -1,5 +1,6 @@
 package cronapi.text;
 
+import cronapi.CronapiMetaData;
 import cronapi.Var;
 
 /**
@@ -207,4 +208,11 @@ public class Operations {
 		return new Var(text.getObjectAsString());
 
 	}
+
+	@CronapiMetaData(type = "function", name = "{{newline}}", nameTags = {
+			"newline" }, description = "{{newlineDescription}}", returnType = CronapiMetaData.ObjectType.STRING)
+	public static final Var newline() {
+		return Var.valueOf("\n");
+	}
+
 }
