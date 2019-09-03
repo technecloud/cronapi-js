@@ -469,5 +469,6 @@
   "classNameWithMethod": "Name of block function to be called",
   "callbackFinish": "Function to be executed when execution is finished",
   "newline": "Newline",
-  "newlineDescription": "Function that returns a newline '\\n'"
+  "newlineDescription": "Function that returns a newline '\\n'",
+  "stopExecutionAfterScopeDestroyLabel": "Stop execution after changing scope"
 }

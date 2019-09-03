@@ -741,15 +741,20 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.LONG} initial_time {{scheduleExecutionParam1}}
    * @param {ObjectType.LONG} interval_time {{scheduleExecutionParam2}}
    * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
+   * @param {ObjectType.BOOLEAN} stopExecutionAfterScopeDestroy {{stopExecutionAfterScopeDestroyLabel}}
    */
-  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit ) {
+  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit, /** @type {ObjectType.BOOLEAN} @description {{stopExecutionAfterScopeDestroyLabel}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  stopExecutionAfterScopeDestroy ) {
+
+    stopExecutionAfterScopeDestroy = stopExecutionAfterScopeDestroy || true;
+    stopExecutionAfterScopeDestroy = (stopExecutionAfterScopeDestroy === 'true' || stopExecutionAfterScopeDestroy === true);
+
     var factor = 1;
 
-    if (measurement_unit == 'seconds') {
+    if (measurement_unit === 'seconds') {
       factor = 1000;
-    } else if(measurement_unit =='minutes') {
+    } else if(measurement_unit ==='minutes') {
       factor = 60000;
-    } else if(measurement_unit =='hours') {
+    } else if(measurement_unit ==='hours') {
       factor = 3600000;
     }
 
@@ -763,10 +768,12 @@ if (!window.fixedTimeZone) {
       intervalId = setInterval(statements , interval_time) ;
     }.bind(this), initial_time);
 
-    this.$on('$destroy', function() {
-      try { clearTimeout(timeoutId); } catch(e) {}
-      try { clearInterval(intervalId); } catch(e) {}
-    });
+    if(stopExecutionAfterScopeDestroy){
+      this.$on('$destroy', function() {
+        try { clearTimeout(timeoutId); } catch(e) {}
+        try { clearInterval(intervalId); } catch(e) {}
+      });
+    }
 
   };
 
