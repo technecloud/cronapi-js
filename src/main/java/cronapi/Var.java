@@ -753,7 +753,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return object.toString();
     }
 
-    return this.getObjectAsJson().toString();
+    return this.getObjectAsJson().getAsString();
   }
 
   private List getSingleList(Object o) {

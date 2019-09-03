@@ -1,11 +1,14 @@
 package br.com.cronapi;
 
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import cronapi.Var;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+
+import cronapi.json.Operations;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -55,10 +58,19 @@ public class VarTest {
 
 
   @Test
-  public void dateConversion(){
+  public void dateConversion() {
     Assert.assertTrue(Var.deserialize("2019-04-10T00:00:00.000Z") instanceof Date);
   }
 
-
+  @Test
+  public void getObjectAsStringWhenByteArray() {
+    // Create a Var instance from a byte[]
+    Var image = new Var("MinhaImagem".getBytes());
+    // Get its Base64 value
+    String base64Afterconversion = image.getObjectAsString();
+    // Base64 String should not bet surrounded by quotes
+    boolean assertCondition = !base64Afterconversion.contains("\"");
+    Assert.assertTrue(assertCondition);
+  }
 
 }

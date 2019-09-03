@@ -71,12 +71,24 @@ public class ImportEventsREST {
       }
     }
   }
-  
+
   private void write(PrintWriter out, String eventName, JsonObject eventObj) {
     String namespace = "window.blockly.events." + eventName;
-    if(!isNull(eventObj.get("blockly"))) {
-      out.println(namespace + " = blockly." + eventObj.get("blockly").getAsJsonObject().get("namespace").getAsString() +
-              "." + Operations.safeNameForMethodBlockly(eventObj.get("blocklyMethod").getAsString()) + ";");
+    // Try to set the 'window.blockly.events.{eventName}' with the blockly method reference
+    StringBuilder sb = new StringBuilder("try{ ");
+    sb.append(namespace);
+    if (!isNull(eventObj.get("blockly"))) {
+      String blocklyNamespace = eventObj.get("blockly").getAsJsonObject().get("namespace").getAsString();
+      String method = Operations.safeNameForMethodBlockly(eventObj.get("blocklyMethod").getAsString());
+      sb.append(" = blockly.").append(blocklyNamespace).append(".").append(method).append(";");
+      sb.append(" } catch(ex){ ");
+      // If it is not possible to add the reference (Blockly not found due to be from other project - mobile/web) set the reference as String
+      sb.append(namespace).append(" = 'blockly.").append(blocklyNamespace).append(".").append(method).append("';");
+      sb.append(" }");
+    } else {
+      // No event to be added
+      sb.append(" = {}; } catch(ex){ }");
     }
+    out.println(sb.toString());
   }
 }
