@@ -2,6 +2,8 @@ package cronapi.math;
 
 import java.util.*;
 
+import cronapi.CronapiMetaData;
+import cronapi.ParamMetaData;
 import cronapi.Var;
 
 /**
@@ -233,16 +235,11 @@ public class Operations {
 		return result;
 	}
 
-	public static final Var pow(Var value1, Var value2) throws Exception {
-		Var result = new Var();
-		boolean isDouble = false;
-		if (value1.getType() == Var.Type.DOUBLE || value2.getType() == Var.Type.DOUBLE)
-			isDouble = true;
-		if (isDouble)
-			result = new Var(Math.pow(value1.getObjectAsDouble(), value2.getObjectAsDouble()));
-		else
-			result = new Var(Math.pow(value1.getObjectAsLong(), value2.getObjectAsLong()));
-		return result;
+	@CronapiMetaData(type = "function", name = "{{ MATHTHEPOW }}", displayInline = true, nameTags = {
+			"Potência", "pow" }, description = "{{ MATHPOWDESCRIPTION }}", returnType = CronapiMetaData.ObjectType.DOUBLE)
+	public static final Var pow(@ParamMetaData(description = "{{ MATHPOWBASE }}", type = CronapiMetaData.ObjectType.DOUBLE) Var base,
+								@ParamMetaData(description = "^", type = CronapiMetaData.ObjectType.DOUBLE) Var exponent) throws Exception {
+		return Var.valueOf(Math.pow(base.getObjectAsDouble(), exponent.getObjectAsDouble()));
 	}
 
 	public static final Var pow10(Var value1) throws Exception {
@@ -796,4 +793,9 @@ public class Operations {
 		}
 		return new Var(value.getObjectAsLong() * -1);
 	}
+
+	//Utilize o método Math.pow(double d1, double d2), aonde:
+
+	//d1 = número base
+	//d2 = expoente
 }
