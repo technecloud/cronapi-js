@@ -351,10 +351,8 @@ public class Operations {
 			"xml","JSON" }, description = "{{XMLToJSONDescription}}", params = {
 			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var xmltoJson(Var xml) throws Exception {
-
-		JSONObject json = XML.toJSONObject(xml.getObjectAsString());
+		JSONObject json = XML.toJSONObject(new StringReader(xml.getObjectAsString()));
 		return Var.valueOf(cronapi.json.Operations.toJson(Var.valueOf(json.toString())));
-
 	}
 
 }
