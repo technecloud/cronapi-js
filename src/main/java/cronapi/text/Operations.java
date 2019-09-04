@@ -1,6 +1,9 @@
 package cronapi.text;
 
 import cronapi.CronapiMetaData;
+import cronapi.CronapiMetaData.CategoryType;
+import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
 import cronapi.Var;
 
 /**
@@ -11,6 +14,7 @@ import cronapi.Var;
  * @since 2017-04-03
  *
  */
+@CronapiMetaData(category = CronapiMetaData.CategoryType.TEXT, categoryTags = { "Text", "Texto" })
 public class Operations {
 
 	public static final Var newText(Var text) throws Exception {
@@ -210,7 +214,7 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{newline}}", nameTags = {
-			"newline" }, description = "{{newlineDescription}}", returnType = CronapiMetaData.ObjectType.STRING)
+			"newline" }, description = "{{newlineDescription}}", returnType = ObjectType.STRING)
 	public static final Var newline() {
 		return Var.valueOf("\n");
 	}
