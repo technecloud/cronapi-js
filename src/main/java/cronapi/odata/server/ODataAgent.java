@@ -61,16 +61,14 @@ public class ODataAgent {
     NodeList nodes = (NodeList) xpath.evaluate("//Resource", doc, XPathConstants.NODESET);
 
     Set<String> added = new HashSet<>();
+
     for (int i = 0; i < nodes.getLength(); i++) {
       Node elem = nodes.item(i);
       String name = elem.getAttributes().getNamedItem("name").getTextContent();
       String profile = elem.getAttributes().getNamedItem("profile").getTextContent();
+
       if (activeProfile.equalsIgnoreCase(profile) && !added.contains(name)) {
-        final BasicDataSource ds = new BasicDataSource();
-        ds.setUrl(elem.getAttributes().getNamedItem("url").getTextContent());
-        ds.setDriverClassName(elem.getAttributes().getNamedItem("driverClassName").getTextContent());
-        ds.setUsername(elem.getAttributes().getNamedItem("username").getTextContent());
-        ds.setPassword(elem.getAttributes().getNamedItem("password").getTextContent());
+        final BasicDataSource ds = createDataSource(elem);
 
         final Context context = new InitialContext();
         context.bind("java:comp/env/" + name, ds);
@@ -78,6 +76,29 @@ public class ODataAgent {
         added.add(name);
       }
     }
+
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node elem = nodes.item(i);
+      String name = elem.getAttributes().getNamedItem("name").getTextContent();
+
+      if (!added.contains(name)) {
+        final BasicDataSource ds = createDataSource(elem);
+
+        final Context context = new InitialContext();
+        context.bind("java:comp/env/" + name, ds);
+
+        added.add(name);
+      }
+    }
+  }
+
+  private static BasicDataSource createDataSource(final Node elem) {
+    final BasicDataSource ds = new BasicDataSource();
+    ds.setUrl(elem.getAttributes().getNamedItem("url").getTextContent());
+    ds.setDriverClassName(elem.getAttributes().getNamedItem("driverClassName").getTextContent());
+    ds.setUsername(elem.getAttributes().getNamedItem("username").getTextContent());
+    ds.setPassword(elem.getAttributes().getNamedItem("password").getTextContent());
+    return ds;
   }
 
   private static String xmlEscapeText(String t) {
