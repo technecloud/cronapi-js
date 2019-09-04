@@ -840,7 +840,7 @@ if (!window.fixedTimeZone) {
               }
               catch (e) {
               }
-              if(fieldValue){
+              if(fieldValue !== undefined || fieldValue !== null){
                 return fieldValue;
               }
               else if(scope && scope.$parent ) {
