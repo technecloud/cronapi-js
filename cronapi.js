@@ -10,9 +10,9 @@ if (window.timeZoneOffset === undefined || window.timeZoneOffset === null) {
   window.timeZoneOffset = 0;
 }
 
-if (window.fixedTimeZone) {
-  window.timeZoneOffset = window.timeZoneOffset;
-} else {
+window.systemTimeZoneOffset = window.timeZoneOffset;
+
+if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
@@ -371,7 +371,7 @@ if (window.fixedTimeZone) {
       if(fieldValue && Object.keys(fieldValue).length !== 0) {
         var keys = Object.keys(fieldValue);
         keys.forEach(function(key){
-          if (fieldValue[key]) {
+          if (fieldValue[key] !== undefined && fieldValue[key] !== null) {
             if (!fields.vars) {
               fields.vars = {};
             }
@@ -1978,6 +1978,16 @@ if (window.fixedTimeZone) {
    */
   this.cronapi.text.prompt = function(/** @type {ObjectType.STRING} @defaultValue abc*/ value) {
     return null;
+  }
+
+     /**
+   * @type function
+   * @name {{newline}}
+   * @description {{newlineDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.text.newline = function() {
+    return "\n";
   }
 
   /**
