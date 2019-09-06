@@ -751,9 +751,16 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return outputter.outputString(element);
     } else if (object instanceof String  || object instanceof File) {
       return object.toString();
+    } if ( _type == Type.DATETIME) {
+       return Utils.getISODateFormat().format(((Calendar) getObject()).getTime());
     }
 
-    return this.getObjectAsJson().toString();
+    JsonElement element = this.getObjectAsJson();
+    if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+      return element.getAsString();
+    }
+
+    return element.toString();
   }
 
   private List getSingleList(Object o) {
