@@ -1556,6 +1556,18 @@ if (!window.fixedTimeZone) {
         return getDatasource(datasource).hasNextPage();
     };
 
+    /**
+     * @type function
+     * @name {{datasourceLoadName}}
+     * @nameTags load|datasource
+     * @description {{datasourceLoadDescription}}
+     * @param {ObjectType.STRING} datasource {{datasource}}
+     * @multilayer true
+     */
+    this.cronapi.screen.load = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+        getDatasource(datasource).fetch({ params: {} }, undefined, undefined, { origin: "button" });
+    };
+
   /**
    * @category CategoryType.DATETIME
    * @categoryTags Date|Datetime|Data|Hora
