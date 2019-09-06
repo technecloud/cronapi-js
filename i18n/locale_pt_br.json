@@ -472,6 +472,6 @@
   "newline": "Nova linha",
   "newlineDescription": "Função que retorna uma nova linha '\\n'",
   "datasourceLoadName": "Carregar fonte de dados",
-  "datasourceLoadDescription": "Função que carrega a fonte de dados selecionada"
+  "datasourceLoadDescription": "Função que carrega a fonte de dados selecionada",
   "stopExecutionAfterScopeDestroyLabel": "Terminar execução após alterar o escopo"
 }

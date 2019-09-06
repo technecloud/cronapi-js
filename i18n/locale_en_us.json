@@ -470,6 +470,6 @@
   "newline": "Newline",
   "newlineDescription": "Function that returns a newline '\\n'",
   "datasourceLoadName": "Load datasource",
-  "datasourceLoadDescription": "Function that loads the selected datasource"
+  "datasourceLoadDescription": "Function that loads the selected datasource",
   "stopExecutionAfterScopeDestroyLabel": "Stop execution after changing scope"
 }
