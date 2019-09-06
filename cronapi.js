@@ -741,15 +741,20 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.LONG} initial_time {{scheduleExecutionParam1}}
    * @param {ObjectType.LONG} interval_time {{scheduleExecutionParam2}}
    * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
+   * @param {ObjectType.BOOLEAN} stopExecutionAfterScopeDestroy {{stopExecutionAfterScopeDestroyLabel}}
    */
-  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit ) {
+  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit, /** @type {ObjectType.BOOLEAN} @description {{stopExecutionAfterScopeDestroyLabel}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  stopExecutionAfterScopeDestroy ) {
+
+    stopExecutionAfterScopeDestroy = stopExecutionAfterScopeDestroy || true;
+    stopExecutionAfterScopeDestroy = (stopExecutionAfterScopeDestroy === 'true' || stopExecutionAfterScopeDestroy === true);
+
     var factor = 1;
 
-    if (measurement_unit == 'seconds') {
+    if (measurement_unit === 'seconds') {
       factor = 1000;
-    } else if(measurement_unit =='minutes') {
+    } else if(measurement_unit ==='minutes') {
       factor = 60000;
-    } else if(measurement_unit =='hours') {
+    } else if(measurement_unit ==='hours') {
       factor = 3600000;
     }
 
@@ -763,10 +768,12 @@ if (!window.fixedTimeZone) {
       intervalId = setInterval(statements , interval_time) ;
     }.bind(this), initial_time);
 
-    this.$on('$destroy', function() {
-      try { clearTimeout(timeoutId); } catch(e) {}
-      try { clearInterval(intervalId); } catch(e) {}
-    });
+    if(stopExecutionAfterScopeDestroy){
+      this.$on('$destroy', function() {
+        try { clearTimeout(timeoutId); } catch(e) {}
+        try { clearInterval(intervalId); } catch(e) {}
+      });
+    }
 
   };
 
@@ -840,7 +847,7 @@ if (!window.fixedTimeZone) {
               }
               catch (e) {
               }
-              if(fieldValue){
+              if(fieldValue !== undefined || fieldValue !== null){
                 return fieldValue;
               }
               else if(scope && scope.$parent ) {
@@ -1916,21 +1923,6 @@ if (!window.fixedTimeZone) {
     return this.cronapi.dateTime.getMomentObj(date).toDate();
   };
 
-  /**
-   * @type function
-   * @name {{updateDate}}
-   * @nameTags setDate|updateDate
-   * @description {{functionToUpdateDate}}
-   * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
-   * @param {ObjectType.LONG} year {{year}}
-   * @param {ObjectType.LONG} month {{month}}
-   * @param {ObjectType.LONG} day {{day}}
-   * @param {ObjectType.LONG} hour {{hour}}
-   * @param {ObjectType.LONG} minute {{minute}}
-   * @param {ObjectType.LONG} second {{second}}
-   * @param {ObjectType.LONG} millisecond {{millisecond}}
-   * @returns {ObjectType.DATETIME}
-   */
   this.cronapi.dateTime.updateDate = function(value, year, month, day, hour, minute, second, millisecond) {
     var date = this.cronapi.dateTime.getMomentObj(value).toDate();
     if (date && !isNaN(date.getTime())) {
@@ -1947,6 +1939,50 @@ if (!window.fixedTimeZone) {
       return;
     }
     return this.cronapi.dateTime.getMomentObj(date).toDate();
+  };
+
+  /**
+   * @type function
+   * @name {{updateDate}}
+   * @nameTags setDate|updateDate
+   * @description {{functionToUpdateDate}}
+   * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+   * @param {ObjectType.STRING} type {{attribute}}
+   * @param {ObjectType.LONG} value {{value}}
+   * @returns {ObjectType.DATETIME}
+   */
+  this.cronapi.dateTime.updateNewDate = function(date, /** @type {ObjectType.STRING} @description {{attribute}} @blockType util_dropdown @keys year|month|day|hour|minute|second|millisecond  @values {{year}}|{{month}}|{{day}}|{{hour}}|{{minute}}|{{second}}|{{millisecond}}  */ type, value ) {
+    var updatedDate = this.cronapi.dateTime.getMomentObj(date).toDate();
+    if (updatedDate && !isNaN(updatedDate.getTime())) {
+      switch(type){
+        case "year":
+          updatedDate.setYear(value);
+          break;
+        case "month":
+          updatedDate.setMonth(value - 1);
+          break;
+        case "day":
+          updatedDate.setDate(value);
+          break;
+        case "hour":
+          updatedDate.setHours(value);
+          break;
+        case "minute":
+          updatedDate.setMinutes(value);
+          break;
+        case "second":
+          updatedDate.setSeconds(value);
+          break;
+        case "millisecond":
+          updatedDate.setMilliseconds(value);
+          break;
+      }
+    }
+    else{
+      this.cronapi.screen.notify('error',this.cronapi.i18n.translate("InvalidDate",[  ]));
+      return;
+    }
+    return this.cronapi.dateTime.getMomentObj(updatedDate).toDate();
   };
 
   /**
