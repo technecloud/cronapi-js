@@ -2,14 +2,12 @@ package br.com.cronapi.dateTime;
 
 import cronapi.Var;
 import cronapi.dateTime.Operations;
-import org.junit.Assert;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 public class DateTimeTest {
@@ -105,7 +103,7 @@ public class DateTimeTest {
   }
 
   @Test
-  public void testUpdateDateValues(){
+  public void testUpdateDateValues() {
     Var item = getTestDate();
     Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("year"), Var.valueOf(5)).getObjectAsDateTime().get(Calendar.YEAR), 5);
     Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("month"), Var.valueOf(6)).getObjectAsDateTime().get(Calendar.MONTH), 5);
