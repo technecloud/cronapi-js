@@ -1,7 +1,6 @@
 package cronapi.json;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
@@ -15,12 +14,8 @@ import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 import cronapi.database.DataSource;
-import org.jdom2.Document;
-import org.jdom2.input.SAXBuilder;
-import org.json.JSONObject;
 
 import java.io.FileInputStream;
-import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 

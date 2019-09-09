@@ -5,6 +5,7 @@ import cronapi.Var;
 import cronapi.xml.Operations;
 import org.apache.commons.io.IOUtils;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.json.JSONException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -13,8 +14,7 @@ import org.testng.annotations.Test;
 
 import java.io.InputStream;
 
-import static cronapi.xml.Operations.xmlFromStrng;
-import static cronapi.xml.Operations.xmltoJson;
+import static cronapi.xml.Operations.*;
 
 public class OperationsTest {
 
@@ -61,22 +61,34 @@ public class OperationsTest {
         Assert.assertFalse(document.hasRootElement());
     }
 
-//    @Test
-//    void testNewXMLEmpty() {
-//    }
-//
-//    @Test
-//    void XMLOpenFromFile() {
-//    }
-//
-//    @Test
-//    void XMLOpen() {
-//    }
-//
-//    @Test
-//    void XMLcreateElement() {
-//    }
-//
+    @Test
+    void testNewXMLEmpty() throws Exception {
+        Var xmlRoot = Var.valueOf(new Element("teste"));
+        Var retorno = Operations.newXMLEmpty(xmlRoot);
+        Document document = (Document)retorno.getObject();
+        Assert.assertTrue(document.hasRootElement());
+        Assert.assertEquals(((Element)document.getContent().get(0)).getName(),"teste");
+    }
+
+    @Test
+    void XMLOpenFromFile() throws Exception {
+        String absPath = getClass().getResource("/books.xml").getPath();
+        Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
+        Assert.assertTrue(xmlRetorno.getObject() instanceof Document);
+    }
+
+    @Test
+    void XMLOpen() throws Exception {
+        Var xmlRetorno = Operations.XMLOpen(Var.valueOf("teste"));
+        Assert.assertTrue(xmlRetorno.getObject() instanceof Document);
+    }
+
+    @Test
+    void XMLcreateElement() {
+       Var var = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
+
+    }
+
 //    @Test
 //    void XMLaddElement() {
 //    }
