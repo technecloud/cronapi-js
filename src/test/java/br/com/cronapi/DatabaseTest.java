@@ -2,11 +2,11 @@ package br.com.cronapi;
 
 import cronapi.Var;
 import cronapi.database.Operations;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 
-public class DatabaseTests {
+public class DatabaseTest {
   @Test
   public void QAIBT_1436() {
     try {
@@ -17,7 +17,7 @@ public class DatabaseTests {
       );
       Assert.fail();
     } catch (Exception e) {
-      Assert.assertFalse(e instanceof NullPointerException, "Should not throw NullPointerException");
+      Assert.assertFalse(e instanceof NullPointerException);
     }
   }
 }

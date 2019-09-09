@@ -2,28 +2,28 @@ package br.com.cronapi.dateTime;
 
 import cronapi.Var;
 import cronapi.dateTime.Operations;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.xml.bind.DatatypeConverter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class OperationsTest {
+public class DateTimeTest {
 
-  private TimeZone last;
+  private static TimeZone last;
 
   @BeforeClass
-  private void before() {
+  public static void before() {
     last = TimeZone.getDefault();
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
 
   @AfterClass
-  private void after() {
+  public static void after() {
     TimeZone.setDefault(last);
   }
 

@@ -5,9 +5,9 @@ import com.jayway.jsonpath.JsonPath;
 import cronapi.Var;
 import cronapi.list.Operations;
 import org.apache.commons.io.IOUtils;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,14 +17,14 @@ import java.util.List;
 import static cronapi.json.Operations.GSON_CONFIGURATION;
 import static cronapi.json.Operations.toJson;
 
-public class OperationsTest {
+public class ListTest {
 
-  private Var BOOKS_JSON;
+  private static Var BOOKS_JSON;
 
   @BeforeClass
-  public void oneTimeSetUp() throws Exception {
+  public static void oneTimeSetUp() throws Exception {
     //
-    try (InputStream booksInput = getClass().getResourceAsStream("/books.json")) {
+    try (InputStream booksInput = ListTest.class.getResourceAsStream("/books.json")) {
       String json = JsonPath.using(GSON_CONFIGURATION)
           .parse(IOUtils.toString(booksInput))
           .read("$.store.book")
@@ -42,7 +42,7 @@ public class OperationsTest {
   }
 
   @Test
-  void sizeFromListTest() {
+  public void sizeFromListTest() {
     List<Object> list = new ArrayList<>();
     list.add(new Object());
     Var listVar = Var.valueOf(list);
@@ -50,20 +50,20 @@ public class OperationsTest {
   }
 
   @Test
-  void sizeFromJsonTest() {
+  public void sizeFromJsonTest() {
     Var listVar = Var.valueOf(BOOKS_JSON);
     Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 4);
   }
 
   @Test
-  void listFromTextTest() {
+  public void listFromTextTest() {
     Var listVar = Operations.getListFromText(Var.valueOf("Cronapp/Platform"), Var.valueOf("/"));
     Assert.assertTrue(listVar.getObject() instanceof List);
     Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 2);
   }
 
   @Test
-  void listFromTextUsingListAsParameterTest() {
+  public void listFromTextUsingListAsParameterTest() {
     Var listParam = Var.valueOf(Arrays.asList("Cronapp", "/", "Platform"));
     Var listVar = Operations.getListFromText(listParam, Var.valueOf("/"));
     Assert.assertTrue(listVar.getObject() instanceof List);
@@ -71,7 +71,7 @@ public class OperationsTest {
   }
 
   @Test
-  void listFromTextNullAsParameterTest() {
+  public void listFromTextNullAsParameterTest() {
     Var listVar = Operations.getListFromText(Var.VAR_NULL, Var.VAR_NULL);
     Assert.assertTrue(listVar.getObject() instanceof List);
     Assert.assertEquals(Operations.size(listVar).getObjectAsInt().intValue(), 1);

@@ -8,10 +8,10 @@ import cronapi.Var;
 import cronapi.i18n.Messages;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -20,19 +20,19 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class Operations {
+public class ConversionTest {
 
-  private TimeZone last;
+  private static TimeZone last;
 
   @BeforeClass
-  private void before() {
+  public static void before() {
     last = TimeZone.getDefault();
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     Messages.set(Locale.ENGLISH);
   }
 
   @AfterClass
-  private void after() {
+  public static void after() {
     TimeZone.setDefault(last);
   }
 

@@ -1,7 +1,7 @@
 package br.com.cronapi.rest.security;
 
 import cronapi.rest.security.CronappSecurity;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 /**
  * Simples testes de usabilidade da anotação {@link CronappSecurity}

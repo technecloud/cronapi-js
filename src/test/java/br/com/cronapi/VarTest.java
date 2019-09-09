@@ -6,8 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class VarTest {
 
@@ -37,8 +37,8 @@ public class VarTest {
     Assert.assertEquals((int) Var.valueOf("1").getObjectAsInt(), 1);
     Assert.assertEquals((int) Var.valueOf(1.0).getObjectAsInt(), 1);
     Assert.assertEquals((int) Var.valueOf(1.1).getObjectAsInt(), 1);
-    Assert.assertEquals((double) Var.valueOf("1.0").getObjectAsDouble(), 1.0);
-    Assert.assertEquals((double) Var.valueOf(1).getObjectAsDouble(), 1.0);
+    Assert.assertEquals((double) Var.valueOf("1.0").getObjectAsDouble(), 1.0, 0.001);
+    Assert.assertEquals((double) Var.valueOf(1).getObjectAsDouble(), 1.0, 0.001);
 
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
