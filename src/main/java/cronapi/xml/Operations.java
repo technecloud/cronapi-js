@@ -2,6 +2,7 @@ package cronapi.xml;
 
 import java.io.File;
 import java.io.StringReader;
+import java.util.Objects;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -29,7 +30,7 @@ public class Operations {
 	@CronapiMetaData(type = "function", name = "{{newXMLEmptyName}}", nameTags = {
 			"newXMLEmpty" }, description = "{{newXMLEmptyDescription}}", returnType = ObjectType.OBJECT)
 	public static final Var newXMLEmpty() throws Exception {
-		return new Var(new Document());
+		return Var.valueOf(new Document());
 	}
 
 	@CronapiMetaData(type = "function", name = "{{newXMLEmptyName}}", nameTags = {
@@ -69,8 +70,8 @@ public class Operations {
 			if (!value.equals(Var.VAR_NULL) && !value.getObjectAsString().trim().isEmpty())
 				newElement.setText(value.getObjectAsString());
 			return new Var(newElement);
-		} else
-			return Var.VAR_NULL;
+		}
+		return Var.VAR_NULL;
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLaddElementName}}", nameTags = {
@@ -108,7 +109,7 @@ public class Operations {
 				return new Var(false);
 		} else if (document.getObject() instanceof Element) {
 			Element elementCasted = (Element) document.getObject();
-			if (elementCasted.getDocument().hasRootElement())
+			if (Objects.nonNull(elementCasted.getDocument()) && elementCasted.getDocument().hasRootElement())
 				return new Var(true);
 			else
 				return new Var(false);
@@ -177,9 +178,7 @@ public class Operations {
 					return new Var(elementCasted.getChildren(child.getObjectAsString()));
 				}
 			} else if (element.getObject() instanceof Document) {
-				if (child.getObject() instanceof Element) {
-
-				} else if (child.getObject() instanceof String) {
+				if (child.getObject() instanceof String) {
 					Document documentCasted = (Document) element.getObject();
 					if (documentCasted.getRootElement().getName() == child.getObjectAsString()) {
 						return new Var(documentCasted.getRootElement());
