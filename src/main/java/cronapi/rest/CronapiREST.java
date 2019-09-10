@@ -1,17 +1,11 @@
 package cronapi.rest;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.gson.JsonObject;
+import cronapi.*;
+import cronapi.database.*;
+import cronapi.util.SecurityUtil;
+import cronapi.util.StorageService;
+import cronapi.util.StorageServiceFileObject;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,36 +15,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.JsonObject;
-
-import cronapi.ErrorResponse;
-import cronapi.QueryManager;
-import cronapi.RestBody;
-import cronapi.RestClient;
-import cronapi.RestResult;
-import cronapi.Utils;
-import cronapi.Var;
-import cronapi.database.DataSource;
-import cronapi.database.DataSourceFilter;
-import cronapi.database.EntityMetadata;
-import cronapi.database.TenantService;
-import cronapi.database.TransactionManager;
-import cronapi.database.DataSourceFilter.DataSourceFilterItem;
-import cronapi.rest.CronapiREST.TranslationPath;
-import cronapi.util.SecurityUtil;
-import cronapi.util.StorageService;
-import cronapi.util.StorageServiceFileObject;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping(value = "/api/cronapi")
@@ -62,7 +39,7 @@ public class CronapiREST {
   private HttpServletRequest request;
 
   @Autowired
-	private HttpServletResponse response;
+  private HttpServletResponse response;
 
   @Autowired
   private TenantService tenantService;
@@ -85,16 +62,16 @@ public class CronapiREST {
 
   private TranslationPath translatePathVars(String clazz, int offSet, int max) {
     String paths = request.getServletPath().substring(request.getServletPath().indexOf(clazz) + clazz.length()).trim();
-    if(paths.startsWith("/")) {
+    if (paths.startsWith("/")) {
       paths = paths.substring(1);
     }
-    if(paths.endsWith("/")) {
+    if (paths.endsWith("/")) {
       paths = paths.substring(0, paths.length() - 1);
     }
 
     String[] strParams = paths.split("/");
 
-    strParams = Arrays.copyOfRange(strParams, offSet, max!=-1?max:strParams.length);
+    strParams = Arrays.copyOfRange(strParams, offSet, max != -1 ? max : strParams.length);
 
     List<Var> params = new LinkedList<>();
     List<Var> relationParams = new LinkedList<>();
@@ -103,12 +80,12 @@ public class CronapiREST {
 
     boolean isParam = true;
     boolean isRelationParam = false;
-    if(!paths.isEmpty()) {
-      for(int i = 0; i < strParams.length; i++) {
+    if (!paths.isEmpty()) {
+      for (int i = 0; i < strParams.length; i++) {
 
         if (strParams[i] != null) {
           Matcher matcher = RELATION_PARAM.matcher(strParams[i]);
-          if(matcher.matches()) {
+          if (matcher.matches()) {
             translationPath.relationClass = matcher.group(2);
             translationPath.field = matcher.group(1);
             translationPath.refId = strParams[i];
@@ -118,11 +95,11 @@ public class CronapiREST {
           }
         }
 
-        if(isParam) {
+        if (isParam) {
           params.add(Var.valueOf(strParams[i]));
         }
 
-        if(isRelationParam) {
+        if (isRelationParam) {
           relationParams.add(Var.valueOf(strParams[i]));
         }
       }
@@ -135,14 +112,14 @@ public class CronapiREST {
       caseInsensitive = "true".equalsIgnoreCase(request.getParameter("filterCaseInsensitive"));
     }
     translationPath.filter = DataSourceFilter.getInstance(request.getParameter("filter"), request.getParameter("order"),
-            request.getParameter("filterType"), caseInsensitive);
+        request.getParameter("filterType"), caseInsensitive);
 
     return translationPath;
   }
 
   private Var[] toVarArray(LinkedList list) {
     Var[] vars = new Var[list.size()];
-    for(int i = 0; i < list.size(); i++) {
+    for (int i = 0; i < list.size(); i++) {
       vars[i] = Var.valueOf(list.get(i));
     }
 
@@ -152,7 +129,8 @@ public class CronapiREST {
   @ExceptionHandler(Throwable.class)
   @ResponseBody
   ResponseEntity<ErrorResponse> handleControllerException(HttpServletRequest req, Throwable ex) {
-    ex.printStackTrace();;
+    ex.printStackTrace();
+    ;
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex, req.getMethod());
     return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -174,7 +152,7 @@ public class CronapiREST {
       PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
 
       DataSource ds = new DataSource(entity);
-      if(translationPath.relationClass == null) {
+      if (translationPath.relationClass == null) {
         ds.checkRESTSecurity("GET");
         if (translationPath.params.length > 0 && translationPath.params[0].equals("__new__")) {
           ds.insert();
@@ -183,8 +161,7 @@ public class CronapiREST {
           ds.setDataSourceFilter(translationPath.filter);
           ds.filter(null, page, translationPath.params);
         }
-      }
-      else {
+      } else {
         ds.checkRESTSecurity(translationPath.refId, "GET");
         if (translationPath.relationParams.length > 0 && translationPath.relationParams[0].equals("__new__")) {
           ds.resolveRelation(translationPath.refId);
@@ -209,13 +186,12 @@ public class CronapiREST {
       DataSource ds = new DataSource(entity);
       TranslationPath translationPath = translatePathVars(entity);
 
-      if(translationPath.relationClass == null) {
+      if (translationPath.relationClass == null) {
         ds.checkRESTSecurity("PUT");
         ds.filter(data, null);
         ds.update(data);
         return Var.valueOf(ds.save());
-      }
-      else {
+      } else {
         ds.checkRESTSecurity(translationPath.refId, "PUT");
         String entityRelation = ds.getRelationEntity(translationPath.refId);
         ds = new DataSource(entityRelation);
@@ -236,14 +212,13 @@ public class CronapiREST {
       TranslationPath translationPath = translatePathVars(entity);
 
       Object inserted = null;
-      if(translationPath.relationClass == null) {
+      if (translationPath.relationClass == null) {
         ds.checkRESTSecurity("POST");
-        ds.insert((Map<?, ?>)data.getObject());
+        ds.insert((Map<?, ?>) data.getObject());
         inserted = ds.save();
-      }
-      else {
+      } else {
         ds.checkRESTSecurity(translationPath.refId, "POST");
-        inserted = ds.insertRelation(translationPath.refId, (Map<?, ?>)data.getObject(), translationPath.params);
+        inserted = ds.insertRelation(translationPath.refId, (Map<?, ?>) data.getObject(), translationPath.params);
       }
       return Var.valueOf(inserted);
     });
@@ -256,11 +231,10 @@ public class CronapiREST {
     runIntoTransaction(() -> {
       TranslationPath translationPath = translatePathVars(entity);
       DataSource ds = new DataSource(entity);
-      if(translationPath.relationClass == null) {
+      if (translationPath.relationClass == null) {
         ds.checkRESTSecurity("DELETE");
         ds.delete(translationPath.params);
-      }
-      else {
+      } else {
         ds.checkRESTSecurity(translationPath.refId, "DELETE");
         ds.deleteRelation(translationPath.refId, translationPath.params, translationPath.relationParams);
       }
@@ -308,7 +282,7 @@ public class CronapiREST {
         TranslationPath translationPath = translatePathVars(id);
         if (translationPath.filter != null && translationPath.filter.getItems().size() > 0) {
           Var[] filterParams = toVarArray(translationPath.filter.getItems());
-          Var[] params = (Var[])ArrayUtils.addAll(translationPath.params, filterParams);
+          Var[] params = (Var[]) ArrayUtils.addAll(translationPath.params, filterParams);
           return QueryManager.executeBlockly(query, "FILTER", params).getObjectAsPOJOList();
         } else {
           return QueryManager.executeBlockly(query, "GET", translationPath.params).getObjectAsPOJOList();
@@ -344,7 +318,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/query/{id}/**")
-  public Object queryPost(@PathVariable("id") String id, @RequestBody final Map<?,?> rawData, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+  public Object queryPost(@PathVariable("id") String id, @RequestBody final Map<?, ?> rawData, @RequestHeader(value = "X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
     RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -354,7 +328,7 @@ public class CronapiREST {
 
       QueryManager.checkFieldSecurity(query, data, "POST");
 
-      Var entity =  Var.valueOf(data.getEntityData());
+      Var entity = Var.valueOf(data.getEntityData());
 
       RestClient.getRestClient().setRawBody(entity);
       RestClient.getRestClient().setBody(data);
@@ -362,7 +336,7 @@ public class CronapiREST {
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
 
-        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {entity}, translationPath.params);
+        Var[] params = (Var[]) ArrayUtils.addAll(new Var[]{entity}, translationPath.params);
         QueryManager.executeEvent(query, entity, "beforeInsert");
         Var inserted = QueryManager.executeBlockly(query, "POST", params);
         QueryManager.executeEvent(query, entity, "afterInsert");
@@ -393,7 +367,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/query/{id}/**")
-  public Object queryPut(@PathVariable("id") String id, @RequestBody final Map<?, ?> rawData, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+  public Object queryPut(@PathVariable("id") String id, @RequestBody final Map<?, ?> rawData, @RequestHeader(value = "X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
     RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -403,14 +377,14 @@ public class CronapiREST {
 
       QueryManager.checkFieldSecurity(query, data, "PUT");
 
-      Var entity =  Var.valueOf(data.getEntityData());
+      Var entity = Var.valueOf(data.getEntityData());
       RestClient.getRestClient().setRawBody(entity);
       RestClient.getRestClient().setBody(data);
 
       if (QueryManager.getType(query).equals("blockly")) {
         TranslationPath translationPath = translatePathVars(id);
 
-        Var[] params = (Var[])ArrayUtils.addAll(new Var[] {entity}, translationPath.params);
+        Var[] params = (Var[]) ArrayUtils.addAll(new Var[]{entity}, translationPath.params);
         QueryManager.executeEvent(query, entity, "beforeUpdate");
         Var modified = QueryManager.executeBlockly(query, "PUT", params);
         QueryManager.executeEvent(query, entity, "beforeUpdate");
@@ -438,7 +412,7 @@ public class CronapiREST {
   }
 
   @RequestMapping(method = RequestMethod.DELETE, value = "/query/{id}/**")
-  public Object queryDelete(@PathVariable("id") String id, @RequestHeader(value="X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
+  public Object queryDelete(@PathVariable("id") String id, @RequestHeader(value = "X-From-DataSource", defaultValue = "false") boolean isFromDataSource) throws Exception {
     RestResult result = runIntoTransaction(() -> {
 
       JsonObject query = QueryManager.getQuery(id);
@@ -526,7 +500,7 @@ public class CronapiREST {
     });
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**", consumes ={ MediaType.APPLICATION_JSON_VALUE,  MediaType.APPLICATION_ATOM_XML_VALUE})
+  @RequestMapping(method = RequestMethod.POST, value = "/rest/{class}/**", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_ATOM_XML_VALUE})
   public Var postRest(@RequestBody(required = false) Var var, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransactionVar(() -> {
       return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), var);
@@ -591,68 +565,68 @@ public class CronapiREST {
   //Fim Api de Segurança
 
   //Api upload e visualização de arquivo
-	@RequestMapping(method = RequestMethod.GET, value = "/filePreview/{fileName}/**")
-	public void filePreview(@PathVariable("fileName") String fileName) throws Exception {
-		StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(fileName);
-		response.setContentType(fileObject.contentType);
-		response.setHeader("Content-disposition", "attachment; filename="+ fileObject.name + fileObject.extension);
+  @RequestMapping(method = RequestMethod.GET, value = "/filePreview/{fileName}/**")
+  public void filePreview(@PathVariable("fileName") String fileName) throws Exception {
+    StorageServiceFileObject fileObject = StorageService.getFileObjectFromTempDirectory(fileName);
+    response.setContentType(fileObject.contentType);
+    response.setHeader("Content-disposition", "attachment; filename=" + fileObject.name + fileObject.extension);
 
-		ServletOutputStream responseOutputStream = response.getOutputStream();
-		responseOutputStream.write(fileObject.bytes);
-		responseOutputStream.flush();
-		responseOutputStream.close();
-	}
+    ServletOutputStream responseOutputStream = response.getOutputStream();
+    responseOutputStream.write(fileObject.bytes);
+    responseOutputStream.flush();
+    responseOutputStream.close();
+  }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/downloadFile/{entity}/{field}/**")
-	public void downloadFile(@PathVariable("entity") String entity, @PathVariable("field") String field,
-			@RequestBody final Var data) throws Exception {
-		DataSource ds = new DataSource(entity);
-		ds.checkRESTSecurity("GET");
-		ds.filter(data, null);
-		Object obj = ds.getObject();
-		byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
-		StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
-		response.setContentType(fileObject.contentType);
-		response.addHeader("x-filename", fileObject.name + fileObject.extension);
+  @RequestMapping(method = RequestMethod.POST, value = "/downloadFile/{entity}/{field}/**")
+  public void downloadFile(@PathVariable("entity") String entity, @PathVariable("field") String field,
+                           @RequestBody final Var data) throws Exception {
+    DataSource ds = new DataSource(entity);
+    ds.checkRESTSecurity("GET");
+    ds.filter(data, null);
+    Object obj = ds.getObject();
+    byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
+    StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
+    response.setContentType(fileObject.contentType);
+    response.addHeader("x-filename", fileObject.name + fileObject.extension);
 
-		ServletOutputStream responseOutputStream = response.getOutputStream();
-		responseOutputStream.write(fileObject.bytes);
-		responseOutputStream.flush();
-		responseOutputStream.close();
-	}
+    ServletOutputStream responseOutputStream = response.getOutputStream();
+    responseOutputStream.write(fileObject.bytes);
+    responseOutputStream.flush();
+    responseOutputStream.close();
+  }
 
-	@RequestMapping(method = RequestMethod.GET, value = "/downloadFile/{entity}/{field}/{ids}/**")
-	public void downloadFileGet(@PathVariable("entity") String entity, @PathVariable("field") String field,
-			@PathVariable("ids") String ids) throws Exception {
+  @RequestMapping(method = RequestMethod.GET, value = "/downloadFile/{entity}/{field}/{ids}/**")
+  public void downloadFileGet(@PathVariable("entity") String entity, @PathVariable("field") String field,
+                              @PathVariable("ids") String ids) throws Exception {
 
-		DataSource ds = new DataSource(entity);
+    DataSource ds = new DataSource(entity);
 
-		List<Var> varIds = new LinkedList<Var>();
-		String[] idsSplited = ids.split(Pattern.quote(":"));
-		for (String id: idsSplited) {
-		  varIds.add(Var.valueOf(id));
-		}
-	  Object domainInstance = ds.getObjectWithId(varIds.toArray(new Var[0]));
-		ds.filter(Var.valueOf(domainInstance) , null);
-		Object obj = ds.getObject();
+    List<Var> varIds = new LinkedList<Var>();
+    String[] idsSplited = ids.split(Pattern.quote(":"));
+    for (String id : idsSplited) {
+      varIds.add(Var.valueOf(id));
+    }
+    Object domainInstance = ds.getObjectWithId(varIds.toArray(new Var[0]));
+    ds.filter(Var.valueOf(domainInstance), null);
+    Object obj = ds.getObject();
 
-		byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
-		StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
-		response.setContentType(fileObject.contentType);
-		response.addHeader("x-filename", fileObject.name + fileObject.extension);
-		response.setHeader("Content-Disposition", "attachment;filename=" + fileObject.name + fileObject.extension);
+    byte[] bytes = (byte[]) Utils.getFieldValue(obj, field);
+    StorageServiceFileObject fileObject = StorageService.getFileObjectFromBytes(bytes);
+    response.setContentType(fileObject.contentType);
+    response.addHeader("x-filename", fileObject.name + fileObject.extension);
+    response.setHeader("Content-Disposition", "attachment;filename=" + fileObject.name + fileObject.extension);
 
-		ServletOutputStream responseOutputStream = response.getOutputStream();
-		responseOutputStream.write(fileObject.bytes);
-		responseOutputStream.flush();
-		responseOutputStream.close();
-	}
+    ServletOutputStream responseOutputStream = response.getOutputStream();
+    responseOutputStream.write(fileObject.bytes);
+    responseOutputStream.flush();
+    responseOutputStream.close();
+  }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/uploadFile")
-	public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile[] uploadfiles) throws Exception {
-		return new ResponseEntity<Object>(StorageService.saveUploadFiles(uploadfiles), HttpStatus.OK);
-	}
-	//Fim Api upload e visualizaão de arquivo
+  @RequestMapping(method = RequestMethod.POST, value = "/uploadFile")
+  public ResponseEntity<Object> uploadFile(@RequestParam("file") MultipartFile[] uploadfiles) throws Exception {
+    return new ResponseEntity<Object>(StorageService.saveUploadFiles(uploadfiles), HttpStatus.OK);
+  }
+  //Fim Api upload e visualizaão de arquivo
 
   private RestResult runIntoTransaction(Callable<Var> callable) throws Exception {
     RestClient.getRestClient().setFilteredEnabled(true);
@@ -661,12 +635,10 @@ public class CronapiREST {
     try {
       var = callable.call();
       TransactionManager.commit();
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       TransactionManager.rollback();
       throw e;
-    }
-    finally {
+    } finally {
       TransactionManager.close();
       TransactionManager.clear();
     }
@@ -680,12 +652,10 @@ public class CronapiREST {
     try {
       var = callable.call();
       TransactionManager.commit();
-    }
-    catch(Exception e) {
+    } catch (Exception e) {
       TransactionManager.rollback();
       throw e;
-    }
-    finally {
+    } finally {
       TransactionManager.close();
       TransactionManager.clear();
     }

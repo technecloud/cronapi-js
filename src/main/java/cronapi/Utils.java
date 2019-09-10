@@ -44,6 +44,8 @@ public class Utils {
 
   private static final Map<String, DateFormat> PARSE_DATETIME_FORMAT = new HashMap<>();
 
+  private static final ISO8601DateFormat ISO_FORMAT = new ISO8601DateFormat();;
+
   static {
     DATE_FORMATS.put("pt", getGenericParseDateFormat(new Locale("pt", "BR")));
     DATE_FORMATS.put("en", getGenericParseDateFormat(new Locale("en", "US")));
@@ -390,6 +392,10 @@ public class Utils {
     }
 
     return format;
+  }
+
+  public static final DateFormat getISODateFormat() {
+    return ISO_FORMAT;
   }
 
   private static DateFormat[] getGenericParseDateFormat(Locale locale) {

@@ -15,13 +15,7 @@ import cronapi.rest.security.CronappSecurity;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.EntityType;
@@ -373,19 +367,21 @@ public class DataSource implements JsonSerializable {
     }
 
     if (isCount) {
-      return new Long[]{Long.valueOf(this.page.getContent().size())};
+      return new Long[]{(long) this.page.getContent().size()};
     } else {
       return this.page.getContent().toArray();
     }
   }
 
-  private List normalizeList(List entities,
-      org.apache.olingo.odata2.api.edm.provider.EntityType entityType) {
+  private List normalizeList(List entities, org.apache.olingo.odata2.api.edm.provider.EntityType entityType) {
     if (entities != null && !entities.isEmpty()) {
       try {
+        List<Object> newEntities = new LinkedList<>();
 
-        List<Object> newEntities = new LinkedList<Object>();
         for (Object obj : entities) {
+          if (Objects.isNull(obj)) {
+            continue;
+          }
 
           Var entity = Var.valueOf(new LinkedHashMap<>());
           if (obj.getClass().isArray()) {
@@ -409,11 +405,16 @@ public class DataSource implements JsonSerializable {
               i++;
             }
           } else {
-            Var sub = Var.valueOf(obj);
-            for (Property property : entityType.getProperties()) {
-              JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) property.getMapping();
-              String key = property.getName();
-              entity.set(key, sub.get(mapping.getInternalName()));
+            if (entityType.getProperties().size() == 1) {
+              String key = entityType.getProperties().get(0).getName();
+              entity.set(key, obj);
+            } else {
+              Var sub = Var.valueOf(obj);
+              for (Property property : entityType.getProperties()) {
+                JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) property.getMapping();
+                String key = property.getName();
+                entity.set(key, sub.get(mapping.getInternalName()));
+              }
             }
           }
 
@@ -427,7 +428,6 @@ public class DataSource implements JsonSerializable {
     }
 
     return entities;
-
   }
 
   public EntityMetadata getMetadata() {

@@ -2,12 +2,12 @@ package br.com.cronapi.util;
 
 import cronapi.Var;
 import cronapi.util.Operations;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 
-public class OperationsTest {
+public class UtilTest {
 
     @Test
     public void isUUID() {

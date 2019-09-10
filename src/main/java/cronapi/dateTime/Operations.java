@@ -3,6 +3,7 @@ package cronapi.dateTime;
 import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 import java.text.SimpleDateFormat;
@@ -105,27 +106,57 @@ public class Operations {
 		return new Var(date.getTime());
 	}
 
-  @CronapiMetaData(type = "function", name = "{{updateDate}}", nameTags = { "updateDate",
-      "setDate" }, description = "{{functionToUpdateDate}}", params = { "{{date}}", "{{year}}", "{{month}}", "{{day}}",
-      "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}, paramsType = { ObjectType.LONG, ObjectType.LONG,
-      ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
-      ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.DATETIME)
-  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) {
-    Calendar updatedDate = Calendar.getInstance();
-    updatedDate.setTime(date.getObjectAsDateTime().getTime());
-    int y = year.getObjectAsInt();
-    int m = month.getObjectAsInt() - 1;
-    int d = day.getObjectAsInt();
-    int h = hour.getObjectAsInt();
-    int min = minute.getObjectAsInt();
-    int s = second.getObjectAsInt();
-    int mili = millisecond.getObjectAsInt();
-    updatedDate.set(y, m, d, h, min, s);
-    updatedDate.set(Calendar.MILLISECOND, mili);
-    return new Var(updatedDate.getTime());
-  }
-	
-	@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
+	 @Deprecated
+	  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) {
+		Calendar updatedDate = Calendar.getInstance();
+		updatedDate.setTime(date.getObjectAsDateTime().getTime());
+		int y = year.getObjectAsInt();
+		int m = month.getObjectAsInt() - 1;
+		int d = day.getObjectAsInt();
+		int h = hour.getObjectAsInt();
+		int min = minute.getObjectAsInt();
+		int s = second.getObjectAsInt();
+		int mili = millisecond.getObjectAsInt();
+		updatedDate.set(y, m, d, h, min, s);
+		updatedDate.set(Calendar.MILLISECOND, mili);
+		return new Var(updatedDate.getTime());
+	  }
+
+	@CronapiMetaData(type = "function", name = "{{updateDate}}", nameTags = { "updateDate", "setDate" },
+			description = "{{functionToUpdateDate}}", params = { "{{date}}", "{{type}}", "{{value}}" },
+			paramsType = { ObjectType.DATETIME, ObjectType.STRING, ObjectType.LONG}, returnType = ObjectType.DATETIME)
+	public static final Var updateNewDate(Var date, @ParamMetaData(type = ObjectType.STRING, description = "{{attribute}}", blockType = "util_dropdown",
+			keys = {"year", "month", "day", "hour", "minute", "second", "millisecond"},
+			values = {"{{year}}", "{{month}}", "{{day}}", "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}) Var type, Var value) {
+		Calendar updatedDate = Calendar.getInstance();
+		updatedDate.setTime(date.getObjectAsDateTime().getTime());
+		switch(type.getObjectAsString()){
+			case "year":
+				updatedDate.set(Calendar.YEAR, value.getObjectAsInt());
+				break;
+			case "month":
+				updatedDate.set(Calendar.MONTH, value.getObjectAsInt() - 1);
+				break;
+			case "day":
+				updatedDate.set(Calendar.DAY_OF_MONTH, value.getObjectAsInt());
+				break;
+			case "hour":
+				updatedDate.set(Calendar.HOUR_OF_DAY, value.getObjectAsInt());
+				break;
+			case "minute":
+				updatedDate.set(Calendar.MINUTE, value.getObjectAsInt());
+				break;
+			case "second":
+				updatedDate.set(Calendar.SECOND, value.getObjectAsInt());
+				break;
+			case "millisecond":
+				updatedDate.set(Calendar.MILLISECOND, value.getObjectAsInt());
+				break;
+		}
+		return new Var(updatedDate.getTime());
+	}
+
+		@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
 			"getSecondsDiffDate", "diffDatesSeconds" }, description = "{{functionToGetSecondsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)

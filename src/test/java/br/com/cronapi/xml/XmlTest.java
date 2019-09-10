@@ -8,10 +8,10 @@ import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.json.JSONException;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,11 +19,11 @@ import java.util.List;
 
 import static cronapi.xml.Operations.*;
 
-public class OperationsTest {
+public class XmlTest {
 
     private Var booksXml;
 
-    @BeforeClass
+    @Before
     private void before() throws Exception {
         try (InputStream booksInput = getClass().getResourceAsStream("/books.xml")) {
             String xml = IOUtils.toString(booksInput);
@@ -31,7 +31,7 @@ public class OperationsTest {
         }
     }
 
-    @AfterClass
+    @After
     private void after() {
         booksXml = null;
     }
@@ -44,9 +44,9 @@ public class OperationsTest {
         return getClass().getResource(s).getPath();
     }
 
-    @Test
+    @Test(expected = JSONException.class)
     public void testXmltoJsonException() throws Exception {
-        Assert.assertThrows(JSONException.class, () -> xmltoJson(getXMLException()));
+        xmltoJson(getXMLException());
     }
 
     @Test
@@ -206,12 +206,12 @@ public class OperationsTest {
         Assert.assertEquals(retorno.getObjectAsList().size(),2);
     }
 
-    @Test(expectedExceptions = Exception.class)
+    @Test(expected = Exception.class)
     void XMLSetElementAttributeValueNull() throws Exception {
         Operations.XMLSetElementAttributeValue(Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL));
     }
 
-    @Test(expectedExceptions = Exception.class)
+    @Test(expected = Exception.class)
     void XMLSetElementAttributeValueNotElement() throws Exception {
         Operations.XMLSetElementAttributeValue(Var.valueOf("teste"), Var.valueOf("teste"), Var.valueOf("teste"));
     }
@@ -244,7 +244,7 @@ public class OperationsTest {
         Assert.assertTrue(retorno.getObject() instanceof Content);
     }
 
-    @Test(expectedExceptions = Exception.class)
+    @Test(expected = Exception.class)
     void XMLSetElementValueNotElement() throws Exception {
         Operations.XMLSetElementValue(Var.valueOf("teste"), Var.valueOf("teste"));
     }
