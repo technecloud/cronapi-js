@@ -485,6 +485,38 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{language}}
+   * @nameTags language, i18n, idioma, linguagem, locale
+   * @description {{languageDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.language = function() {
+    var locale = (window.navigator.userLanguage || window.navigator.language || 'pt_br').replace('-', '_');
+    return locale;
+  };
+
+  /**
+   * @type function
+   * @name {{share}}
+   * @nameTags share, compartilhar, enviar, abrir como
+   * @description {{shareDescription}}
+   * @param {ObjectType.STRING} title {{shareParam0}}
+   * @param {ObjectType.STRING} text {{shareParam1}}
+   * @param {ObjectType.STRING} url {{shareParam2}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.share = function(title, text, url) {
+    navigator.share({
+      title: title,
+      text: text,
+      url: url
+    }).then(() => console.log('Successful share'))
+        .catch(error => console.log('Error sharing:', error));
+    return value;
+  };
+
+  /**
+   * @type function
    * @name {{callServerBlockly}}
    * @nameTags callServerBlockly
    * @description {{functionToCallServerBlockly}}

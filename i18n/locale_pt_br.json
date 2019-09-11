@@ -469,5 +469,12 @@
   "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
   "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair",
   "classNameWithMethod": "Nome da função do bloco que deverá ser chamada",
-  "callbackFinish": "Função que deverá ser executada, quando finalizar a execução"
+  "callbackFinish": "Função que deverá ser executada, quando finalizar a execução",
+  "language": "Idioma do Cliente",
+  "languageDescription": "Função que retorna o idioma utilizado no cliente",
+  "share": "Compartilhar URL",
+  "shareDescription": "Função que chama a tela nativa de compartilhamento do dispositivo ou navegador",
+  "shareParam0": "Título: Título do compartilhamento",
+  "shareParam1": "Texto: Texto que explica o compartilhamento",
+  "shareParam2": "URL: Link a ser compartilhado. Ex: uma url, vídeo, arquivo etc"
 }
