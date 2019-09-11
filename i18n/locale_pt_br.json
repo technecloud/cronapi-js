@@ -476,7 +476,7 @@
   "shareDescription": "Função que chama a tela nativa de compartilhamento do dispositivo ou navegador",
   "shareParam0": "Título: Título do compartilhamento",
   "shareParam1": "Texto: Texto que explica o compartilhamento",
-  "shareParam2": "URL: Link a ser compartilhado. Ex: uma url, vídeo, arquivo etc"
+  "shareParam2": "URL: Link a ser compartilhado. Ex: uma url, vídeo, arquivo etc",
   "callbackFinish": "Função que deverá ser executada, quando finalizar a execução",
   "newline": "Nova linha",
   "newlineDescription": "Função que retorna uma nova linha '\\n'",

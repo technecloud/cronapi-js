@@ -472,7 +472,7 @@
   "newlineDescription": "Function that returns a newline '\\n'",
   "datasourceLoadName": "Load datasource",
   "datasourceLoadDescription": "Function that loads the selected datasource",
-  "stopExecutionAfterScopeDestroyLabel": "Stop execution after changing scope"
+  "stopExecutionAfterScopeDestroyLabel": "Stop execution after changing scope",
   "callbackFinish": "Function to be executed when execution is finished",
   "language": "Client Locale",
   "languageDescription": "Function to returns client locale",
