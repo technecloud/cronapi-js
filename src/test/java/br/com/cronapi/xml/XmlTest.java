@@ -24,7 +24,7 @@ public class XmlTest {
     private Var booksXml;
 
     @Before
-    private void before() throws Exception {
+    public void before() throws Exception {
         try (InputStream booksInput = getClass().getResourceAsStream("/books.xml")) {
             String xml = IOUtils.toString(booksInput);
             booksXml = Var.valueOf(xml);
@@ -32,7 +32,7 @@ public class XmlTest {
     }
 
     @After
-    private void after() {
+    public void after() {
         booksXml = null;
     }
 
@@ -61,7 +61,7 @@ public class XmlTest {
     }
 
     @Test
-    void newXMLEmpty() throws Exception {
+    public void newXMLEmpty() throws Exception {
         Var newXMLEmpty = Operations.newXMLEmpty();
         Assert.assertTrue(newXMLEmpty.getObject() instanceof Document);
         Document document = (Document) newXMLEmpty.getObject();
@@ -69,7 +69,7 @@ public class XmlTest {
     }
 
     @Test
-    void testNewXMLEmpty() throws Exception {
+    public void testNewXMLEmpty() throws Exception {
         Var xmlRoot = Var.valueOf(new Element("teste"));
         Var retorno = Operations.newXMLEmpty(xmlRoot);
         Document document = (Document) retorno.getObject();
@@ -78,73 +78,73 @@ public class XmlTest {
     }
 
     @Test
-    void XMLOpenFromFile() throws Exception {
+    public void XMLOpenFromFile() throws Exception {
         String absPath = getPath("/books.xml");
         Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
         Assert.assertTrue(xmlRetorno.getObject() instanceof Document);
     }
 
     @Test
-    void XMLOpen() throws Exception {
+    public void XMLOpen() throws Exception {
         Var xmlRetorno = Operations.XMLOpen(Var.valueOf("https://www.w3schools.com/xml/plant_catalog.xml"));
         Assert.assertTrue(xmlRetorno.getObject() instanceof Document);
     }
 
     @Test
-    void XMLOpenNull() throws Exception {
+    public void XMLOpenNull() throws Exception {
         Var xmlRetorno = Operations.XMLOpen(Var.valueOf(""));
         Assert.assertNull(xmlRetorno.getObject());
     }
 
     @Test
-    void XMLcreateElement() {
+    public void XMLcreateElement() {
         Var xmlRetorno = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertTrue(xmlRetorno.getObject() instanceof Element);
     }
 
     @Test
-    void XMLcreateElementNull() {
+    public void XMLcreateElementNull() {
         Var xmlRetorno = Operations.XMLcreateElement(Var.VAR_NULL, Var.valueOf("value"));
         Assert.assertNull(xmlRetorno.getObject());
     }
 
     @Test
-    void XMLaddElementParent() {
+    public void XMLaddElementParent() {
         Var xmlElementParent = Operations.XMLcreateElement(Var.valueOf("parante1"), Var.valueOf("value"));
         Var xmlElement = Operations.XMLcreateElement(Var.valueOf("element2"), Var.valueOf("value"));
         Operations.XMLaddElement(xmlElementParent, xmlElement);
     }
 
     @Test
-    void XMLaddElementDocumentHasRoot() throws Exception {
+    public void XMLaddElementDocumentHasRoot() throws Exception {
         Var xmlRetorno = Operations.XMLOpen(Var.valueOf("https://www.w3schools.com/xml/plant_catalog.xml"));
         Var xmlElement = Operations.XMLcreateElement(Var.valueOf("element2"), Var.valueOf("value"));
         Operations.XMLaddElement(xmlRetorno, xmlElement);
     }
 
     @Test
-    void XMLaddElementDocumentNotHasRoot() throws Exception {
+    public void XMLaddElementDocumentNotHasRoot() throws Exception {
         Var xmlRetorno = Operations.newXMLEmpty();
         Var xmlElement = Operations.XMLcreateElement(Var.valueOf("element2"), Var.valueOf("value"));
         Operations.XMLaddElement(xmlRetorno, xmlElement);
     }
 
     @Test
-    void hasRootElementFalse() {
+    public void hasRootElementFalse() {
         Var xmlString = Var.valueOf("");
         Var xmlRetorno = Operations.hasRootElement(xmlString);
         Assert.assertFalse(xmlRetorno.getObjectAsBoolean());
     }
 
     @Test
-    void hasRootElementDocumentFalse() throws Exception {
+    public void hasRootElementDocumentFalse() throws Exception {
         Var xml = Operations.newXMLEmpty();
         Var xmlRetorno = Operations.hasRootElement(xml);
         Assert.assertFalse(xmlRetorno.getObjectAsBoolean());
     }
 
     @Test
-    void hasRootElementElementFalse() throws Exception {
+    public void hasRootElementElementFalse() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Var xmlRetorno = Operations.hasRootElement(xml);
         Assert.assertFalse(xmlRetorno.getObjectAsBoolean());
@@ -155,7 +155,7 @@ public class XmlTest {
     }
 
     @Test
-    void getRootElement() throws Exception {
+    public void getRootElement() throws Exception {
         Assert.assertNull(Operations.getRootElement(Var.valueOf("teste")).getObject());
         String absPath = getPath("/books.xml");
         Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
@@ -172,7 +172,7 @@ public class XmlTest {
     }
 
     @Test
-    void XMLDocumentToString() throws Exception {
+    public void XMLDocumentToString() throws Exception {
         String absPath = getPath("/books.xml");
         Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
         Assert.assertTrue(xmlRetorno.getObject() instanceof Document);
@@ -181,14 +181,14 @@ public class XmlTest {
     }
 
     @Test
-    void XMLElementToString() {
+    public void XMLElementToString() {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertTrue(Operations.XMLElementToString(xml).getObject() instanceof String);
         Assert.assertNull(Operations.XMLElementToString(Var.valueOf(Var.VAR_NULL)).getObject());
     }
 
     @Test
-    void XMLGetChildElement() throws Exception {
+    public void XMLGetChildElement() throws Exception {
         Assert.assertNull(Operations.XMLGetChildElement(Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL)).getObject());
         Assert.assertNull(Operations.XMLGetChildElement(Var.valueOf("Var.VAR_NULL"), Var.valueOf(Var.VAR_NULL)).getObject());
         String absPath = getPath("/books.xml");
@@ -207,23 +207,23 @@ public class XmlTest {
     }
 
     @Test(expected = Exception.class)
-    void XMLSetElementAttributeValueNull() throws Exception {
+    public void XMLSetElementAttributeValueNull() throws Exception {
         Operations.XMLSetElementAttributeValue(Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL));
     }
 
     @Test(expected = Exception.class)
-    void XMLSetElementAttributeValueNotElement() throws Exception {
+    public void XMLSetElementAttributeValueNotElement() throws Exception {
         Operations.XMLSetElementAttributeValue(Var.valueOf("teste"), Var.valueOf("teste"), Var.valueOf("teste"));
     }
 
     @Test()
-    void XMLSetElementAttributeValue() throws Exception {
+    public void XMLSetElementAttributeValue() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Operations.XMLSetElementAttributeValue(xml, Var.valueOf("teste"), Var.valueOf("teste"));
     }
 
     @Test
-    void XMLGetAttributeValue() throws Exception {
+    public void XMLGetAttributeValue() throws Exception {
         Assert.assertNull(Operations.XMLGetAttributeValue(Var.valueOf(null), Var.valueOf(null)).getObject());
         String absPath = getPath("/books.xml");
         Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
@@ -232,7 +232,7 @@ public class XmlTest {
     }
 
     @Test
-    void XMLGetParentElementNull() throws Exception {
+    public void XMLGetParentElementNull() throws Exception {
         Assert.assertEquals(XMLGetParentElement(Var.valueOf(null)).getObjectAsString(), "");
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertEquals(XMLGetParentElement(xml).getObjectAsString(), "");
@@ -245,30 +245,30 @@ public class XmlTest {
     }
 
     @Test(expected = Exception.class)
-    void XMLSetElementValueNotElement() throws Exception {
+    public void XMLSetElementValueNotElement() throws Exception {
         Operations.XMLSetElementValue(Var.valueOf("teste"), Var.valueOf("teste"));
     }
 
     @Test
-    void XMLSetElementValue() throws Exception {
+    public void XMLSetElementValue() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Operations.XMLSetElementValue(xml, Var.valueOf("teste"));
         Operations.XMLSetElementValue(xml, xml);
     }
 
     @Test
-    void XMLGetElementValueStringEmpty() throws Exception {
+    public void XMLGetElementValueStringEmpty() throws Exception {
         Assert.assertEquals(Operations.XMLGetElementValue(Var.valueOf("")).getObjectAsString(), "");
     }
 
     @Test
-    void XMLGetElementValueElement() throws Exception {
+    public void XMLGetElementValueElement() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertEquals(Operations.XMLGetElementValue(xml).getObjectAsString(), "value");
     }
 
     @Test
-    void XMLGetElementValue() throws Exception {
+    public void XMLGetElementValue() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         List<Element> list = new ArrayList<>();
         list.add((Element)xml.getObject());
@@ -279,20 +279,19 @@ public class XmlTest {
         Assert.assertEquals(Operations.XMLGetElementValue(Var.valueOf(integerList)).getObjectAsString(), "12");
     }
 
-
     @Test
-    void XMLRemoveElementNull() throws Exception {
+    public void XMLRemoveElementNull() throws Exception {
         Assert.assertFalse(Operations.XMLRemoveElement(Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL)).getObjectAsBoolean());
     }
 
     @Test
-    void XMLRemoveElementWithParent() throws Exception {
+    public void XMLRemoveElementWithParent() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertTrue(Operations.XMLRemoveElement(xml, Var.valueOf(Var.VAR_NULL)).getObjectAsBoolean());
     }
 
     @Test
-    void XMLRemoveElement() throws Exception {
+    public void XMLRemoveElement() throws Exception {
         String absPath = getPath("/hasRootObjects.xml");
         Var xmlRetorno = Operations.XMLOpenFromFile(Var.valueOf(absPath));
         Assert.assertTrue(Operations.XMLRemoveElement(Var.valueOf(((Document)xmlRetorno.getObject()).getContent(0)), Var.valueOf("value")).getObjectAsBoolean());
@@ -301,33 +300,33 @@ public class XmlTest {
     }
 
     @Test
-    void XMLGetElementTagNameNull() throws Exception {
+    public void XMLGetElementTagNameNull() throws Exception {
         Assert.assertNull(Operations.XMLGetElementTagName(Var.valueOf(Var.VAR_NULL)).getObject());
     }
 
     @Test
-    void XMLGetElementTagNameNotElement() throws Exception {
+    public void XMLGetElementTagNameNotElement() throws Exception {
         Assert.assertNull(Operations.XMLGetElementTagName(Var.valueOf("Var.VAR_NULL")).getObject());
     }
 
     @Test
-    void XMLGetElementTagName() throws Exception {
+    public void XMLGetElementTagName() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertEquals(Operations.XMLGetElementTagName(xml).getObject(), "name");
     }
 
     @Test
-    void XMLChangeNodeNameNull() throws Exception {
+    public void XMLChangeNodeNameNull() throws Exception {
         Assert.assertFalse(Operations.XMLChangeNodeName(Var.valueOf(Var.VAR_NULL), Var.valueOf(Var.VAR_NULL)).getObjectAsBoolean());
     }
 
     @Test
-    void XMLChangeNodeNameFalse() throws Exception {
+    public void XMLChangeNodeNameFalse() throws Exception {
         Assert.assertFalse(Operations.XMLChangeNodeName(Var.valueOf("root"), Var.valueOf("root")).getObjectAsBoolean());
     }
 
     @Test
-    void XMLChangeNodeName() throws Exception {
+    public void XMLChangeNodeName() throws Exception {
         Var xml = Operations.XMLcreateElement(Var.valueOf("name"), Var.valueOf("value"));
         Assert.assertTrue(Operations.XMLChangeNodeName(xml, Var.valueOf("root")).getObjectAsBoolean());
     }

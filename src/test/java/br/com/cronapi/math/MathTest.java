@@ -1,20 +1,20 @@
 package br.com.cronapi.math;
 
 import cronapi.Var;
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import static cronapi.math.Operations.pow;
 
-public class OperationsTest {
+public class MathTest {
 
-    @BeforeMethod
+    @Before
     public void setUp() {
     }
 
-    @AfterMethod
+    @After
     public void tearDown() {
     }
 
