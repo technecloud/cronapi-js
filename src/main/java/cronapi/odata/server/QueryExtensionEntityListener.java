@@ -1,41 +1,16 @@
 package cronapi.odata.server;
 
 import com.google.gson.JsonObject;
-import cronapi.ClientCommand;
-import cronapi.ErrorResponse;
-import cronapi.QueryManager;
-import cronapi.RestClient;
-import cronapi.Utils;
-import cronapi.Var;
-import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
+import cronapi.*;
+import cronapi.database.DataSource;
+import cronapi.util.ReflectionUtils;
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
-import org.apache.olingo.odata2.api.uri.expression.BinaryExpression;
-import org.apache.olingo.odata2.api.uri.expression.CommonExpression;
-import org.apache.olingo.odata2.api.uri.expression.FilterExpression;
-import org.apache.olingo.odata2.api.uri.expression.MethodExpression;
-import org.apache.olingo.odata2.api.uri.expression.PropertyExpression;
-import org.apache.olingo.odata2.api.uri.info.DeleteUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntityCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetCountUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntitySetUriInfo;
-import org.apache.olingo.odata2.api.uri.info.GetEntityUriInfo;
-import org.apache.olingo.odata2.api.uri.info.PostUriInfo;
-import org.apache.olingo.odata2.api.uri.info.PutMergePatchUriInfo;
+import org.apache.olingo.odata2.api.uri.expression.*;
+import org.apache.olingo.odata2.api.uri.info.*;
 import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
@@ -48,18 +23,21 @@ import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
-import org.eclipse.persistence.jpa.jpql.parser.DefaultEclipseLinkJPQLGrammar;
-import org.eclipse.persistence.jpa.jpql.parser.Expression;
-import org.eclipse.persistence.jpa.jpql.parser.GroupByClause;
-import org.eclipse.persistence.jpa.jpql.parser.HavingClause;
-import org.eclipse.persistence.jpa.jpql.parser.InputParameter;
-import org.eclipse.persistence.jpa.jpql.parser.JPQLExpression;
-import org.eclipse.persistence.jpa.jpql.parser.SelectClause;
-import org.eclipse.persistence.jpa.jpql.parser.SelectStatement;
-import org.eclipse.persistence.jpa.jpql.parser.WhereClause;
+import org.eclipse.persistence.jpa.jpql.parser.*;
 import org.eclipse.persistence.queries.DatabaseQuery;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import java.lang.reflect.Field;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.*;
+
 public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityListener {
+
+  private BlocklyQuery GETBlocklyQuery;
+  private String GETFunctionName;
 
   private void findInputParams(Expression expression, List<String> inputs) {
 
@@ -172,7 +150,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
 
           if (uriInfo.isCount() || uriInfo.rawEntity()) {
-            setField(selectStatement, "selectClause", null);
+            ReflectionUtils.setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
               selectExpression = "SELECT " + mainAlias + " ";
             } else {
@@ -184,7 +162,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             }
 
             if (selectStatement.hasOrderByClause()) {
-              setField(selectStatement, "orderByClause", null);
+              ReflectionUtils.setField(selectStatement, "orderByClause", null);
             }
 
             jpqlStatement = selectStatement.toString();
@@ -192,7 +170,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
           if (selectStatement.hasOrderByClause()) {
             orderBy = selectStatement.getOrderByClause().toString();
-            setField(selectStatement, "orderByClause", null);
+            ReflectionUtils.setField(selectStatement, "orderByClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
@@ -229,19 +207,19 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
           if (selectStatement != null && selectStatement.hasWhereClause()) {
             where = ((WhereClause) selectStatement.getWhereClause()).getConditionalExpression().toString();
-            setField(selectStatement, "whereClause", null);
+            ReflectionUtils.setField(selectStatement, "whereClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
           if (selectStatement != null && selectStatement.hasGroupByClause()) {
             groupBy = ((GroupByClause) selectStatement.getGroupByClause()).toString();
-            setField(selectStatement, "groupByClause", null);
+            ReflectionUtils.setField(selectStatement, "groupByClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
           if (selectStatement != null && selectStatement.hasHavingClause()) {
             having = ((HavingClause) selectStatement.getHavingClause()).toString();
-            setField(selectStatement, "havingClause", null);
+            ReflectionUtils.setField(selectStatement, "havingClause", null);
             jpqlStatement = selectStatement.toString();
           }
 
@@ -298,7 +276,24 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           if (uriInfo.isCount()) {
             type = "count";
           }
+
+          String function = customQuery.getAsJsonObject("blockly").get("blocklyClass").getAsString() + ":" + customQuery.getAsJsonObject("blockly").get("blocklyMethod").getAsString();
+
           query = new BlocklyQuery(customQuery, restMethod, type, jpqlStatement, (uriInfo.getFilter() != null ? uriInfo.getFilter().getExpressionString() : ""), uriInfo.getTargetEntitySet().getName());
+
+          if (uriInfo.isCount() && GETFunctionName != null && GETBlocklyQuery != null && GETFunctionName.equalsIgnoreCase(function)) {
+            if (GETBlocklyQuery.getLastResult() != null && GETBlocklyQuery.getLastResult().getObject() instanceof DataSource) {
+              long total = ((DataSource) GETBlocklyQuery.getLastResult().getObject()).count();
+              ((BlocklyQuery) query).setLastResult(Var.valueOf(total));
+              GETFunctionName = null;
+              GETBlocklyQuery = null;
+            }
+          }
+
+          if (restMethod.equalsIgnoreCase("GET")) {
+            GETFunctionName = function;
+            GETBlocklyQuery = (BlocklyQuery) query;
+          }
         }
 
         if (parameterizedMap != null && parameterizedMap.size() > 0) {
@@ -313,7 +308,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
                 } else {
                   try {
                     query.setParameter(param.getKey(), param.getValue());
-                  } catch(Exception e) {
+                  } catch (Exception e) {
                     Class clazz = query.getParameter(param.getKey()).getParameterType();
 
                     if (clazz != null) {
@@ -422,45 +417,6 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   @Override
   public Query getQuery(DeleteUriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
     return this.getBaseQuery((UriInfo) uriInfo, em);
-  }
-
-  private void setField(Object obj, String name, Object value) {
-    try {
-
-      Field field;
-      try {
-        field = obj.getClass().getDeclaredField(name);
-      } catch (Exception e) {
-        field = obj.getClass().getSuperclass().getDeclaredField(name);
-      }
-
-      if (field != null) {
-        field.setAccessible(true);
-        field.set(obj, value);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private Object getField(Object obj, String name) {
-    try {
-      Field field;
-      try {
-        field = obj.getClass().getDeclaredField(name);
-      } catch (Exception e) {
-        field = obj.getClass().getSuperclass().getDeclaredField(name);
-      }
-
-      if (field != null) {
-        field.setAccessible(true);
-        return field.get(obj);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    return null;
   }
 
   @Override
