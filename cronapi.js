@@ -3834,7 +3834,7 @@ if (!window.fixedTimeZone) {
    * @description {{createChartDescription}}
    * @arbitraryParams true
    */
-  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|doughnut|pie|polarArea  @values line|bar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
+  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea  @values line|bar|horizontalBar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
 
     var CSS_COLOR_NAMES = ["#FF5C00","#0E53A7","#48DD00","#FFD500","#7309AA","#CD0074","#00AF64","#BF8230","#F16D95","#A65000","#A65000","#AF66D5"];
     var colorIndex = 0;
@@ -3938,7 +3938,8 @@ if (!window.fixedTimeZone) {
 
         break;
       }
-      case 'bar':{
+      case 'bar':
+      case 'horizontalBar': {
         json.data.datasets = getDataset(arguments);
         //Applying configs in Datasets
         $.each(json.data.datasets, function(index,value){
@@ -3949,8 +3950,10 @@ if (!window.fixedTimeZone) {
         displayLegend();
         break;
       }
-
-      case 'doughnut':{
+      case 'doughnut':
+      case 'pie':
+      case 'polarArea':
+      {
         var ds = getDataset(arguments);
         $.each(ds, function(index, value){
           var dtset = {};
@@ -3960,41 +3963,6 @@ if (!window.fixedTimeZone) {
           $.each(dtset.data, function(indexx,valuee){
             dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
 
-          });
-          dtset.borderColor =  dtset.backgroundColor;
-          json.data.datasets.push(dtset);
-          colorIndex = 0;
-        });
-        break;
-
-      }
-      case 'pie':{
-        var ds = getDataset(arguments);
-        $.each(ds, function(index, value){
-          var dtset = {};
-          dtset = ds[index];
-          dtset.backgroundColor = [];
-          dtset.borderColor = [];
-          $.each(dtset.data, function(indexx,valuee){
-            dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
-
-          });
-          dtset.borderColor =  dtset.backgroundColor;
-          json.data.datasets.push(dtset);
-          colorIndex = 0;
-        });
-        break;
-      }
-
-      case 'polarArea':{
-        var ds = getDataset(arguments);
-        $.each(ds, function(index, value){
-          var dtset = {};
-          dtset = ds[index];
-          dtset.backgroundColor = [];
-          dtset.borderColor = [];
-          $.each(dtset.data, function(indexx,valuee){
-            dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
           });
           dtset.borderColor =  dtset.backgroundColor;
           json.data.datasets.push(dtset);
