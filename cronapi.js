@@ -485,6 +485,38 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{language}}
+   * @nameTags language, i18n, idioma, linguagem, locale
+   * @description {{languageDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.language = function() {
+    var locale = (window.navigator.userLanguage || window.navigator.language || 'pt_br').replace('-', '_');
+    return locale;
+  };
+
+  /**
+   * @type function
+   * @name {{share}}
+   * @nameTags share, compartilhar, enviar, abrir como
+   * @description {{shareDescription}}
+   * @param {ObjectType.STRING} title {{shareParam0}}
+   * @param {ObjectType.STRING} text {{shareParam1}}
+   * @param {ObjectType.STRING} url {{shareParam2}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.share = function(title, text, url) {
+    navigator.share({
+      title: title,
+      text: text,
+      url: url
+    }).then(() => console.log('Successful share'))
+        .catch(error => console.log('Error sharing:', error));
+    return value;
+  };
+
+  /**
+   * @type function
    * @name {{callServerBlockly}}
    * @nameTags callServerBlockly
    * @description {{functionToCallServerBlockly}}
@@ -741,15 +773,20 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.LONG} initial_time {{scheduleExecutionParam1}}
    * @param {ObjectType.LONG} interval_time {{scheduleExecutionParam2}}
    * @param {ObjectType.STRING} measurement_unit {{scheduleExecutionParam3}}
+   * @param {ObjectType.BOOLEAN} stopExecutionAfterScopeDestroy {{stopExecutionAfterScopeDestroyLabel}}
    */
-  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit ) {
+  this.cronapi.util.scheduleExecution = function( /** @type {ObjectType.STATEMENT} @description {{statement}} */ statements ,  /** @type {ObjectType.LONG} */  initial_time ,  /** @type {ObjectType.LONG} */  interval_time , /** @type {ObjectType.STRING} @description {{scheduleExecutionParam3}} @blockType util_dropdown @keys seconds|milliseconds|minutes|hours @values {{seconds}}|{{millisecondss}}|{{minutes}}|{{hours}}  */ measurement_unit, /** @type {ObjectType.BOOLEAN} @description {{stopExecutionAfterScopeDestroyLabel}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}}  */  stopExecutionAfterScopeDestroy ) {
+
+    stopExecutionAfterScopeDestroy = stopExecutionAfterScopeDestroy || true;
+    stopExecutionAfterScopeDestroy = (stopExecutionAfterScopeDestroy === 'true' || stopExecutionAfterScopeDestroy === true);
+
     var factor = 1;
 
-    if (measurement_unit == 'seconds') {
+    if (measurement_unit === 'seconds') {
       factor = 1000;
-    } else if(measurement_unit =='minutes') {
+    } else if(measurement_unit ==='minutes') {
       factor = 60000;
-    } else if(measurement_unit =='hours') {
+    } else if(measurement_unit ==='hours') {
       factor = 3600000;
     }
 
@@ -763,10 +800,12 @@ if (!window.fixedTimeZone) {
       intervalId = setInterval(statements , interval_time) ;
     }.bind(this), initial_time);
 
-    this.$on('$destroy', function() {
-      try { clearTimeout(timeoutId); } catch(e) {}
-      try { clearInterval(intervalId); } catch(e) {}
-    });
+    if(stopExecutionAfterScopeDestroy){
+      this.$on('$destroy', function() {
+        try { clearTimeout(timeoutId); } catch(e) {}
+        try { clearInterval(intervalId); } catch(e) {}
+      });
+    }
 
   };
 
@@ -840,7 +879,7 @@ if (!window.fixedTimeZone) {
               }
               catch (e) {
               }
-              if(fieldValue){
+              if(fieldValue !== undefined || fieldValue !== null){
                 return fieldValue;
               }
               else if(scope && scope.$parent ) {
@@ -1549,6 +1588,18 @@ if (!window.fixedTimeZone) {
         return getDatasource(datasource).hasNextPage();
     };
 
+    /**
+     * @type function
+     * @name {{datasourceLoadName}}
+     * @nameTags load|datasource
+     * @description {{datasourceLoadDescription}}
+     * @param {ObjectType.STRING} datasource {{datasource}}
+     * @multilayer true
+     */
+    this.cronapi.screen.load = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+        getDatasource(datasource).fetch({ params: {} }, undefined, undefined, { origin: "button" });
+    };
+
   /**
    * @category CategoryType.DATETIME
    * @categoryTags Date|Datetime|Data|Hora
@@ -1904,21 +1955,6 @@ if (!window.fixedTimeZone) {
     return this.cronapi.dateTime.getMomentObj(date).toDate();
   };
 
-  /**
-   * @type function
-   * @name {{updateDate}}
-   * @nameTags setDate|updateDate
-   * @description {{functionToUpdateDate}}
-   * @param {ObjectType.DATETIME} value {{ObjectType.DATETIME}}
-   * @param {ObjectType.LONG} year {{year}}
-   * @param {ObjectType.LONG} month {{month}}
-   * @param {ObjectType.LONG} day {{day}}
-   * @param {ObjectType.LONG} hour {{hour}}
-   * @param {ObjectType.LONG} minute {{minute}}
-   * @param {ObjectType.LONG} second {{second}}
-   * @param {ObjectType.LONG} millisecond {{millisecond}}
-   * @returns {ObjectType.DATETIME}
-   */
   this.cronapi.dateTime.updateDate = function(value, year, month, day, hour, minute, second, millisecond) {
     var date = this.cronapi.dateTime.getMomentObj(value).toDate();
     if (date && !isNaN(date.getTime())) {
@@ -1935,6 +1971,50 @@ if (!window.fixedTimeZone) {
       return;
     }
     return this.cronapi.dateTime.getMomentObj(date).toDate();
+  };
+
+  /**
+   * @type function
+   * @name {{updateDate}}
+   * @nameTags setDate|updateDate
+   * @description {{functionToUpdateDate}}
+   * @param {ObjectType.DATETIME} date {{ObjectType.DATETIME}}
+   * @param {ObjectType.STRING} type {{attribute}}
+   * @param {ObjectType.LONG} value {{value}}
+   * @returns {ObjectType.DATETIME}
+   */
+  this.cronapi.dateTime.updateNewDate = function(date, /** @type {ObjectType.STRING} @description {{attribute}} @blockType util_dropdown @keys year|month|day|hour|minute|second|millisecond  @values {{year}}|{{month}}|{{day}}|{{hour}}|{{minute}}|{{second}}|{{millisecond}}  */ type, value ) {
+    var updatedDate = this.cronapi.dateTime.getMomentObj(date).toDate();
+    if (updatedDate && !isNaN(updatedDate.getTime())) {
+      switch(type){
+        case "year":
+          updatedDate.setYear(value);
+          break;
+        case "month":
+          updatedDate.setMonth(value - 1);
+          break;
+        case "day":
+          updatedDate.setDate(value);
+          break;
+        case "hour":
+          updatedDate.setHours(value);
+          break;
+        case "minute":
+          updatedDate.setMinutes(value);
+          break;
+        case "second":
+          updatedDate.setSeconds(value);
+          break;
+        case "millisecond":
+          updatedDate.setMilliseconds(value);
+          break;
+      }
+    }
+    else{
+      this.cronapi.screen.notify('error',this.cronapi.i18n.translate("InvalidDate",[  ]));
+      return;
+    }
+    return this.cronapi.dateTime.getMomentObj(updatedDate).toDate();
   };
 
   /**
@@ -3754,7 +3834,7 @@ if (!window.fixedTimeZone) {
    * @description {{createChartDescription}}
    * @arbitraryParams true
    */
-  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|doughnut|pie|polarArea  @values line|bar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
+  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea  @values line|bar|horizontalBar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
 
     var CSS_COLOR_NAMES = ["#FF5C00","#0E53A7","#48DD00","#FFD500","#7309AA","#CD0074","#00AF64","#BF8230","#F16D95","#A65000","#A65000","#AF66D5"];
     var colorIndex = 0;
@@ -3858,7 +3938,8 @@ if (!window.fixedTimeZone) {
 
         break;
       }
-      case 'bar':{
+      case 'bar':
+      case 'horizontalBar': {
         json.data.datasets = getDataset(arguments);
         //Applying configs in Datasets
         $.each(json.data.datasets, function(index,value){
@@ -3869,8 +3950,10 @@ if (!window.fixedTimeZone) {
         displayLegend();
         break;
       }
-
-      case 'doughnut':{
+      case 'doughnut':
+      case 'pie':
+      case 'polarArea':
+      {
         var ds = getDataset(arguments);
         $.each(ds, function(index, value){
           var dtset = {};
@@ -3880,41 +3963,6 @@ if (!window.fixedTimeZone) {
           $.each(dtset.data, function(indexx,valuee){
             dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
 
-          });
-          dtset.borderColor =  dtset.backgroundColor;
-          json.data.datasets.push(dtset);
-          colorIndex = 0;
-        });
-        break;
-
-      }
-      case 'pie':{
-        var ds = getDataset(arguments);
-        $.each(ds, function(index, value){
-          var dtset = {};
-          dtset = ds[index];
-          dtset.backgroundColor = [];
-          dtset.borderColor = [];
-          $.each(dtset.data, function(indexx,valuee){
-            dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
-
-          });
-          dtset.borderColor =  dtset.backgroundColor;
-          json.data.datasets.push(dtset);
-          colorIndex = 0;
-        });
-        break;
-      }
-
-      case 'polarArea':{
-        var ds = getDataset(arguments);
-        $.each(ds, function(index, value){
-          var dtset = {};
-          dtset = ds[index];
-          dtset.backgroundColor = [];
-          dtset.borderColor = [];
-          $.each(dtset.data, function(indexx,valuee){
-            dtset.backgroundColor.push( CSS_COLOR_NAMES[nextColor()] );
           });
           dtset.borderColor =  dtset.backgroundColor;
           json.data.datasets.push(dtset);
