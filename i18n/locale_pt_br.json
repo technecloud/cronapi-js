@@ -470,7 +470,6 @@
   "clearCacheBeforeOpen": "Limpar Dados de Login ao Sair",
   "classNameWithMethod": "Nome da função do bloco que deverá ser chamada",
   "callbackFinish": "Função que deverá ser executada, quando finalizar a execução",
-  "callbackFinish": "Função que deverá ser executada, quando finalizar a execução",
   "newline": "Nova linha",
   "newlineDescription": "Função que retorna uma nova linha '\\n'",
   "datasourceLoadName": "Carregar fonte de dados",
