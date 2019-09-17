@@ -1,7 +1,18 @@
 package cronapi.odata.server;
 
 import cronapi.util.ReflectionUtils;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.jpa.jpql.parser.*;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Record;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
+import javax.persistence.Query;
+import java.util.LinkedList;
 
 public class JPQLParserUtil {
 
@@ -68,8 +79,6 @@ public class JPQLParserUtil {
 
     String selectExpression = null;
 
-    ReflectionUtils.getField(selectStatement, "selectClause");
-
     ReflectionUtils.setField(selectStatement, "selectClause", null);
 
     if (hasDistinct) {
@@ -85,6 +94,56 @@ public class JPQLParserUtil {
     selectExpression += selectStatement.toString();
 
     return selectExpression;
+
+  }
+
+  public static long countAsLong(String jpql, Query query, EntityManager em) {
+    Query countNativeQuery = count(jpql, query, em);
+    return (long) countNativeQuery.getResultList().get(0);
+  }
+
+  public static Query count(String jpql, Query query, EntityManager em) {
+    AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
+
+    String jpqlStatement = jpql;
+
+    JPQLExpression jpqlExpression = new JPQLExpression(
+        jpqlStatement,
+        DefaultEclipseLinkJPQLGrammar.instance(),
+        true
+    );
+
+    SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
+
+    if (selectStatement.hasOrderByClause()) {
+      ReflectionUtils.setField(selectStatement, "orderByClause", null);
+    }
+
+    jpql = selectStatement.toString();
+
+    Query countQuery = em.createQuery(jpql);
+    LinkedList arguments = new LinkedList();
+    for (Parameter p : query.getParameters()) {
+      if (p.getName() == null) {
+        countQuery.setParameter(p.getPosition(), query.getParameterValue(p.getPosition()));
+        arguments.add(query.getParameterValue(p.getPosition()));
+      } else {
+        countQuery.setParameter(p.getName(), query.getParameterValue(p.getName()));
+        arguments.add(query.getParameterValue(p.getName()));
+      }
+    }
+
+    DatabaseQuery databaseQuery = countQuery.unwrap(EJBQueryImpl.class).getDatabaseQuery();
+    databaseQuery.prepareCall(session, new DatabaseRecord());
+    Record r = databaseQuery.rowFromArguments(arguments, session);
+    String sql = databaseQuery.getTranslatedSQLString(session, r);
+    sql = sql.replace("ESCAPE '\\'", "");
+
+    String countSql = "select count(*) AS CRONAPP_COUNT from (" + sql + ") as CRONAPP_COUNT_SELECT";
+
+    Query countNativeQuery = em.createNativeQuery(countSql);
+
+    return countNativeQuery;
 
   }
 }

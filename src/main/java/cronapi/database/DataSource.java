@@ -286,10 +286,6 @@ public class DataSource implements JsonSerializable {
         }
       }
 
-      if (isCount) {
-        jpql = JPQLParserUtil.getCountJPQL(jpql);
-      }
-
       EntityManager em = getEntityManager(domainClass);
 
       startMultitenant(em);
@@ -343,6 +339,10 @@ public class DataSource implements JsonSerializable {
       if ((this.pageRequest != null) && (!isCount)) {
         query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
         query.setMaxResults(this.pageRequest.getPageSize());
+      }
+
+      if (isCount) {
+        return new Long[]{JPQLParserUtil.countAsLong(jpql, query, em)};
       }
 
       List<?> resultsInPage = query.getResultList();

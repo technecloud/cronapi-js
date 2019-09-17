@@ -140,29 +140,16 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
           selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
           String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
-          String distinct = ((SelectClause) selectStatement.getSelectClause()).getActualDistinctIdentifier();
-          boolean hasDistinct = ((SelectClause) selectStatement.getSelectClause()).hasDistinct();
           String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
-          hasGroupBy = selectStatement.getGroupByClause().getLength() > 0 || uriInfo.getOrderBy() != null;
 
           if (!selection.contains(".") && !selection.contains(",")) {
             alias = mainAlias;
           }
 
-          if (uriInfo.isCount() || uriInfo.rawEntity()) {
+          if (uriInfo.rawEntity()) {
             ReflectionUtils.setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
               selectExpression = "SELECT " + mainAlias + " ";
-            } else {
-              if (hasDistinct) {
-                selectExpression = "SELECT count( " + distinct + " " + selection + ") ";
-              } else {
-                selectExpression = "SELECT count( " + mainAlias + ") ";
-              }
-            }
-
-            if (selectStatement.hasOrderByClause()) {
-              ReflectionUtils.setField(selectStatement, "orderByClause", null);
             }
 
             jpqlStatement = selectStatement.toString();
@@ -174,7 +161,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             jpqlStatement = selectStatement.toString();
           }
 
-          if (uriInfo.getOrderBy() != null && !uriInfo.isCount()) {
+          if (uriInfo.getOrderBy() != null) {
             String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
             orderBy = "ORDER BY " + orderExpression;
           }
@@ -367,11 +354,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
         }
 
-        if (uriInfo.isCount() && hasGroupBy) {
-          List result = query.getResultList();
-          int count = result.size();
-          selectExpression = "SELECT " + count;
-          query = em.createNativeQuery(selectExpression);
+        if (uriInfo.isCount() && !isBlockly) {
+          query = JPQLParserUtil.count(jpqlStatement, query, em);
         }
 
         return query;
