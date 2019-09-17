@@ -1151,7 +1151,28 @@ if (!window.fixedTimeZone) {
         }
       }
 
+      let existRoute = (view) => {
+        if (this.cronapi.$scope && this.cronapi.$scope.$state) {
+          let $states = this.cronapi.$scope.$state.get();
+          let viewSplited = view.split("/").slice(2);
+          let templateToFind = "views/" + viewSplited.join("/") + ".view.html";
+
+          $states.forEach((s)=> {
+            let templateUrl  = s.templateUrl;
+            if (templateUrl instanceof Function)  {
+              let regexExecuted = /'[a-z0-9/.]+'/gim.exec(templateUrl.toString());
+              if (regexExecuted[0])
+                templateUrl = regexExecuted[0].replace(/'/g, "");
+            }
+            if (templateUrl === templateToFind)
+              view = "#" + s.url;
+          })
+        }
+        return view;
+      };
+
       var oldHash = window.location.hash;
+      view = existRoute(view);
       window.location.hash = view + (queryString?"?"+queryString:"");
 
       var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
