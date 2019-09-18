@@ -2,6 +2,7 @@ package cronapi.report;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import cronapi.CronapiConfigurator;
 import cronapi.QueryManager;
 import cronapi.report.DataSourcesInBand.FieldParam;
 import cronapi.report.DataSourcesInBand.ParamValue;
@@ -95,7 +96,7 @@ public class ReportService {
 
 	public String getContentReport(String reportName) {
 		try (InputStream inputStream = this.getInputStream(reportName)) {
-			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
+			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream, CronapiConfigurator.ENCODING))) {
 				return buffer.lines().collect(Collectors.joining("\n"));
 			}
 		}
