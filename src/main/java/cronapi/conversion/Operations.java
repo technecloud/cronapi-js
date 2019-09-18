@@ -14,6 +14,7 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.i18n.Messages;
 
 /**
  * Classe que representa ...
@@ -123,12 +124,31 @@ public class Operations {
 	}
 
 	@CronapiMetaData(type = "function", name = "{{convertStringToDate}}", nameTags = {
-			"stringToDate" }, description = "{{functionToConvertStringToDate}}", params = { "{{content}}",
-					"{{mask}}" }, paramsType = { ObjectType.STRING,
+			"string to date", "para data" }, description = "{{functionToConvertStringToDate}}", params = { "{{content}}",
+					"{{maskFormat}}" }, paramsType = { ObjectType.STRING,
 							ObjectType.STRING }, returnType = ObjectType.DATETIME)
-	public static final Var stringToDate(Var val, Var mask) throws Exception {
-		return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString()));
+	public static final Var stringToDate(Var val, Var mask) {
+		return stringToDate(val, mask, Var.VAR_NULL);
 	}
+
+  @CronapiMetaData(type = "function", name = "{{convertStringToDateWithTimeZone}}", nameTags = {
+      "string to date", "para data" }, description = "{{functionToConvertStringToDate}}", params = { "{{content}}",
+      "{{maskFormat}}", "{{timezoneFormat}}" }, paramsType = { ObjectType.STRING,
+      ObjectType.STRING, ObjectType.LONG }, returnType = ObjectType.DATETIME)
+  public static final Var stringToDate(Var val, Var mask, Var timeZone) {
+    if (mask.isEmptyOrNull()) {
+      mask = Var.valueOf(Messages.getString("DateTimeFormat"));
+    }
+
+    if (mask.getObjectAsString().equals("DateTimeFormat")) {
+      mask = Var.valueOf(Messages.getString("DateTimeFormat"));
+    }
+
+    if (mask.getObjectAsString().equals("DateFormat")) {
+      mask = Var.valueOf(Messages.getString("DateFormat"));
+    }
+    return new Var(Utils.toCalendar(val.getObjectAsString(), mask.getObjectAsString(), Utils.toTimeZone(timeZone)));
+  }
 
 	@CronapiMetaData(type = "function", name = "{{convertDecToHex}}", nameTags = {
 			"decToHex" }, description = "{{functionToConvertDecToHex}}", params = { "{{content}}"}, paramsType = { ObjectType.LONG }, returnType = ObjectType.STRING)

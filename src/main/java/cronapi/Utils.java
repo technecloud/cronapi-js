@@ -356,7 +356,25 @@ public class Utils {
     return null;
   }
 
+  public static TimeZone toTimeZone(Var timeZone) {
+    if (timeZone != null && !timeZone.isEmptyOrNull()) {
+      if (!timeZone.isString()) {
+        int tz = timeZone.getObjectAsInt();
+        String id = "GMT" + (tz < 0 ? "-" : "+") + (tz < 10 ? "0" : "") + Math.abs(tz) + ":00";
+        return TimeZone.getTimeZone(id);
+      } else {
+        return TimeZone.getTimeZone(timeZone.getObjectAsString());
+      }
+    }
+
+    return TimeZone.getDefault();
+  }
+
   public static Calendar toCalendar(String value, String mask) {
+    return toCalendar(value, mask, null);
+  }
+
+  public static Calendar toCalendar(String value, String mask, TimeZone timeZone) {
     if (value == null) {
       return null;
     }
@@ -364,6 +382,9 @@ public class Utils {
     try {
       if (mask != null && !mask.isEmpty()) {
         SimpleDateFormat format = new SimpleDateFormat(mask);
+        if (timeZone != null) {
+          format.setTimeZone(timeZone);
+        }
         Date date = format.parse(value);
         Calendar c = Calendar.getInstance();
         c.setTime(date);
