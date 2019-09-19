@@ -19,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -771,4 +773,57 @@ public class Operations {
 	public static Var getSystemProfile() {
 		return getSystemParameter(Var.valueOf("app.profile"));
 	}
+
+  @CronapiMetaData(type = "function", name = "{{log}}", nameTags = { "log", "imprimir", "logging", "logar" }, description = "{{logDescription}}")
+  public static void log(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{logCategory}}", defaultValue = "General") Var category,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{logLevel}}", blockType = "util_dropdown",
+          keys = {"INFO", "SEVERE", "WARNING", "CONFIG", "FINE", "FINER", "FINEST"},
+          values = {"{{INFO}}", "{{SEVERE}}", "{{WARNING}}", "{{CONFIG}}", "{{FINE}}", "{{FINER}}", "{{FINEST}}"},
+          defaultValue = "INFO"
+          ) Var type,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{logMessage}}") Var message,
+      @ParamMetaData(type = ObjectType.OBJECT, description = "{{logDetail}}") Var exception
+  ) {
+    Logger log;
+
+    if (category == null || category.isEmptyOrNull()) {
+      log = Logger.getLogger("Logger");
+    } else {
+      log = Logger.getLogger(category.getObjectAsString());
+    }
+
+    Level level = Level.INFO;
+
+    if (type.getObjectAsString().equals("FINE")) {
+      level = Level.FINE;
+    }
+    else if (type.getObjectAsString().equals("FINER")) {
+      level = Level.FINER;
+    }
+    else if (type.getObjectAsString().equals("FINEST")) {
+      level = Level.FINEST;
+    }
+    else if (type.getObjectAsString().equals("SEVERE")) {
+      level = Level.SEVERE;
+    }
+    else if (type.getObjectAsString().equals("WARNING")) {
+      level = Level.WARNING;
+    }
+    else if (type.getObjectAsString().equals("CONFIG")) {
+      level = Level.CONFIG;
+    }
+
+    if (exception != null && !exception.isEmptyOrNull() && exception.getObject() instanceof Throwable) {
+      log.log(level, message.getObjectAsString(), (Throwable) exception.getObject());
+    }
+
+    else if (exception != null && !exception.isEmptyOrNull()) {
+      log.log(level, message.getObjectAsString(), exception.getObjectAsString());
+    }
+
+    else {
+      log.log(level, message.getObjectAsString());
+    }
+  }
 }
