@@ -1160,8 +1160,8 @@ if (!window.fixedTimeZone) {
           $states.forEach((s)=> {
             let templateUrl  = s.templateUrl;
             if (templateUrl instanceof Function)  {
-              let regexExecuted = /'[a-z0-9/.]+'/gim.exec(templateUrl.toString());
-              if (regexExecuted[0])
+              let regexExecuted = /('|")[a-z0-9/.]+('|")/gim.exec(templateUrl.toString());
+              if (regexExecuted !== null && regexExecuted !== undefined && regexExecuted[0])
                 templateUrl = regexExecuted[0].replace(/'/g, "");
             }
             if (templateUrl === templateToFind)
