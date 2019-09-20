@@ -3,15 +3,20 @@ package cronapi.dateTime;
 import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
+import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.i18n.Messages;
+import org.joda.time.DateTimeUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Classe que representa ...
- * 
+ *
  * @author Usuário de Teste
  * @version 1.0
  * @since 2017-04-07
@@ -105,27 +110,57 @@ public class Operations {
 		return new Var(date.getTime());
 	}
 
-  @CronapiMetaData(type = "function", name = "{{updateDate}}", nameTags = { "updateDate",
-      "setDate" }, description = "{{functionToUpdateDate}}", params = { "{{date}}", "{{year}}", "{{month}}", "{{day}}",
-      "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}, paramsType = { ObjectType.LONG, ObjectType.LONG,
-      ObjectType.LONG, ObjectType.LONG, ObjectType.LONG,
-      ObjectType.LONG, ObjectType.LONG }, returnType = ObjectType.DATETIME)
-  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) {
-    Calendar updatedDate = Calendar.getInstance();
-    updatedDate.setTime(date.getObjectAsDateTime().getTime());
-    int y = year.getObjectAsInt();
-    int m = month.getObjectAsInt() - 1;
-    int d = day.getObjectAsInt();
-    int h = hour.getObjectAsInt();
-    int min = minute.getObjectAsInt();
-    int s = second.getObjectAsInt();
-    int mili = millisecond.getObjectAsInt();
-    updatedDate.set(y, m, d, h, min, s);
-    updatedDate.set(Calendar.MILLISECOND, mili);
-    return new Var(updatedDate.getTime());
-  }
-	
-	@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
+	 @Deprecated
+	  public static final Var updateDate(Var date, Var year, Var month, Var day, Var hour, Var minute, Var second, Var millisecond) {
+		Calendar updatedDate = Calendar.getInstance();
+		updatedDate.setTime(date.getObjectAsDateTime().getTime());
+		int y = year.getObjectAsInt();
+		int m = month.getObjectAsInt() - 1;
+		int d = day.getObjectAsInt();
+		int h = hour.getObjectAsInt();
+		int min = minute.getObjectAsInt();
+		int s = second.getObjectAsInt();
+		int mili = millisecond.getObjectAsInt();
+		updatedDate.set(y, m, d, h, min, s);
+		updatedDate.set(Calendar.MILLISECOND, mili);
+		return new Var(updatedDate.getTime());
+	  }
+
+	@CronapiMetaData(type = "function", name = "{{updateDate}}", nameTags = { "updateDate", "setDate" },
+			description = "{{functionToUpdateDate}}", params = { "{{date}}", "{{type}}", "{{value}}" },
+			paramsType = { ObjectType.DATETIME, ObjectType.STRING, ObjectType.LONG}, returnType = ObjectType.DATETIME)
+	public static final Var updateNewDate(Var date, @ParamMetaData(type = ObjectType.STRING, description = "{{attribute}}", blockType = "util_dropdown",
+			keys = {"year", "month", "day", "hour", "minute", "second", "millisecond"},
+			values = {"{{year}}", "{{month}}", "{{day}}", "{{hour}}", "{{minute}}", "{{second}}", "{{millisecond}}"}) Var type, Var value) {
+		Calendar updatedDate = Calendar.getInstance();
+		updatedDate.setTime(date.getObjectAsDateTime().getTime());
+		switch(type.getObjectAsString()){
+			case "year":
+				updatedDate.set(Calendar.YEAR, value.getObjectAsInt());
+				break;
+			case "month":
+				updatedDate.set(Calendar.MONTH, value.getObjectAsInt() - 1);
+				break;
+			case "day":
+				updatedDate.set(Calendar.DAY_OF_MONTH, value.getObjectAsInt());
+				break;
+			case "hour":
+				updatedDate.set(Calendar.HOUR_OF_DAY, value.getObjectAsInt());
+				break;
+			case "minute":
+				updatedDate.set(Calendar.MINUTE, value.getObjectAsInt());
+				break;
+			case "second":
+				updatedDate.set(Calendar.SECOND, value.getObjectAsInt());
+				break;
+			case "millisecond":
+				updatedDate.set(Calendar.MILLISECOND, value.getObjectAsInt());
+				break;
+		}
+		return new Var(updatedDate.getTime());
+	}
+
+		@CronapiMetaData(type = "function", name = "{{getSecondsBetweenDates}}", nameTags = { "getSecondsBetweenDates",
 			"getSecondsDiffDate", "diffDatesSeconds" }, description = "{{functionToGetSecondsBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
 							ObjectType.DATETIME, ObjectType.DATETIME }, returnType = ObjectType.LONG)
@@ -136,7 +171,7 @@ public class Operations {
 		int resultBetween = (int) ((date.getTime() - date2.getTime()) / SECOND_IN_MILLIS);
 		return new Var(resultBetween);
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{getMinutesBetweenDates}}", nameTags = { "getMinutesBetweenDates",
 			"getMinutesDiffDate", "diffDatesMinutes" }, description = "{{functionToGetMinutesBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
@@ -148,7 +183,7 @@ public class Operations {
 		int resultBetween = (int) ((date.getTime() - date2.getTime()) / MINUTE_IN_MILLIS);
 		return new Var(resultBetween);
 	}
-	
+
 	@CronapiMetaData(type = "function", name = "{{getHoursBetweenDates}}", nameTags = { "getHoursBetweenDates",
 			"getHoursDiffDate", "diffDatesHours" }, description = "{{functionToGetHoursBetweenDates}}", params = {
 					"{{largerDateToBeSubtracted}}", "{{smallerDateToBeSubtracted}}" }, paramsType = {
@@ -297,7 +332,7 @@ public class Operations {
 
     return new Var(cal);
   }
-  
+
     @CronapiMetaData(type = "function", name = "{{getNowInMilliseconds}}", nameTags = { "getNow", "now",
       "getDate","milliseconds" }, description = "{{getNowInMillisecondsDescription}}", returnType = ObjectType.LONG)
   public static final Var getNowInMilliseconds() {
@@ -306,12 +341,34 @@ public class Operations {
     return new Var(cal.getTimeInMillis());
   }
 
-	@CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {
-			"formatDateTime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
-					"{{mask}}" }, paramsType = { ObjectType.DATETIME,
-							ObjectType.STRING }, returnType = ObjectType.STRING)
-	public static final Var formatDateTime(Var value, Var format) {
+	@CronapiMetaData(type = "function", name = "{{formatDateTimeWithTimeZone}}", nameTags = {
+			"format", "date", "datetime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
+					"{{maskFormat}}", "{{timezoneFormat}}" }, paramsType = { ObjectType.DATETIME,
+							ObjectType.STRING, ObjectType.LONG }, returnType = ObjectType.STRING)
+	public static final Var formatDateTime(Var value, Var format, Var timeZone) {
+	  if (format.isEmptyOrNull()) {
+	    format = Var.valueOf(Messages.getString("DateTimeFormat"));
+    }
+
+	  if (format.getObjectAsString().equals("DateTimeFormat")) {
+      format = Var.valueOf(Messages.getString("DateTimeFormat"));
+    }
+
+    if (format.getObjectAsString().equals("DateFormat")) {
+      format = Var.valueOf(Messages.getString("DateFormat"));
+    }
+
 		SimpleDateFormat sdf = new SimpleDateFormat(format.getObjectAsString());
+    sdf.setTimeZone(Utils.toTimeZone(timeZone));
+
 		return new Var(sdf.format(value.getObjectAsDateTime().getTime()));
 	}
+
+  @CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {
+      "format", "date", "datetime" }, description = "{{functionToFormatDateTime}}", params = { "{{date}}",
+      "{{maskFormat}}" }, paramsType = { ObjectType.DATETIME,
+      ObjectType.STRING}, returnType = ObjectType.STRING)
+  public static final Var formatDateTime(Var value, Var format) {
+    return formatDateTime(value, format, Var.VAR_NULL);
+  }
 }

@@ -11,17 +11,8 @@ import cronapi.Utils;
 import cronapi.Var;
 import cronapi.i18n.Messages;
 import cronapi.odata.server.DatasourceExtension;
+import cronapi.odata.server.JPQLParserUtil;
 import cronapi.rest.security.CronappSecurity;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.olingo.odata2.api.edm.provider.Property;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
@@ -40,6 +31,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Class database manipulation, responsible for querying, inserting,
@@ -68,6 +69,7 @@ public class DataSource implements JsonSerializable {
   private boolean multiTenant = true;
   private boolean plainData = false;
   private boolean useUrlParams = false;
+  private boolean countData = false;
 
   /**
    * Init a datasource with a page size equals 100
@@ -216,6 +218,14 @@ public class DataSource implements JsonSerializable {
     }
   }
 
+  public long count() {
+    Long[] total = (Long[]) fetch(true);
+    if (total != null && total.length > 0) {
+      return total[0];
+    }
+    return 0;
+  }
+
   /**
    * Retrieve objects from database using repository when filter is null or empty,
    * if filter not null or is not empty, this method uses entityManager and create a
@@ -266,7 +276,7 @@ public class DataSource implements JsonSerializable {
       if (namedParams) {
         paramsValues = new LinkedHashMap<>();
         if (useUrlParams) {
-          for (String key: parsedParams) {
+          for (String key : parsedParams) {
             paramsValues.put(key, Var.valueOf(RestClient.getRestClient().getParameter(key)));
           }
         } else {
@@ -282,7 +292,6 @@ public class DataSource implements JsonSerializable {
 
       AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
       DatabaseQuery dbQuery = EJBQueryImpl.buildEJBQLDatabaseQuery("customQuery", jpql, session, (Enum) null, (Map) null, session.getDatasourcePlatform().getConversionManager().getLoader());
-
 
       HermesParser parser = new HermesParser();
       DatabaseQuery queryParsed = parser.buildQuery(jpql, session);
@@ -332,9 +341,13 @@ public class DataSource implements JsonSerializable {
         query.setMaxResults(this.pageRequest.getPageSize());
       }
 
+      if (isCount) {
+        return new Long[]{JPQLParserUtil.countAsLong(jpql, query, em)};
+      }
+
       List<?> resultsInPage = query.getResultList();
 
-      if (plainData) {
+      if (plainData && !isCount) {
         String context = this.entity.substring(0, this.entity.indexOf("."));
         JPAEdmModel model = new JPAEdmModel(em.getMetamodel(), context);
         model.getBuilder().build();
@@ -346,15 +359,17 @@ public class DataSource implements JsonSerializable {
         resultsInPage = normalizeList(resultsInPage, extension.getJpqlEntity());
       }
 
-      Long count = 0L;
+      Long total = 0L;
       if (!isCount) {
-        Object[] countResult = fetch(true);
-        if (!ArrayUtils.isEmpty(countResult)) {
-          count = (Long)countResult[0];
+        if (countData) {
+          Object[] countResult = fetch(true);
+          if (!ArrayUtils.isEmpty(countResult)) {
+            total = (Long) countResult[0];
+          }
         }
       }
 
-      this.page = new PageImpl(resultsInPage, this.pageRequest, count);
+      this.page = new PageImpl(resultsInPage, this.pageRequest, total);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     } finally {
@@ -367,7 +382,7 @@ public class DataSource implements JsonSerializable {
     }
 
     if (isCount) {
-      return new Long[]{(long) this.page.getContent().size()};
+      return new Long[]{(long) this.page.getContent().get(0)};
     } else {
       return this.page.getContent().toArray();
     }

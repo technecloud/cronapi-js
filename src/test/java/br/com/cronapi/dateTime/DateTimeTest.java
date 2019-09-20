@@ -2,30 +2,38 @@ package br.com.cronapi.dateTime;
 
 import cronapi.Var;
 import cronapi.dateTime.Operations;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import cronapi.i18n.Messages;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
-public class OperationsTest {
+public class DateTimeTest {
 
-  private TimeZone last;
+  private static TimeZone last;
 
   @BeforeClass
-  private void before() {
+  public static void before() {
     last = TimeZone.getDefault();
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    Messages.set(new Locale("pt", "BR"));
   }
 
   @AfterClass
-  private void after() {
+  public static void after() {
     TimeZone.setDefault(last);
   }
 
   private Var getTestDate() {
     return Var.valueOf("2012-05-12T04:05:24Z");
+  }
+
+  private Var getTestDateNoTime() {
+    return Var.valueOf("2012-05-12T00:00:00Z");
   }
 
   private Var getSecondTestDate() {
@@ -50,6 +58,14 @@ public class OperationsTest {
     item = cronapi.dateTime.Operations.updateDate(item, Var.valueOf(2012), Var.valueOf(5), Var.valueOf(12), Var.valueOf(12), Var.valueOf(5), Var.valueOf(24), Var.valueOf(100));
     Assert.assertNotNull(item);
   }
+
+  @Test
+  public void testUpdateNewDate() {
+    Var item = getTestDate();
+    item = cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("day"), Var.valueOf(-230));
+    Assert.assertNotNull(item);
+  }
+
 
   @Test
   public void testGetParts() {
@@ -91,5 +107,37 @@ public class OperationsTest {
   @Test
   public void testForm() {
     Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("dd/MM/yyyy HH:mm:ss")).getObjectAsString(), "12/05/2012 04:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf(-3)).getObjectAsString(), "12/05/2012 01:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf(3)).getObjectAsString(), "12/05/2012 07:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf("GMT-03:00")).getObjectAsString(), "12/05/2012 01:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf("America/Sao_Paulo")).getObjectAsString(), "12/05/2012 01:05:24");
+
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("DateTimeFormat")).getObjectAsString(), "12/05/2012 04:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.VAR_NULL), "12/05/2012 04:05:24");
+    Assert.assertEquals(Operations.formatDateTime(getTestDate(), Var.valueOf("DateTimeFormat")).getObjectAsString(), "12/05/2012 04:05:24");
+
   }
+
+  @Test
+  public void testConversion() {
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012 04:05:24"), Var.valueOf("dd/MM/yyyy HH:mm:ss")), getTestDate().getObjectAsDateTime());
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012 01:05:24"), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf(-3)), getTestDate().getObjectAsDateTime());
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012 01:05:24"), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf("GMT-03:00")), getTestDate().getObjectAsDateTime());
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012 01:05:24"), Var.valueOf("dd/MM/yyyy HH:mm:ss"), Var.valueOf("America/Sao_Paulo")), getTestDate().getObjectAsDateTime());
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012 01:05:24"), Var.valueOf("DateTimeFormat"), Var.valueOf("America/Sao_Paulo")), getTestDate().getObjectAsDateTime());
+    Assert.assertEquals(cronapi.conversion.Operations.stringToDate(Var.valueOf("12/05/2012"), Var.valueOf("DateFormat"), Var.valueOf("UTC")), getTestDateNoTime().getObjectAsDateTime());
+  }
+
+  @Test
+  public void testUpdateDateValues() {
+    Var item = getTestDate();
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("year"), Var.valueOf(5)).getObjectAsDateTime().get(Calendar.YEAR), 5);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("month"), Var.valueOf(6)).getObjectAsDateTime().get(Calendar.MONTH), 5);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("day"), Var.valueOf(21)).getObjectAsDateTime().get(Calendar.DAY_OF_MONTH), 21);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("hour"), Var.valueOf(4)).getObjectAsDateTime().get(Calendar.HOUR_OF_DAY), 4);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("minute"), Var.valueOf(15)).getObjectAsDateTime().get(Calendar.MINUTE), 15);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("second"), Var.valueOf(15)).getObjectAsDateTime().get(Calendar.SECOND), 15);
+    Assert.assertEquals(cronapi.dateTime.Operations.updateNewDate(item, Var.valueOf("millisecond"), Var.valueOf(54)).getObjectAsDateTime().get(Calendar.MILLISECOND), 54);
+  }
+
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Identification_List counter="2">
+    <Identification number="111" letter="c" name="My Name">
+        <TravelList counter="2">
+            <Travel travelType="My First Travel"/>
+            <Travel travelType="My Second Travel"/>
+        </TravelList>
+    </Identification>
+    <Identification number="222" letter="d" name="My Name">
+        <TravelList counter="2">
+            <Travel travelType="My Third Travel"/>
+            <Travel travelType="My Fourth Travel"/>
+        </TravelList>
+    </Identification>
+</Identification_List>

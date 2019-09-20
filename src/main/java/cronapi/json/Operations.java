@@ -14,6 +14,7 @@ import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 import cronapi.database.DataSource;
+
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +142,19 @@ public class Operations {
     }
 
     return Var.valueOf(obj);
+  }
+
+  @CronapiMetaData(type = "function", name = "{{JSONToXML}}", nameTags = {
+          "xml","JSON" }, description = "{{JSONToXMLDescription}}", params = {
+          "{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.XML)
+  public static final Var toXml(
+          @ParamMetaData(type = ObjectType.OBJECT, description = "{{JSONTOXMLValueToBeRead}}") Var json)
+          throws Exception {
+    org.json.JSONObject jsonFileObject = new org.json.JSONObject(json.getObjectAsString());
+    String xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>"
+            .concat(org.json.XML.toString(jsonFileObject))
+            .concat("</root>");
+    return cronapi.xml.Operations.xmlFromStrng(Var.valueOf(xml));
   }
 
 }
