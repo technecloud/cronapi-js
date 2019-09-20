@@ -3887,7 +3887,12 @@ if (!window.fixedTimeZone) {
 
     function getDataset(args){
       var ds = [];
-      for(var size = 4 ; size <  args.length ; size++){
+      var size = 4;
+      if(Array.isArray(args[4])){
+        args = args[4];
+        size = 0;
+      }
+      for(size ; size <  args.length ; size++){
         if(args[size].label){
           if(args[size].options){
             if(args[size].data) ds.push(cronapi.chart.createDataset(args[size].label,args[size].data,args[size].options) );
