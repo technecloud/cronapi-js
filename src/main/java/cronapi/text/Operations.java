@@ -73,12 +73,10 @@ public class Operations {
 	}
 
 	public static final Var getFirstLetter(Var text) throws Exception {
-
 		return getLetter(text, Var.valueOf(1));
 	}
 
 	public static final Var getLastLetter(Var text) throws Exception {
-
 		return getLetter(text, Var.valueOf(text.getObjectAsString().length()));
 	}
 
@@ -173,7 +171,6 @@ public class Operations {
 					(text.length() - (index1.getObjectAsInt() - 1))));
 		}
 		return Var.VAR_NULL;
-
 	}
 
 	public static final Var getLettersFromEndToFromLast(Var text, Var index1) throws Exception {
@@ -191,7 +188,6 @@ public class Operations {
 	}
 
 	public static final Var getLettersFromFirstToFromStart(Var text, Var index1) throws Exception {
-
 		if (index1.getObjectAsInt() < 1)
 			index1 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
@@ -200,7 +196,6 @@ public class Operations {
 	}
 
 	public static final Var getLettersFromFirstToFromEnd(Var text, Var index1) throws Exception {
-
 		if (index1.getObjectAsInt() < 1)
 			index1 = new Var(1);
 		if (index1.getObjectAsInt() > text.getObjectAsString().length())
@@ -210,13 +205,49 @@ public class Operations {
 
 	public static final Var getLettersFromFirstToEnd(Var text) throws Exception {
 		return new Var(text.getObjectAsString());
-
 	}
 
 	@CronapiMetaData(type = "function", name = "{{newline}}", nameTags = {
-			"newline" }, description = "{{newlineDescription}}", returnType = ObjectType.STRING)
+			"newline", "nova linha" }, description = "{{newlineDescription}}", returnType = ObjectType.STRING)
 	public static final Var newline() {
 		return Var.valueOf("\n");
 	}
+
+	@CronapiMetaData(type = "function", name = "{{textReplace}}", nameTags = {
+			"replace", "substituir" }, description = "{{textReplaceDescription}}", returnType = ObjectType.STRING)
+	public static final Var replace(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceTarget}}") Var target,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+		if (validationReplace(textReplace, target, replacement)) return Var.VAR_NULL;
+		return Var.valueOf(textReplace.getObjectAsString().replace(target.getObjectAsString(), replacement.getObjectAsString()).trim());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{textReplaceAll}}", nameTags = {
+			"replace", "substituir" }, description = "{{textReplaceAllDescription}}", returnType = ObjectType.STRING)
+	public static final Var replaceAll(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceAll}}") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceAllRegex}}") Var regex,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+		if (validationReplace(textReplace, regex, replacement)) return Var.VAR_NULL;
+		return Var.valueOf(textReplace.getObjectAsString().replaceAll(regex.getObjectAsString(), replacement.getObjectAsString()).trim());
+	}
+
+	@CronapiMetaData(type = "function", name = "{{textReplaceFirst}}", nameTags = {
+			"replace", "substituir" }, description = "{{textReplaceFirstDescription}}", returnType = ObjectType.STRING)
+	public static final Var replaceFirst(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceFirst}}") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceFirstRegex}}") Var regex,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+		if (validationReplace(textReplace, regex, replacement)) return Var.VAR_NULL;
+		return Var.valueOf(textReplace.getObjectAsString().replaceFirst(regex.getObjectAsString(), replacement.getObjectAsString()).trim());
+	}
+
+	private static boolean validationReplace(@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}") Var textReplace, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceRegex}}") Var regex, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+		if (textReplace == Var.VAR_NULL || regex == Var.VAR_NULL || replacement == Var.VAR_NULL)
+			return true;
+		return textReplace.isEmptyOrNull() || regex.isEmptyOrNull();
+	}
+
 
 }
