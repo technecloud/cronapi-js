@@ -57,7 +57,9 @@ public class UtilTest {
     logger.setUseParentHandlers(false);
     logger.addHandler(handler);
 
-    Operations.log(Var.valueOf("Tests"), Var.valueOf("FINE"), Var.valueOf("Log Message"), Var.VAR_NULL);
+    Operations.LOGGERS.put("Tests", logger);
+
+    Operations.log(Var.valueOf("Tests"), Var.valueOf("INFO"), Var.valueOf("Log Message"), Var.VAR_NULL);
     Assert.assertTrue(out.indexOf("Log Message") != -1);
 
     out.delete(0, out.length());

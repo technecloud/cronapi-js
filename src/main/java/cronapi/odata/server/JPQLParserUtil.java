@@ -62,7 +62,12 @@ public class JPQLParserUtil {
     return alias;
   }
 
-  public static String getCountJPQL(String jpql) {
+  public static long countAsLong(String jpql, Query query, EntityManager em) {
+    Query countNativeQuery = count(jpql, query, em);
+    return (long) countNativeQuery.getResultList().get(0);
+  }
+
+  public static Query count(String jpql, Query query, EntityManager em) {
     String jpqlStatement = jpql;
 
     JPQLExpression jpqlExpression = new JPQLExpression(
@@ -93,16 +98,19 @@ public class JPQLParserUtil {
 
     selectExpression += selectStatement.toString();
 
-    return selectExpression;
+    Query countQuery = em.createQuery(selectExpression.toString());
+    for (Parameter p : query.getParameters()) {
+      if (p.getName() == null) {
+        countQuery.setParameter(p.getPosition(), query.getParameterValue(p.getPosition()));
+      } else {
+        countQuery.setParameter(p.getName(), query.getParameterValue(p.getName()));
+      }
+    }
 
+    return countQuery;
   }
 
-  public static long countAsLong(String jpql, Query query, EntityManager em) {
-    Query countNativeQuery = count(jpql, query, em);
-    return (long) countNativeQuery.getResultList().get(0);
-  }
-
-  public static Query count(String jpql, Query query, EntityManager em) {
+  public static Query countNative(String jpql, Query query, EntityManager em) {
     AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
 
     String jpqlStatement = jpql;
