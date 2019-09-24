@@ -42,16 +42,45 @@ public class Operations {
   
   public static Var queryPaged(Var entity, Var query, Var useRestPagination, Var ... params) {
     DataSource ds = new DataSource(entity.getObjectAsString());
+    String limit = null;
+    String offset = null;
+    boolean limitChosen = false;
+    boolean offsetChosen = false;
     
     List<Var> finalParams = new LinkedList<>();
-    for (Var p : params) 
-      finalParams.add(p);
-    
-    PageRequest page = null;
+    for (Var p : params){
+      switch (p.getId()) {
+        case "limit":
+          limit = p.getObjectAsString();
+          limitChosen = true;
+          break;
+        case "offset":
+          offset = p.getObjectAsString();
+          offsetChosen = true;
+          break;
+        default:
+          finalParams.add(p);
+          break;
+      }
+    }
+
+    PageRequest page;
+    int pageNumber = 0;
+    int pageSize = 100;
+
+    if(offset != null){
+      pageNumber =  Integer.parseInt(offset);
+    }
+    if(limit != null){
+      pageSize =  Integer.parseInt(limit);
+    }
+
+    page = new PageRequest(pageNumber, pageSize);
+
     if (useRestPagination.getObjectAsBoolean()) {
       if(query != Var.VAR_NULL) {
         String queryString = RestClient.getRestClient().getRequest().getServletPath();
-        if (queryString.indexOf("/api/cronapi/query/") > -1) {
+        if (queryString.contains("/api/cronapi/query/")) {
           queryString = queryString.replace("/api/cronapi/query/", "");
           String[] splitedQueryString = queryString.split("/");
           if (splitedQueryString.length > 1) {
@@ -79,25 +108,25 @@ public class Operations {
       }
 
       if (isODataParam) {
-        String pageFrom = pageFromRequest.equals("0") ? "0" : String.valueOf((Integer.parseInt(pageSizeFromRequest) / Integer.parseInt(pageFromRequest)) );
-        pageFromRequest = pageFrom;
+        pageFromRequest = pageFromRequest.equals("0") ? "0" : String.valueOf((Integer.parseInt(pageSizeFromRequest) / Integer.parseInt(pageFromRequest)) );
       }
-
-      int pageNumber = Integer.parseInt(pageFromRequest);
-      int pageSize = Integer.parseInt(pageSizeFromRequest);
+      if(!offsetChosen){
+        pageNumber = Integer.parseInt(pageFromRequest);
+      }
+      if(!limitChosen){
+        pageSize = Integer.parseInt(pageSizeFromRequest);
+      }
       page = new PageRequest(pageNumber, pageSize);
     }
+
     
-    if(query == Var.VAR_NULL)
+    if(query == Var.VAR_NULL){
       ds.fetch();
-    else {
-      if (page != null)
-        ds.filter(query.getObjectAsString(), page, finalParams.toArray(new Var[0]));
-      else
-        ds.filter(query.getObjectAsString(), finalParams.toArray(new Var[0]));
     }
-    Var varDs = new Var(ds);
-    return varDs;
+    else {
+      ds.filter(query.getObjectAsString(), page, finalParams.toArray(new Var[0]));
+    }
+    return new Var(ds);
   }
 
   @CronapiMetaData(type = "function", name = "{{datasourceNext}}", nameTags = { "next", "avançar",
