@@ -2063,6 +2063,29 @@ if (!window.fixedTimeZone) {
   }
 
   /**
+   * @type function
+   * @name {{replaceName}}
+   * @nameTags text|replace
+   * @description {{replaceDescription}}
+   * @param {ObjectType.STRING} textReplace {{textReplaceElement}}
+   * @param {ObjectType.STRING} textReplaceTargetRegex {{textReplaceTargetRegexElement}}
+   * @param {ObjectType.STRING} textReplaceReplacement {{textReplaceReplacementElement}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.text.replaceAll = function(textReplace, textReplaceTargetRegex, textReplaceReplacement){
+    if (textReplace === null || typeof textReplace  == 'undefined'  || textReplace == undefined){
+      return null;
+    }
+    if (textReplaceTargetRegex === null || typeof textReplaceTargetRegex  == 'undefined'  || textReplaceTargetRegex == undefined){
+      return null;
+    }
+    if (textReplaceReplacement === null || typeof textReplaceReplacement  == 'undefined'  || textReplaceReplacement == undefined){
+      return null;
+    }
+    return textReplace.replace(textReplaceTargetRegex, textReplaceReplacement);
+  }
+
+  /**
    * @category CategoryType.XML
    * @categoryTags XML|xml
    */
