@@ -66,10 +66,10 @@
   "hour": "Hour",
   "minute": "Minute",
   "second": "Second",
+  "seconds": "Segunds",
   "callServerBlocklyAsync": "Call blockly server async",
   "functionToCallServerBlocklyAsync": "function to block server call async",
   "classNameWithMethod": "Name of block function to be called",
-  
   "callbackSuccess": "Callback success: callback function when success",
   "callbackError": "Callback error: callback function when error occurs",
   "params": "Parameters",
@@ -133,7 +133,7 @@
   "datasourceFilterName": "Filter",
   "datasourceFilterDescription": "Function that filter a datasource concat '/' and the path on parameter",
   "datasourceFilterParam0": "Datasource",
-  "datasourceFilterParam1": "Caminho",
+  "datasourceFilterParam1": "Way",
   "getParam": "Get param from query string",
   "functionToGetParam": "Function to get param from query string",
   "paramName": "Param name",
@@ -186,6 +186,7 @@
   "rootElement": "Root element",
   "newXMLElementName": "Create XML element",
   "newXMLElementDescription": "Function that create a XML element",
+  "newXMLEmptyWithRootDescription": "Function that creates XML with root element",
   "elementName": "Element name",
   "addXMLElementName": "Add XML element",
   "addXMLElementDescription": "Function that add a XML element inside a parent element",
@@ -478,5 +479,11 @@
   "shareDescription": "Function to call native share window from device or browser",
   "shareParam0": "Title: Share title",
   "shareParam1": "Text: Share text",
-  "shareParam2": "URL: Share URL. Ex: a url, video, file etc"
+  "shareParam2": "URL: Share URL. Ex: a url, video, file etc",
+  "replaceName": "Function Replace",
+  "replaceDescription": "Function that returns a new string replaced the past text.",
+  "textReplaceElement": "Original text",
+  "textReplaceTargetRegexElement": "A RegExp or literal object. The match or matches are replaced with newSubStr or the value returned by the specified function.",
+  "textReplaceReplacementElement": "New Text",
+  "value": "Value"
 }
