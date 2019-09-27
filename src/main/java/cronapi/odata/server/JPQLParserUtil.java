@@ -1,6 +1,8 @@
 package cronapi.odata.server;
 
+import cronapi.Var;
 import cronapi.util.ReflectionUtils;
+import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
@@ -13,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
 import javax.persistence.Query;
 import java.util.LinkedList;
+import java.util.List;
 
 public class JPQLParserUtil {
 
@@ -154,4 +157,184 @@ public class JPQLParserUtil {
     return countNativeQuery;
 
   }
+
+  public static class ODataInfo {
+    public String jpql;
+    public Var[] params;
+    public Integer first;
+    public Integer max;
+  }
+
+  public static ODataInfo addODdataRequest(String jpql, Var[] queryParams) {
+    try {
+      BlocklyQuery blocklyQuery = BlocklyQuery.CURRENT_BLOCK_QUERY.get();
+      if (blocklyQuery != null) {
+        String jpqlStatement = jpql;
+
+        JPQLExpression jpqlExpression = new JPQLExpression(
+            jpqlStatement,
+            DefaultEclipseLinkJPQLGrammar.instance(),
+            true
+        );
+
+        SelectStatement selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
+        String alias = null;
+        String having = null;
+        String groupBy = null;
+        String orderBy = null;
+
+        String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+        String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
+
+        if (!selection.contains(".") && !selection.contains(",")) {
+          alias = mainAlias;
+        }
+
+        String whereExpression = null;
+
+        ODataInfo info = new ODataInfo();
+
+        if (blocklyQuery.getUriInfo().getFilter() != null) {
+          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, "?");
+
+          if (blocklyQuery.getUriInfo().getKeyPredicates().size() > 0) {
+            whereExpression = ODataExpressionParser.parseKeyPredicates(blocklyQuery.getUriInfo().getKeyPredicates(), alias, "?");
+          }
+
+          List<String> params = JPQLParserUtil.parseParams(whereExpression, '?');
+
+          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, ":crn_param_");
+
+          if (blocklyQuery.getUriInfo().getKeyPredicates().size() > 0) {
+            whereExpression = ODataExpressionParser.parseKeyPredicates(blocklyQuery.getUriInfo().getKeyPredicates(), alias, ":crn_param_");
+          }
+
+          List<String> paramsWithName = JPQLParserUtil.parseParams(whereExpression, ':');
+
+          int i = 0;
+          info.params = new Var[queryParams.length + params.size()];
+          for (Var v : queryParams) {
+            info.params[i] = v;
+            i++;
+          }
+
+          for (String p : params) {
+            info.params[i] = Var.valueOf(paramsWithName.get(i), blocklyQuery.getParameterValue(p));
+            i++;
+          }
+
+        }
+
+        String where = null;
+
+        if (selectStatement != null && selectStatement.hasOrderByClause()) {
+          orderBy = ((OrderByClause) selectStatement.getOrderByClause()).toString();
+          ReflectionUtils.setField(selectStatement, "orderByClause", null);
+          jpqlStatement = selectStatement.toString();
+        }
+
+        if (blocklyQuery.getUriInfo().getOrderBy() != null) {
+          String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(blocklyQuery.getUriInfo().getOrderBy(), alias, ":crn_param_");
+          orderBy = "ORDER BY " + orderExpression;
+        }
+
+        if (selectStatement != null && selectStatement.hasWhereClause()) {
+          where = ((WhereClause) selectStatement.getWhereClause()).getConditionalExpression().toString();
+          ReflectionUtils.setField(selectStatement, "whereClause", null);
+          jpqlStatement = selectStatement.toString();
+        }
+
+        if (selectStatement != null && selectStatement.hasGroupByClause()) {
+          groupBy = ((GroupByClause) selectStatement.getGroupByClause()).toString();
+          ReflectionUtils.setField(selectStatement, "groupByClause", null);
+          jpqlStatement = selectStatement.toString();
+        }
+
+        if (selectStatement != null && selectStatement.hasHavingClause()) {
+          having = ((HavingClause) selectStatement.getHavingClause()).toString();
+          ReflectionUtils.setField(selectStatement, "havingClause", null);
+          jpqlStatement = selectStatement.toString();
+        }
+
+        if (whereExpression != null) {
+          if (where != null) {
+            jpqlStatement += " WHERE (" + where + ") AND " + whereExpression;
+          } else {
+            jpqlStatement += " WHERE " + whereExpression;
+          }
+        } else {
+          if (where != null) {
+            jpqlStatement += " " + where;
+          }
+        }
+
+        if (having != null) {
+          jpqlStatement += " " + having;
+        }
+
+        if (groupBy != null) {
+          jpqlStatement += " " + groupBy;
+        }
+
+        if (orderBy != null) {
+          jpqlStatement += " " + orderBy;
+        }
+
+        info.jpql = jpqlStatement;
+
+        if (blocklyQuery.getFirstResult() != -1) {
+          info.first = blocklyQuery.getFirstResult();
+        }
+        if (blocklyQuery.getMaxResults() != -1) {
+          info.max = blocklyQuery.getMaxResults();
+        }
+        return info;
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  public static List<String> parseParams(String SQL) {
+    return parseParams(SQL, ':');
+  }
+
+  public static List<String> parseParams(String SQL, char charDelim) {
+    final String delims = " \n\r\t.(){},+=!" + charDelim;
+    final String quots = "\'";
+    String token = "";
+    boolean isQuoted = false;
+    List<String> tokens = new LinkedList<>();
+
+    for (int i = 0; i < SQL.length(); i++) {
+      if (quots.indexOf(SQL.charAt(i)) != -1) {
+        isQuoted = token.length() == 0;
+      }
+      if (delims.indexOf(SQL.charAt(i)) == -1 || isQuoted) {
+        token += SQL.charAt(i);
+      } else {
+        if (token.length() > 0) {
+          if (token.startsWith("" + charDelim))
+            tokens.add(token.substring(1));
+          token = "";
+          isQuoted = false;
+        }
+        if (SQL.charAt(i) == charDelim) {
+          token = "" + charDelim;
+        }
+      }
+    }
+
+    if (token.length() > 0) {
+      if (token.startsWith("" + charDelim))
+        tokens.add(token.substring(1));
+    }
+
+    return tokens;
+  }
+
+
 }
