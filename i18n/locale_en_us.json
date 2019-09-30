@@ -485,5 +485,6 @@
   "textReplaceElement": "Original text",
   "textReplaceTargetRegexElement": "A RegExp or literal object. The match or matches are replaced with newSubStr or the value returned by the specified function.",
   "textReplaceReplacementElement": "New Text",
+  "typeReplaceElement": "Type user to regex.",
   "value": "Value"
 }
