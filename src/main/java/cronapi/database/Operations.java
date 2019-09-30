@@ -40,7 +40,7 @@ public class Operations {
     return varDs;
   }
   
-  public static Var queryPaged(Var entity, Var query, Var useRestPagination, Var ... params) {
+  public static Var queryPaged(Var entity, Var query, Var useRequestData, Var ... params) {
     DataSource ds = new DataSource(entity.getObjectAsString());
     String limit = null;
     String offset = null;
@@ -77,7 +77,7 @@ public class Operations {
 
     page = new PageRequest(pageNumber, pageSize);
 
-    if (useRestPagination.getObjectAsBoolean()) {
+    if (useRequestData.getObjectAsBoolean()) {
       if(query != Var.VAR_NULL) {
         String queryString = RestClient.getRestClient().getRequest().getServletPath();
         if (queryString.contains("/api/cronapi/query/")) {
@@ -119,7 +119,7 @@ public class Operations {
       page = new PageRequest(pageNumber, pageSize);
     }
 
-    
+    ds.setUseOdataRequest(useRequestData.getObjectAsBoolean());
     if(query == Var.VAR_NULL){
       ds.fetch();
     }

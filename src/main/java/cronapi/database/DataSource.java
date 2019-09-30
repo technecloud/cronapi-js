@@ -70,6 +70,7 @@ public class DataSource implements JsonSerializable {
   private boolean plainData = false;
   private boolean useUrlParams = false;
   private boolean countData = false;
+  private boolean useOdataRequest = false;
 
   /**
    * Init a datasource with a page size equals 100
@@ -148,40 +149,6 @@ public class DataSource implements JsonSerializable {
     } catch (ClassNotFoundException cnfex) {
       throw new RuntimeException(cnfex);
     }
-  }
-
-  private List<String> parseParams(String SQL) {
-    final String delims = " \n\r\t.(){},+:=!";
-    final String quots = "\'";
-    String token = "";
-    boolean isQuoted = false;
-    List<String> tokens = new LinkedList<>();
-
-    for (int i = 0; i < SQL.length(); i++) {
-      if (quots.indexOf(SQL.charAt(i)) != -1) {
-        isQuoted = token.length() == 0;
-      }
-      if (delims.indexOf(SQL.charAt(i)) == -1 || isQuoted) {
-        token += SQL.charAt(i);
-      } else {
-        if (token.length() > 0) {
-          if (token.startsWith(":"))
-            tokens.add(token.substring(1));
-          token = "";
-          isQuoted = false;
-        }
-        if (SQL.charAt(i) == ':') {
-          token = ":";
-        }
-      }
-    }
-
-    if (token.length() > 0) {
-      if (token.startsWith(":"))
-        tokens.add(token.substring(1));
-    }
-
-    return tokens;
   }
 
   private void enableTenantToogle(EntityManager em) {
@@ -263,7 +230,21 @@ public class DataSource implements JsonSerializable {
 
       boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
 
-      List<String> parsedParams = parseParams(jpql);
+      JPQLParserUtil.ODataInfo info = null;
+
+      if (useOdataRequest) {
+        info = JPQLParserUtil.addODdataRequest(jpql, params);
+        if (info != null) {
+          if (info.jpql != null) {
+            jpql = info.jpql;
+          }
+          if (info.params != null) {
+            params = info.params;
+          }
+        }
+      }
+
+      List<String> parsedParams = JPQLParserUtil.parseParams(jpql);
 
       int o = 0;
       for (String param : parsedParams) {
@@ -337,8 +318,16 @@ public class DataSource implements JsonSerializable {
       }
 
       if ((this.pageRequest != null) && (!isCount)) {
-        query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
-        query.setMaxResults(this.pageRequest.getPageSize());
+        if (info != null && info.first != null) {
+          query.setFirstResult(info.first);
+        } else {
+          query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
+        }
+        if (info != null && info.max != null) {
+          query.setMaxResults(info.max);
+        } else {
+          query.setMaxResults(this.pageRequest.getPageSize());
+        }
       }
 
       if (isCount) {
@@ -893,7 +882,7 @@ public class DataSource implements JsonSerializable {
       }
     } else {
       //Verificar se existe parametros que são ID´s
-      List<String> parsedParams = parseParams(filter);
+      List<String> parsedParams = JPQLParserUtil.parseParams(filter);
       if (params.length > parsedParams.size() && domainClass != null) {
         String alias = JPQLConverter.getAliasFromSql(filter);
         EntityManager em = getEntityManager(domainClass);
@@ -1212,7 +1201,7 @@ public class DataSource implements JsonSerializable {
         TypedQuery<?> strQuery = em.createQuery(query, domainClass);
 
         int i = 0;
-        List<String> parsedParams = parseParams(query);
+        List<String> parsedParams = JPQLParserUtil.parseParams(query);
         if (!query.trim().startsWith("DELETE")) {
           Object instanceForUpdate = createAndSetFieldsDomain(parsedParams, strQuery, params);
           processCloudFields(instanceForUpdate);
@@ -1458,5 +1447,9 @@ public class DataSource implements JsonSerializable {
   public void flush() {
     EntityManager em = getEntityManager(domainClass);
     em.flush();
+  }
+
+  public void setUseOdataRequest(boolean useOdataRequest) {
+    this.useOdataRequest = useOdataRequest;
   }
 }
