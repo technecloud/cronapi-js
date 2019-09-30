@@ -194,33 +194,40 @@ public class JPQLParserUtil {
 
         ODataInfo info = new ODataInfo();
 
-        if (blocklyQuery.getUriInfo().getFilter() != null) {
-          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, "?");
+        if (blocklyQuery.getUriInfo().getFilter() != null || blocklyQuery.getUriInfo().getKeyPredicates().size() > 0) {
+
+          if (blocklyQuery.getUriInfo().getFilter() != null) {
+            whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, "?");
+          }
 
           if (blocklyQuery.getUriInfo().getKeyPredicates().size() > 0) {
             whereExpression = ODataExpressionParser.parseKeyPredicates(blocklyQuery.getUriInfo().getKeyPredicates(), alias, "?");
           }
 
-          List<String> params = JPQLParserUtil.parseParams(whereExpression, '?');
+          List<String> params = whereExpression != null ? JPQLParserUtil.parseParams(whereExpression, '?') : null;
 
-          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, ":crn_param_");
+          if (blocklyQuery.getUriInfo().getFilter() != null) {
+            whereExpression = ODataExpressionParser.parseToJPAWhereExpression(blocklyQuery.getUriInfo().getFilter(), alias, ":crn_param_");
+          }
 
           if (blocklyQuery.getUriInfo().getKeyPredicates().size() > 0) {
             whereExpression = ODataExpressionParser.parseKeyPredicates(blocklyQuery.getUriInfo().getKeyPredicates(), alias, ":crn_param_");
           }
 
-          List<String> paramsWithName = JPQLParserUtil.parseParams(whereExpression, ':');
+          List<String> paramsWithName = whereExpression != null ? JPQLParserUtil.parseParams(whereExpression, ':') : null;
 
-          int i = 0;
-          info.params = new Var[queryParams.length + params.size()];
-          for (Var v : queryParams) {
-            info.params[i] = v;
-            i++;
-          }
+          if (paramsWithName != null && params != null) {
+            int i = 0;
+            info.params = new Var[queryParams.length + params.size()];
+            for (Var v : queryParams) {
+              info.params[i] = v;
+              i++;
+            }
 
-          for (String p : params) {
-            info.params[i] = Var.valueOf(paramsWithName.get(i), blocklyQuery.getParameterValue(p));
-            i++;
+            for (String p : params) {
+              info.params[i] = Var.valueOf(paramsWithName.get(i), blocklyQuery.getParameterValue(p));
+              i++;
+            }
           }
 
         }
