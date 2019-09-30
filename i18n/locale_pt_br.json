@@ -485,5 +485,6 @@
   "replaceDescription": "Função que retorna uma nova string substituído o texto passado.",
   "textReplaceElement": "Texto original",
   "textReplaceTargetRegexElement": "Um objeto RegExp ou literal. A correspondência ou correspondências são substituídas por newSubStr ou o valor retornado pela função especificada.",
-  "textReplaceReplacementElement": "Novo texto"
+  "textReplaceReplacementElement": "Novo texto",
+  "typeReplaceElement": "Tipo usando no regex."
 }
