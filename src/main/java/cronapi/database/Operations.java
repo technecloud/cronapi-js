@@ -44,19 +44,15 @@ public class Operations {
     DataSource ds = new DataSource(entity.getObjectAsString());
     String limit = null;
     String offset = null;
-    boolean limitChosen = false;
-    boolean offsetChosen = false;
-    
+
     List<Var> finalParams = new LinkedList<>();
     for (Var p : params){
       switch (p.getId()) {
         case "limit":
           limit = p.getObjectAsString();
-          limitChosen = true;
           break;
         case "offset":
           offset = p.getObjectAsString();
-          offsetChosen = true;
           break;
         default:
           finalParams.add(p);
@@ -70,6 +66,7 @@ public class Operations {
 
     if(offset != null){
       pageNumber =  Integer.parseInt(offset);
+      ds.setUseOffset(true);
     }
     if(limit != null){
       pageSize =  Integer.parseInt(limit);
@@ -109,12 +106,6 @@ public class Operations {
 
       if (isODataParam) {
         pageFromRequest = pageFromRequest.equals("0") ? "0" : String.valueOf((Integer.parseInt(pageSizeFromRequest) / Integer.parseInt(pageFromRequest)) );
-      }
-      if(!offsetChosen){
-        pageNumber = Integer.parseInt(pageFromRequest);
-      }
-      if(!limitChosen){
-        pageSize = Integer.parseInt(pageSizeFromRequest);
       }
       page = new PageRequest(pageNumber, pageSize);
     }
