@@ -1,6 +1,8 @@
 package cronapi.odata.server;
 
+import cronapi.Var;
 import cronapi.util.ReflectionUtils;
+import org.apache.olingo.odata2.jpa.processor.core.ODataExpressionParser;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
@@ -13,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Parameter;
 import javax.persistence.Query;
 import java.util.LinkedList;
+import java.util.List;
 
 public class JPQLParserUtil {
 
@@ -154,4 +157,86 @@ public class JPQLParserUtil {
     return countNativeQuery;
 
   }
+
+  public static class ODataInfo {
+    public String jpql;
+    public Var[] params;
+    public Integer first;
+    public Integer max;
+  }
+
+  public static List<String> getNonWhereParams(String jpql) {
+    String jpqlStatement = jpql;
+
+    JPQLExpression jpqlExpression = new JPQLExpression(
+        jpqlStatement,
+        DefaultEclipseLinkJPQLGrammar.instance(),
+        true
+    );
+
+    Expression selectStatement = ((Expression) jpqlExpression.getQueryStatement());
+
+
+    if (selectStatement != null) {
+      try {
+        ReflectionUtils.setField(selectStatement, "whereClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      try {
+        ReflectionUtils.setField(selectStatement, "groupByClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      try {
+        ReflectionUtils.setField(selectStatement, "havingClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      jpqlStatement = selectStatement.toString();
+    }
+
+    return parseParams(jpqlStatement);
+
+  }
+
+  public static List<String> parseParams(String SQL) {
+    return parseParams(SQL, ':');
+  }
+
+  public static List<String> parseParams(String SQL, char charDelim) {
+    final String delims = " \n\r\t.(){},+=!" + charDelim;
+    final String quots = "\'";
+    String token = "";
+    boolean isQuoted = false;
+    List<String> tokens = new LinkedList<>();
+
+    for (int i = 0; i < SQL.length(); i++) {
+      if (quots.indexOf(SQL.charAt(i)) != -1) {
+        isQuoted = token.length() == 0;
+      }
+      if (delims.indexOf(SQL.charAt(i)) == -1 || isQuoted) {
+        token += SQL.charAt(i);
+      } else {
+        if (token.length() > 0) {
+          if (token.startsWith("" + charDelim))
+            tokens.add(token.substring(1));
+          token = "";
+          isQuoted = false;
+        }
+        if (SQL.charAt(i) == charDelim) {
+          token = "" + charDelim;
+        }
+      }
+    }
+
+    if (token.length() > 0) {
+      if (token.startsWith("" + charDelim))
+        tokens.add(token.substring(1));
+    }
+
+    return tokens;
+  }
+
+
 }
