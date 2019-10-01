@@ -75,6 +75,7 @@ public class DataSource implements JsonSerializable {
   private boolean useUrlParams = false;
   private boolean countData = false;
   private boolean useOdataRequest = false;
+  private boolean isEor = false;
   private boolean useOffset = false;
 
   /**
@@ -211,6 +212,7 @@ public class DataSource implements JsonSerializable {
 
   public Object[] fetch(boolean isCount) {
 
+    this.isEor = false;
     String jpql = this.filter;
     Var[] params = this.params;
 
@@ -752,15 +754,24 @@ public class DataSource implements JsonSerializable {
    * looking for next page and so on
    */
   public void next() {
-    if (this.page.getNumberOfElements() > (this.current + 1))
+
+    if (this.isEor) {
+      this.current = -1;
+      return;
+    }
+
+    if (this.page.getNumberOfElements() > (this.current + 1)) {
       this.current++;
+    }
     else {
-      if (this.page.hasNext()) {
-        this.pageRequest = this.page.nextPageable();
-        this.fetch();
+      this.pageRequest = new PageRequest(this.page.getNumber() + 1, pageSize);
+      this.fetch();
+      if (this.page.getNumberOfElements() > 0) {
         this.current = 0;
-      } else {
+      }
+      else {
         this.current = -1;
+        this.isEor = true;
       }
     }
   }
