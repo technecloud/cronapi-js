@@ -213,32 +213,32 @@ public class Operations {
 		return Var.valueOf("\n");
 	}
 
-	@CronapiMetaData(type = "function", name = "{{textReplace}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{textReplaceFunction}}", nameTags = {
 			"replace", "substituir" }, description = "{{textReplaceDescription}}", returnType = ObjectType.STRING)
 	public static final Var replace(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}") Var textReplace,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceTarget}}") Var target,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}", defaultValue = "Site is crxnapp.ix") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceTarget}}", defaultValue = "x") Var target,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}", defaultValue = "o") Var replacement) {
 		if (validationReplace(textReplace, target, replacement)) return Var.VAR_NULL;
 		return Var.valueOf(textReplace.getObjectAsString().replace(target.getObjectAsString(), replacement.getObjectAsString()).trim());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{textReplaceAll}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{textReplaceAllFunction}}", nameTags = {
 			"replace", "substituir" }, description = "{{textReplaceAllDescription}}", returnType = ObjectType.STRING)
 	public static final Var replaceAll(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceAll}}") Var textReplace,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceAllRegex}}") Var regex,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}", defaultValue = "My .com site is cronapp.com") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceRegex}}", defaultValue = "com") Var regex,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}", defaultValue = "io") Var replacement) {
 		if (validationReplace(textReplace, regex, replacement)) return Var.VAR_NULL;
 		return Var.valueOf(textReplace.getObjectAsString().replaceAll(regex.getObjectAsString(), replacement.getObjectAsString()).trim());
 	}
 
-	@CronapiMetaData(type = "function", name = "{{textReplaceFirst}}", nameTags = {
+	@CronapiMetaData(type = "function", name = "{{textReplaceFirstFunction}}", nameTags = {
 			"replace", "substituir" }, description = "{{textReplaceFirstDescription}}", returnType = ObjectType.STRING)
 	public static final Var replaceFirst(
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceFirst}}") Var textReplace,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceFirstRegex}}") Var regex,
-			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}", defaultValue = "Site is Test.com") Var textReplace,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceRegex}}", defaultValue = "Test(.*)") Var regex,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}", defaultValue = "cronapp.io") Var replacement) {
 		if (validationReplace(textReplace, regex, replacement)) return Var.VAR_NULL;
 		return Var.valueOf(textReplace.getObjectAsString().replaceFirst(regex.getObjectAsString(), replacement.getObjectAsString()).trim());
 	}
