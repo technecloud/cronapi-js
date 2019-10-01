@@ -1179,6 +1179,7 @@ public class DataSource implements JsonSerializable {
         boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
 
         List<String> parsedParams = JPQLParserUtil.parseParams(query);
+        List<String> nonWhereParams = JPQLParserUtil.getNonWhereParams(query);
 
         int o = 0;
         for (String param : parsedParams) {
@@ -1226,10 +1227,12 @@ public class DataSource implements JsonSerializable {
               if (value != null) {
                 int idx = argsNames.indexOf(paramName);
                 strQuery.setParameter(paramName, value.getObject(argsTypes.get(idx)));
-                try {
-                  Utils.updateField(instanceForUpdate, realParamName, value.getObject(argsTypes.get(idx)));
-                } catch (Exception e) {
-                  log.error(e.getMessage(), e);
+                if (nonWhereParams.contains(realParamName)) {
+                  try {
+                    Utils.updateField(instanceForUpdate, realParamName, value.getObject(argsTypes.get(idx)));
+                  } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                  }
                 }
               }
             }
@@ -1245,10 +1248,12 @@ public class DataSource implements JsonSerializable {
             if (p != null) {
               int idx = argsNames.indexOf(param);
               strQuery.setParameter(param, p.getObject(argsTypes.get(idx)));
-              try {
-                Utils.updateField(instanceForUpdate, parsedParams.get(i), p.getObject(argsTypes.get(idx)));
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
+              if (nonWhereParams.contains(parsedParams.get(i))) {
+                try {
+                  Utils.updateField(instanceForUpdate, parsedParams.get(i), p.getObject(argsTypes.get(idx)));
+                } catch (Exception e) {
+                  log.error(e.getMessage(), e);
+                }
               }
             } else {
               strQuery.setParameter(param, null);

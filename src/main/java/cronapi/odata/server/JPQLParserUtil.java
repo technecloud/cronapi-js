@@ -165,6 +165,41 @@ public class JPQLParserUtil {
     public Integer max;
   }
 
+  public static List<String> getNonWhereParams(String jpql) {
+    String jpqlStatement = jpql;
+
+    JPQLExpression jpqlExpression = new JPQLExpression(
+        jpqlStatement,
+        DefaultEclipseLinkJPQLGrammar.instance(),
+        true
+    );
+
+    Expression selectStatement = ((Expression) jpqlExpression.getQueryStatement());
+
+
+    if (selectStatement != null) {
+      try {
+        ReflectionUtils.setField(selectStatement, "whereClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      try {
+        ReflectionUtils.setField(selectStatement, "groupByClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      try {
+        ReflectionUtils.setField(selectStatement, "havingClause", null);
+      } catch (Exception e) {
+        //NoCommand
+      }
+      jpqlStatement = selectStatement.toString();
+    }
+
+    return parseParams(jpqlStatement);
+
+  }
+
   public static ODataInfo addODdataRequest(String jpql, Var[] queryParams) {
     try {
       BlocklyQuery blocklyQuery = BlocklyQuery.CURRENT_BLOCK_QUERY.get();
