@@ -480,10 +480,10 @@
   "shareParam0": "Title: Share title",
   "shareParam1": "Text: Share text",
   "shareParam2": "URL: Share URL. Ex: a url, video, file etc",
-  "replaceName": "Function Replace",
+  "replaceName": "Replace",
   "replaceDescription": "Function that returns a new string replaced the past text.",
   "textReplaceElement": "Original text",
-  "textReplaceTargetRegexElement": "A RegExp or literal object. The match or matches are replaced with newSubStr or the value returned by the specified function.",
+  "textReplaceTargetRegexElement": "A RegExp or Text ",
   "textReplaceReplacementElement": "New Text",
   "typeReplaceElement": "Type user to regex.",
   "value": "Value"
