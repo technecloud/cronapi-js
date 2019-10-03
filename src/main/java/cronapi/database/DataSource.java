@@ -26,6 +26,8 @@ import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.queries.DatabaseQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -53,6 +55,8 @@ import java.util.*;
  */
 public class DataSource implements JsonSerializable {
 
+  private static final Logger log = LoggerFactory.getLogger(DataSource.class);
+
   private String entity;
   private String simpleEntity;
   private Class domainClass;
@@ -70,6 +74,9 @@ public class DataSource implements JsonSerializable {
   private boolean plainData = false;
   private boolean useUrlParams = false;
   private boolean countData = false;
+  private boolean useOdataRequest = false;
+  private boolean isEor = false;
+  private boolean useOffset = false;
 
   /**
    * Init a datasource with a page size equals 100
@@ -150,40 +157,6 @@ public class DataSource implements JsonSerializable {
     }
   }
 
-  private List<String> parseParams(String SQL) {
-    final String delims = " \n\r\t.(){},+:=!";
-    final String quots = "\'";
-    String token = "";
-    boolean isQuoted = false;
-    List<String> tokens = new LinkedList<>();
-
-    for (int i = 0; i < SQL.length(); i++) {
-      if (quots.indexOf(SQL.charAt(i)) != -1) {
-        isQuoted = token.length() == 0;
-      }
-      if (delims.indexOf(SQL.charAt(i)) == -1 || isQuoted) {
-        token += SQL.charAt(i);
-      } else {
-        if (token.length() > 0) {
-          if (token.startsWith(":"))
-            tokens.add(token.substring(1));
-          token = "";
-          isQuoted = false;
-        }
-        if (SQL.charAt(i) == ':') {
-          token = ":";
-        }
-      }
-    }
-
-    if (token.length() > 0) {
-      if (token.startsWith(":"))
-        tokens.add(token.substring(1));
-    }
-
-    return tokens;
-  }
-
   private void enableTenantToogle(EntityManager em) {
     try {
       for (EntityType type : em.getMetamodel().getEntities()) {
@@ -239,6 +212,7 @@ public class DataSource implements JsonSerializable {
 
   public Object[] fetch(boolean isCount) {
 
+    this.isEor = false;
     String jpql = this.filter;
     Var[] params = this.params;
 
@@ -263,7 +237,21 @@ public class DataSource implements JsonSerializable {
 
       boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
 
-      List<String> parsedParams = parseParams(jpql);
+      JPQLParserUtil.ODataInfo info = null;
+
+      if (useOdataRequest) {
+        info = JPQLParserUtil.addODdataRequest(jpql, params);
+        if (info != null) {
+          if (info.jpql != null) {
+            jpql = info.jpql;
+          }
+          if (info.params != null) {
+            params = info.params;
+          }
+        }
+      }
+
+      List<String> parsedParams = JPQLParserUtil.parseParams(jpql);
 
       int o = 0;
       for (String param : parsedParams) {
@@ -337,8 +325,18 @@ public class DataSource implements JsonSerializable {
       }
 
       if ((this.pageRequest != null) && (!isCount)) {
-        query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
-        query.setMaxResults(this.pageRequest.getPageSize());
+        if (info != null && info.first != null) {
+          query.setFirstResult(info.first);
+        }else if(this.useOffset) {
+          query.setFirstResult(this.pageRequest.getPageNumber());
+        }else{
+          query.setFirstResult(this.pageRequest.getPageNumber() * this.pageRequest.getPageSize());
+        }
+        if (info != null && info.max != null) {
+          query.setMaxResults(info.max);
+        } else {
+          query.setMaxResults(this.pageRequest.getPageSize());
+        }
       }
 
       if (isCount) {
@@ -756,15 +754,24 @@ public class DataSource implements JsonSerializable {
    * looking for next page and so on
    */
   public void next() {
-    if (this.page.getNumberOfElements() > (this.current + 1))
+
+    if (this.isEor) {
+      this.current = -1;
+      return;
+    }
+
+    if (this.page.getNumberOfElements() > (this.current + 1)) {
       this.current++;
+    }
     else {
-      if (this.page.hasNext()) {
-        this.pageRequest = this.page.nextPageable();
-        this.fetch();
+      this.pageRequest = new PageRequest(this.page.getNumber() + 1, pageSize);
+      this.fetch();
+      if (this.page.getNumberOfElements() > 0) {
         this.current = 0;
-      } else {
+      }
+      else {
         this.current = -1;
+        this.isEor = true;
       }
     }
   }
@@ -893,7 +900,7 @@ public class DataSource implements JsonSerializable {
       }
     } else {
       //Verificar se existe parametros que são ID´s
-      List<String> parsedParams = parseParams(filter);
+      List<String> parsedParams = JPQLParserUtil.parseParams(filter);
       if (params.length > parsedParams.size() && domainClass != null) {
         String alias = JPQLConverter.getAliasFromSql(filter);
         EntityManager em = getEntityManager(domainClass);
@@ -1172,32 +1179,6 @@ public class DataSource implements JsonSerializable {
     this.page = null;
   }
 
-  private Object createAndSetFieldsDomain(List<String> parsedParams, TypedQuery<?> strQuery, Var... params) {
-    try {
-      Object instanceForUpdate = this.domainClass.newInstance();
-      int i = 0;
-      for (String param : parsedParams) {
-        Var p = null;
-        if (i <= params.length - 1) {
-          p = params[i];
-        }
-        if (p != null) {
-          if (p.getId() != null) {
-            Utils.updateField(instanceForUpdate, p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
-          } else {
-            Utils.updateField(instanceForUpdate, param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
-          }
-        } else {
-          Utils.updateField(instanceForUpdate, param, null);
-        }
-        i++;
-      }
-      return instanceForUpdate;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   /**
    * Execute Query
    *
@@ -1209,50 +1190,92 @@ public class DataSource implements JsonSerializable {
     try {
       startMultitenant(em);
       try {
+        boolean namedParams = (params.length > 0 && params[0].getId() != null) || useUrlParams;
+
+        List<String> parsedParams = JPQLParserUtil.parseParams(query);
+        List<String> nonWhereParams = JPQLParserUtil.getNonWhereParams(query);
+
+        int o = 0;
+        for (String param : parsedParams) {
+          query = query.replaceFirst(":" + param, ":param" + o);
+          o++;
+        }
+
         TypedQuery<?> strQuery = em.createQuery(query, domainClass);
+        AbstractSession session = (AbstractSession) ((EntityManagerImpl) em.getDelegate()).getActiveSession();
 
-        int i = 0;
-        List<String> parsedParams = parseParams(query);
-        if (!query.trim().startsWith("DELETE")) {
-          Object instanceForUpdate = createAndSetFieldsDomain(parsedParams, strQuery, params);
-          processCloudFields(instanceForUpdate);
+        Map<String, Var> paramsValues = null;
 
-          for (String param : parsedParams) {
-            Var p = null;
-            if (i <= params.length - 1) {
-              p = params[i];
+        if (namedParams) {
+          paramsValues = new LinkedHashMap<>();
+          if (useUrlParams) {
+            for (String key : parsedParams) {
+              paramsValues.put(key, Var.valueOf(RestClient.getRestClient().getParameter(key)));
             }
-            if (p != null) {
-              if (p.getId() != null) {
-                //strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
-                strQuery.setParameter(p.getId(), Utils.getFieldValue(instanceForUpdate, p.getId()));
-              } else {
-                // strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
-                strQuery.setParameter(param, Utils.getFieldValue(instanceForUpdate, parsedParams.get(i)));
-              }
-            } else {
-              strQuery.setParameter(param, null);
+          } else {
+            for (Var p : params) {
+              paramsValues.put(p.getId(), p);
             }
-            i++;
-          }
-        } else {
-          for (String param : parsedParams) {
-            Var p = null;
-            if (i <= params.length - 1) {
-              p = params[i];
-            }
-            if (p != null) {
-              if (p.getId() != null) {
-                strQuery.setParameter(p.getId(), p.getObject(strQuery.getParameter(p.getId()).getParameterType()));
-              } else {
-                strQuery.setParameter(param, p.getObject(strQuery.getParameter(parsedParams.get(i)).getParameterType()));
-              }
-            } else {
-              strQuery.setParameter(param, null);
-            }
-            i++;
           }
         }
+
+        HermesParser parser = new HermesParser();
+        DatabaseQuery queryParsed = parser.buildQuery(query, session);
+
+        List<Class> argsTypes = queryParsed.getArgumentTypes();
+        List<String> argsNames = queryParsed.getArguments();
+
+        for (String name : argsNames) {
+          strQuery.setParameter(name, null);
+        }
+
+        Object instanceForUpdate = this.domainClass.newInstance();
+
+        if (namedParams) {
+          for (int i = 0; i < parsedParams.size(); i++) {
+            String paramName = "param" + i;
+            String realParamName = parsedParams.get(i);
+
+            if (paramsValues != null) {
+              Var value = paramsValues.get(realParamName);
+              if (value != null) {
+                int idx = argsNames.indexOf(paramName);
+                strQuery.setParameter(paramName, value.getObject(argsTypes.get(idx)));
+                if (nonWhereParams.contains(realParamName)) {
+                  try {
+                    Utils.updateField(instanceForUpdate, realParamName, value.getObject(argsTypes.get(idx)));
+                  } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                  }
+                }
+              }
+            }
+          }
+        } else {
+
+          for (int i = 0; i < parsedParams.size(); i++) {
+            String param = "param" + i;
+            Var p = null;
+            if (i <= params.length - 1) {
+              p = params[i];
+            }
+            if (p != null) {
+              int idx = argsNames.indexOf(param);
+              strQuery.setParameter(param, p.getObject(argsTypes.get(idx)));
+              if (nonWhereParams.contains(parsedParams.get(i))) {
+                try {
+                  Utils.updateField(instanceForUpdate, parsedParams.get(i), p.getObject(argsTypes.get(idx)));
+                } catch (Exception e) {
+                  log.error(e.getMessage(), e);
+                }
+              }
+            } else {
+              strQuery.setParameter(param, null);
+            }
+          }
+        }
+
+        processCloudFields(instanceForUpdate);
 
         try {
           if (!em.getTransaction().isActive()) {
@@ -1458,5 +1481,13 @@ public class DataSource implements JsonSerializable {
   public void flush() {
     EntityManager em = getEntityManager(domainClass);
     em.flush();
+  }
+
+  public void setUseOdataRequest(boolean useOdataRequest) {
+    this.useOdataRequest = useOdataRequest;
+  }
+
+  public void setUseOffset(boolean useOffset) {
+        this.useOffset = useOffset;
   }
 }

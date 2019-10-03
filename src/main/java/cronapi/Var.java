@@ -9,12 +9,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.reflect.TypeToken;
 import cronapi.database.DataSource;
@@ -23,6 +18,17 @@ import cronapi.json.JsonArrayWrapper;
 import cronapi.json.Operations;
 import cronapi.serialization.CronappModule;
 import cronapi.util.StorageService;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
+import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClassInterface;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -36,16 +42,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.Pattern;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
-import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClassInterface;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.output.XMLOutputter;
 
 @JsonAdapter(VarSerializer.class)
 public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer,
@@ -406,12 +402,11 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
           Object instanceClass = type.newInstance();
 
           if (_object instanceof java.util.LinkedHashMap) {
-            java.util.LinkedHashMap hashmap = (java.util.LinkedHashMap)_object;
+            java.util.LinkedHashMap hashmap = (java.util.LinkedHashMap) _object;
             for (String id : ids) {
               Utils.updateField(instanceClass, id, hashmap.get(id));
             }
-          }
-          else {
+          } else {
             for (String id : ids) {
               Utils.updateField(instanceClass, id, _object);
             }
@@ -701,7 +696,11 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
           if (cronapi.util.StorageService.isTempFileJson(((String) getObject()))) {
             return StorageService.getFileBytesWithMetadata((String) getObject());
           }
-          return java.util.Base64.getDecoder().decode(((String) getObject()).getBytes("UTF-8"));
+          try {
+            return Base64.getDecoder().decode(((String) getObject()).getBytes(cronapi.CronapiConfigurator.ENCODING));
+          } catch (Exception e) {
+            return getObjectAsString().getBytes(cronapi.CronapiConfigurator.ENCODING);
+          }
         default:
           if (_object instanceof File) {
             if (StorageService.isFileImage(_object)) {
@@ -749,10 +748,11 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
-    } else if (object instanceof String  || object instanceof File) {
+    } else if (object instanceof String || object instanceof File) {
       return object.toString();
-    } if ( _type == Type.DATETIME) {
-       return Utils.getISODateFormat().format(((Calendar) getObject()).getTime());
+    }
+    if (_type == Type.DATETIME) {
+      return Utils.getISODateFormat().format(((Calendar) getObject()).getTime());
     }
 
     JsonElement element = this.getObjectAsJson();
@@ -822,13 +822,13 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     } else if (getObject() instanceof String) {
       String parsed = _object.toString();
       if (_object.toString().startsWith("[") && _object.toString().endsWith("]")) {
-        parsed = parsed.substring(1, parsed.length()-1);
+        parsed = parsed.substring(1, parsed.length() - 1);
       }
 
       String[] values = parsed.split(",");
 
       List<String> list = new LinkedList<>();
-      for (String v: values) {
+      for (String v : values) {
         if (!v.trim().isEmpty()) {
           list.add(v.trim());
         }
@@ -987,7 +987,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
    * is a list and also note that index must be in bounds.
    *
    * @param index the index into which the Var will be inserted
-   * @param var the var to insert
+   * @param var   the var to insert
    */
   public void set(int index, Var var) {
     ((List) getObject()).add(index, var);
@@ -1181,7 +1181,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
         Double d = (double) _object;
         return _formatter.format(d);
       case DATETIME:
-        return Utils.getDateFormat().format(((Calendar) getObject()).getTime());
+        return Utils.getISODateFormat().format(((Calendar) getObject()).getTime());
       case LIST:
         List list = (LinkedList) getObject();
         StringBuilder sb = new StringBuilder();
@@ -1297,7 +1297,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   @Override
   public void serializeWithType(JsonGenerator gen, SerializerProvider serializers,
-      TypeSerializer typeSer)
+                                TypeSerializer typeSer)
       throws IOException {
     if (id != null) {
       gen.writeStartObject();

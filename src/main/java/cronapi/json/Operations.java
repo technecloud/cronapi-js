@@ -151,7 +151,7 @@ public class Operations {
           @ParamMetaData(type = ObjectType.OBJECT, description = "{{JSONTOXMLValueToBeRead}}") Var json)
           throws Exception {
     org.json.JSONObject jsonFileObject = new org.json.JSONObject(json.getObjectAsString());
-    String xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>"
+    String xml = "<?xml version=\"1.0\" encoding=\""+cronapi.CronapiConfigurator.ENCODING+"\"?>\n<root>"
             .concat(org.json.XML.toString(jsonFileObject))
             .concat("</root>");
     return cronapi.xml.Operations.xmlFromStrng(Var.valueOf(xml));
