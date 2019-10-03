@@ -481,7 +481,7 @@
   "shareParam1": "Text: Share text",
   "shareParam2": "URL: Share URL. Ex: a url, video, file etc",
   "replaceName": "Replace",
-  "replaceDescription": "Function that returns a new string replaced the past text.",
+  "replaceDescription": "Function that returns a new string replacing the past text.",
   "textReplaceElement": "Original text",
   "textReplaceTargetRegexElement": "A RegExp or Text ",
   "textReplaceReplacementElement": "New Text",
