@@ -24,7 +24,7 @@ public class OperationsTest {
 
     @Test
     public void replaceText() {
-        Assert.assertEquals(Operations.replace(Var.valueOf("teste x"), Var.valueOf("x"), Var.valueOf("teste")).getObjectAsString(), "teste");
+        Assert.assertEquals(Operations.replace(Var.valueOf("teste x"), Var.valueOf("x"), Var.valueOf("teste")).getObjectAsString(), "teste teste");
     }
 
     @Test
