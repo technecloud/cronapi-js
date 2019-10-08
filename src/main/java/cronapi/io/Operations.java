@@ -6,6 +6,8 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
@@ -588,58 +590,78 @@ public class Operations {
 		zis.close();
 	}
 
+	@CronapiMetaData(type = "function", name = "{{zipFile}}", nameTags = {
+			"Zip" }, description = "{{functionToZipFile}}", params = { "{{fileList}}",
+			"{{destinationFolder}}", "{{fileNameToZip}}" }, paramsType = { ObjectType.LIST, ObjectType.STRING, ObjectType.STRING })
+	public static void zipFile(Var sourceFiles, Var destFolder, Var zipFileName) throws Exception {
+		try (FileOutputStream fileOutputStream = new FileOutputStream(String.format("%s%s%s", destFolder, File.separator, zipFileName.getObjectAsString()))) {
+			ZipOutputStream zipOut = new ZipOutputStream(fileOutputStream);
+			List fileList = sourceFiles.getObjectAsList();
+			for (Object file : fileList) {
+				File fileToZip = new File(file.toString());
+				FileInputStream fileInputStream = new FileInputStream(fileToZip);
+				ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+				zipOut.putNextEntry(zipEntry);
+
+				byte[] bytes = new byte[1024];
+				int length;
+				while ((length = fileInputStream.read(bytes)) >= 0) {
+					zipOut.write(bytes, 0, length);
+				}
+				fileInputStream.close();
+			}
+			zipOut.close();
+		}
+	}
+
 	@CronapiMetaData(type = "function", name = "{{listFilesName}}", nameTags = {
-			"listFiles" }, description = "{{listFilesDescription}}", returnType = ObjectType.STRING)
-	public static final Var listFiles(
+			"listFiles"}, description = "{{listFilesDescription}}", returnType = ObjectType.LIST)
+	public static Var listFiles(
 			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam0}}") Var path,
 			@ParamMetaData(type = ObjectType.STRING, description = "{{listFilesParam1}}", blockType = "util_dropdown", keys = {
-					"all", "directories", "files" }, values = { "{{all}}", "{{directories}}", "{{files}}" }) Var type)
-			throws Exception {
+					"all", "directories", "files"}, values = {"{{all}}", "{{directories}}", "{{files}}"}) Var type) {
 		try {
 			if (path.equals(Var.VAR_NULL))
 				return Var.newList();
 
-			if (type.getObjectAsString().equals("directories")) {
-
-				FileFilter filter = new FileFilter() {
-					@Override
-					public boolean accept(File pathname) {
-						return pathname.isDirectory();
-					}
-				};
-
-				File[] files = new File(path.getObjectAsString()).listFiles(filter);
-				LinkedList<String> result = new LinkedList<String>();
-				for (File f : files) {
-					result.add(f.getName());
+			switch (type.getObjectAsString()) {
+				case "directories": {
+					FileFilter filter = File::isDirectory;
+					return getFileList(path, filter);
 				}
-				return new Var(result);
-
-			} else if (type.getObjectAsString().equals("files")) {
-
-				FileFilter filter = new FileFilter() {
-					@Override
-					public boolean accept(File pathname) {
-						return pathname.isFile();
-					}
-				};
-
-				File[] files = new File(path.getObjectAsString()).listFiles(filter);
-				LinkedList<String> result = new LinkedList<String>();
-				for (File f : files) {
-					result.add(f.getName());
+				case "files": {
+					FileFilter filter = File::isFile;
+					return getFileList(path, filter);
 				}
-				return new Var(result);
-
-			} else {
-				String[] files = new File(path.getObjectAsString()).list();
-				Var list = new Var(new LinkedList<String>(Arrays.asList(files)));
-				return list;
+				default:
+					return getFileList(path);
 			}
-
 		} catch (Exception e) {
 			return Var.newList();
 		}
+
+	}
+
+	private static Var getFileList(Var path, FileFilter filter) {
+		File[] files = new File(path.getObjectAsString()).listFiles(filter);
+		LinkedList<String> result = new LinkedList<>();
+		if (files != null) {
+			for (File f : files) {
+				result.add(f.getAbsolutePath());
+			}
+		}
+		return new Var(result);
+	}
+
+	private static Var getFileList(Var path) {
+		File[] files = new File(path.getObjectAsString()).listFiles();
+		LinkedList<String> result = new LinkedList<>();
+		if (files != null) {
+			for (File f : files) {
+				result.add(f.getAbsolutePath());
+			}
+		}
+		return new Var(result);
 	}
 
 	@CronapiMetaData(type = "function", name = "{{fileSeparatorName}}", nameTags = {
