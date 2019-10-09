@@ -634,7 +634,7 @@ public class Operations {
 					return getFileList(path, filter);
 				}
 				default:
-					return getFileList(path);
+					return getFileList(path, null);
 			}
 		} catch (Exception e) {
 			return Var.newList();
@@ -644,17 +644,6 @@ public class Operations {
 
 	private static Var getFileList(Var path, FileFilter filter) {
 		File[] files = new File(path.getObjectAsString()).listFiles(filter);
-		LinkedList<String> result = new LinkedList<>();
-		if (files != null) {
-			for (File f : files) {
-				result.add(f.getAbsolutePath());
-			}
-		}
-		return new Var(result);
-	}
-
-	private static Var getFileList(Var path) {
-		File[] files = new File(path.getObjectAsString()).listFiles();
 		LinkedList<String> result = new LinkedList<>();
 		if (files != null) {
 			for (File f : files) {
