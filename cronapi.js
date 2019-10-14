@@ -3685,7 +3685,6 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.database.openInAppBrowser = function(url) {
-    console.log(url);
     if(cordova.InAppBrowser){
       cordova.InAppBrowser.open(url, '_blank', 'location=no');
     }
