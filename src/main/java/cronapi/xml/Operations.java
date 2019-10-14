@@ -343,7 +343,7 @@ public class Operations {
 			"{{XMLOpenFromStringParam0}}" }, paramsType = { ObjectType.OBJECT }, returnType = ObjectType.OBJECT)
 	public static final Var xmlFromStrng(Var string) throws Exception {
 		SAXBuilder builder = new SAXBuilder();
-		return new Var(builder.build(new StringReader( string.getObjectAsString())));
+		return new Var(builder.build(new StringReader(string.getObjectAsString())));
 	}
 
 	@CronapiMetaData(type = "function", name = "{{XMLToJSON}}", nameTags = {

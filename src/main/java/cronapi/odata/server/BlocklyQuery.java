@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import cronapi.QueryManager;
 import cronapi.RestClient;
 import cronapi.Var;
+import org.apache.olingo.odata2.api.uri.UriInfo;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -21,6 +23,8 @@ import javax.persistence.TemporalType;
 
 public class BlocklyQuery implements Query {
 
+  public static ThreadLocal<BlocklyQuery> CURRENT_BLOCK_QUERY = new ThreadLocal<>();
+
   private JsonObject query;
   private String method;
   private String queryStatement;
@@ -29,6 +33,7 @@ public class BlocklyQuery implements Query {
   private String originalFilter;
   private String entityName;
   private Var lastResult;
+  private UriInfo uriInfo;
 
   public BlocklyQuery(JsonObject query, String method, String type, String queryStatement, String originalFilter, String entityName) {
     this.type = type;
@@ -49,59 +54,69 @@ public class BlocklyQuery implements Query {
   @Override
   public List getResultList() {
 
-    Var result = null;
+    try {
+      CURRENT_BLOCK_QUERY.set(this);
 
-    if (lastResult != null) {
-      result = lastResult;
-    }
+      Var result = null;
 
-    if (result == null) {
-      Var[] params = new Var[0];
+      if (lastResult != null) {
+        result = lastResult;
+      }
 
-      if (!isNull(query.get("queryParamsValues"))) {
-        JsonArray paramValues = query.getAsJsonArray("queryParamsValues");
-        params = new Var[paramValues.size()];
-        for (int x = 0; x < paramValues.size(); x++) {
-          JsonObject prv = paramValues.get(x).getAsJsonObject();
-          if (!isNull(prv.get("fieldName"))) {
-            String name = prv.get("fieldName").getAsString();
-            params[x] = Var.VAR_NULL;
-            if (!isNull(prv.get("fieldValue"))) {
+      if (result == null) {
+        Var[] params = new Var[0];
 
-              Map<String, Var> customValues = new LinkedHashMap<>();
-              customValues.put("entityName", Var.valueOf(this.entityName));
+        if (!isNull(query.get("queryParamsValues"))) {
+          JsonArray paramValues = query.getAsJsonArray("queryParamsValues");
+          params = new Var[paramValues.size()];
+          for (int x = 0; x < paramValues.size(); x++) {
+            JsonObject prv = paramValues.get(x).getAsJsonObject();
+            if (!isNull(prv.get("fieldName"))) {
+              String name = prv.get("fieldName").getAsString();
+              params[x] = Var.VAR_NULL;
+              if (!isNull(prv.get("fieldValue"))) {
 
-              customValues.put("queryType", Var.valueOf(type));
-              customValues.put("queryStatement", Var.valueOf(queryStatement));
-              customValues.put("queryFilter", Var.valueOf(originalFilter));
-              customValues.put("queryParameters", Var.valueOf(parameters));
+                Map<String, Var> customValues = new LinkedHashMap<>();
+                customValues.put("entityName", Var.valueOf(this.entityName));
 
-              String strValue = RestClient.getRestClient().getParameter(name);
-              if (strValue != null) {
-                params[x] = Var.valueOf(strValue);
-              } else {
-                params[x] = QueryManager.getParameterValue(query, name, customValues);
+                customValues.put("queryType", Var.valueOf(type));
+                customValues.put("queryStatement", Var.valueOf(queryStatement));
+                customValues.put("queryFilter", Var.valueOf(originalFilter));
+                customValues.put("queryParameters", Var.valueOf(parameters));
+
+                String strValue = RestClient.getRestClient().getParameter(name);
+                if (strValue != null) {
+                  params[x] = Var.valueOf(strValue);
+                } else {
+                  params[x] = QueryManager.getParameterValue(query, name, customValues);
+                }
               }
             }
           }
         }
+
+        result = QueryManager.executeBlockly(query, this.method, params);
       }
 
-      result = QueryManager.executeBlockly(query, this.method, params);
-    }
-
-    if (query.get("baseEntity") != null) {
-      try {
-        parameters.put("baseEntity", query.get("baseEntity").getAsString());
-        lastResult = result;
-        return (List) result.getObjectAsRawList(LinkedList.class);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+      if (query.get("baseEntity") != null) {
+        try {
+          parameters.put("baseEntity", query.get("baseEntity").getAsString());
+          lastResult = result;
+          return (List) result.getObjectAsRawList(LinkedList.class);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       }
-    }
 
-    lastResult = result;
-    return result.getObjectAsList();
+      lastResult = result;
+      return result.getObjectAsList();
+    } finally {
+      CURRENT_BLOCK_QUERY.remove();
+    }
+  }
+
+  public void setUriInfo(UriInfo uriInfo) {
+    this.uriInfo = uriInfo;
   }
 
   public Var getLastResult() {
@@ -130,7 +145,7 @@ public class BlocklyQuery implements Query {
 
   @Override
   public int getMaxResults() {
-    return 0;
+    return parameters.containsKey("MaxResults") ? (int) parameters.get("MaxResults") : -1;
   }
 
   @Override
@@ -141,7 +156,7 @@ public class BlocklyQuery implements Query {
 
   @Override
   public int getFirstResult() {
-    return 0;
+    return parameters.containsKey("FirstResult") ? (int) parameters.get("FirstResult") : -1;
   }
 
   @Override
@@ -250,7 +265,7 @@ public class BlocklyQuery implements Query {
 
   @Override
   public Object getParameterValue(String name) {
-    return null;
+    return parameters.get(name);
   }
 
   @Override
@@ -281,5 +296,9 @@ public class BlocklyQuery implements Query {
   @Override
   public <T> T unwrap(Class<T> cls) {
     return null;
+  }
+
+  public UriInfo getUriInfo() {
+    return uriInfo;
   }
 }

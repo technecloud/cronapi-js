@@ -55,6 +55,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   private String getBlocklyMethod(UriInfo uriInfo, JsonObject customQuery) {
     String restMethod = getRestMehtod(uriInfo);
 
+    return getBlocklyMethod(customQuery, restMethod);
+  }
+
+  private String getBlocklyMethod(JsonObject customQuery, String restMethod) {
     if (QueryManager.isNull(customQuery.get("entityFullName"))) {
       String blocklyMethod = QueryManager.getBlocklyMethod(customQuery, restMethod);
       if (customQuery.get("baseEntity") != null && "default".equals(blocklyMethod)) {
@@ -267,6 +271,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           String function = customQuery.getAsJsonObject("blockly").get("blocklyClass").getAsString() + ":" + customQuery.getAsJsonObject("blockly").get("blocklyMethod").getAsString();
 
           query = new BlocklyQuery(customQuery, restMethod, type, jpqlStatement, (uriInfo.getFilter() != null ? uriInfo.getFilter().getExpressionString() : ""), uriInfo.getTargetEntitySet().getName());
+          ((BlocklyQuery)query).setUriInfo(uriInfo);
 
           if (uriInfo.isCount() && GETFunctionName != null && GETBlocklyQuery != null && GETFunctionName.equalsIgnoreCase(function)) {
             if (GETBlocklyQuery.getLastResult() != null && GETBlocklyQuery.getLastResult().getObject() instanceof DataSource) {
