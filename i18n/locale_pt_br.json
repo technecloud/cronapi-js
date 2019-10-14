@@ -482,11 +482,11 @@
   "shareParam1": "Texto: Texto que explica o compartilhamento",
   "shareParam2": "URL: Link a ser compartilhado. Ex: uma url, vídeo, arquivo etc",
   "replaceName": "Substituir",
-  "replaceDescription": "Função que retorna uma nova string substituído o texto passado",
+  "replaceDescription": "Função que retorna uma nova string substituindo o texto de entrada",
   "textReplaceElement": "Texto original",
-  "textReplaceTargetRegexElement": "Texto ou RegEx a ser substituido",
+  "textReplaceTargetRegexElement": "Texto ou regex a ser substituido",
   "textReplaceReplacementElement": "Novo texto",
-  "typeReplaceElement": "Tipo usando no regex.",
+  "typeReplaceElement": "Tipo usado no regex",
   "openInAppBrowser": "Abrir URL dentro do app",
   "openInAppBrowserDescription": "Função que abre uma URL dentro da aplicação mobile"
 }
