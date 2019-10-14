@@ -486,5 +486,7 @@
   "textReplaceTargetRegexElement": "A RegExp or Text ",
   "textReplaceReplacementElement": "New Text",
   "typeReplaceElement": "Type user to regex.",
-  "value": "Value"
+  "value": "Value",
+  "openInAppBrowser": "Open URL inside app",
+  "openInAppBrowserDescription": "Function that opens a URL inside the mobile app"
 }

@@ -486,5 +486,7 @@
   "textReplaceElement": "Texto original",
   "textReplaceTargetRegexElement": "Texto ou RegEx a ser substituido",
   "textReplaceReplacementElement": "Novo texto",
-  "typeReplaceElement": "Tipo usando no regex."
+  "typeReplaceElement": "Tipo usando no regex.",
+  "openInAppBrowser": "Abrir URL dentro do app",
+  "openInAppBrowserDescription": "Função que abre uma URL dentro da aplicação mobile"
 }

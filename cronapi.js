@@ -3675,6 +3675,22 @@ if (!window.fixedTimeZone) {
 
   };
 
+  /**
+   * @type function
+   * @platform M
+   * @name {{openInAppBrowser}}
+   * @nameTags openInAppBrowser
+   * @param {ObjectType.STRING} url {{url}}
+   * @description {{openInAppBrowserDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.database.openInAppBrowser = function(url) {
+    console.log(url);
+    if(cordova.InAppBrowser){
+      cordova.InAppBrowser.open(url, '_blank', 'location=no');
+    }
+  };
+
 
   //Private variables and functions
   this.cronapi.internal.ptDate = function(varray) {
