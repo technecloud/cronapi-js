@@ -485,6 +485,38 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{language}}
+   * @nameTags language, i18n, idioma, linguagem, locale
+   * @description {{languageDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.language = function() {
+    var locale = (window.navigator.userLanguage || window.navigator.language || 'pt_br').replace('-', '_');
+    return locale;
+  };
+
+  /**
+   * @type function
+   * @name {{share}}
+   * @nameTags share, compartilhar, enviar, abrir como
+   * @description {{shareDescription}}
+   * @param {ObjectType.STRING} title {{shareParam0}}
+   * @param {ObjectType.STRING} text {{shareParam1}}
+   * @param {ObjectType.STRING} url {{shareParam2}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.share = function(title, text, url) {
+    navigator.share({
+      title: title,
+      text: text,
+      url: url
+    }).then(() => console.log('Successful share'))
+        .catch(error => console.log('Error sharing:', error));
+    return value;
+  };
+
+  /**
+   * @type function
    * @name {{callServerBlockly}}
    * @nameTags callServerBlockly
    * @description {{functionToCallServerBlockly}}
@@ -847,7 +879,7 @@ if (!window.fixedTimeZone) {
               }
               catch (e) {
               }
-              if(fieldValue){
+              if(fieldValue !== undefined || fieldValue !== null){
                 return fieldValue;
               }
               else if(scope && scope.$parent ) {
@@ -1111,7 +1143,14 @@ if (!window.fixedTimeZone) {
       if (typeof params != 'undefined') {
         for (var i in Object.keys(params)) {
           var k = Object.keys(params[i])[0];
-          var v = String(Object.values(params[i])[0]);
+
+          var paramValue = Object.values(params[i])[0];
+
+          if (paramValue instanceof Date) {
+            paramValue = paramValue.toISOString();
+          }
+
+          var v = String(paramValue);
           if (queryString) {
             queryString += "&";
           }
@@ -1119,7 +1158,28 @@ if (!window.fixedTimeZone) {
         }
       }
 
+      let existRoute = (view) => {
+        if (this.cronapi.$scope && this.cronapi.$scope.$state) {
+          let $states = this.cronapi.$scope.$state.get();
+          let viewSplited = view.split("/").slice(2);
+          let templateToFind = "views/" + viewSplited.join("/") + ".view.html";
+
+          $states.forEach((s)=> {
+            let templateUrl  = s.templateUrl;
+            if (templateUrl instanceof Function)  {
+              let regexExecuted = /('|")[a-z0-9/.]+('|")/gim.exec(templateUrl.toString());
+              if (regexExecuted !== null && regexExecuted !== undefined && regexExecuted[0])
+                templateUrl = regexExecuted[0].replace(/'/g, "");
+            }
+            if (templateUrl === templateToFind)
+              view = "#" + s.url;
+          })
+        }
+        return view;
+      };
+
       var oldHash = window.location.hash;
+      view = existRoute(view);
       window.location.hash = view + (queryString?"?"+queryString:"");
 
       var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
@@ -1554,6 +1614,18 @@ if (!window.fixedTimeZone) {
      */
     this.cronapi.screen.hasNextPage = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
         return getDatasource(datasource).hasNextPage();
+    };
+
+    /**
+     * @type function
+     * @name {{datasourceLoadName}}
+     * @nameTags load|datasource
+     * @description {{datasourceLoadDescription}}
+     * @param {ObjectType.STRING} datasource {{datasource}}
+     * @multilayer true
+     */
+    this.cronapi.screen.load = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+        getDatasource(datasource).fetch({ params: {} }, undefined, undefined, { origin: "button" });
     };
 
   /**
@@ -1995,6 +2067,25 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.text.newline = function() {
     return "\n";
+  }
+
+  /**
+   * @type function
+   * @name {{replaceName}}
+   * @nameTags text|replace
+   * @description {{replaceDescription}}
+   * @param {ObjectType.STRING} textReplace {{textReplaceElement}}
+   * @param {ObjectType.STRING} textReplaceTargetRegex {{textReplaceTargetRegexElement}}
+   * @param {ObjectType.STRING} typeReplace {{typeReplaceElement}}
+   * @param {ObjectType.STRING} textReplaceReplacement {{textReplaceReplacementElement}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.text.replaceAll = function(/** @type {ObjectType.STRING} @defaultValue Xmas.*/ textReplace, /** @type {ObjectType.STRING} @defaultValue X*/ textReplaceTargetRegex, /** @type {ObjectType.STRING} @description {{typeReplaceElement}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ typeReplace, /** @type {ObjectType.STRING} @defaultValue Christmas*/ textReplaceReplacement){
+    if (this.cronapi.logic.isNull(textReplace) || this.cronapi.logic.isNull(textReplaceTargetRegex) || this.cronapi.logic.isNull(textReplaceReplacement))
+      return null;
+    if (typeReplace !== '-')
+      return textReplace.replace(new RegExp(textReplaceTargetRegex, typeReplace), textReplaceReplacement);
+    return textReplace.replace(textReplaceTargetRegex, textReplaceReplacement);
   }
 
   /**
@@ -3838,7 +3929,11 @@ if (!window.fixedTimeZone) {
     function getDataset(args){
       var ds = [];
       var size = 4;
-      if(Array.isArray(args[4])){
+      if(Array.isArray(args[4])
+      && typeof args[4][0] === 'object'
+      && 'label' in args[4][0]
+      && 'data' in args[4][0]
+      && 'options' in args[4][0]){
         args = args[4];
         size = 0;
       }
