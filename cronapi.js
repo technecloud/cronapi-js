@@ -1304,10 +1304,16 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    let modalToShow = `#${id}`;
     try{
-      $('#'+id).modal({backdrop: 'static', keyboard: false});
+      $(modalToShow).one('shown.bs.modal', function (e) {
+        $(this).data('lastFocused', $(':focus'));
+        $(this).find('input')[0].focus();
+      }).one('hidden.bs.modal', function(e) {
+        $(modalToShow).data('lastFocused').focus();
+      }).modal({backdrop: 'static', keyboard: false});
     }catch(e){
-      $('#'+id).show();
+      $(modalToShow).show();
     }
   };
 
@@ -2482,6 +2488,19 @@ if (!window.fixedTimeZone) {
   };
 
   this.cronapi.internal = {};
+
+  this.cronapi.internal.focusFormInput = function () {
+    let $firstForm = $($('form')[0]);
+    let $firstInput = $($firstForm.find('input')[0]);
+    if ($firstInput && $firstInput.length) {
+      let waitBecomeVisible = setInterval(()=> {
+        if ($firstInput.is(':visible')) {
+          $firstInput.focus();
+          clearInterval(waitBecomeVisible);
+        }
+      }, 100);
+    }
+  };
 
   this.cronapi.internal.setFile = function(field, file) {
     this.cronapi.internal.fileToBase64(file, function(base64) { this.cronapi.screen.changeValueOfField(field, base64); }.bind(this));
