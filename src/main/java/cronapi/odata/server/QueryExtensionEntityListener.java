@@ -61,7 +61,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
   private String getBlocklyMethod(JsonObject customQuery, String restMethod) {
     if (QueryManager.isNull(customQuery.get("entityFullName"))) {
       String blocklyMethod = QueryManager.getBlocklyMethod(customQuery, restMethod);
-      if (customQuery.get("baseEntity") != null && "default".equals(blocklyMethod)) {
+      if (!QueryManager.isNull(customQuery.get("baseEntity")) && "default".equals(blocklyMethod)) {
         return null;
       } else {
         return blocklyMethod;
@@ -736,7 +736,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         Var result = QueryManager.executeBlockly(query, getRestMehtod(infoView), Var.valueOf(entity));
         if (result != null && !result.isNull()) {
-          if (query.get("baseEntity") != null) {
+          if (!QueryManager.isNull(query.get("baseEntity"))) {
             return result.getObject();
           } else {
             return result;

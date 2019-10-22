@@ -484,7 +484,7 @@ public class DatasourceExtension implements JPAEdmExtension {
 
   private EntitySet createBlocklyDataSource(Schema edmSchema, String id, JsonObject entity,
       List<CalcField> addFields) {
-    if (entity.get("baseEntity") != null) {
+    if (!QueryManager.isNull(entity.get("baseEntity"))) {
       String baseEntity = entity.get("baseEntity").getAsString();
       if (baseEntity.contains(".")) {
         baseEntity = baseEntity.substring(baseEntity.lastIndexOf(".") + 1);

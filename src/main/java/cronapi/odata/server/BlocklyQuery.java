@@ -98,7 +98,7 @@ public class BlocklyQuery implements Query {
         result = QueryManager.executeBlockly(query, this.method, params);
       }
 
-      if (query.get("baseEntity") != null) {
+      if (!QueryManager.isNull(query.get("baseEntity"))) {
         try {
           parameters.put("baseEntity", query.get("baseEntity").getAsString());
           lastResult = result;
