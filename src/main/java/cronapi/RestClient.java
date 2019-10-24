@@ -33,6 +33,8 @@ public class RestClient {
   private HttpServletRequest request;
   private HttpSession session;
   private User user;
+  private String host;
+  private String userAgent;
   private JsonObject query = null;
   private boolean filteredEnabled = false;
   private Locale locale;
@@ -40,6 +42,19 @@ public class RestClient {
   private Map<String, String> parameters;
 
   private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
+
+  private static final String[] IP_HEADER_CANDIDATES = {
+      "X-Forwarded-For",
+      "Proxy-Client-IP",
+      "WL-Proxy-Client-IP",
+      "HTTP_X_FORWARDED_FOR",
+      "HTTP_X_FORWARDED",
+      "HTTP_X_CLUSTER_CLIENT_IP",
+      "HTTP_CLIENT_IP",
+      "HTTP_FORWARDED_FOR",
+      "HTTP_FORWARDED",
+      "HTTP_VIA",
+      "REMOTE_ADDR" };
 
   static {
     DEFAULT_AUTHORITIES = new ArrayList<>();
@@ -353,5 +368,33 @@ public class RestClient {
 
   public boolean isDefined() {
     return getRequest() != null;
+  }
+
+  public String getHost() {
+    if (host != null) return host;
+    else {
+      if (getRequest() != null) return getClientIpAddress(getRequest());
+    }
+
+    return null;
+  }
+
+  public String getAgent() {
+    if (userAgent != null) return userAgent;
+    else {
+      if (getRequest() != null) return getRequest().getHeader("User-Agent");
+    }
+
+    return null;
+  }
+
+  public static String getClientIpAddress(HttpServletRequest request) {
+    for (String header : IP_HEADER_CANDIDATES) {
+      String ip = request.getHeader(header);
+      if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+        return ip;
+      }
+    }
+    return request.getRemoteAddr();
   }
 }

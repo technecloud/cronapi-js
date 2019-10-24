@@ -644,7 +644,7 @@ public class DataSource implements JsonSerializable {
     int i = 0;
     String jpql = " select e FROM " + entity.substring(entity.lastIndexOf(".") + 1) + " e WHERE ";
     Vector<Var> params = new Vector<>();
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         if (i > 0) {
@@ -881,7 +881,7 @@ public class DataSource implements JsonSerializable {
 
         int i = 0;
         String jpql = "Select e from " + simpleEntity + " e where (";
-        for (Object obj : getAjustedAttributes(type)) {
+        for (Object obj : JPAUtil.getAjustedAttributes(type)) {
           SingularAttribute field = (SingularAttribute) obj;
           if (field.isId()) {
             if (i > 0) {
@@ -907,7 +907,7 @@ public class DataSource implements JsonSerializable {
         EntityType type = em.getMetamodel().entity(domainClass);
         int i = 0;
         String filterForId = " (";
-        for (Object obj : getAjustedAttributes(type)) {
+        for (Object obj : JPAUtil.getAjustedAttributes(type)) {
           SingularAttribute field = (SingularAttribute) obj;
           if (field.isId()) {
             if (i > 0) {
@@ -954,25 +954,8 @@ public class DataSource implements JsonSerializable {
     SingularAttribute field;
   }
 
-  private Set getAjustedAttributes(EntityType type) {
-    Set<SingularAttribute> attributes = type.getAttributes();
-    Set<SingularAttribute> attrs = new LinkedHashSet<SingularAttribute>();
-
-    for (int i = 0; i < type.getJavaType().getDeclaredFields().length; i++) {
-      for (SingularAttribute attr : attributes) {
-        if (attr.getName().equalsIgnoreCase(type.getJavaType().getDeclaredFields()[i].getName())) {
-          attrs.add(attr);
-          break;
-        }
-      }
-      ;
-    }
-
-    return attrs;
-  }
-
   private void addKeys(EntityManager em, EntityType type, String parent, List<TypeKey> keys) {
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         if (field.getType().getPersistenceType() == Type.PersistenceType.BASIC) {
@@ -1155,7 +1138,7 @@ public class DataSource implements JsonSerializable {
 
     int i = 0;
     String jpql = "Select e" + selectAttr + " from " + name + " e where ";
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         if (i > 0) {
@@ -1400,7 +1383,7 @@ public class DataSource implements JsonSerializable {
 
     LinkedList result = new LinkedList<>();
 
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         result.add(getObject(field.getName()));
@@ -1418,7 +1401,7 @@ public class DataSource implements JsonSerializable {
     EntityManager em = getEntityManager(domainClass);
     EntityType type = em.getMetamodel().entity(domainClass);
 
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         return Var.valueOf(getObject(field.getName()));
@@ -1439,7 +1422,7 @@ public class DataSource implements JsonSerializable {
     }
 
     int i = 0;
-    for (Object obj : getAjustedAttributes(type)) {
+    for (Object obj : JPAUtil.getAjustedAttributes(type)) {
       SingularAttribute field = (SingularAttribute) obj;
       if (field.isId()) {
         Utils.updateField(instanceDomain, field.getName(), ids[i].getObject(field.getType().getJavaType()));
