@@ -306,7 +306,7 @@ public class JPQLParserUtil {
           }
         } else {
           if (where != null) {
-            jpqlStatement += " " + where;
+            jpqlStatement += " WHERE " + where;
           }
         }
 
