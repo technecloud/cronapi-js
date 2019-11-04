@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -66,6 +67,13 @@ public class DateTimeTest {
     Assert.assertNotNull(item);
   }
 
+  @Test
+  public void testTimestamp() {
+    Var item = Var.valueOf(new Timestamp(getTestDate().getObjectAsDateTime().getTimeInMillis()));
+    Assert.assertEquals(Operations.formatDateTime(item, Var.valueOf("ISO8601")).getObjectAsString(), "2012-05-12T04:05:24Z");
+    Timestamp timestamp = item.getTypedObject(Timestamp.class);
+    Assert.assertEquals(timestamp.getTime(), getTestDate().getObjectAsDateTime().getTimeInMillis());
+  }
 
   @Test
   public void testGetParts() {

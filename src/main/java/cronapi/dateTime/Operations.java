@@ -7,12 +7,11 @@ import cronapi.ParamMetaData;
 import cronapi.Utils;
 import cronapi.Var;
 import cronapi.i18n.Messages;
-import org.joda.time.DateTimeUtils;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Classe que representa ...
@@ -358,10 +357,15 @@ public class Operations {
       format = Var.valueOf(Messages.getString("DateFormat"));
     }
 
+    if (format.getObjectAsString().equals("ISO8601")) {
+      DateFormat frm = Utils.getISODateFormat();
+      return Var.valueOf(frm.format(value.getObjectAsDateTime().getTime()));
+    }
+
 		SimpleDateFormat sdf = new SimpleDateFormat(format.getObjectAsString());
     sdf.setTimeZone(Utils.toTimeZone(timeZone));
 
-		return new Var(sdf.format(value.getObjectAsDateTime().getTime()));
+		return Var.valueOf(sdf.format(value.getObjectAsDateTime().getTime()));
 	}
 
   @CronapiMetaData(type = "function", name = "{{formatDateTime}}", nameTags = {

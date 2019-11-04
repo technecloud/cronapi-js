@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -369,6 +370,8 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return getObjectAsBoolean();
     } else if (type == JsonElement.class) {
       return getObjectAsJson();
+    } else if (type == Timestamp.class) {
+      return new Timestamp(getObjectAsDateTime().getTimeInMillis());
     } else if (type == Date.class) {
       return getObjectAsDateTime().getTime();
     } else if (type == Calendar.class) {
