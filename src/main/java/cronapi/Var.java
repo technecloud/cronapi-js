@@ -29,6 +29,7 @@ import org.jdom2.output.XMLOutputter;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -45,6 +46,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 @JsonAdapter(VarSerializer.class)
+@XmlJavaTypeAdapter(VarAdapter.class)
 public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer,
     VirtualClassInterface {
 

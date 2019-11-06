@@ -268,12 +268,26 @@ public class Operations {
           clazz = Class.forName(className);
         }
       } catch (Exception e2) {
-        throw new Exception(Messages.getString("blocklyNotFound"), e2);
+        try {
+          if (IS_DEBUG) {
+            CronapiClassLoader loader = new CronapiClassLoader();
+            clazz = loader.findClass("blockly." + className);
+          } else {
+            clazz = Class.forName("blockly." + className);
+          }
+        } catch (Exception e3) {
+          throw new Exception(Messages.getString("blocklyNotFound"), e);
+        }
       }
 
     }
 
+    boolean checkSOAP = false;
     if (checkSecurity) {
+      if (restMethod.equals("soap")) {
+        restMethod = "POST";
+        checkSOAP = true;
+      }
       BlocklySecurity.checkSecurity(clazz, restMethod);
     }
 
@@ -305,6 +319,7 @@ public class Operations {
     }
 
     boolean isBlockly = false;
+    boolean isSoap = false;
     boolean audit = false;
     for (Annotation annotation : clazz.getAnnotations()) {
       if (annotation.annotationType().getName().equals("cronapi.CronapiMetaData")) {
@@ -319,8 +334,16 @@ public class Operations {
       if (annotation.annotationType().getName().equals("cronapi.rest.security.CronappAudit")) {
         audit = true;
       }
+
+      if (annotation.annotationType().getName().equals("javax.jws.WebService")) {
+        isSoap = true;
+      }
     }
     if (!isBlockly) {
+      throw new Exception(Messages.getString("accessDenied"));
+    }
+
+    if (checkSOAP && !isSoap) {
       throw new Exception(Messages.getString("accessDenied"));
     }
 

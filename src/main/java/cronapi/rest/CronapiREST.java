@@ -464,7 +464,7 @@ public class CronapiREST {
   @RequestMapping(method = RequestMethod.POST, value = "/call/{class}/**")
   public RestResult postParams(@RequestBody Var[] vars, @PathVariable("class") String clazz) throws Exception {
     return runIntoTransaction(() -> {
-      return cronapi.util.Operations.callBlockly(new Var(clazz), true, RestClient.getRestClient().getMethod(), vars);
+      return cronapi.util.Operations.callBlockly(new Var(clazz), true, "execute", vars);
     });
   }
   //Fim Api via bloco
