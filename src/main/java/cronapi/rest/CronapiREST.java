@@ -149,7 +149,7 @@ public class CronapiREST {
 
       TranslationPath translationPath = translatePathVars(entity);
 
-      PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
+      PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
       DataSource ds = new DataSource(entity);
       if (translationPath.relationClass == null) {
@@ -274,7 +274,7 @@ public class CronapiREST {
   @RequestMapping(method = RequestMethod.GET, value = "/query/{id}/**")
   public HttpEntity<?> queryGet(@PathVariable("id") String id, Pageable pageable) throws Exception {
     RestResult data = runIntoTransaction(() -> {
-      PageRequest page = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
+      PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
       JsonObject query = QueryManager.getQuery(id);
       QueryManager.checkSecurity(query, "GET");
@@ -428,7 +428,7 @@ public class CronapiREST {
         TranslationPath translationPath = translatePathVars(id, query.getAsJsonArray("queryParamsValues").size(), -1);
 
         DataSource ds = new DataSource(query);
-        ds.filter(null, new PageRequest(1, 1), translationPath.params);
+        ds.filter(null, PageRequest.of(1, 1), translationPath.params);
         QueryManager.executeEvent(query, ds.getObject(), "beforeDelete");
         ds.delete();
         QueryManager.executeEvent(query, ds.getObject(), "afterDelete");

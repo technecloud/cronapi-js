@@ -72,7 +72,7 @@ public class Operations {
       pageSize =  Integer.parseInt(limit);
     }
 
-    page = new PageRequest(pageNumber, pageSize);
+    page = PageRequest.of(pageNumber, pageSize);
 
     if (useRequestData.getObjectAsBoolean()) {
       if(query != Var.VAR_NULL) {
@@ -107,7 +107,7 @@ public class Operations {
       if (isODataParam) {
         pageFromRequest = pageFromRequest.equals("0") ? "0" : String.valueOf((Integer.parseInt(pageSizeFromRequest) / Integer.parseInt(pageFromRequest)) );
       }
-      page = new PageRequest(pageNumber, pageSize);
+      page = PageRequest.of(pageNumber, pageSize);
     }
 
     ds.setUseOdataRequest(useRequestData.getObjectAsBoolean());

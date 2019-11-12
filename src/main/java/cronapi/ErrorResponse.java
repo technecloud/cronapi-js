@@ -32,9 +32,8 @@ public class ErrorResponse {
   private static final String PRIMARY_KEY_ERROR = "primaryKeyError";
   private static final String FOREIGN_KEY = "foreignKey";
   private static final String FOREIGN_KEY_ERROR = "foreignKeyError";
-  
-  
-  
+  private static final String OPTIMISTIC_LOCKING_ERROR = "optimisticLockingError";
+
   
   private static final String ERROR_HANDLES = "errorHandles";
   
@@ -67,6 +66,11 @@ public class ErrorResponse {
   }
   
   private static String heandleDatabaseException(String message, String method) {
+
+    if(message.contains("cannot be updated because it has changed or been deleted since it was last read")){
+        return Messages.getString(OPTIMISTIC_LOCKING_ERROR);
+    }
+
     for(JsonElement elem : getDataBaseJSON().getAsJsonArray(PRIMARY_KEY_ERROR)) {
       if(message.toLowerCase().contains(elem.getAsString().toLowerCase())) {
         JsonObject obj = RestClient.getRestClient().getQuery();
@@ -181,7 +185,8 @@ public class ErrorResponse {
           matcher = EXCEPTION_NAME_PATTERN.matcher(message);
         }
         if(hasThrowable(ex, javax.persistence.RollbackException.class) ||
-                hasThrowable(ex, javax.persistence.PersistenceException.class)) {
+                hasThrowable(ex, javax.persistence.PersistenceException.class) ||
+                hasThrowable(ex, javax.persistence.OptimisticLockException.class)) {
           message = heandleDatabaseException(message, method);
         }
       }

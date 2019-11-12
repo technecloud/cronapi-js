@@ -117,7 +117,7 @@ public class DataSource implements JsonSerializable {
     this.entity = entity;
     this.simpleEntity = entity.substring(entity.lastIndexOf(".") + 1);
     this.pageSize = pageSize;
-    this.pageRequest = new PageRequest(0, pageSize);
+    this.pageRequest = PageRequest.of(0, pageSize);
 
     // initialize dependencies and necessaries objects
     this.instantiateRepository();
@@ -654,7 +654,7 @@ public class DataSource implements JsonSerializable {
   }
 
   public void filterByPk(Var[] params) {
-    filter(null, new PageRequest(1, 1), params);
+    filter(null, PageRequest.of(1, 1), params);
   }
 
   public void filter(Var data, Var[] extraParams) {
@@ -785,7 +785,7 @@ public class DataSource implements JsonSerializable {
       this.current++;
     }
     else {
-      this.pageRequest = new PageRequest(this.page.getNumber() + 1, pageSize);
+      this.pageRequest = PageRequest.of(this.page.getNumber() + 1, pageSize);
       this.fetch();
       if (this.page.getNumberOfElements() > 0) {
         this.current = 0;
@@ -872,7 +872,7 @@ public class DataSource implements JsonSerializable {
    */
   public void setPageSize(int pageSize) {
     this.pageSize = pageSize;
-    this.pageRequest = new PageRequest(0, pageSize);
+    this.pageRequest = PageRequest.of(0, pageSize);
     this.current = -1;
   }
 
@@ -885,7 +885,7 @@ public class DataSource implements JsonSerializable {
   public void filter(String filter, Var... params) {
     this.filter = filter;
     this.params = params;
-    this.pageRequest = new PageRequest(0, pageSize);
+    this.pageRequest = PageRequest.of(0, pageSize);
     this.current = -1;
     this.fetch();
   }
@@ -1075,7 +1075,7 @@ public class DataSource implements JsonSerializable {
     try {
       startMultitenant(em);
 
-      filter(null, new PageRequest(0, 100), primaryKeys);
+      filter(null, PageRequest.of(0, 100), primaryKeys);
       Object insertion = null;
       if (relationMetadata.getAssossiationName() != null) {
         insertion = this.newInstance(relationMetadata.getAssossiationName());
@@ -1178,7 +1178,7 @@ public class DataSource implements JsonSerializable {
    * Clean Datasource and to free up allocated memory
    */
   public void clear() {
-    this.pageRequest = new PageRequest(0, 100);
+    this.pageRequest = PageRequest.of(0, 100);
     this.current = -1;
     this.page = null;
   }

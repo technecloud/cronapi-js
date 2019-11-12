@@ -57,7 +57,7 @@ public class DatabaseQueryManager {
   }
 
   public Var get(final PageRequest paramPage, final Object... objParams) throws Exception {
-    final PageRequest page = paramPage == null ? new PageRequest(0, 100) : paramPage;
+    final PageRequest page = paramPage == null ? PageRequest.of(0, 100) : paramPage;
     final Var[] params = toVarArray(objParams);
     return runIntoTransaction(() -> {
 
@@ -175,7 +175,7 @@ public class DatabaseQueryManager {
       }
       else {
         DataSource ds = new DataSource(query);
-        ds.filter(null, new PageRequest(1, 1), extraParams);
+        ds.filter(null, PageRequest.of(1, 1), extraParams);
         QueryManager.executeEvent(query, ds, "beforeDelete");
         ds.delete();
         QueryManager.executeEvent(query, ds, "afterDelete");

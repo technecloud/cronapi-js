@@ -29,6 +29,10 @@ public class TransactionManager {
   }
 
   public static EntityManager getEntityManager(Class domainClass) {
+    return getEntityManager(domainClass, true);
+  }
+
+  public static EntityManager getEntityManager(Class domainClass, boolean cache) {
 
     Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
 
@@ -38,7 +42,7 @@ public class TransactionManager {
     }
 
     String namespace = domainClass.getPackage().getName().replace(".entity", "");
-    if (mapNamespace != null) {
+    if (mapNamespace != null && cache) {
       EntityManager emNamespace = mapNamespace.get(namespace);
       if (emNamespace != null) {
         return emNamespace;
@@ -48,7 +52,9 @@ public class TransactionManager {
     EntityManagerFactory factory = findEntityManagerFactory(domainClass);
 
     EntityManager em = factory.createEntityManager();
-    CACHE_NAMESPACE.get().put(namespace, em);
+    if (cache) {
+      CACHE_NAMESPACE.get().put(namespace, em);
+    }
 
     TenantService tenantService = RestClient.getRestClient().getTenantService();
 
@@ -57,6 +63,10 @@ public class TransactionManager {
       for (String key : keySet) {
         em.setProperty(key, tenantService.getId(key));
       }
+    }
+    if (!cache) {
+      em.setProperty("eclipselink.query-results-cache", "false");
+      em.setProperty("eclipselink.cache.shared.default", "false");
     }
     return em;
   }
