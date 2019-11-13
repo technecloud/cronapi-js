@@ -919,4 +919,35 @@ public class Operations {
       log.log(level, message.getObjectAsString());
     }
   }
+
+  @CronapiMetaData(type = "function", name = "{{audit}}", nameTags = {"audit", "auditar"}, description = "{{auditDescription}}")
+  public static void audit(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{auditType}}", defaultValue = "General") Var type,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{auditCommand}}") Var command,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{auditCategory}}", defaultValue = "Trace") Var category,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{auditData}}") Var data
+  ) throws Exception {
+    DatabaseQueryManager logManager = HistoryListener.getAuditLogManager();
+
+    if (logManager != null) {
+
+      Var auditLog = new Var(new LinkedHashMap<>());
+
+      auditLog.set("type", type.getObjectAsString());
+      auditLog.set("command", command.getObjectAsString());
+      auditLog.set("category", category.getObjectAsString());
+      auditLog.set("date", new Date());
+      auditLog.set("objectData", data.getObjectAsString());
+      if (RestClient.getRestClient() != null) {
+        auditLog.set("user", RestClient.getRestClient().getUser() != null ? RestClient.getRestClient().getUser().getUsername() : null);
+        auditLog.set("host", RestClient.getRestClient().getHost());
+        auditLog.set("agent", RestClient.getRestClient().getAgent());
+      }
+      auditLog.set("server", HistoryListener.CURRENT_IP);
+      auditLog.set("affectedFields", null);
+
+      logManager.insert(auditLog);
+
+    }
+  }
 }
