@@ -272,6 +272,35 @@ public class QueryManager {
     }
   }
 
+  public static void executeEvent(JsonObject query, String eventName, Map<String, Var> customValues) {
+    JsonObject events = query.getAsJsonObject("events");
+    if (!isNull(events)) {
+      if (!isNull(events.get(eventName))) {
+        JsonObject event = events.getAsJsonObject(eventName);
+        Var name = Var
+            .valueOf(event.get("blocklyClass").getAsString() + ":" + event.get("blocklyMethod")
+                .getAsString());
+
+        Var params[] = new Var[0];
+        if (event.get("blocklyParams") != null) {
+          JsonArray bloclyParams = event.get("blocklyParams").getAsJsonArray();
+          params = new Var[bloclyParams.size()];
+          for (int i = 0; i < bloclyParams.size(); i++) {
+            JsonObject param = bloclyParams.get(i).getAsJsonObject();
+            customValues.put("eventName", Var.valueOf(eventName));
+            params[i] = parseExpressionValue(param.get("value"), customValues);
+          }
+        }
+
+        try {
+          Operations.callBlockly(name, params);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+  }
+
   public static void executeEvent(JsonObject query, String eventName, Var... params) {
     JsonObject events = query.getAsJsonObject("events");
     if (!isNull(events)) {

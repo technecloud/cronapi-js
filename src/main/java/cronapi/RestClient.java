@@ -40,6 +40,8 @@ public class RestClient {
   private Locale locale;
   private Integer utcOffset;
   private Map<String, String> parameters;
+  private Object entity;
+  private List<Object> keys;
 
   private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
 
@@ -273,6 +275,22 @@ public class RestClient {
 
   public void setQuery(JsonObject query) {
     this.query = query;
+  }
+
+  public Object getEntity() {
+    return entity;
+  }
+
+  public void setEntity(Object entity) {
+    this.entity = entity;
+  }
+
+  public List<Object> getKeys() {
+    return keys;
+  }
+
+  public void setKeys(List<Object> keys) {
+    this.keys = keys;
   }
 
   public User getUser() {

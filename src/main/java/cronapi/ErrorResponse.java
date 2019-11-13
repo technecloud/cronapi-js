@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +49,7 @@ public class ErrorResponse {
   private static JsonObject loadJSON() {
     ClassLoader classLoader = QueryManager.class.getClassLoader();
     try (InputStream stream = classLoader.getResourceAsStream("cronapi/database/databases.json")) {
-      InputStreamReader reader = new InputStreamReader(stream);
+      InputStreamReader reader = new InputStreamReader(stream, "UTF-8");
       JsonElement jsonElement = new JsonParser().parse(reader);
       return jsonElement.getAsJsonObject();
     }
@@ -171,12 +173,44 @@ public class ErrorResponse {
     final String message = getExceptionMessage(ex, method);
     return new RuntimeException(message, ex);
   }
-  
+
   public static String getExceptionMessage(Throwable ex, String method) {
+    return getExceptionMessage(ex, method, null);
+  }
+
+  public static String getExceptionMessage(Throwable ex, String method, String entity) {
     
     String message = null;
     
     if(ex != null) {
+
+      if (entity != null) {
+        JsonObject obj = null;
+        try {
+          obj = QueryManager.getQuery(entity);
+        } catch (Exception e) {
+          //NoCommande
+        }
+
+        if (obj != null && !QueryManager.isNull(obj.get("events")) && !QueryManager.isNull(obj.get("events").getAsJsonObject().get("onError"))) {
+          try {
+            Map<String, Var> values = new LinkedHashMap<>();
+            values.put("exception", Var.valueOf(ex));
+            values.put("exceptionMessage", Var.valueOf(ex.getMessage()));
+            values.put("data", Var.valueOf(RestClient.getRestClient().getEntity()));
+            values.put("primaryKeys", Var.valueOf(RestClient.getRestClient().getKeys()));
+            if (RestClient.getRestClient().getKeys() != null && RestClient.getRestClient().getKeys().size() > 0) {
+              values.put("primaryKey", Var.valueOf(RestClient.getRestClient().getKeys().get(0)));
+            }
+            values.put("entityName", Var.valueOf(entity));
+            values.put("eventName", Var.valueOf("onError"));
+            QueryManager.executeEvent(obj, "onError", values);
+          } catch (Exception e) {
+            ex = e;
+          }
+        }
+      }
+
       if(ex.getMessage() != null && !ex.getMessage().trim().isEmpty() && !hasIgnoredException(ex)) {
         message = ex.getMessage();
         Matcher matcher = EXCEPTION_NAME_PATTERN.matcher(message);

@@ -691,6 +691,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             if (!QueryManager.isNull(query.get("audit")) && query.get("audit").getAsJsonPrimitive().getAsBoolean()) {
               beforeAnyOperation(type.replace("before", "").toUpperCase(), data);
             }
+            RestClient.getRestClient().setEntity(data);
           }
 
           List<Object> keys = new LinkedList<>();
@@ -701,6 +702,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           } catch (Exception e) {
             e.printStackTrace();
           }
+          RestClient.getRestClient().setKeys(keys);
           Var result = QueryManager.executeEvent(query, data, type, keys, entityType.getName());
           if (result != null) {
             return result.getObject();
