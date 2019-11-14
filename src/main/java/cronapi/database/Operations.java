@@ -1,21 +1,21 @@
 package cronapi.database;
 
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.PageRequest;
-
 import cronapi.CronapiMetaData;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe que representa operações de acesso ao banco
@@ -336,28 +336,39 @@ public class Operations {
 
   @CronapiMetaData(name = "{{datasourceExecuteNativeQuery}}", nameTags = { "datasourceExecuteNativeQuery",
         "executeNativeQuery", "executarQueryNativa" }, description = "{{functionToExecuteNativeQuery}}", params = {
-        "{{entity}}", "{{query}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING }, returnType =
-        ObjectType.DATASET, wizard = "procedures_sql_command_callreturn")
-  public static Var executeNativeQuery(Var entity, Var query) throws Exception {
-    String namespace = entity.getObjectAsString().split(".")[0];
-    Class<?> domainClass = Class.forName(entity.getObjectAsString());
-    EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
-    EntityManager em = factory.createEntityManager();
-    Query nativeQuery = em.createNativeQuery(query.getObjectAsString(), domainClass);
+        "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
+        ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
+  public static Var executeNativeQuery(Var entity, Var query, Var... params) throws Exception {
+    Query nativeQuery = createNativeQuery(entity, query);
+    bindParameters(nativeQuery, params);
     return Var.valueOf(nativeQuery.getResultList());
   }
 
   @CronapiMetaData(name = "{{datasourceExecuteNativeQueryUpdate}}", nameTags = { "datasourceExecuteNativeQueryUpdate",
          "executeNativeQueryUpdate", "executarQueryNativaAlteracao" }, description = "{{functionToExecuteNativeQueryUpdate}}",
-         params = { "{{entity}}", "{{query}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING }, returnType =
-         ObjectType.LONG, wizard = "procedures_sql_command_callreturn")
-  public static Var executeNativeQueryUpdate(Var entity, Var query) throws Exception {
-    String namespace = entity.getObjectAsString().split(".")[0];
+         params = { "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
+         ObjectType.LIST }, returnType = ObjectType.LONG, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
+  public static Var executeNativeQueryUpdate(Var entity, Var query, Var... params) throws Exception {
+    Query nativeQuery = createNativeQuery(entity, query);
+    bindParameters(nativeQuery, params);
+    return Var.valueOf(nativeQuery.executeUpdate());
+  }
+
+  private static Query createNativeQuery(Var entity, Var query) throws Exception {
+    String namespace = entity.getObjectAsString().split("\\.")[0];
     Class<?> domainClass = Class.forName(entity.getObjectAsString());
     EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
-    EntityManager em = factory.createEntityManager();
-    Query nativeQuery = em.createNativeQuery(query.getObjectAsString(), domainClass);
-    return Var.valueOf(nativeQuery.executeUpdate());
+    EntityManager entityManager = factory.createEntityManager();
+    return entityManager.createNativeQuery(query.getObjectAsString(), domainClass);
+  }
+
+  private static void bindParameters(Query query, Var... params) {
+    if (params == null || params.length == 0) {
+      return;
+    }
+    for (Var param : params) {
+      query.setParameter(param.getId(), param.getObjectAsString());
+    }
   }
 
 }
