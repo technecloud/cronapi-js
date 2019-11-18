@@ -20,6 +20,7 @@ import cronapi.serialization.CronappModule;
 import cronapi.util.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.olingo.odata2.core.ep.producer.OlingoJsonSerializer;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClassInterface;
 import org.jdom2.Document;
@@ -52,6 +53,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   static {
     System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,TLSv1");
+    System.setProperty(StaxUtils.ALLOW_INSECURE_PARSER, "1");
   }
 
   @Override
