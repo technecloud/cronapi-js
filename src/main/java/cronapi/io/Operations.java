@@ -3,6 +3,16 @@ package cronapi.io;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -658,4 +668,78 @@ public class Operations {
 	public static final Var fileSeparator() {
 		return Var.valueOf(File.separator);
 	}
+
+  @CronapiMetaData(type = "function",
+      name = "{{loadPrivateKey}}",
+      nameTags = {"loadPrivateKey"},
+      description = "{{loadPrivateKeyDescription}}",
+      returnType = ObjectType.OBJECT,
+      params = { "{{privateKeyFile}}" },
+      paramsType = { ObjectType.OBJECT }
+  )
+  public static Var loadPrivateKeyFile(Var privateKeyFile)
+      throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+
+    byte[] bytes = Files.readAllBytes(Paths.get(privateKeyFile.getObjectAsFile().getPath()));
+    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(bytes);
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+    return Var.valueOf(keyFactory.generatePrivate(keySpec));
+  }
+
+  @CronapiMetaData(type = "function",
+      name = "{{loadPublicKey}}",
+      nameTags = {"loadPublicKey"},
+      description = "{{loadPublicKeyDescription}}",
+      returnType = ObjectType.OBJECT,
+      params = { "{{publicKeyFile}}" },
+      paramsType = { ObjectType.OBJECT }
+  )
+  public static Var loadPublicKeyFile(Var publicKeyFile)
+      throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+
+    byte[] bytes = Files.readAllBytes(Paths.get(publicKeyFile.getObjectAsFile().getPath()));
+    X509EncodedKeySpec keySpec = new X509EncodedKeySpec(bytes);
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+    return Var.valueOf(keyFactory.generatePublic(keySpec));
+  }
+
+  @CronapiMetaData(type = "function",
+      name = "{{signFile}}",
+      nameTags = {"signFile"},
+      description = "{{signFileDescription}}",
+      returnType = ObjectType.OBJECT,
+      params = { "{{file}}", "{{privateKey}}" },
+      paramsType = { ObjectType.OBJECT, ObjectType.OBJECT }
+  )
+  public static Var signFile(Var file, Var privateKey)
+      throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, IOException {
+
+    Signature rsa = Signature.getInstance("SHA1withRSA");
+    rsa.initSign(privateKey.getTypedObject(PrivateKey.class));
+    rsa.update(file.getObjectAsByteArray());
+    File newFile = new File(file.getObjectAsFile().getName() + "signed");
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(newFile));
+    objectOutputStream.writeObject(rsa.sign());
+    objectOutputStream.close();
+    return Var.valueOf(newFile);
+  }
+
+  @CronapiMetaData(type = "function",
+      name = "{{verifySignature}}",
+      nameTags = {"verifySignature"},
+      description = "{{verifySignatureDescription}}",
+      returnType = ObjectType.OBJECT,
+      params = { "{{signedObject}}","{{signature}}","{{publicKey}}" },
+      paramsType = { ObjectType.OBJECT,ObjectType.OBJECT,ObjectType.OBJECT }
+  )
+  public static Var verifySignature(Var file, Var publicKey)
+      throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+
+    Signature rsaSignature = Signature.getInstance("SHA1withRSA");
+    rsaSignature.initVerify(publicKey.getTypedObject(PublicKey.class));
+    rsaSignature.update(file.getObjectAsByteArray());
+    return Var.valueOf(rsaSignature.verify(Signature.getInstance("SHA1withRSA").sign()));
+  }
 }
