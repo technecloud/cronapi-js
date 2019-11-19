@@ -6,6 +6,7 @@ import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.RestClient;
 import cronapi.Var;
+import cronapi.odata.server.JPQLParserUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 
@@ -13,6 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -339,9 +341,7 @@ public class Operations {
         "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
         ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
   public static Var executeNativeQuery(Var entity, Var query, Var... params) throws Exception {
-    query = replaceParameters(query);
-    Query nativeQuery = createNativeQuery(entity, query);
-    bindParameters(nativeQuery, params);
+    Query nativeQuery = sanitizeNativeQuery(entity, query, params);
     return Var.valueOf(nativeQuery.getResultList());
   }
 
@@ -350,36 +350,45 @@ public class Operations {
          params = { "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
          ObjectType.LIST }, returnType = ObjectType.LONG, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
   public static Var executeNativeQueryUpdate(Var entity, Var query, Var... params) throws Exception {
-    query = replaceParameters(query);
-    Query nativeQuery = createNativeQuery(entity, query);
-    bindParameters(nativeQuery, params);
+    Query nativeQuery = sanitizeNativeQuery(entity, query, params);
     return Var.valueOf(nativeQuery.executeUpdate());
   }
 
-  private static Query createNativeQuery(Var entity, Var query) throws Exception {
+  private static Query createNativeQuery(Var entity, String query) throws Exception {
     String namespace = entity.getObjectAsString().split("\\.")[0];
     Class<?> domainClass = Class.forName(entity.getObjectAsString());
     EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
     EntityManager entityManager = factory.createEntityManager();
-    return entityManager.createNativeQuery(query.getObjectAsString(), domainClass);
+    return entityManager.createNativeQuery(query, domainClass);
   }
 
-  private static Var replaceParameters(Var query) {
-    String regex = "(:[\\w]+)";
+  private static Query sanitizeNativeQuery(Var entity, Var query, Var... params) throws Exception {
     String replacement = "?";
     String parameterizedQuery = query.getObjectAsString();
-    String positionQuery = parameterizedQuery.replaceAll(regex, replacement);
-    return Var.valueOf(positionQuery);
-  }
 
-  private static void bindParameters(Query query, Var... params) {
-    if (params == null || params.length == 0) {
-      return;
+    List<String> parsedParams = JPQLParserUtil.parseParams(parameterizedQuery);
+
+    for (String param : parsedParams) {
+      parameterizedQuery = parameterizedQuery.replaceFirst(":" + param, replacement);
     }
-    for (int i = 0; i < params.length; i++) {
-      int position = i + 1;
-      query.setParameter(position, params[i].getObject());
+
+    Query nativeQuery = createNativeQuery(entity, parameterizedQuery);
+
+    if (params != null && params.length > 0) {
+      Map<String, Object> paramsValues = new LinkedHashMap<>();
+
+      for (Var param : params) {
+        paramsValues.put(param.getId(), param.getObject());
+      }
+
+      int position = 1;
+      for (String param : parsedParams) {
+        nativeQuery.setParameter(position, paramsValues.get(param));
+        position++;
+      }
     }
+
+    return nativeQuery;
   }
 
 }
