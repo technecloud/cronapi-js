@@ -1,10 +1,11 @@
 package cronapi.text;
 
 import cronapi.CronapiMetaData;
-import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.ParamMetaData;
 import cronapi.Var;
+
+import java.text.Normalizer;
 
 /**
  * Classe que representa ...
@@ -241,6 +242,16 @@ public class Operations {
 			@ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}", defaultValue = "cronapp.io") Var replacement) {
 		if (validationReplace(textReplace, regex, replacement)) return Var.VAR_NULL;
 		return Var.valueOf(textReplace.getObjectAsString().replaceFirst(regex.getObjectAsString(), replacement.getObjectAsString()).trim());
+	}
+
+	@CronapiMetaData(name = "{{textNormalizeFunction}}", nameTags = {
+			"normalize", "normalizar" }, description = "{{textNormalizeDescription}}", returnType = ObjectType.STRING)
+	public static final Var normalize(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{nonNormalizedText}}") Var nonNormalizedText) {
+		String normalizedText = Normalizer
+				.normalize(nonNormalizedText.getObjectAsString(), Normalizer.Form.NFD)
+				.replaceAll("[^\\p{ASCII}]", "").toLowerCase();
+		return Var.valueOf(normalizedText);
 	}
 
 	private static boolean validationReplace(@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}") Var textReplace, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceRegex}}") Var regex, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
