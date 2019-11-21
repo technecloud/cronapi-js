@@ -4,7 +4,6 @@ import cronapi.i18n.Messages;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
-import org.eclipse.persistence.internal.helper.DatabaseField;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -46,53 +45,59 @@ public class VersionListener extends DescriptorEventAdapter {
         versionChecked = true;
       }
       if (versionChecked && versionFields != null && pkFields != null) {
-        EntityManager em = TransactionManager.getEntityManager(event.getObject().getClass());
+        EntityManager em = TransactionManager.getEntityManager(event.getObject().getClass(), false);
         try {
           for (Field field : versionFields) {
-            String jpql = "select e from " + event.getObject().getClass().getName() + " e where ";
+            Object value = field.get(event.getObject());
 
-            int i = 0;
-            for (Field pk : pkFields) {
+            if (value != null) {
+              String jpql = "select e from " + event.getObject().getClass().getName() + " e where ";
+
+              int i = 0;
+              for (Field pk : pkFields) {
+                if (i > 0) {
+                  jpql += " AND ";
+                }
+
+                jpql += "e." + pk.getName() + "  = :" + pk.getName();
+                i++;
+              }
+
               if (i > 0) {
                 jpql += " AND ";
               }
 
-              jpql += "e." + pk.getName() + "  = :" + pk.getName();
+              jpql += "e." + field.getName() + "  = :" + field.getName();
               i++;
-            }
 
-            if (i > 0) {
-              jpql += " AND ";
-            }
+              Query query = em.createQuery(jpql);
 
-            jpql += "e." + field.getName() + "  = :" + field.getName();
-            i++;
+              for (Field pk : pkFields) {
+                Field refField = event.getObject().getClass().getDeclaredField(pk.getName());
+                refField.setAccessible(true);
+                query.setParameter(pk.getName(), refField.get(event.getObject()));
+              }
+              query.setParameter(field.getName(), field.get(event.getObject()));
 
-            Query query = em.createQuery(jpql);
+              query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 
-            for (Field pk : pkFields) {
-              Field refField = event.getObject().getClass().getDeclaredField(pk.getName());
-              refField.setAccessible(true);
-              query.setParameter(pk.getName(), refField.get(event.getObject()));
-            }
-            query.setParameter(field.getName(), field.get(event.getObject()));
+              List result = query.getResultList();
 
-            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+              Object current = result.size() > 0 ? result.get(0) : null;
 
-            List result = query.getResultList();
-
-            Object current = result.size() > 0 ? result.get(0) : null;
-
-            if (current == null) {
-              throw new RuntimeException(Messages.getString("optimisticLockingError"));
-            }
-            Object currentValue = field.get(current);
-            Object newValue = field.get(event.getObject());
-            if (!Objects.equals(currentValue, newValue)) {
-              throw new RuntimeException(Messages.getString("optimisticLockingError"));
+              if (current == null) {
+                throw new RuntimeException(Messages.getString("optimisticLockingError"));
+              }
+              Object currentValue = field.get(current);
+              Object newValue = field.get(event.getObject());
+              if (!Objects.equals(currentValue, newValue)) {
+                throw new RuntimeException(Messages.getString("optimisticLockingError"));
+              }
             }
           }
         } finally {
+          em.clear();
+          em.close();
         }
       }
     } catch (Exception e) {
