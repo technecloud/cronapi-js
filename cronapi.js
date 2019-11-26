@@ -2918,7 +2918,11 @@ if (!window.fixedTimeZone) {
         }
         else {
           fileName += this.cronapi.internal.getExtensionBase64(valueContent);
-          valueContent = window.atob(valueContent);
+          try {
+            valueContent = window.atob(valueContent);
+          } catch (e) {
+            //NoCommand
+          }
           bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
         }
         var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
