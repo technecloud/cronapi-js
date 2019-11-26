@@ -52,6 +52,7 @@ public class TransactionManager {
     EntityManagerFactory factory = findEntityManagerFactory(domainClass);
 
     EntityManager em = factory.createEntityManager();
+    em.setFlushMode(FlushModeType.COMMIT);
     if (cache) {
       CACHE_NAMESPACE.get().put(namespace, em);
     }

@@ -45,59 +45,54 @@ public class VersionListener extends DescriptorEventAdapter {
         versionChecked = true;
       }
       if (versionChecked && versionFields != null && pkFields != null) {
-        EntityManager em = TransactionManager.getEntityManager(event.getObject().getClass(), false);
-        try {
-          for (Field field : versionFields) {
-            Object value = field.get(event.getObject());
+        EntityManager em = TransactionManager.getEntityManager(event.getObject().getClass(), true);
+        for (Field field : versionFields) {
+          Object value = field.get(event.getObject());
 
-            if (value != null) {
-              String jpql = "select e from " + event.getObject().getClass().getName() + " e where ";
+          if (value != null) {
+            String jpql = "select e." + field.getName() + " from " + event.getObject().getClass().getName() + " e where ";
 
-              int i = 0;
-              for (Field pk : pkFields) {
-                if (i > 0) {
-                  jpql += " AND ";
-                }
-
-                jpql += "e." + pk.getName() + "  = :" + pk.getName();
-                i++;
-              }
-
+            int i = 0;
+            for (Field pk : pkFields) {
               if (i > 0) {
                 jpql += " AND ";
               }
 
-              jpql += "e." + field.getName() + "  = :" + field.getName();
+              jpql += "e." + pk.getName() + "  = :" + pk.getName();
               i++;
+            }
 
-              Query query = em.createQuery(jpql);
+            if (i > 0) {
+              jpql += " AND ";
+            }
 
-              for (Field pk : pkFields) {
-                Field refField = event.getObject().getClass().getDeclaredField(pk.getName());
-                refField.setAccessible(true);
-                query.setParameter(pk.getName(), refField.get(event.getObject()));
-              }
-              query.setParameter(field.getName(), field.get(event.getObject()));
+            jpql += "e." + field.getName() + "  = :" + field.getName();
+            i++;
 
-              query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            Query query = em.createQuery(jpql);
 
-              List result = query.getResultList();
+            for (Field pk : pkFields) {
+              Field refField = event.getObject().getClass().getDeclaredField(pk.getName());
+              refField.setAccessible(true);
+              query.setParameter(pk.getName(), refField.get(event.getObject()));
+            }
+            query.setParameter(field.getName(), field.get(event.getObject()));
 
-              Object current = result.size() > 0 ? result.get(0) : null;
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
 
-              if (current == null) {
-                throw new RuntimeException(Messages.getString("optimisticLockingError"));
-              }
-              Object currentValue = field.get(current);
-              Object newValue = field.get(event.getObject());
-              if (!Objects.equals(currentValue, newValue)) {
-                throw new RuntimeException(Messages.getString("optimisticLockingError"));
-              }
+            List result = query.getResultList();
+
+            Object current = result.size() > 0 ? result.get(0) : null;
+
+            if (current == null) {
+              throw new RuntimeException(Messages.getString("optimisticLockingError"));
+            }
+            Object currentValue = result.get(0);
+            Object newValue = field.get(event.getObject());
+            if (!Objects.equals(currentValue, newValue)) {
+              throw new RuntimeException(Messages.getString("optimisticLockingError"));
             }
           }
-        } finally {
-          em.clear();
-          em.close();
         }
       }
     } catch (Exception e) {
