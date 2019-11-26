@@ -254,6 +254,14 @@ public class Operations {
 		return Var.valueOf(normalizedText);
 	}
 
+	@CronapiMetaData(name = "{{textStartsWithFunction}}", nameTags = {
+			"startsWith", "começa com" }, description = "{{textStartsWithDescription}}", returnType = ObjectType.BOOLEAN)
+	public static final Var startsWith(
+			@ParamMetaData(type = ObjectType.STRING, description = "{{textStarts}}") Var textStarts,
+			@ParamMetaData(type = ObjectType.STRING, description = "{{prefixStartsWith}}") Var prefixStartsWith) {
+		return Var.valueOf(textStarts.getObjectAsString().startsWith(prefixStartsWith.getObjectAsString()));
+	}
+
 	private static boolean validationReplace(@ParamMetaData(type = ObjectType.STRING, description = "{{textReplace}}") Var textReplace, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceRegex}}") Var regex, @ParamMetaData(type = ObjectType.STRING, description = "{{textReplaceReplacement}}") Var replacement) {
 		if (textReplace == Var.VAR_NULL || regex == Var.VAR_NULL || replacement == Var.VAR_NULL)
 			return true;

@@ -42,4 +42,9 @@ public class OperationsTest {
     public void normalize() {
        Assert.assertEquals(Operations.normalize(Var.valueOf("árvíztűrő tükörfúrógép")), Var.valueOf("arvizturo tukorfurogep"));
     }
+
+    @Test
+    public void startsWith() {
+        Assert.assertTrue(Operations.startsWith(Var.valueOf("cronapp"), Var.valueOf("cron")).getObjectAsBoolean());
+    }
 }
