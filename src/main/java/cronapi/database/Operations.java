@@ -8,12 +8,10 @@ import cronapi.RestClient;
 import cronapi.Var;
 import cronapi.odata.server.JPQLParserUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.springframework.data.domain.PageRequest;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
+import javax.persistence.*;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -341,7 +339,7 @@ public class Operations {
         "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
         ObjectType.LIST }, returnType = ObjectType.DATASET, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
   public static Var executeNativeQuery(Var entity, Var query, Var... params) throws Exception {
-    Query nativeQuery = sanitizeNativeQuery(entity, query, params);
+    Query nativeQuery = sanitizeNativeQuery(entity, query, Var.valueOf(false), params);
     return Var.valueOf(nativeQuery.getResultList());
   }
 
@@ -350,19 +348,26 @@ public class Operations {
          params = { "{{entity}}", "{{query}}", "{{paramsQueryTuples}}" }, paramsType = { ObjectType.STRING, ObjectType.STRING,
          ObjectType.LIST }, returnType = ObjectType.LONG, arbitraryParams = true, wizard = "procedures_sql_command_callreturn")
   public static Var executeNativeQueryUpdate(Var entity, Var query, Var... params) throws Exception {
-    Query nativeQuery = sanitizeNativeQuery(entity, query, params);
+    Query nativeQuery = sanitizeNativeQuery(entity, query, Var.valueOf(true), params);
     return Var.valueOf(nativeQuery.executeUpdate());
   }
 
-  private static Query createNativeQuery(Var entity, String query) throws Exception {
+  private static Query createNativeQuery(Var entity, Var isModififyQuery, String query) throws Exception {
     String namespace = entity.getObjectAsString().split("\\.")[0];
     Class<?> domainClass = Class.forName(entity.getObjectAsString());
-    EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
-    EntityManager entityManager = factory.createEntityManager();
-    return entityManager.createNativeQuery(query, domainClass);
+    if (!isModififyQuery.getObjectAsBoolean()) {
+      EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace);
+      EntityManager entityManager = factory.createEntityManager();
+      return entityManager.createNativeQuery(query, domainClass);
+    }
+    else {
+      //Obtendo o EntityManager do TransactionManager para obter a transação corrente
+      EntityManager entityManager = TransactionManager.getEntityManager(domainClass);
+      return entityManager.createNativeQuery(query);
+    }
   }
 
-  private static Query sanitizeNativeQuery(Var entity, Var query, Var... params) throws Exception {
+  private static Query sanitizeNativeQuery(Var entity, Var query, Var isModififyQuery, Var... params) throws Exception {
     String replacement = "?";
     String parameterizedQuery = query.getObjectAsString();
 
@@ -372,7 +377,7 @@ public class Operations {
       parameterizedQuery = parameterizedQuery.replaceFirst(":" + param, replacement);
     }
 
-    Query nativeQuery = createNativeQuery(entity, parameterizedQuery);
+    Query nativeQuery = createNativeQuery(entity, isModififyQuery, parameterizedQuery);
 
     if (params != null && params.length > 0) {
       Map<String, Object> paramsValues = new LinkedHashMap<>();
