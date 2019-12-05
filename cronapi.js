@@ -1491,11 +1491,26 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    if($('#'+id).data("kendoComboBox")){
-      $('#'+id).data("kendoComboBox").enable(false);
-    }else{
-      $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
-    }
+      let injector = window.angular.element('body').injector();
+      let $rootScope = injector.get('$rootScope');
+
+      let waitAngularReady = () => {
+          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+              if($('#'+id).data("kendoComboBox")){
+                  $('#'+id).data("kendoComboBox").enable(false);
+              }
+              else if($('#'+id).data("kendoDropDownList")){
+                  $('#'+id).data("kendoDropDownList").enable(false);
+              }
+              else{
+                  $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
+              }
+          }
+          else {
+              setTimeout( () => waitAngularReady(), 200);
+          }
+      };
+      waitAngularReady();
   };
 
   /**
@@ -1507,7 +1522,26 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
+      let injector = window.angular.element('body').injector();
+      let $rootScope = injector.get('$rootScope');
+
+      let waitAngularReady = () => {
+          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+              if($('#'+id).data("kendoComboBox")){
+                  $('#'+id).data("kendoComboBox").enable(true);
+              }
+              else if($('#'+id).data("kendoDropDownList")){
+                  $('#'+id).data("kendoDropDownList").enable(true);
+              }
+              else{
+                  $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
+              }
+          }
+          else {
+              setTimeout( () => waitAngularReady(), 200);
+          }
+      };
+      waitAngularReady();
   };
 
   /**
