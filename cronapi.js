@@ -3937,8 +3937,16 @@ if (!window.fixedTimeZone) {
     this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple, 'scope': this});
   };
 
-
-
+  /**
+   * @type function
+   * @name {{getBaseUrlName}}
+   * @nameTags getBaseUrl
+   * @description {{getBaseUrlDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getBaseUrl = function() {
+    return window.location.origin;
+  };
 
   /**
    * @category CategoryType.CHART

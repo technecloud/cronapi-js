@@ -66,7 +66,7 @@
   "hour": "Hour",
   "minute": "Minute",
   "second": "Second",
-  "seconds": "Segunds",
+  "seconds": "Seconds",
   "callServerBlocklyAsync": "Call blockly server async",
   "functionToCallServerBlocklyAsync": "function to block server call async",
   "classNameWithMethod": "Name of block function to be called",
@@ -488,5 +488,7 @@
   "typeReplaceElement": "Type used to regex",
   "value": "Value",
   "openInAppBrowser": "Open URL inside app",
-  "openInAppBrowserDescription": "Function that opens a URL inside the mobile app"
+  "openInAppBrowserDescription": "Function that opens a URL inside the mobile app",
+  "getBaseUrlName": "Get Base Url",
+  "getBaseUrlDescription": "Function to get server's base url"
 }
