@@ -488,5 +488,7 @@
   "textReplaceReplacementElement": "Novo texto",
   "typeReplaceElement": "Tipo usado no regex",
   "openInAppBrowser": "Abrir URL dentro do app",
-  "openInAppBrowserDescription": "Função que abre uma URL dentro da aplicação mobile"
+  "openInAppBrowserDescription": "Função que abre uma URL dentro da aplicação mobile",
+  "getBaseUrlName": "Obter Url Base",
+  "getBaseUrlDescription": "Função para obter url base do servidor"
 }

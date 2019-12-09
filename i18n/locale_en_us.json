@@ -488,5 +488,7 @@
   "typeReplaceElement": "Type used to regex",
   "value": "Value",
   "openInAppBrowser": "Open URL inside app",
-  "openInAppBrowserDescription": "Function that opens a URL inside the mobile app"
+  "openInAppBrowserDescription": "Function that opens a URL inside the mobile app",
+  "getBaseUrlName": "Get Base Url",
+  "getBaseUrlDescription": "Function to get base url of server"
 }

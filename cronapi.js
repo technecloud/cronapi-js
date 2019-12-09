@@ -469,6 +469,17 @@ if (!window.fixedTimeZone) {
     throw value;
   };
 
+  /**
+   * @type function
+   * @name {{getBaseUrlName}}
+   * @nameTags getBaseUrl
+   * @description {{getBaseUrlDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getBaseUrl = function() {
+    return window.location.origin;
+  };
+
 
 
   /**
