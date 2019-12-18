@@ -1497,22 +1497,25 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      } else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
-              if($('#'+id).data("kendoComboBox")){
+          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+              if ($('#'+id).data("kendoComboBox")) {
                   $('#'+id).data("kendoComboBox").enable(false);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(false);
-              }
-              else{
+              } else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
@@ -1528,22 +1531,25 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      } else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(true);
-              }
-              else{
+              }  else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
