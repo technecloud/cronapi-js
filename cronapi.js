@@ -1507,7 +1507,7 @@ if (!window.fixedTimeZone) {
       }
 
       let waitAngularReady = () => {
-          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
               if ($('#'+id).data("kendoComboBox")) {
                   $('#'+id).data("kendoComboBox").enable(false);
               } else if ($('#'+id).data("kendoDropDownList")) {
@@ -1541,7 +1541,7 @@ if (!window.fixedTimeZone) {
       }
 
       let waitAngularReady = () => {
-          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
               } else if ($('#'+id).data("kendoDropDownList")) {
