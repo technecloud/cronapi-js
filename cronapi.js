@@ -1501,25 +1501,21 @@ if (!window.fixedTimeZone) {
       let $scope = undefined;
       if (window.cordova) {
           $scope = this.cronapi.$scope;
-      }
-      else {
+      } else {
           let injector = window.angular.element('body').injector();
           $scope = injector.get('$rootScope');
       }
 
       let waitAngularReady = () => {
           if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
-              if($('#'+id).data("kendoComboBox")){
+              if ($('#'+id).data("kendoComboBox")) {
                   $('#'+id).data("kendoComboBox").enable(false);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(false);
-              }
-              else{
+              } else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
@@ -1539,8 +1535,7 @@ if (!window.fixedTimeZone) {
       let $scope = undefined;
       if (window.cordova) {
           $scope = this.cronapi.$scope;
-      }
-      else {
+      } else {
           let injector = window.angular.element('body').injector();
           $scope = injector.get('$rootScope');
       }
@@ -1549,15 +1544,12 @@ if (!window.fixedTimeZone) {
           if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(true);
-              }
-              else{
+              }  else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
