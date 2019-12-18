@@ -1497,11 +1497,18 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      }
+      else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(false);
               }
@@ -1528,11 +1535,18 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      }
+      else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
               }
