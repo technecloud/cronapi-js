@@ -81,6 +81,17 @@ public class AppConfig {
     return null;
   }
 
+  public static String tokenRecaptcha() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("security"))) {
+      JsonElement elem = config.get("security").getAsJsonObject().get("recaptcha");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+    return "";
+  }
+
   public static String token() {
     JsonObject config = getJSON();
     if (!isNull(config.get("security"))) {
