@@ -3413,7 +3413,10 @@ if (!window.fixedTimeZone) {
           success(result.text);
         },
         function (errorMsg) {
-          error(errorMsg);
+          if (errorMsg !== 'Scan is already in progress') {
+            // Verification in order to avoid issue: https://github.com/phonegap/phonegap-plugin-barcodescanner/issues/660
+            error(errorMsg);
+          }
         },
         {
           preferFrontCamera : false,
