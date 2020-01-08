@@ -5,6 +5,7 @@ import cronapi.*;
 import cronapi.database.DataSource;
 import cronapi.database.DatabaseQueryManager;
 import cronapi.database.HistoryListener;
+import cronapi.i18n.Messages;
 import cronapi.util.ReflectionUtils;
 import org.apache.olingo.odata2.api.ClientCallback;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
@@ -377,6 +378,9 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
       }
 
     } catch (Exception e) {
+      if (e.getMessage().contains("The state field path")) {
+        throw ErrorResponse.createException(new RuntimeException(Messages.getString("fieldpath")), RestClient.getRestClient().getMethod());
+      }
       throw ErrorResponse.createException(e, RestClient.getRestClient().getMethod());
     }
 
