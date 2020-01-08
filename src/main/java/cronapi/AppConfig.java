@@ -104,6 +104,18 @@ public class AppConfig {
     return "9SyECk96oDsTmXfogIieDI0cD/8FpnojlYSUJT5U9I/FGVmBz5oskmjOR8cbXTvoPjX+Pq/T/b1PqpHX0lYm0oCBjXWICA==";
   }
 
+  public static String guid() {
+    JsonObject config = getJSON();
+    if (!isNull(config.get("app"))) {
+      JsonElement elem = config.get("app").getAsJsonObject().get("guid");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+
+    return "00000000-0000-0000-0000-000000000000";
+  }
+
   public static long tokenExpiration() {
     JsonObject config = getJSON();
     if (!isNull(config.get("security"))) {

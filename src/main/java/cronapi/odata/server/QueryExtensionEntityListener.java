@@ -661,6 +661,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           auditLog.set("agent", RestClient.getRestClient().getAgent());
         }
         auditLog.set("server", HistoryListener.CURRENT_IP);
+        auditLog.set("application", AppConfig.guid());
 
         logManager.insert(auditLog);
 

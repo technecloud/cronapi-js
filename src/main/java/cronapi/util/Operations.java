@@ -383,6 +383,7 @@ public class Operations {
       }
       auditLog.set("server", HistoryListener.CURRENT_IP);
       auditLog.set("affectedFields", null);
+      auditLog.set("application", AppConfig.guid());
 
       logManager.insert(auditLog);
 
@@ -945,6 +946,7 @@ public class Operations {
       }
       auditLog.set("server", HistoryListener.CURRENT_IP);
       auditLog.set("affectedFields", null);
+      auditLog.set("application", AppConfig.guid());
 
       logManager.insert(auditLog);
 

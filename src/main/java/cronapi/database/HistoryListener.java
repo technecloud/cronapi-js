@@ -1,6 +1,7 @@
 package cronapi.database;
 
 import com.google.gson.*;
+import cronapi.AppConfig;
 import cronapi.RestClient;
 import cronapi.Var;
 import cronapi.util.GsonUTCDateAdapter;
@@ -138,6 +139,7 @@ public class HistoryListener extends DescriptorEventAdapter {
         }
         auditLog.set("server", HistoryListener.CURRENT_IP);
         auditLog.set("affectedFields", affected != null ? affected.toString() : null);
+        auditLog.set("application", AppConfig.guid());
 
         if (logManager.isDatabase() && logManager.getEntity().startsWith(namespace+".")) {
           logManager.insertAfterCommit(event.getSession(), auditLog);
