@@ -2828,9 +2828,9 @@ if (!window.fixedTimeZone) {
       if (json.name.length > 25)
         json.name = json.name.substr(0,22)+'...';
 
-      var result = "<b>Nome:</b> <br/>" + json.name +"<br/>";
-      result += "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>";
-      result += "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>";
+      var result = (this.cronapi.$translate.use() == 'pt_br' ? "<b>Nome:</b> <br/>" : "<b>Name:</b> <br/>") + (json.contentType !== undefined ? json.name +"<br/>" : "");
+      result += json.contentType !== undefined ? "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>" : "";
+      result += json.fileExtension !== "" ? this.cronapi.$translate.use() == 'pt_br' ? "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>" : "<b>Extension:</b> <br/>" + json.fileExtension +"<br/>" : "";
       return result;
     }
   };
