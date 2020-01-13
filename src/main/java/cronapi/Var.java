@@ -17,6 +17,7 @@ import cronapi.i18n.Messages;
 import cronapi.json.JsonArrayWrapper;
 import cronapi.json.Operations;
 import cronapi.serialization.CronappModule;
+import cronapi.util.GsonUTCDateAdapter;
 import cronapi.util.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +28,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -555,6 +558,27 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
             return new Gson().fromJson(_object.toString(), JsonElement.class);
           } else if (_object instanceof InputStream) {
             return new Gson().fromJson(getObjectAsString(), JsonElement.class);
+          } else if (_object.getClass().getAnnotation(Entity.class) != null) {
+            GsonBuilder builder = new GsonBuilder().addSerializationExclusionStrategy(new ExclusionStrategy() {
+              @Override
+              public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                if (fieldAttributes.getDeclaringClass() == _object.getClass() || fieldAttributes.getAnnotation(Id.class) != null) {
+                  return false;
+                }
+                return true;
+              }
+
+              @Override
+              public boolean shouldSkipClass(Class<?> aClass) {
+                return false;
+              }
+            });
+
+            builder.registerTypeAdapter(Date.class, new GsonUTCDateAdapter());
+
+            Gson gson = builder.create();
+
+            return  gson.toJsonTree(_object);
           } else {
             ObjectMapper mapper = new ObjectMapper();
             SimpleFilterProvider filters = new SimpleFilterProvider();
