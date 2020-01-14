@@ -83,7 +83,7 @@ public class AppConfig {
 
   public static String tokenRecaptcha() {
     JsonObject config = getJSON();
-    if (!isNull(config.get("security"))) {
+    if (!isNull(config.get("security")) && config.get("security").getAsJsonObject().has("tokenRecaptcha")) {
       JsonElement elem = config.get("security").getAsJsonObject().get("tokenRecaptcha");
       if (!isNull(elem)) {
         return elem.getAsString();
@@ -92,7 +92,7 @@ public class AppConfig {
     return "";
   }
 
-  //TODO: CRONAPP-1208 - Remover Depois
+  //TODO: CRONAPP-1208 - Remover Depois - JIRA DE REMOÇÃO CRONAPP-1220
   public static String tokenSeleniumIdeId(){
     JsonObject config = getJSON();
     if (!isNull(config.get("security"))) {
@@ -104,7 +104,7 @@ public class AppConfig {
     return "";
   }
 
-  //TODO: CRONAPP-1208 - Remover Depois
+  //TODO: CRONAPP-1208 - Remover Depois - JIRA DE REMOÇÃO CRONAPP-1220
   public static String tokenCronappId(){
     JsonObject config = getJSON();
     if (!isNull(config.get("security"))) {
