@@ -84,7 +84,31 @@ public class AppConfig {
   public static String tokenRecaptcha() {
     JsonObject config = getJSON();
     if (!isNull(config.get("security"))) {
-      JsonElement elem = config.get("security").getAsJsonObject().get("recaptcha");
+      JsonElement elem = config.get("security").getAsJsonObject().get("tokenRecaptcha");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+    return "";
+  }
+
+  //TODO: CRONAPP-1208 - Remover Depois
+  public static String tokenSeleniumIdeId(){
+    JsonObject config = getJSON();
+    if (!isNull(config.get("security"))) {
+      JsonElement elem = config.get("security").getAsJsonObject().get("tokenSeleniumIdeId");
+      if (!isNull(elem)) {
+        return elem.getAsString();
+      }
+    }
+    return "";
+  }
+
+  //TODO: CRONAPP-1208 - Remover Depois
+  public static String tokenCronappId(){
+    JsonObject config = getJSON();
+    if (!isNull(config.get("security"))) {
+      JsonElement elem = config.get("security").getAsJsonObject().get("tokenCronappId");
       if (!isNull(elem)) {
         return elem.getAsString();
       }
