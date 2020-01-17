@@ -2573,12 +2573,14 @@ if (!window.fixedTimeZone) {
       });
     }else{
       var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
-                                      <div class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
+                                      <button class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
                                           <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
-                                      </div>\
-                                      <div class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                          <span class="sr-only">{{"Upload.camera" | translate}}</span>\
+                                      </button>\
+                                      <button class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
                                           <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
-                                      </div>\
+                                          <span class="sr-only">{{"Cancel" | translate}}</span>\
+                                      </button>\
                                       <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
                               </div>';
 
