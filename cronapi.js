@@ -1312,16 +1312,16 @@ if (!window.fixedTimeZone) {
           $(this).data('lastFocused', focused);
           $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
         }
-        $(this).find('input')[0].focus();
+        $(this).find('input:not(:hidden)')[0].focus();
       }).one('hidden.bs.modal', function(e) {
         let lastFocused = $(modalToShow).data('lastFocused');
-        if (lastFocused.length) {
+        if (lastFocused && lastFocused.length) {
           $($(this).data('lastFocusedClass')).focus();
           lastFocused.focus();
         }
       }).modal({backdrop: 'static', keyboard: false});
     }catch(e){
-        $(modalToShow).show();
+      $(modalToShow).show();
     }
   };
 
