@@ -1307,13 +1307,21 @@ if (!window.fixedTimeZone) {
     let modalToShow = `#${id}`;
     try{
       $(modalToShow).one('shown.bs.modal', function (e) {
-        $(this).data('lastFocused', $(':focus'));
+        let focused = $(':focus');
+        if (focused.length) {
+          $(this).data('lastFocused', focused);
+          $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
+        }
         $(this).find('input')[0].focus();
       }).one('hidden.bs.modal', function(e) {
-        $(modalToShow).data('lastFocused').focus();
+        let lastFocused = $(modalToShow).data('lastFocused');
+        if (lastFocused.length) {
+          $($(this).data('lastFocusedClass')).focus();
+          lastFocused.focus();
+        }
       }).modal({backdrop: 'static', keyboard: false});
     }catch(e){
-      $(modalToShow).show();
+        $(modalToShow).show();
     }
   };
 
