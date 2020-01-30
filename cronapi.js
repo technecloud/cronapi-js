@@ -3715,9 +3715,9 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
     if (!dbName) {
-      return window.openDatabase(this.cronapi.cordova.database.nameDefault, "1.0",this.cronapi.cordova.database.nameDefault,1000000);
+      return sqlitePlugin.openDatabase(this.cronapi.cordova.database.nameDefault, "1.0",this.cronapi.cordova.database.nameDefault,1000000);
     }else{
-      return window.openDatabase(dbName, "1.0", dbName, 1000000);
+      return sqlitePlugin.openDatabase(dbName, "1.0", dbName, 1000000);
     }
   };
 
