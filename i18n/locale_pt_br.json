@@ -490,5 +490,14 @@
   "openInAppBrowser": "Abrir URL dentro do app",
   "openInAppBrowserDescription": "Função que abre uma URL dentro da aplicação mobile",
   "getBaseUrlName": "Obter Url Base",
-  "getBaseUrlDescription": "Função para obter url base do servidor"
+  "getBaseUrlDescription": "Função para obter url base do servidor",
+  "isInsertingMode": "Está em modo de inserção?",
+  "functionToIsInsertingMode": "Função para verificar se está em modo de inserção",
+  "isEditingMode": "Está em modo de edição?",
+  "functionToIsEditingMode": "Função para verificar se está em modo de edição",
+  "title": "Título",
+  "changeTitleScreen": "Alterar título do formulário",
+  "functionToChangeTitleScreen": "Função para alterar título do formulário",
+  "getApplicationName": "Obter nome da aplicação",
+  "functionToGetApplicationName": "Função para obter nome da aplicação"
 }

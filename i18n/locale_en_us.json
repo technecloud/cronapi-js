@@ -490,5 +490,14 @@
   "openInAppBrowser": "Open URL inside app",
   "openInAppBrowserDescription": "Function that opens a URL inside the mobile app",
   "getBaseUrlName": "Get Base Url",
-  "getBaseUrlDescription": "Function to get server's base url"
+  "getBaseUrlDescription": "Function to get server's base url",
+  "isInsertingMode": "Is the form in insertion mode?",
+  "functionToIsInsertingMode": "Function to check if the insertion mode form is",
+  "isEditingMode": "Is the form in edit mode?",
+  "functionToIsEditingMode": "Function to check if the form is in edit mode",
+  "title": "title",
+  "changeTitleScreen": "Change form title",
+  "functionToChangeTitleScreen": "Function to change the title of the form",
+  "getApplicationName": "Get application name",
+  "functionToGetApplicationName": "Function to obtain application name"
 }
