@@ -3714,11 +3714,13 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
-    if (!dbName) {
-      return sqlitePlugin.openDatabase(this.cronapi.cordova.database.nameDefault, "1.0",this.cronapi.cordova.database.nameDefault,1000000);
-    }else{
-      return sqlitePlugin.openDatabase(dbName, "1.0", dbName, 1000000);
+    // Starts using browser WebSQL
+    let myOpenDatabaseMethod = window.openDatabase;
+    // If in mobile environment use native sqlite
+    if (sqlitePlugin) {
+      myOpenDatabaseMethod = sqlitePlugin.openDatabase;
     }
+    return myOpenDatabaseMethod(dbName ? dbName : this.cronapi.cordova.database.nameDefault, "1.0", dbName ? dbName : this.cronapi.cordova.database.nameDefault, 1000000);
   };
 
   /**
