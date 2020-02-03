@@ -3775,7 +3775,7 @@ if (!window.fixedTimeZone) {
    * @name {{executeSql}}
    * @nameTags executesql
    * @param {ObjectType.STRING} dbName {{dbName}}
-   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} text SQL
    * @param {ObjectType.OBJECT} array {{arrayParams}}
    * @param {ObjectType.STATEMENTSENDER} success {{success}}
    * @param {ObjectType.STATEMENTSENDER} error {{error}}
