@@ -3763,8 +3763,8 @@ if (!window.fixedTimeZone) {
     // Starts using browser WebSQL
     let myOpenDatabaseMethod = window.openDatabase;
     // If in mobile environment use native sqlite
-    if (sqlitePlugin) {
-      myOpenDatabaseMethod = sqlitePlugin.openDatabase;
+    if (window.sqlitePlugin) {
+      myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
     }
     return myOpenDatabaseMethod(dbName ? dbName : this.cronapi.cordova.database.nameDefault, "1.0", dbName ? dbName : this.cronapi.cordova.database.nameDefault, 1000000);
   };
