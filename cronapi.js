@@ -301,6 +301,17 @@ if (!window.fixedTimeZone) {
   this.cronapi.util = {};
 
   /**
+   * @type function
+   * @name {{getApplicationName}}
+   * @nameTags getApplicationName
+   * @description {{functionToGetApplicationName}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getApplicationName = function() {
+    return $('#projectName').length ? $('#projectName').val() : $('h1:first').length && $('h1:first').text().trim().length ? $('h1:first').text().trim() : '';
+  };
+
+  /**
    * @type internal
    * @name {{callServerBlocklyAsync}}
    * @nameTags callServerBlocklyAsync
@@ -821,6 +832,41 @@ if (!window.fixedTimeZone) {
    * @categoryTags Screen|Tela
    */
   this.cronapi.screen = {};
+
+  /**
+   * @type function
+   * @name {{isInsertingMode}}
+   * @nameTags isInsertingMode
+   * @description {{functionToIsInsertingMode}}
+   * @param {ObjectType.OBJECT} datasource {{datasource}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.screen.isInsertingMode = function(datasource) {
+    return datasource.inserting;
+  };
+
+  /**
+   * @type function
+   * @name {{isEditingMode}}
+   * @nameTags isEditingMode
+   * @description {{functionToIsEditingMode}}
+   * @param {ObjectType.OBJECT} datasource {{datasource}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.screen.isEditingMode = function(datasource) {
+    return datasource.editing;
+  };
+
+  /**
+   * @type function
+   * @name {{changeTitleScreen}}
+   * @nameTags changeTitleScreen
+   * @description {{functionToChangeTitleScreen}}
+   * @param {ObjectType.STRING} title {{title}}
+   */
+  this.cronapi.screen.changeTitleScreen = function(title) {
+    window.document.title = title;
+  };
 
   /**
    * @type function
