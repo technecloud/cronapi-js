@@ -320,7 +320,7 @@
   "openDatabaseDescription": "Função para criar um banco de dados no dispositivo móvel. Caso não seja passado um nome , será criado com um nome default.",
   "executeSql": "Executar Comando SQL",
   "executeMultipleSql": "Executar Múltiplos Comandos SQL",
-  "executeMultipleSqlDescription": "Executar Múltiplos Comandos SQL Seprados por Ponto e Vírgula (;)",
+  "executeMultipleSqlDescription": "Executar Múltiplos Comandos SQL Separados por Ponto e Vírgula (;)",
   "executeSqlDescription": "Função para executar comando SQL.",
   "text": "Texto",
   "arrayParams": "Lista de parâmetros",
