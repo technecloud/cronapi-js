@@ -3802,6 +3802,51 @@ if (!window.fixedTimeZone) {
   /**
    * @type function
    * @platform M
+   * @name {{executeMultipleSql}}
+   * @nameTags executesql
+   * @param {ObjectType.STRING} dbName {{dbName}}
+   * @param {ObjectType.STRING} text SQL
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @description {{executeMultipleSqlDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.database.executeMultipleSql = function (dbName, text, success, error) {
+
+    // exist DB
+    var db = this.cronapi.cordova.database.openDatabase(dbName); // create DB
+    let promises = [];
+    let statements = text.split(';');
+
+    for (let stmIdx in statements) {
+      let statement = statements[stmIdx];
+      if (!statement) { break; }
+      let promise = new Promise((resolve, reject) => {
+        db.transaction(function (txn) {
+          txn.executeSql(statement.trim(), [], function (transaction, result) {
+            resolve(result);
+          }.bind(this),
+            // callback de erro, função anônima que recebe um objeto SQLTransaction e um SQLError
+            function (transaction, error) {
+              reject(error)
+            }.bind(this));
+        }.bind(this));
+      });
+
+      promises.push(promise);
+    }
+
+    Promise.all(promises).then(function (values) {
+      success(values);
+    }.bind(this)).catch(function (e) {
+      error(e);
+    }.bind(this));
+  }
+
+
+  /**
+   * @type function
+   * @platform M
    * @name {{openInAppBrowser}}
    * @nameTags openInAppBrowser
    * @param {ObjectType.STRING} url {{url}}

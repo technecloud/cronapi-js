@@ -319,6 +319,8 @@
   "openDatabase": "Create Database",
   "openDatabaseDescription": "Function to create a database on the mobile device. If no name is given, it will be created with a default name.",
   "executeSql": "Run Command SQL",
+  "executeMultipleSql": "Execute multiple SQL commands",
+  "executeMultipleSqlDescription": "Execute multiple SQL comands splitted by (;)",
   "executeSqlDescription": "Function to execute command SQL.",
   "text": "Text",
   "arrayParams": "List of parameters",
