@@ -1350,25 +1350,58 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    let modalToShow = `#${id}`;
-    try{
-      $(modalToShow).one('shown.bs.modal', function (e) {
-        let focused = $(':focus');
-        if (focused.length) {
-          $(this).data('lastFocused', focused);
-          $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
-        }
-        $(this).find('input:not(:hidden)')[0].focus();
-      }).one('hidden.bs.modal', function(e) {
-        let lastFocused = $(modalToShow).data('lastFocused');
-        if (lastFocused && lastFocused.length) {
-          $($(this).data('lastFocusedClass')).focus();
-          lastFocused.focus();
-        }
-      }).modal({backdrop: 'static', keyboard: false});
-    }catch(e){
-      $(modalToShow).show();
-    }
+      let modalToShow = `#${id}`;
+      let focused = $(':focus');
+      let allHover = $(':hover');
+
+      try{
+          $(modalToShow).one('shown.bs.modal', function (e) {
+
+              if (focused.length) {
+                  $(this).data('lastFocused', focused);
+                  $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
+              }
+              if (allHover.length) {
+                  $(this).data('lastHovers', allHover);
+              }
+              let firstInputVisible = $(this).find('input:not(:hidden)')[0];
+              if (firstInputVisible)
+                  firstInputVisible.focus();
+
+          }).one('hidden.bs.modal', function(e) {
+
+              let lastFocusedClass = undefined;
+              let lastFocused = $(modalToShow).data('lastFocused');
+              let lastFocusedIsVisible = false;
+
+              if (lastFocused && lastFocused.length) {
+                  //Verifica se o item que foi clicado ainda existe no documento (A grade remove o botao e adiciona novamente, perde a referencia)
+                  lastFocusedClass = $($(this).data('lastFocusedClass'));
+                  if ($('html').has(lastFocused).length) {
+                      //Se existir, verifica se o mesmo está visivel
+                      lastFocusedIsVisible = lastFocused.is(':visible');
+                  }
+                  else {
+                      //Se nao existir, e foi readicionado verifica se está visivel pelas classes
+                      lastFocusedIsVisible = lastFocusedClass.is(':visible');
+                  }
+              }
+
+              let lastHovers = $(modalToShow).data('lastHovers');
+
+              if (lastFocusedIsVisible) {
+                  lastFocusedClass.focus();
+                  lastFocused.focus();
+              }
+              else if (lastHovers.length) {
+                  let lastLink = $(lastHovers[lastHovers.length-1]).closest('ul:visible').find('a:first')
+                  lastLink.focus();
+              }
+
+          }).modal({backdrop: 'static', keyboard: false});
+      }catch(e){
+          $(modalToShow).show();
+      }
   };
 
   /**
