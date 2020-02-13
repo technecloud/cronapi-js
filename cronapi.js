@@ -1387,16 +1387,24 @@ if (!window.fixedTimeZone) {
                   }
               }
 
+              let findLastLink = function(element) {
+                return $(element[element.length - 1]).closest('ul:visible').find('a:first');
+              };
+
               let lastHovers = $(modalToShow).data('lastHovers');
 
               if (lastFocusedIsVisible) {
                   lastFocusedClass.focus();
                   lastFocused.focus();
               }
-              else if (lastHovers.length) {
-                  let lastLink = $(lastHovers[lastHovers.length-1]).closest('ul:visible').find('a:first')
-                  lastLink.focus();
+              else if (lastHovers && lastHovers.length) {
+                let lastLink = findLastLink(lastHovers);
+                lastLink.focus();
+              }else{
+                let lastLink = findLastLink(lastFocused);
+                lastLink.focus();
               }
+
 
           }).modal({backdrop: 'static', keyboard: false});
       }catch(e){
