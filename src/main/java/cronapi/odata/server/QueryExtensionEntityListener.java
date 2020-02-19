@@ -14,6 +14,7 @@ import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
 import org.apache.olingo.odata2.api.uri.expression.*;
 import org.apache.olingo.odata2.api.uri.info.*;
+import org.apache.olingo.odata2.core.edm.provider.EdmEntityTypeImplProv;
 import org.apache.olingo.odata2.core.edm.provider.EdmSimplePropertyImplProv;
 import org.apache.olingo.odata2.core.uri.UriInfoImpl;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAQueryExtensionEntityListener;
@@ -138,6 +139,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
             jpqlStatement = RestClient.getRestClient().getParameter("jpql");
           } else {
             jpqlStatement = QueryManager.getJPQL(customQuery, false);
+          }
+
+          if (((EdmEntityTypeImplProv) entityType).getEntityType().getJpql() != null) {
+            jpqlStatement = ((EdmEntityTypeImplProv) entityType).getEntityType().getJpql();
           }
 
           JPQLExpression jpqlExpression = new JPQLExpression(

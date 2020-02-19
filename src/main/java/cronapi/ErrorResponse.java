@@ -44,6 +44,7 @@ public class ErrorResponse {
     IGNORED.add("java.lang.reflect.InvocationTargetException");
     IGNORED.add("java.lang.NullPointerException");
     IGNORED.add("org.apache.olingo.odata2.api.exception.ODataBadRequestException");
+    IGNORED.add("org.apache.olingo.odata2.api.ep.EntityProviderException");
     DATABASE = loadJSON();
   }
 

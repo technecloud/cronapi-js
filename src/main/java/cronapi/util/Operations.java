@@ -463,7 +463,7 @@ public class Operations {
   private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
                                              Var cookieContainer, Var returnType, Var postData) throws Exception {
 
-    HttpClient httpClient = HttpClients.createDefault();
+    HttpClient httpClient = HttpClients.createSystem();
     final HttpRequestBase httpMethod;
 
     if (method.getObjectAsString().equalsIgnoreCase("POST")) {
