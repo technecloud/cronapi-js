@@ -4394,5 +4394,14 @@ if (!window.fixedTimeZone) {
     return result;
   };
 
+  /**
+   * @type function
+   * @name {{back}}
+   * @nameTags back|voltar|retroceder|history
+   * @description {{backDescription}}
+   */
+  this.cronapi.screen.back = function() {
+    history.back();
+  }
 
 }).bind(window)();

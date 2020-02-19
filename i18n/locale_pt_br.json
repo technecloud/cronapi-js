@@ -501,5 +501,7 @@
   "changeTitleScreen": "Alterar título do formulário",
   "functionToChangeTitleScreen": "Função para alterar título do formulário",
   "getApplicationName": "Obter nome da aplicação",
-  "functionToGetApplicationName": "Função para obter nome da aplicação"
+  "functionToGetApplicationName": "Função para obter nome da aplicação",
+  "back": "Voltar para Formulário Anterior",
+  "backDescription": "Volta para formulário aberto anteriormente"
 }
