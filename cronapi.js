@@ -146,6 +146,25 @@ if (!window.fixedTimeZone) {
     }
   };
 
+  this.cronapi.callFunction = function(name) {
+    return {
+      call: function() {
+        var ref;
+        try {
+          ref = eval(name);
+        } catch(e) {
+          //
+        }
+
+        if (ref) {
+          return ref.apply(this, arguments)
+        }
+
+        return undefined;
+      }.bind(this)
+    }
+  };
+
   /**
    * @category CategoryType.CONVERSION
    * @categoryTags Conversão|Convert
