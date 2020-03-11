@@ -240,7 +240,7 @@ public class Operations {
 
     try {
       if (IS_DEBUG) {
-        CronapiClassLoader loader = new CronapiClassLoader();
+        CronapiClassLoader loader = CronapiClassLoader.getInstance();
         clazz = loader.findClass(className);
       } else {
         clazz = Class.forName(className);
@@ -262,7 +262,7 @@ public class Operations {
 
       try {
         if (IS_DEBUG) {
-          CronapiClassLoader loader = new CronapiClassLoader();
+          CronapiClassLoader loader = CronapiClassLoader.getInstance();
           clazz = loader.findClass(className);
         } else {
           clazz = Class.forName(className);
@@ -270,7 +270,7 @@ public class Operations {
       } catch (Exception e2) {
         try {
           if (IS_DEBUG) {
-            CronapiClassLoader loader = new CronapiClassLoader();
+            CronapiClassLoader loader = CronapiClassLoader.getInstance();
             clazz = loader.findClass("blockly." + className);
           } else {
             clazz = Class.forName("blockly." + className);

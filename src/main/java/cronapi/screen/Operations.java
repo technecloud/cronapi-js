@@ -1,11 +1,8 @@
 package cronapi.screen;
 
-import cronapi.CronapiMetaData;
+import cronapi.*;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
-import cronapi.ParamMetaData;
-import cronapi.RestClient;
-import cronapi.Var;
 
 @CronapiMetaData(category = CategoryType.SCREEN, categoryTags = { "Formulário", "Form", "Frontend" })
 public class Operations {
@@ -24,8 +21,8 @@ public class Operations {
     return result;
   }
 
-  @CronapiMetaData(type = "function", name = "{{getParam}}", nameTags = {
-      "getParam", "Parametro" }, description = "{{getParamDescription}}", returnType = ObjectType.STRING)
+  @CronapiMetaData(type = "function", name = "{{result}}", nameTags = {
+      "parameter", "Parametro", "request", "requisição"}, description = "{{getParamDescription}}", returnType = ObjectType.STRING)
   public static final Var getParam(
       @ParamMetaData( type = ObjectType.STRING, description="{{getValueOfFieldParam0}}") Var name) throws Exception {
     Var result =  Var.valueOf(RestClient.getRestClient().getParameter(name.getObjectAsString()));
@@ -34,6 +31,21 @@ public class Operations {
       result = Var.valueOf(Var.deserialize((String) result.getObject()));
     }
 
+    return result;
+  }
+
+  @CronapiMetaData(type = "function", name = "{{getHeader}}", nameTags = {
+      "header", "cabeçalho", "request", "requisição" }, description = "{{getHeaderDescription}}", returnType = ObjectType.STRING)
+  public static final Var getHeader(
+      @ParamMetaData( type = ObjectType.STRING, description="{{getValueOfFieldParam0}}") Var name) throws Exception {
+    Var result =  Var.valueOf(RestClient.getRestClient().getHeader(name.getObjectAsString()));
+    return result;
+  }
+
+  @CronapiMetaData(type = "function", name = "{{getToken}}", nameTags = {
+      "token", "requisição", "request" }, description = "{{getTokenDescription}}", returnType = ObjectType.STRING)
+  public static final Var getToken() throws Exception {
+    Var result =  Var.valueOf(RestClient.getRestClient().getHeader(TokenUtils.AUTH_HEADER_NAME));
     return result;
   }
 }

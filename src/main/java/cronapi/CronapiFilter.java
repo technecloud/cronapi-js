@@ -6,9 +6,9 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cronapi.clazz.CronapiClassLoader;
 import cronapi.database.TransactionManager;
 import cronapi.i18n.AppMessages;
-import org.springframework.stereotype.Component;
 
 import cronapi.i18n.Messages;
 
@@ -43,6 +43,7 @@ public class CronapiFilter implements Filter {
           AppMessages.remove();
           TransactionManager.close();
           TransactionManager.clear();
+          CronapiClassLoader.clear();
         }
     }
 

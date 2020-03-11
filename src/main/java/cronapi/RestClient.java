@@ -40,6 +40,7 @@ public class RestClient {
   private Locale locale;
   private Integer utcOffset;
   private Map<String, String> parameters;
+  private Map<String, String> headers;
   private Object entity;
   private List<Object> keys;
 
@@ -213,6 +214,14 @@ public class RestClient {
     parameters.put(key, value);
   }
 
+  public void setHeader(String key, String value) {
+    if (headers == null) {
+      headers = new LinkedHashMap<>();
+    }
+
+    headers.put(key, value);
+  }
+
   public void setParameters(String parametersStr) {
     if (parameters == null) {
       parameters = new LinkedHashMap<>();
@@ -233,6 +242,13 @@ public class RestClient {
       return parameters.get(key);
     }
     return getRequest().getParameter(key);
+  }
+
+  public String getHeader(String key) {
+    if (headers != null) {
+      return headers.get(key);
+    }
+    return getRequest().getHeader(key);
   }
 
   public boolean hasParameter(String key) {
