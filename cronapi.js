@@ -146,6 +146,25 @@ if (!window.fixedTimeZone) {
     }
   };
 
+  this.cronapi.callFunction = function(name) {
+    return {
+      call: function() {
+        var ref;
+        try {
+          ref = eval(name);
+        } catch(e) {
+          //
+        }
+
+        if (ref) {
+          return ref.apply(this, arguments)
+        }
+
+        return undefined;
+      }.bind(this)
+    }
+  };
+
   /**
    * @category CategoryType.CONVERSION
    * @categoryTags Conversão|Convert
@@ -299,6 +318,17 @@ if (!window.fixedTimeZone) {
    * @categoryTags Util
    */
   this.cronapi.util = {};
+
+  /**
+   * @type function
+   * @name {{getApplicationName}}
+   * @nameTags getApplicationName
+   * @description {{functionToGetApplicationName}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getApplicationName = function() {
+    return $('#projectName').length ? $('#projectName').val() : $('h1:first').length && $('h1:first').text().trim().length ? $('h1:first').text().trim() : '';
+  };
 
   /**
    * @type internal
@@ -824,6 +854,41 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{isInsertingMode}}
+   * @nameTags isInsertingMode
+   * @description {{functionToIsInsertingMode}}
+   * @param {ObjectType.OBJECT} datasource {{datasource}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.screen.isInsertingMode = function(datasource) {
+    return datasource.inserting;
+  };
+
+  /**
+   * @type function
+   * @name {{isEditingMode}}
+   * @nameTags isEditingMode
+   * @description {{functionToIsEditingMode}}
+   * @param {ObjectType.OBJECT} datasource {{datasource}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.screen.isEditingMode = function(datasource) {
+    return datasource.editing;
+  };
+
+  /**
+   * @type function
+   * @name {{changeTitleScreen}}
+   * @nameTags changeTitleScreen
+   * @description {{functionToChangeTitleScreen}}
+   * @param {ObjectType.STRING} title {{title}}
+   */
+  this.cronapi.screen.changeTitleScreen = function(title) {
+    window.document.title = title;
+  };
+
+  /**
+   * @type function
    * @name {{fieldNameFromScreen}}
    * @nameTags fieldNameFromScreen
    * @description {{functionToGetFieldNameFromScreen}}
@@ -1304,11 +1369,66 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.showModal = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    try{
-      $('#'+id).modal({backdrop: 'static', keyboard: false});
-    }catch(e){
-      $('#'+id).show();
-    }
+      let modalToShow = `#${id}`;
+      let focused = $(':focus');
+      let allHover = $(':hover');
+
+      try{
+          $(modalToShow).one('shown.bs.modal', function (e) {
+
+              if (focused.length) {
+                  $(this).data('lastFocused', focused);
+                  $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
+              }
+              if (allHover.length) {
+                  $(this).data('lastHovers', allHover);
+              }
+              let firstInputVisible = $(this).find('input:not(:hidden)')[0];
+              if (firstInputVisible)
+                  firstInputVisible.focus();
+
+          }).one('hidden.bs.modal', function(e) {
+
+              let lastFocusedClass = undefined;
+              let lastFocused = $(modalToShow).data('lastFocused');
+              let lastFocusedIsVisible = false;
+
+              if (lastFocused && lastFocused.length) {
+                  //Verifica se o item que foi clicado ainda existe no documento (A grade remove o botao e adiciona novamente, perde a referencia)
+                  lastFocusedClass = $($(this).data('lastFocusedClass'));
+                  if ($('html').has(lastFocused).length) {
+                      //Se existir, verifica se o mesmo está visivel
+                      lastFocusedIsVisible = lastFocused.is(':visible');
+                  }
+                  else {
+                      //Se nao existir, e foi readicionado verifica se está visivel pelas classes
+                      lastFocusedIsVisible = lastFocusedClass.is(':visible');
+                  }
+              }
+
+              let findLastLink = function(element) {
+                return $(element[element.length - 1]).closest('ul:visible').find('a:first');
+              };
+
+              let lastHovers = $(modalToShow).data('lastHovers');
+
+              if (lastFocusedIsVisible) {
+                  lastFocusedClass.focus();
+                  lastFocused.focus();
+              }
+              else if (lastHovers && lastHovers.length) {
+                let lastLink = findLastLink(lastHovers);
+                lastLink.focus();
+              }else{
+                let lastLink = findLastLink(lastFocused);
+                lastLink.focus();
+              }
+
+
+          }).modal({backdrop: 'static', keyboard: false});
+      }catch(e){
+          $(modalToShow).show();
+      }
   };
 
   /**
@@ -1491,22 +1611,25 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.disableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      } else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
-              if($('#'+id).data("kendoComboBox")){
+          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
+              if ($('#'+id).data("kendoComboBox")) {
                   $('#'+id).data("kendoComboBox").enable(false);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(false);
-              }
-              else{
+              } else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
@@ -1522,22 +1645,25 @@ if (!window.fixedTimeZone) {
    * @multilayer true
    */
   this.cronapi.screen.enableComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let injector = window.angular.element('body').injector();
-      let $rootScope = injector.get('$rootScope');
+
+      let $scope = undefined;
+      if (window.cordova) {
+          $scope = this.cronapi.$scope;
+      } else {
+          let injector = window.angular.element('body').injector();
+          $scope = injector.get('$rootScope');
+      }
 
       let waitAngularReady = () => {
-          if ($rootScope.$$phase !== '$apply' && $rootScope.$$phase !== '$digest') {
+          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
-              }
-              else if($('#'+id).data("kendoDropDownList")){
+              } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(true);
-              }
-              else{
+              }  else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
               }
-          }
-          else {
+          } else {
               setTimeout( () => waitAngularReady(), 200);
           }
       };
@@ -2517,6 +2643,19 @@ if (!window.fixedTimeZone) {
 
   this.cronapi.internal = {};
 
+  this.cronapi.internal.focusFormInput = function () {
+    let $firstForm = $($('form')[0]);
+    let $firstInput = $($firstForm.find('input')[0]);
+    if ($firstInput && $firstInput.length) {
+      let waitBecomeVisible = setInterval(()=> {
+        if ($firstInput.is(':visible')) {
+          $firstInput.focus();
+          clearInterval(waitBecomeVisible);
+        }
+      }, 100);
+    }
+  };
+
   this.cronapi.internal.setFile = function(field, file) {
     this.cronapi.internal.fileToBase64(file, function(base64) { this.cronapi.screen.changeValueOfField(field, base64); }.bind(this));
   };
@@ -2548,12 +2687,14 @@ if (!window.fixedTimeZone) {
       });
     }else{
       var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
-                                      <div class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
+                                      <button class="btn btn-success button button-balanced" id="cronapiVideoCaptureOk" style="position: absolute; z-index: 999999999;">\
                                           <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
-                                      </div>\
-                                      <div class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                          <span class="sr-only">{{"Upload.camera" | translate}}</span>\
+                                      </button>\
+                                      <button class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiVideoCaptureCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
                                           <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
-                                      </div>\
+                                          <span class="sr-only">{{"Cancel" | translate}}</span>\
+                                      </button>\
                                       <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
                               </div>';
 
@@ -2803,9 +2944,9 @@ if (!window.fixedTimeZone) {
       if (json.name.length > 25)
         json.name = json.name.substr(0,22)+'...';
 
-      var result = "<b>Nome:</b> <br/>" + json.name +"<br/>";
-      result += "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>";
-      result += "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>";
+      var result = (this.cronapi.$translate.use() == 'pt_br' ? "<b>Nome:</b> <br/>" : "<b>Name:</b> <br/>") + (json.contentType !== undefined ? json.name +"<br/>" : "");
+      result += json.contentType !== undefined ? "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>" : "";
+      result += json.fileExtension !== "" ? this.cronapi.$translate.use() == 'pt_br' ? "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>" : "<b>Extension:</b> <br/>" + json.fileExtension +"<br/>" : "";
       return result;
     }
   };
@@ -2933,7 +3074,11 @@ if (!window.fixedTimeZone) {
         }
         else {
           fileName += this.cronapi.internal.getExtensionBase64(valueContent);
-          valueContent = window.atob(valueContent);
+          try {
+            valueContent = window.atob(valueContent);
+          } catch (e) {
+            //NoCommand
+          }
           bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
         }
         var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
@@ -3675,11 +3820,13 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
-    if (!dbName) {
-      return window.openDatabase(this.cronapi.cordova.database.nameDefault, "1.0",this.cronapi.cordova.database.nameDefault,1000000);
-    }else{
-      return window.openDatabase(dbName, "1.0", dbName, 1000000);
+    // Starts using browser WebSQL
+    let myOpenDatabaseMethod = window.openDatabase;
+    // If in mobile environment use native sqlite
+    if (window.sqlitePlugin) {
+      myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
     }
+    return myOpenDatabaseMethod(dbName ? dbName : this.cronapi.cordova.database.nameDefault, "1.0", dbName ? dbName : this.cronapi.cordova.database.nameDefault, 1000000);
   };
 
   /**
@@ -3688,7 +3835,7 @@ if (!window.fixedTimeZone) {
    * @name {{executeSql}}
    * @nameTags executesql
    * @param {ObjectType.STRING} dbName {{dbName}}
-   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} text SQL
    * @param {ObjectType.OBJECT} array {{arrayParams}}
    * @param {ObjectType.STATEMENTSENDER} success {{success}}
    * @param {ObjectType.STATEMENTSENDER} error {{error}}
@@ -3711,6 +3858,51 @@ if (!window.fixedTimeZone) {
     }.bind(this));
 
   };
+
+  /**
+   * @type function
+   * @platform M
+   * @name {{executeMultipleSql}}
+   * @nameTags executesql
+   * @param {ObjectType.STRING} dbName {{dbName}}
+   * @param {ObjectType.STRING} text SQL
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @description {{executeMultipleSqlDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.cordova.database.executeMultipleSql = function (dbName, text, success, error) {
+
+    // exist DB
+    var db = this.cronapi.cordova.database.openDatabase(dbName); // create DB
+    let promises = [];
+    let statements = text.split(';');
+
+    for (let stmIdx in statements) {
+      let statement = statements[stmIdx];
+      if (!statement) { break; }
+      let promise = new Promise((resolve, reject) => {
+        db.transaction(function (txn) {
+          txn.executeSql(statement.trim(), [], function (transaction, result) {
+            resolve(result);
+          }.bind(this),
+            // callback de erro, função anônima que recebe um objeto SQLTransaction e um SQLError
+            function (transaction, error) {
+              reject(error)
+            }.bind(this));
+        }.bind(this));
+      });
+
+      promises.push(promise);
+    }
+
+    Promise.all(promises).then(function (values) {
+      success(values);
+    }.bind(this)).catch(function (e) {
+      error(e);
+    }.bind(this));
+  }
+
 
   /**
    * @type function
@@ -3917,8 +4109,16 @@ if (!window.fixedTimeZone) {
     this.UploadService.upload({'description': description, 'id' : id, 'filter' : filter, 'maxSize': maxSize, 'multiple': multiple, 'scope': this});
   };
 
-
-
+  /**
+   * @type function
+   * @name {{getBaseUrlName}}
+   * @nameTags getBaseUrl
+   * @description {{getBaseUrlDescription}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getBaseUrl = function() {
+    return window.location.origin;
+  };
 
   /**
    * @category CategoryType.CHART
@@ -4194,5 +4394,14 @@ if (!window.fixedTimeZone) {
     return result;
   };
 
+  /**
+   * @type function
+   * @name {{back}}
+   * @nameTags back|voltar|retroceder|history
+   * @description {{backDescription}}
+   */
+  this.cronapi.screen.back = function() {
+    history.back();
+  }
 
 }).bind(window)();
