@@ -2240,11 +2240,11 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} textReplaceReplacement {{textReplaceReplacementElement}}
    * @returns {ObjectType.STRING}
    */
-  this.cronapi.text.replaceAll = function(/** @type {ObjectType.STRING} @defaultValue Xmas.*/ textReplace, /** @type {ObjectType.STRING} @defaultValue X*/ textReplaceTargetRegex, /** @type {ObjectType.STRING} @description {{typeReplaceElement}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ typeReplace, /** @type {ObjectType.STRING} @defaultValue Christmas*/ textReplaceReplacement){    
+  this.cronapi.text.replaceAll = function(/** @type {ObjectType.STRING} @defaultValue Xmas.*/ textReplace, /** @type {ObjectType.STRING} @defaultValue X*/ textReplaceTargetRegex, /** @type {ObjectType.STRING} @description {{typeReplaceElement}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ typeReplace, /** @type {ObjectType.STRING} @defaultValue Christmas*/ textReplaceReplacement){
     if (this.cronapi.logic.isNull(textReplace) || this.cronapi.logic.isNull(textReplaceTargetRegex) || this.cronapi.logic.isNull(textReplaceReplacement))
-      return null;    
+      return null;
     if (typeReplace !== '-')
-      return textReplace.replace(new RegExp(textReplaceTargetRegex, typeReplace), textReplaceReplacement); 
+      return textReplace.replace(new RegExp(textReplaceTargetRegex, typeReplace), textReplaceReplacement);
     return textReplace.replace(textReplaceTargetRegex, textReplaceReplacement);
   }
 
