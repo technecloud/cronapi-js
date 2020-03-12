@@ -209,6 +209,10 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       return VAR_NULL;
     }
 
+    if (val instanceof String && "EXP_NULL".equals(val)) {
+      return VAR_NULL;
+    }
+
     return new Var(val);
   }
 
