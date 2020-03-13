@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
 public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSerializer,
     VirtualClassInterface {
 
-    public static final String EXP_NULL = "EXP_NULL";
+    public static final String EXP_NULL = "$null";
 
     static {
     System.setProperty("https.protocols", "TLSv1.2,TLSv1.1,TLSv1,TLSv1");
