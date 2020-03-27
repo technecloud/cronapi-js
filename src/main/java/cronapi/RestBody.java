@@ -5,8 +5,17 @@ import java.util.*;
 public class RestBody {
   private Var[] inputs;
   private Map<String, Var> fields;
+  private boolean processed = false;
   
   public Var[] getInputs() {
+    if (!processed) {
+      for (int i = 0; i<inputs.length; i++){
+        if (inputs[i] == null) {
+          inputs[i] = Var.valueOf(null);
+        }
+      }
+      processed = true;
+    }
     return inputs;
   }
 
