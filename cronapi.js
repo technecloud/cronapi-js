@@ -342,29 +342,50 @@ if (!window.fixedTimeZone) {
    * @arbitraryParams true
    */
   this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, fields, callbackSuccess, callbackError) {
+  
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+  
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = this.cronapi.$scope.http;
     var params = [];
     $(arguments).each(function() {
       params.push(this);
     });
-
+  
     var token = "";
     if (window.uToken)
       token = window.uToken;
-
+  
     var dataCall = {
       "fields": fields,
       "inputs": params.slice(4)
     };
-
+  
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
-
+    let contentData = undefined;
+    try {
+      contentData = JSON.stringify(dataCall);
+    }
+    catch (e) {
+      contentData = JSON.stringify(dataCall, getCircularReplacer());
+    }
+  
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
       dataType: 'html',
-      data : JSON.stringify(dataCall),
+      data : contentData,
       headers : {
         'Content-Type' : 'application/json',
         'X-AUTH-TOKEN' : token,
@@ -374,9 +395,8 @@ if (!window.fixedTimeZone) {
       success : callbackSuccess,
       error : callbackError
     });
-
+  
   };
-
   /**
    * @type internal
    */
