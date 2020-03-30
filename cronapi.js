@@ -2689,7 +2689,7 @@ if (!window.fixedTimeZone) {
     };
   };
 
-  this.cronapi.internal.startCamera = function(field) {
+  this.cronapi.internal.startCamera = function(field, quality, allowEdit, targetWidth, targetHeight) {
     //verify if user is on Browser or not
     if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
       // If in mobile devices use native camera cordova plugin
@@ -2700,10 +2700,13 @@ if (!window.fixedTimeZone) {
         console.error(error);
         that.cronapi.$scope.Notification.error(message);
       }, {
-        quality: 60, //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
+        quality: parseInt(quality), //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
         destinationType: Camera.DestinationType.DATA_URL,
         encodingType: Camera.EncodingType.PNG,
-        correctOrientation: true
+        correctOrientation: true,
+        allowEdit: (allowEdit == 'true'),
+        targetWidth: parseInt(targetWidth),
+        targetHeight: parseInt(targetHeight)
       });
     }else{
       var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
