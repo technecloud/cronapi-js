@@ -4192,8 +4192,7 @@ if (!window.fixedTimeZone) {
       if(Array.isArray(args[4])
       && typeof args[4][0] === 'object'
       && 'label' in args[4][0]
-      && 'data' in args[4][0]
-      && 'options' in args[4][0]){
+      && 'data' in args[4][0]){
         args = args[4];
         size = 0;
       }
