@@ -402,7 +402,8 @@ public class DataSource implements JsonSerializable {
           }
 
           Var entity = Var.valueOf(new LinkedHashMap<>());
-          if (obj.getClass().isArray()) {
+          //Correção caso o usuario selecione apenas um campo, e esse campo seja um array de byte
+          if (obj.getClass().isArray() && !(obj instanceof byte[])) {
             int i = 0;
 
             for (Object o : (Object[]) obj) {
