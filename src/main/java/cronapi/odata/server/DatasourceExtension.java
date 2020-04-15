@@ -336,16 +336,14 @@ public class DatasourceExtension implements JPAEdmExtension {
 
     if (best == null) {
       for (Property p : complexType.getProperties()) {
+        JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
         PropertyRef key = findKey(complexType, p.getName());
-        if (key == null) {
+        boolean isComplex = isEdmSimpleTypeKind(mapping.getJPAType());
+        if (key == null && !isComplex) {
           best = p;
           break;
         }
       }
-    }
-
-    if (best == null) {
-      best = complexType.getProperties().get(0);
     }
 
     return best;
@@ -361,30 +359,32 @@ public class DatasourceExtension implements JPAEdmExtension {
       EntityType complexType = findEntityType(edmSchema, mapping.getJPAType().getSimpleName());
       if (complexType != null) {
         SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-        SimpleProperty newProp = (SimpleProperty) CloneUtils.getClone(p);
-        newProp.setName(newProp.getName() + "_" + best.getName());
-        newProp.setType(best.getType());
-        ((Facets) newProp.getFacets()).setNullable(true);
+        if (best != null) {
+          SimpleProperty newProp = (SimpleProperty) CloneUtils.getClone(p);
+          newProp.setName(newProp.getName() + "_" + best.getName());
+          newProp.setType(best.getType());
+          ((Facets) newProp.getFacets()).setNullable(true);
 
-        JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
-        newMapping.setInternalName(
-            newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf("."))
-                + "." + best.getName());
-        newProp.setMapping(newMapping);
+          JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
+          newMapping.setInternalName(
+              newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf("."))
+                  + "." + best.getName());
+          newProp.setMapping(newMapping);
 
-        int total = 0;
-        String name = newProp.getName();
-        for (Property prop : type.getProperties()) {
-          if (prop.getName().equals(name) || prop.getName().startsWith(name + "_")) {
-            total++;
+          int total = 0;
+          String name = newProp.getName();
+          for (Property prop : type.getProperties()) {
+            if (prop.getName().equals(name) || prop.getName().startsWith(name + "_")) {
+              total++;
+            }
           }
-        }
 
-        if (total > 0) {
-          newProp.setName(name + "_" + total);
-        }
+          if (total > 0) {
+            newProp.setName(name + "_" + total);
+          }
 
-        type.getProperties().add(newProp);
+          type.getProperties().add(newProp);
+        }
 
       }
     }
@@ -417,12 +417,14 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       if (first != null) {
         SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-        addProperty(orgName, mainType, edmSchema,
-            ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
-            alias != null ? alias + "_" + best.getName()
-                : internalExpression.replace(".", "_") + "_" + best.getName(),
-            first.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
-            propertyRefList, extras, true, expression, tmpComplexIndex, mainAlias);
+        if (best != null) {
+          addProperty(orgName, mainType, edmSchema,
+              ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
+              alias != null ? alias + "_" + best.getName()
+                  : internalExpression.replace(".", "_") + "_" + best.getName(),
+              first.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
+              propertyRefList, extras, true, expression, tmpComplexIndex, mainAlias);
+        }
       }
     } else {
 
