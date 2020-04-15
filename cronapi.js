@@ -85,9 +85,14 @@ if (!window.fixedTimeZone) {
 
   this.cronapi.server = function(pack) {
     var attr = false;
+    var toPromise = false;
     return {
       attr: function() {
         attr = true;
+        return this;
+      },
+      toPromise: function() {
+        toPromise = true;
         return this;
       },
       run: function() {
@@ -105,7 +110,6 @@ if (!window.fixedTimeZone) {
               return "";
             }
           }
-
           serverMap[key] = "$$loading";
         }
 
@@ -115,12 +119,20 @@ if (!window.fixedTimeZone) {
         var namespace = parts.join(".");
 
         var blocklyName = namespace + ":" + func;
+        
+        var resolveForPromise;
+        var rejectForPromise;
+        var promise = new Promise((resolve, reject) => {
+          resolveForPromise = resolve;
+          rejectForPromise = reject;
+        });
 
         var success = function(data) {
           this.safeApply(function() {
             if (attr) {
               serverMap[key] = data;
             }
+            resolveForPromise(data);
           });
         }.bind(this);
 
@@ -129,6 +141,7 @@ if (!window.fixedTimeZone) {
             if (attr) {
               serverMap[key] = error;
             }
+            rejectForPromise(error);
           });
           if (error)
             this.cronapi.$scope.Notification.error(error);
@@ -141,6 +154,8 @@ if (!window.fixedTimeZone) {
         }
 
         this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+        if (toPromise)
+          return promise;
 
       }.bind(this)
     }
