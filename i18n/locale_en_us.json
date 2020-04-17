@@ -503,5 +503,12 @@
   "getApplicationName": "Get application name",
   "functionToGetApplicationName": "Function to obtain application name",
   "back": "Back to previous Form",
-  "backDescription": "Returns to previously opened Form"
+  "backDescription": "Returns to previously opened Form",
+  "CategoryType.REGEX": "Regular Expression",
+  "extractTextByRegex" : "Extract text with Reg. Expression",
+  "extractTextByRegexDescription" : "Function to extract text with Reg. Expression. Returns a list with incidences, if found.",
+  "validateTextWithRegex": "Validate text with Reg. Expression",
+  "validateTextWithRegexDescription": "Function that validate text with Reg. Expression. Returns true if it finds or false if it doesn't find the text.",
+  "regex": "Reg. Expression",
+  "flag": "Flag"
 }

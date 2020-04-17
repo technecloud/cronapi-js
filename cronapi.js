@@ -4426,4 +4426,74 @@ if (!window.fixedTimeZone) {
     history.back();
   }
 
+  /**
+   * @category CategoryType.REGEX
+   * @categoryTags REGEX|regex
+   */
+   
+  this.cronapi.regex = {};
+
+   /**
+   * @type function
+   * @name {{extractTextByRegex}}
+   * @nameTags extractTextByRegex
+   * @description {{extractTextByRegexDescription}}
+   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} regex {{regex}}
+   * @param {ObjectType.STRING} flag {{flag}}
+   * @returns {ObjectType.LIST}
+   */
+  this.cronapi.regex.extractTextByRegex = function(/** @type {ObjectType.STRING} @defaultValue */ text, /** @type {ObjectType.STRING} */ regex, /** @type {ObjectType.STRING} @description {{flag}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ flag){
+    if (this.cronapi.logic.isNull(text) || this.cronapi.logic.isNull(regex))
+      return [];
+
+    let regexInstance = null;
+
+    if (flag != null && flag !== '-'){
+      regexInstance = new RegExp(regex, flag);
+    }else{
+       regexInstance = new RegExp(regex);
+    }
+
+    let matches, output = [];
+    let idx = null;
+    
+    while (matches = regexInstance.exec(text)) {
+
+        if(idx != null && idx == matches.index) break;
+        
+        let occurrence =  [];
+
+        for(i = 1; i < matches.length ; i++){
+          occurrence.push(matches[i]);
+        }
+        
+        idx = matches.index;
+        
+        output.push(occurrence);
+        
+    }
+
+    return output;
+  }
+
+  /**
+   * @type function
+   * @name {{validateTextWithRegex}}
+   * @nameTags validateTextWithRegex
+   * @description {{validateTextWithRegexDescription}}
+   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} regex {{regex}}
+   * @param {ObjectType.STRING} flag {{flag}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.regex.validateTextWithRegex = function(/** @type {ObjectType.STRING} */ text, /** @type {ObjectType.STRING} */ regex, /** @type {ObjectType.STRING} @description {{flag}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ flag){
+    if (this.cronapi.logic.isNull(text) || this.cronapi.logic.isNull(regex))
+      return false;
+    if (flag != null && flag !== '-')
+      return new RegExp(regex, flag).test(text);
+
+    return new RegExp(regex).test(text);
+  }
+
 }).bind(window)();
