@@ -180,6 +180,7 @@ if (!window.fixedTimeZone) {
     }
   };
 
+
   /**
    * @category CategoryType.CONVERSION
    * @categoryTags Conversão|Convert
@@ -344,6 +345,42 @@ if (!window.fixedTimeZone) {
   this.cronapi.util.getApplicationName = function() {
     return $('#projectName').length ? $('#projectName').val() : $('h1:first').length && $('h1:first').text().trim().length ? $('h1:first').text().trim() : '';
   };
+
+  /**
+   * @type function
+   * @name {{createPromiseName}}
+   * @nameTags createPromiseName
+   * @description {{functioncreatePromise}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.util.createPromise = function () {
+    var functionToResolve;
+    var functionToReject;
+    var promise = new Promise((resolve, reject) => {
+      functionToResolve = resolve;
+      functionToReject = reject;
+    });
+    promise.__functionToResolve = functionToResolve;
+    promise.__functionToReject = functionToReject;
+    return promise;
+  }
+
+  /**
+   * @type function
+   * @name {{handleValueToPromise}}
+   * @nameTags handleValueToPromise
+   * @description {{functionToHandleValueToPromise}}
+   * @param {ObjectType.STRING} type {{type}}
+   * @param {ObjectType.OBJECT} promise {{promise}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.util.handleValueToPromise = function (/** @type {ObjectType.STRING} @description {{type}} @blockType util_dropdown @keys resolve|reject @values resolve|reject  */ type, promise, value) {
+    if(type === 'resolve') {
+      promise.__functionToResolve(value);
+    }else{
+      promise.__functionToReject(value);
+    }
+  }
 
   /**
    * @type internal

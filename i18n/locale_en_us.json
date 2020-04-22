@@ -510,5 +510,10 @@
   "validateTextWithRegex": "Validate text with Reg. Expression",
   "validateTextWithRegexDescription": "Function that validate text with Reg. Expression. Returns true if it finds or false if it doesn't find the text.",
   "regex": "Reg. Expression",
-  "flag": "Flag"
+  "flag": "Flag",
+  "createPromiseName": "Create Promise",
+  "functioncreatePromise": "Function to create a promise object",
+  "handleValueToPromise": "Handle value to promise",
+  "functionToHandleValueToPromise": "Function to handle value to a promise object, you can resolve or reject the value",
+  "promise": "Promise",
 }

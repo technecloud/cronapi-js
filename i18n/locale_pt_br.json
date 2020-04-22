@@ -510,5 +510,10 @@
   "validateTextWithRegex": "Validar texto com Exp. Regular",
   "validateTextWithRegexDescription": "Função que valida texto com Exp. Regular. Retorna verdadeiro caso encontre ou falso caso não encontre o texto.",
   "regex": "Exp. Regular",
-  "flag": "Flag"
+  "flag": "Flag",
+  "createPromiseName": "Criar Promessa",
+  "functioncreatePromise": "Função para criar um objeto com uma Promessa",
+  "handleValueToPromise": "Atribuir valor para a promessa" ,
+  "functionToHandleValueToPromise": "Você pode resolver ou rejeitar o valor para a promessa",
+  "promise": "Promessa"
 }
