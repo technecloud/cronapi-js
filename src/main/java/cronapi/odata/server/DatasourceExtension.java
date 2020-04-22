@@ -665,7 +665,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       if (complexType != null) {
         if (mainAlias.equals(expression.toString())) {
           for (Property prop : complexType.getProperties()) {
-            String reportItem = expression + "." + prop.getName();
+            String reportItem = expression + "." + prop.getMapping().getInternalName();
             if (!StringUtils.isEmpty(alias)) {
               reportItem += " as " + alias + "_" + prop.getName();
             }
