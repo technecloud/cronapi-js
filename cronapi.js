@@ -85,9 +85,14 @@ if (!window.fixedTimeZone) {
 
   this.cronapi.server = function(pack) {
     var attr = false;
+    var toPromise = false;
     return {
       attr: function() {
         attr = true;
+        return this;
+      },
+      toPromise: function() {
+        toPromise = true;
         return this;
       },
       run: function() {
@@ -115,12 +120,20 @@ if (!window.fixedTimeZone) {
         var namespace = parts.join(".");
 
         var blocklyName = namespace + ":" + func;
+        
+        var resolveForPromise;
+        var rejectForPromise;
+        var promise = new Promise((resolve, reject) => {
+          resolveForPromise = resolve;
+          rejectForPromise = reject;
+        });
 
         var success = function(data) {
           this.safeApply(function() {
             if (attr) {
               serverMap[key] = data;
             }
+            resolveForPromise(data);
           });
         }.bind(this);
 
@@ -129,6 +142,7 @@ if (!window.fixedTimeZone) {
             if (attr) {
               serverMap[key] = error;
             }
+            rejectForPromise(error);
           });
           if (error)
             this.cronapi.$scope.Notification.error(error);
@@ -141,10 +155,32 @@ if (!window.fixedTimeZone) {
         }
 
         this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+        if (toPromise)
+          return promise;
 
       }.bind(this)
     }
   };
+
+  this.cronapi.callFunction = function(name) {
+    return {
+      call: function() {
+        var ref;
+        try {
+          ref = eval(name);
+        } catch(e) {
+          //
+        }
+
+        if (ref) {
+          return ref.apply(this, arguments)
+        }
+
+        return undefined;
+      }.bind(this)
+    }
+  };
+
 
   /**
    * @category CategoryType.CONVERSION
@@ -299,6 +335,53 @@ if (!window.fixedTimeZone) {
    * @categoryTags Util
    */
   this.cronapi.util = {};
+
+  /**
+   * @type function
+   * @name {{getApplicationName}}
+   * @nameTags getApplicationName
+   * @description {{functionToGetApplicationName}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getApplicationName = function() {
+    return $('#projectName').length ? $('#projectName').val() : $('h1:first').length && $('h1:first').text().trim().length ? $('h1:first').text().trim() : '';
+  };
+
+  /**
+   * @type function
+   * @name {{createPromiseName}}
+   * @nameTags createPromiseName
+   * @description {{functioncreatePromise}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.util.createPromise = function () {
+    var functionToResolve;
+    var functionToReject;
+    var promise = new Promise((resolve, reject) => {
+      functionToResolve = resolve;
+      functionToReject = reject;
+    });
+    promise.__functionToResolve = functionToResolve;
+    promise.__functionToReject = functionToReject;
+    return promise;
+  }
+
+  /**
+   * @type function
+   * @name {{handleValueToPromise}}
+   * @nameTags handleValueToPromise
+   * @description {{functionToHandleValueToPromise}}
+   * @param {ObjectType.STRING} type {{type}}
+   * @param {ObjectType.OBJECT} promise {{promise}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.util.handleValueToPromise = function (/** @type {ObjectType.STRING} @description {{type}} @blockType util_dropdown @keys resolve|reject @values resolve|reject  */ type, promise, value) {
+    if(type === 'resolve') {
+      promise.__functionToResolve(value);
+    }else{
+      promise.__functionToReject(value);
+    }
+  }
 
   /**
    * @type internal
