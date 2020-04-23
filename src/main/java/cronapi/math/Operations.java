@@ -125,25 +125,16 @@ public class Operations {
 	}
 
 	public static final Var divisor(Var... values) throws Exception {
-		boolean isDouble = false;
-		for (Var v : values)
-			if (v.getType() == Var.Type.DOUBLE)
-				isDouble = true;
-		if (isDouble) {
-			Double result = values[0].getObjectAsDouble();
+		Double result = Var.valueOf(0).getObjectAsDouble();
+		for (Var v : values) {
+			result = values[0].getObjectAsDouble();
 			values[0] = new Var(1);
 			for (Var value : values) {
 				result = result / value.getObjectAsDouble();
 			}
 			return new Var(result);
-		} else {
-			Long result = values[0].getObjectAsLong();
-			values[0] = new Var(1);
-			for (Var value : values) {
-				result = result / value.getObjectAsLong();
-			}
-			return new Var(result);
 		}
+		return new Var(result);
 	}
 
 	public static final Var abs(Var value) throws Exception {
