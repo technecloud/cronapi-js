@@ -515,5 +515,7 @@
   "functioncreatePromise": "Função para criar um objeto com uma Promessa",
   "handleValueToPromise": "Atribuir valor para a promessa" ,
   "functionToHandleValueToPromise": "Você pode resolver ou rejeitar o valor para a promessa",
-  "promise": "Promessa"
+  "promise": "Promessa",
+  "createObjectLoginJson": "Criar objeto login Json",
+  "createObjectLoginJsonDescription": "Função para criar objeto login Json",
 }

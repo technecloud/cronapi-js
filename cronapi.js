@@ -3365,6 +3365,22 @@ if (!window.fixedTimeZone) {
     return JSON.parse(string);
   };
 
+   /**
+   * @type function
+   * @name {{createObjectLoginJson}}
+   * @description {{createObjectLoginJsonDescription}}
+   * @nameTags object
+   * @param {ObjectType.STRING} string {{Login}}
+   * @param {ObjectType.STRING} string {{Password}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.object.createObjectLoginFromString = function(login, password) {
+    let json = {};
+    json["username"] = login;
+    json["password"] = password;
+    return JSON.parse(JSON.stringify(json));
+  };
+
   /**
    * @type function
    * @name {{serializeObject}}
