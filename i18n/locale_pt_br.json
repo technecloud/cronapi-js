@@ -517,5 +517,5 @@
   "functionToHandleValueToPromise": "Você pode resolver ou rejeitar o valor para a promessa",
   "promise": "Promessa",
   "createObjectLoginJson": "Criar objeto login Json",
-  "createObjectLoginJsonDescription": "Função para criar objeto login Json",
+  "createObjectLoginJsonDescription": "Função para criar objeto login Json"
 }
