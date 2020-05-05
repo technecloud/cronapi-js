@@ -649,6 +649,20 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
+  
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+    
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
   
