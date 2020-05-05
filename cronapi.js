@@ -82,10 +82,11 @@ if (!window.fixedTimeZone) {
   };
 
   var serverMap = {};
-
+  
   this.cronapi.server = function(pack) {
     var attr = false;
     var toPromise = false;
+    var async = true;
     return {
       attr: function() {
         attr = true;
@@ -95,13 +96,17 @@ if (!window.fixedTimeZone) {
         toPromise = true;
         return this;
       },
+      notAsync: function() {
+        async = false;
+        return this;
+      },
       run: function() {
         var key = pack;
-
+        
         for (var i = 0;i <arguments.length;i++) {
           key += String(arguments[i]);
         }
-
+        
         if (attr) {
           if (serverMap.hasOwnProperty(key)) {
             if (serverMap[key] != "$$loading") {
@@ -112,12 +117,12 @@ if (!window.fixedTimeZone) {
           }
           serverMap[key] = "$$loading";
         }
-
+        
         var parts = pack.split(".");
         var func = parts[parts.length-1];
         parts.pop();
         var namespace = parts.join(".");
-
+        
         var blocklyName = namespace + ":" + func;
         
         var resolveForPromise;
@@ -126,7 +131,7 @@ if (!window.fixedTimeZone) {
           resolveForPromise = resolve;
           rejectForPromise = reject;
         });
-
+        
         var success = function(data) {
           this.safeApply(function() {
             if (attr) {
@@ -135,7 +140,7 @@ if (!window.fixedTimeZone) {
             resolveForPromise(data);
           });
         }.bind(this);
-
+        
         var error = function(error) {
           this.safeApply(function() {
             if (attr) {
@@ -146,17 +151,32 @@ if (!window.fixedTimeZone) {
           if (error)
             this.cronapi.$scope.Notification.error(error);
         }.bind(this);
-
-        var args = [blocklyName, success, error];
-
-        for (var i = 0;i <arguments.length;i++) {
-          args.push(arguments[i]);
+        
+        var args = [blocklyName];
+        
+        if (async) {
+          args.push(success);
+          args.push(error);
+          for (var i = 0;i <arguments.length;i++) {
+            args.push(arguments[i]);
+          }
+          
+          this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+          if (toPromise)
+            return promise;
         }
-
-        this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
-        if (toPromise)
-          return promise;
-
+        else {
+          for (var i = 0;i <arguments.length;i++) {
+            args.push(arguments[i]);
+          }
+          
+          let resultData = this.cronapi.util.callServerBlockly.apply(this, args);
+          if (attr) {
+            serverMap[key] = resultData;
+          }
+          return resultData;
+        }
+        
       }.bind(this)
     }
   };
@@ -631,28 +651,35 @@ if (!window.fixedTimeZone) {
   this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
-
+  
     var fields = this.cronapi.util.getScreenFields();
-
+  
     var dataCall = {
       "fields": fields,
       "inputs": params
     };
-
+  
     for (var i = 1; i<arguments.length; i++)
       params.push(arguments[i]);
-
+  
     var token = "";
     if (window.uToken)
       token = window.uToken;
-
+  
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
-
+    let contentData = undefined;
+    try {
+      contentData = JSON.stringify(dataCall);
+    }
+    catch (e) {
+      contentData = JSON.stringify(dataCall, getCircularReplacer());
+    }
+  
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
       dataType: 'html',
-      data : JSON.stringify(dataCall),
+      data : contentData,
       async: false,
       headers : {
         'Content-Type' : 'application/json',
@@ -661,7 +688,7 @@ if (!window.fixedTimeZone) {
         'timezone': moment().utcOffset()
       }
     });
-
+  
     var result;
     if (resultData.status == 200) {
       if (resultData.responseJSON)
