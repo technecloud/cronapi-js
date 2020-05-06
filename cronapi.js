@@ -1529,15 +1529,17 @@ if (!window.fixedTimeZone) {
                   lastFocusedClass.focus();
                   lastFocused.focus();
               }
-              else if (lastHovers && lastHovers.length) {
-                let lastLink = findLastLink(lastHovers);
-                lastLink.focus();
-              }else{
+              //Tenta achar o mais proximo do ultimo click (link clicado)
+              else if ($('html').has(lastFocused).length) {
                 let lastLink = findLastLink(lastFocused);
                 lastLink.focus();
               }
-
-
+              else if (lastHovers && lastHovers.length) {
+                let lastLink = findLastLink(lastHovers);
+                lastLink.focus();
+              }
+  
+  
           }).modal({backdrop: 'static', keyboard: false});
       }catch(e){
           $(modalToShow).show();
