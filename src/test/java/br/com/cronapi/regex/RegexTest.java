@@ -45,19 +45,19 @@ public class RegexTest {
 
     @Test
     public void extractTextShouldBeReturnListOfList() throws Exception{
-        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var("(\\w*)\\$(\\w*)"), Var.VAR_NULL);
+        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w*)\\$(\\w*)")), Var.VAR_NULL);
         Assert.assertTrue(((result.getObjectAsList().get(0)) instanceof  List));
 
-        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var("(\\w{3,})"), Var.VAR_NULL);
+        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w{3,})")), Var.VAR_NULL);
         Assert.assertTrue(((result2.getObjectAsList().get(0)) instanceof  List));
     }
 
     @Test
     public void verifyListSize() throws Exception{
-        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var("(\\w*)\\$(\\w*)"), Var.VAR_NULL);
+        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w*)\\$(\\w*)")), Var.VAR_NULL);
         Assert.assertEquals(result.getObjectAsList().size(), 3);
 
-        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var("(\\w{3,})"), Var.VAR_NULL);
+        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w{3,})")), Var.VAR_NULL);
         Assert.assertEquals(result2.getObjectAsList().size(), 4);
     }
 
@@ -72,11 +72,11 @@ public class RegexTest {
 
     @Test
     public void compareExtractText() throws Exception{
-        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var("(\\w*)\\$(\\w*)"), Var.VAR_NULL);
+        Var result  = Operations.extractTextWithRegex(new Var(texto1), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w*)\\$(\\w*)")), Var.VAR_NULL);
         Assert.assertEquals(((List) ((result.getObjectAsList().get(0)))).get(0), "estude");
         Assert.assertEquals(((List) ((result.getObjectAsList().get(2)))).get(1), "demais");
 
-        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var("(\\w{3,})"), Var.VAR_NULL);
+        Var result2 = Operations.extractTextWithRegex(new Var(texto2), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("(\\w{3,})")), Var.VAR_NULL);
         Assert.assertEquals(((List) ((result2.getObjectAsList().get(0)))).get(0), "junit");
         Assert.assertEquals(((List) ((result2.getObjectAsList().get(3)))).get(0), "demais");
     }
@@ -94,7 +94,7 @@ public class RegexTest {
 
     @Test
     public void validateTextWithoutFlagShouldBeReturnTrue()  throws Exception{
-            Assert.assertTrue(Operations.validateTextWithRegex(new Var("123"), new Var("^\\d\\d\\d$"), Var.VAR_NULL).getObjectAsBoolean());
+            Assert.assertTrue(Operations.validateTextWithRegex(new Var("123"), new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("^\\d\\d\\d$")), Var.VAR_NULL).getObjectAsBoolean());
     }
 
     @Test
