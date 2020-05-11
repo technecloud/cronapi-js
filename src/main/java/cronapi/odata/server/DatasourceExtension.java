@@ -523,7 +523,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       if (best != null) {
         addProperty(orgName, mainType, edmSchema,
             ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
-            added.getName()+ "_" + best.getName(),
+            added.getName() + "_" + best.getName(),
             added.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
             propertyRefList, expression, complexIndex, mainAlias);
       }
@@ -905,6 +905,18 @@ public class DatasourceExtension implements JPAEdmExtension {
         canEdit = false;
         for (Property item : properties) {
           if (isOriginalKey(mainType, item.getName())) {
+            if (item.getComposite() != null) {
+              for (Property c : item.getComposite()) {
+                keys.add(c);
+              }
+            } else {
+              keys.add(item);
+            }
+          }
+        }
+
+        if (keys.size() == 0) {
+          for (Property item : properties) {
             if (item.getComposite() != null) {
               for (Property c : item.getComposite()) {
                 keys.add(c);

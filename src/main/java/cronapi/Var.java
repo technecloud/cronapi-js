@@ -72,6 +72,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
   @Override
   public Object get(String name) {
+    if (isNative()) {
+      return _object;
+    }
     return getField(name).getObject();
   }
 
