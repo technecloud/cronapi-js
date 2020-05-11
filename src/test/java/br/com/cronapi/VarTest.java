@@ -41,6 +41,30 @@ public class VarTest {
   }
 
   @Test
+  public void testObject() {
+    Map<String, String> map = new LinkedHashMap<>();
+    map.put("key", "value");
+    Var var = Var.valueOf(map);
+    Assert.assertEquals(var.get("key"), "value");
+    var.set("key2", "value2");
+    Assert.assertEquals(var.get("key2"), "value2");
+    Assert.assertEquals(Var.valueOf("primitive").get("anyKey"), "primitive");
+    Assert.assertEquals(Var.valueOf(1L).get("anyKey"), 1L);
+    Assert.assertEquals(Var.valueOf(true).get("anyKey"), true);
+    Assert.assertEquals(getTestDate().get("anyKey"), getTestDate().getObject());
+
+    AnyObject any = new AnyObject();
+    any.setTest("value");
+
+    Assert.assertEquals(Var.valueOf(any).get("test"), "value");
+    any.setTest("value");
+
+    Var anyVar = Var.valueOf(any);
+    anyVar.set("test", "other");
+    Assert.assertEquals(Var.valueOf(any).get("test"), "other");
+  }
+
+  @Test
   public void listConversion() {
     List list = Var.valueOf("1,2").getObjectAsList();
 
