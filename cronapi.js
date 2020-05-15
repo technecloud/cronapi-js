@@ -1520,7 +1520,7 @@ if (!window.fixedTimeZone) {
               }
 
               let findLastLink = function(element) {
-                return $(element[element.length - 1]).closest('ul:visible').find('a:first');
+                return $(element[element.length - 1]).closest('li:visible').find('a:first');
               };
 
               let lastHovers = $(modalToShow).data('lastHovers');
