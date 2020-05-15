@@ -82,21 +82,31 @@ if (!window.fixedTimeZone) {
   };
 
   var serverMap = {};
-
+  
   this.cronapi.server = function(pack) {
     var attr = false;
+    var toPromise = false;
+    var async = true;
     return {
       attr: function() {
         attr = true;
         return this;
       },
+      toPromise: function() {
+        toPromise = true;
+        return this;
+      },
+      notAsync: function() {
+        async = false;
+        return this;
+      },
       run: function() {
         var key = pack;
-
+        
         for (var i = 0;i <arguments.length;i++) {
           key += String(arguments[i]);
         }
-
+        
         if (attr) {
           if (serverMap.hasOwnProperty(key)) {
             if (serverMap[key] != "$$loading") {
@@ -105,43 +115,68 @@ if (!window.fixedTimeZone) {
               return "";
             }
           }
-
           serverMap[key] = "$$loading";
         }
-
+        
         var parts = pack.split(".");
         var func = parts[parts.length-1];
         parts.pop();
         var namespace = parts.join(".");
-
+        
         var blocklyName = namespace + ":" + func;
-
+        
+        var resolveForPromise;
+        var rejectForPromise;
+        var promise = new Promise((resolve, reject) => {
+          resolveForPromise = resolve;
+          rejectForPromise = reject;
+        });
+        
         var success = function(data) {
           this.safeApply(function() {
             if (attr) {
               serverMap[key] = data;
             }
+            resolveForPromise(data);
           });
         }.bind(this);
-
+        
         var error = function(error) {
           this.safeApply(function() {
             if (attr) {
               serverMap[key] = error;
             }
+            rejectForPromise(error);
           });
           if (error)
             this.cronapi.$scope.Notification.error(error);
         }.bind(this);
-
-        var args = [blocklyName, success, error];
-
-        for (var i = 0;i <arguments.length;i++) {
-          args.push(arguments[i]);
+        
+        var args = [blocklyName];
+        
+        if (async) {
+          args.push(success);
+          args.push(error);
+          for (var i = 0;i <arguments.length;i++) {
+            args.push(arguments[i]);
+          }
+          
+          this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
+          if (toPromise)
+            return promise;
         }
-
-        this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
-
+        else {
+          for (var i = 0;i <arguments.length;i++) {
+            args.push(arguments[i]);
+          }
+          
+          let resultData = this.cronapi.util.callServerBlockly.apply(this, args);
+          if (attr) {
+            serverMap[key] = resultData;
+          }
+          return resultData;
+        }
+        
       }.bind(this)
     }
   };
@@ -164,6 +199,7 @@ if (!window.fixedTimeZone) {
       }.bind(this)
     }
   };
+
 
   /**
    * @category CategoryType.CONVERSION
@@ -331,6 +367,42 @@ if (!window.fixedTimeZone) {
   };
 
   /**
+   * @type function
+   * @name {{createPromiseName}}
+   * @nameTags createPromiseName
+   * @description {{functioncreatePromise}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.util.createPromise = function () {
+    var functionToResolve;
+    var functionToReject;
+    var promise = new Promise((resolve, reject) => {
+      functionToResolve = resolve;
+      functionToReject = reject;
+    });
+    promise.__functionToResolve = functionToResolve;
+    promise.__functionToReject = functionToReject;
+    return promise;
+  }
+
+  /**
+   * @type function
+   * @name {{handleValueToPromise}}
+   * @nameTags handleValueToPromise
+   * @description {{functionToHandleValueToPromise}}
+   * @param {ObjectType.STRING} type {{type}}
+   * @param {ObjectType.OBJECT} promise {{promise}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.util.handleValueToPromise = function (/** @type {ObjectType.STRING} @description {{type}} @blockType util_dropdown @keys resolve|reject @values resolve|reject  */ type, promise, value) {
+    if(type === 'resolve') {
+      promise.__functionToResolve(value);
+    }else{
+      promise.__functionToReject(value);
+    }
+  }
+
+  /**
    * @type internal
    * @name {{callServerBlocklyAsync}}
    * @nameTags callServerBlocklyAsync
@@ -342,29 +414,50 @@ if (!window.fixedTimeZone) {
    * @arbitraryParams true
    */
   this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, fields, callbackSuccess, callbackError) {
+  
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+  
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = this.cronapi.$scope.http;
     var params = [];
     $(arguments).each(function() {
       params.push(this);
     });
-
+  
     var token = "";
     if (window.uToken)
       token = window.uToken;
-
+  
     var dataCall = {
       "fields": fields,
       "inputs": params.slice(4)
     };
-
+  
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
-
+    let contentData = undefined;
+    try {
+      contentData = JSON.stringify(dataCall);
+    }
+    catch (e) {
+      contentData = JSON.stringify(dataCall, getCircularReplacer());
+    }
+  
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
       dataType: 'html',
-      data : JSON.stringify(dataCall),
+      data : contentData,
       headers : {
         'Content-Type' : 'application/json',
         'X-AUTH-TOKEN' : token,
@@ -374,9 +467,8 @@ if (!window.fixedTimeZone) {
       success : callbackSuccess,
       error : callbackError
     });
-
+  
   };
-
   /**
    * @type internal
    */
@@ -557,30 +649,51 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
+  
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key, value) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+    
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
-
+  
     var fields = this.cronapi.util.getScreenFields();
-
+  
     var dataCall = {
       "fields": fields,
       "inputs": params
     };
-
+  
     for (var i = 1; i<arguments.length; i++)
       params.push(arguments[i]);
-
+  
     var token = "";
     if (window.uToken)
       token = window.uToken;
-
+  
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
-
+    let contentData = undefined;
+    try {
+      contentData = JSON.stringify(dataCall);
+    }
+    catch (e) {
+      contentData = JSON.stringify(dataCall, getCircularReplacer());
+    }
+  
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
       dataType: 'html',
-      data : JSON.stringify(dataCall),
+      data : contentData,
       async: false,
       headers : {
         'Content-Type' : 'application/json',
@@ -589,7 +702,7 @@ if (!window.fixedTimeZone) {
         'timezone': moment().utcOffset()
       }
     });
-
+  
     var result;
     if (resultData.status == 200) {
       if (resultData.responseJSON)
@@ -1407,7 +1520,7 @@ if (!window.fixedTimeZone) {
               }
 
               let findLastLink = function(element) {
-                return $(element[element.length - 1]).closest('ul:visible').find('a:first');
+                return $(element[element.length - 1]).closest('li:visible').find('a:first');
               };
 
               let lastHovers = $(modalToShow).data('lastHovers');
@@ -1416,15 +1529,17 @@ if (!window.fixedTimeZone) {
                   lastFocusedClass.focus();
                   lastFocused.focus();
               }
-              else if (lastHovers && lastHovers.length) {
-                let lastLink = findLastLink(lastHovers);
-                lastLink.focus();
-              }else{
+              //Tenta achar o mais proximo do ultimo click (link clicado)
+              else if ($('html').has(lastFocused).length) {
                 let lastLink = findLastLink(lastFocused);
                 lastLink.focus();
               }
-
-
+              else if (lastHovers && lastHovers.length) {
+                let lastLink = findLastLink(lastHovers);
+                lastLink.focus();
+              }
+  
+  
           }).modal({backdrop: 'static', keyboard: false});
       }catch(e){
           $(modalToShow).show();
@@ -2669,7 +2784,7 @@ if (!window.fixedTimeZone) {
     };
   };
 
-  this.cronapi.internal.startCamera = function(field) {
+  this.cronapi.internal.startCamera = function(field, quality, allowEdit, targetWidth, targetHeight) {
     //verify if user is on Browser or not
     if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
       // If in mobile devices use native camera cordova plugin
@@ -2680,10 +2795,13 @@ if (!window.fixedTimeZone) {
         console.error(error);
         that.cronapi.$scope.Notification.error(message);
       }, {
-        quality: 60, //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
+        quality: parseInt(quality), //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
         destinationType: Camera.DestinationType.DATA_URL,
         encodingType: Camera.EncodingType.PNG,
-        correctOrientation: true
+        correctOrientation: true,
+        allowEdit: (allowEdit == 'true'),
+        targetWidth: parseInt(targetWidth),
+        targetHeight: parseInt(targetHeight)
       });
     }else{
       var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
@@ -3101,7 +3219,7 @@ if (!window.fixedTimeZone) {
 
         url += '/' + entity;
         url += '/' + field;
-        var _u = JSON.parse(localStorage.getItem('_u'));
+        var _u = JSON.parse(localStorage.getItem('_u')) || {};
         var object = itemActive;
 
         var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
@@ -3140,7 +3258,7 @@ if (!window.fixedTimeZone) {
     var uploadUrl = '/api/cronapi/uploadFile';
     var formData = new FormData();
     formData.append("file", file);
-    var _u = JSON.parse(localStorage.getItem('_u'));
+    var _u = JSON.parse(localStorage.getItem('_u')) || {};
 
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(uploadUrl);
 
@@ -3288,6 +3406,22 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.object.createObjectFromString = function(string) {
     return JSON.parse(string);
+  };
+
+   /**
+   * @type function
+   * @name {{createObjectLoginJson}}
+   * @description {{createObjectLoginJsonDescription}}
+   * @nameTags object
+   * @param {ObjectType.STRING} string {{Login}}
+   * @param {ObjectType.STRING} string {{Password}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.object.createObjectLoginFromString = function(login, password) {
+    let json = {};
+    json["username"] = login;
+    json["password"] = password;
+    return JSON.parse(JSON.stringify(json));
   };
 
   /**
@@ -4169,8 +4303,7 @@ if (!window.fixedTimeZone) {
       if(Array.isArray(args[4])
       && typeof args[4][0] === 'object'
       && 'label' in args[4][0]
-      && 'data' in args[4][0]
-      && 'options' in args[4][0]){
+      && 'data' in args[4][0]){
         args = args[4];
         size = 0;
       }
@@ -4402,6 +4535,76 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.screen.back = function() {
     history.back();
+  }
+
+  /**
+   * @category CategoryType.REGEX
+   * @categoryTags REGEX|regex
+   */
+   
+  this.cronapi.regex = {};
+
+   /**
+   * @type function
+   * @name {{extractTextByRegex}}
+   * @nameTags extractTextByRegex
+   * @description {{extractTextByRegexDescription}}
+   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} regex {{regex}}
+   * @param {ObjectType.STRING} flag {{flag}}
+   * @returns {ObjectType.LIST}
+   */
+  this.cronapi.regex.extractTextByRegex = function(/** @type {ObjectType.STRING} @defaultValue */ text, /** @type {ObjectType.STRING} */ regex, /** @type {ObjectType.STRING} @description {{flag}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ flag){
+    if (this.cronapi.logic.isNull(text) || this.cronapi.logic.isNull(regex))
+      return [];
+
+    let regexInstance = null;
+
+    if (flag != null && flag !== '-'){
+      regexInstance = new RegExp(regex, flag);
+    }else{
+       regexInstance = new RegExp(regex);
+    }
+
+    let matches, output = [];
+    let idx = null;
+    
+    while (matches = regexInstance.exec(text)) {
+
+        if(idx != null && idx == matches.index) break;
+        
+        let occurrence =  [];
+
+        for(i = 1; i < matches.length ; i++){
+          occurrence.push(matches[i]);
+        }
+        
+        idx = matches.index;
+        
+        output.push(occurrence);
+        
+    }
+
+    return output;
+  }
+
+  /**
+   * @type function
+   * @name {{validateTextWithRegex}}
+   * @nameTags validateTextWithRegex
+   * @description {{validateTextWithRegexDescription}}
+   * @param {ObjectType.STRING} text {{text}}
+   * @param {ObjectType.STRING} regex {{regex}}
+   * @param {ObjectType.STRING} flag {{flag}}
+   * @returns {ObjectType.BOOLEAN}
+   */
+  this.cronapi.regex.validateTextWithRegex = function(/** @type {ObjectType.STRING} */ text, /** @type {ObjectType.STRING} */ regex, /** @type {ObjectType.STRING} @description {{flag}} @defaultValue - @blockType util_dropdown @keys -|g|i|m|gi|gim|gm  @values {{-}}|{{g}}|{{i}}|{{m}}|{{gi}}|{{gim}}|{{gm}}  */ flag){
+    if (this.cronapi.logic.isNull(text) || this.cronapi.logic.isNull(regex))
+      return false;
+    if (flag != null && flag !== '-')
+      return new RegExp(regex, flag).test(text);
+
+    return new RegExp(regex).test(text);
   }
 
 }).bind(window)();

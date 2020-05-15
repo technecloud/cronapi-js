@@ -503,5 +503,19 @@
   "getApplicationName": "Obter nome da aplicação",
   "functionToGetApplicationName": "Função para obter nome da aplicação",
   "back": "Voltar para Formulário Anterior",
-  "backDescription": "Volta para formulário aberto anteriormente"
+  "backDescription": "Volta para formulário aberto anteriormente",
+  "CategoryType.REGEX": "Expressão Regular",
+  "extractTextByRegex" : "Extrair texto com Exp. Regular",
+  "extractTextByRegexDescription" : "Função para extrair texto com Exp. Regular. Retorna uma lista com as incidências, caso enconte.",
+  "validateTextWithRegex": "Validar texto com Exp. Regular",
+  "validateTextWithRegexDescription": "Função que valida texto com Exp. Regular. Retorna verdadeiro caso encontre ou falso caso não encontre o texto.",
+  "regex": "Exp. Regular",
+  "flag": "Flag",
+  "createPromiseName": "Criar Promessa",
+  "functioncreatePromise": "Função para criar um objeto com uma Promessa",
+  "handleValueToPromise": "Atribuir valor para a promessa" ,
+  "functionToHandleValueToPromise": "Você pode resolver ou rejeitar o valor para a promessa",
+  "promise": "Promessa",
+  "createObjectLoginJson": "Criar objeto login Json",
+  "createObjectLoginJsonDescription": "Função para criar objeto login Json"
 }
