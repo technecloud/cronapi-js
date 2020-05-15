@@ -12,10 +12,12 @@ import org.apache.olingo.odata2.api.edm.FullQualifiedName;
 import org.apache.olingo.odata2.api.edm.provider.*;
 import org.apache.olingo.odata2.core.CloneUtils;
 import org.apache.olingo.odata2.core.edm.EdmSimpleTypeFacadeImpl;
+import org.apache.olingo.odata2.core.edm.EdmString;
 import org.apache.olingo.odata2.jpa.processor.api.ODataJPAContext;
 import org.apache.olingo.odata2.jpa.processor.api.exception.ODataJPAModelException;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmExtension;
 import org.apache.olingo.odata2.jpa.processor.api.model.JPAEdmSchemaView;
+import org.apache.olingo.odata2.jpa.processor.core.ODataJPAConfig;
 import org.apache.olingo.odata2.jpa.processor.core.access.data.VirtualClass;
 import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
@@ -90,6 +92,7 @@ public class DatasourceExtension implements JPAEdmExtension {
           this.jpqlEntity = type;
         }
       }
+      //A
 
       for (EntityContainer container : edmSchema.getEntityContainers()) {
         for (EntitySet entitySet : container.getEntitySets()) {
@@ -253,6 +256,31 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
+  private boolean isOriginalKey(EntityType entityType, String name) {
+    for (Property item : entityType.getProperties()) {
+      if (item.getName().equals(name) && item.isOriginalId()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private List<Property> findOriginalKeys(EntityType entityType) {
+    List<Property> keys = new LinkedList<>();
+    for (PropertyRef item : entityType.getKey().getKeys()) {
+      Property property = findProperty(entityType, item.getName());
+      if (property != null) {
+        if (property.getComposite() != null) {
+          keys.addAll(property.getComposite());
+        } else {
+          keys.add(property);
+        }
+      }
+    }
+    return keys;
+  }
+
   private Property findProperty(EntityType entityType, String name) {
     for (Property item : entityType.getProperties()) {
       if (item.getName().equals(name)) {
@@ -300,6 +328,9 @@ public class DatasourceExtension implements JPAEdmExtension {
   }
 
   private Property findBestDisplayField(EntityType complexType) {
+    if (!ODataJPAConfig.ADD_DISPLAY_FIELDS) {
+      return null;
+    }
     Class clazz = ((JPAEdmMappingImpl) complexType.getMapping()).getJPAType();
     Field[] fields = clazz.getDeclaredFields();
     for (Field field : fields) {
@@ -317,7 +348,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     for (Property p : complexType.getProperties()) {
       JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
       PropertyRef key = findKey(complexType, p.getName());
-      if (key == null && mapping.getJPAType() == String.class && isPreferedDisplayField(p.getName())) {
+      if (key == null && !p.isOriginalId() && p.getOriginalType() == null && mapping.getJPAType() == String.class && isPreferedDisplayField(p.getName())) {
         best = p;
         break;
       }
@@ -327,7 +358,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       for (Property p : complexType.getProperties()) {
         JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
         PropertyRef key = findKey(complexType, p.getName());
-        if (key == null && mapping.getJPAType() == String.class) {
+        if (key == null && !p.isOriginalId() && p.getOriginalType() == null && mapping.getJPAType() == String.class) {
           best = p;
           break;
         }
@@ -336,55 +367,66 @@ public class DatasourceExtension implements JPAEdmExtension {
 
     if (best == null) {
       for (Property p : complexType.getProperties()) {
+        JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
         PropertyRef key = findKey(complexType, p.getName());
-        if (key == null) {
+        boolean isComplex = isEdmSimpleTypeKind(mapping.getJPAType());
+        if (key == null && !p.isOriginalId() && p.getOriginalType() == null && !isComplex) {
           best = p;
           break;
         }
       }
     }
 
-    if (best == null) {
-      best = complexType.getProperties().get(0);
-    }
-
     return best;
   }
 
   private void addDisplayFields(Schema edmSchema, EntityType type) {
+    if (!ODataJPAConfig.ADD_DISPLAY_FIELDS) {
+      return;
+    }
     List<Property> properties = new LinkedList<>();
     properties.addAll(type.getProperties());
 
     for (Property p : properties) {
 
       JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) p.getMapping();
-      EntityType complexType = findEntityType(edmSchema, mapping.getJPAType().getSimpleName());
+      EntityType complexType = null;
+      if (p.getOriginalType() != null) {
+        complexType = findEntityType(edmSchema, p.getOriginalType().getSimpleName());
+      }
       if (complexType != null) {
         SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
-        SimpleProperty newProp = (SimpleProperty) CloneUtils.getClone(p);
-        newProp.setName(newProp.getName() + "_" + best.getName());
-        newProp.setType(best.getType());
-        ((Facets) newProp.getFacets()).setNullable(true);
+        if (best != null) {
+          SimpleProperty newProp = (SimpleProperty) CloneUtils.getClone(p);
+          newProp.setComposite(null);
+          newProp.setName(newProp.getName() + "_" + best.getName());
+          newProp.setType(best.getType());
+          ((Facets) newProp.getFacets()).setNullable(true);
 
-        JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
-        newMapping.setInternalName(
-            newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf("."))
-                + "." + best.getName());
-        newProp.setMapping(newMapping);
-
-        int total = 0;
-        String name = newProp.getName();
-        for (Property prop : type.getProperties()) {
-          if (prop.getName().equals(name) || prop.getName().startsWith(name + "_")) {
-            total++;
+          JPAEdmMappingImpl newMapping = (JPAEdmMappingImpl) CloneUtils.getClone(p.getMapping());
+          if (newMapping.getInternalName().contains(".")) {
+            newMapping.setInternalName(
+                newMapping.getInternalName().substring(0, newMapping.getInternalName().lastIndexOf("."))
+                    + "." + best.getName());
+          } else {
+            newMapping.setInternalName(newMapping.getInternalName() + "." + best.getName());
           }
-        }
+          newProp.setMapping(newMapping);
 
-        if (total > 0) {
-          newProp.setName(name + "_" + total);
-        }
+          int total = 0;
+          String name = newProp.getName();
+          for (Property prop : type.getProperties()) {
+            if (prop.getName().equals(name) || prop.getName().startsWith(name + "_")) {
+              total++;
+            }
+          }
 
-        type.getProperties().add(newProp);
+          if (total > 0) {
+            newProp.setName(name + "_" + total);
+          }
+
+          type.getProperties().add(newProp);
+        }
 
       }
     }
@@ -394,7 +436,7 @@ public class DatasourceExtension implements JPAEdmExtension {
 
   private SimpleProperty addProperty(String alias, EntityType mainType, Schema edmSchema,
                                      Class type, String orgName, String internalName, String expression, List<Property> properties,
-                                     List<PropertyRef> propertyRefList, List<Property> extras, boolean isExtra, String complexPath, int complexIndex, String mainAlias) {
+                                     List<PropertyRef> propertyRefList, String complexPath, int complexIndex, String mainAlias) {
 
     boolean isComplex = isEdmSimpleTypeKind(type);
     EntityType complexType = null;
@@ -402,27 +444,88 @@ public class DatasourceExtension implements JPAEdmExtension {
       complexType = findEntityType(edmSchema, type.getSimpleName());
     }
     if (complexType != null) {
-      int tmpComplexIndex = properties.size();
-      String internalExpression = expression.substring(expression.indexOf(".") + 1);
-      List<PropertyRef> keys = complexType.getKey().getKeys();
-      SimpleProperty first = null;
-      for (PropertyRef key : keys) {
-        Property prop = findProperty(complexType, key.getName());
-        first = addProperty(orgName, mainType, edmSchema,
-            ((JPAEdmMappingImpl) prop.getMapping()).getJPAType(),
-            alias != null ? alias : internalExpression.replace(".", "_") + "_" + key.getName(),
-            "[name]." + key.getName(), expression + "." + key.getName(), properties,
-            propertyRefList, extras, first != null, expression, tmpComplexIndex, mainAlias);
+      if (orgName.equals(mainAlias) && alias == null) {
+        for (Property property : complexType.getProperties()) {
+          if (property.getName().equals(ODataJPAConfig.COMPOSITE_KEY_NAME)) {
+            continue;
+          }
+          Property newProperty = CloneUtils.getClone(property);
+          properties.add(newProperty);
+          newProperty.setName(newProperty.getName());
+          newProperty.setMapping(CloneUtils.getClone(property.getMapping()));
+          JPAEdmMappingImpl mapping = ((JPAEdmMappingImpl) newProperty.getMapping());
+          mapping.setVirtualAccess(true);
+          mapping.setInternalName(mainAlias + "." + mapping.getInternalName());
+          mapping.setInternalExpression(expression + "." + property.getMapping().getInternalName());
+          mapping.setComplexIndex(complexIndex);
+          newProperty.setForeignKey(true);
+          if (property.getOriginalType() != null) {
+            if (property.getComposite() != null) {
+              newProperty.setComposite(null);
+              for (Property c : property.getComposite()) {
+                Property newComposite = CloneUtils.getClone(c);
+                JPAEdmMappingImpl compositeMapping = ((JPAEdmMappingImpl) newComposite.getMapping());
+                newComposite.setName(mainAlias + "_" + c.getName());
+                compositeMapping.setInternalName(mainAlias + "." + compositeMapping.getInternalName());
+                compositeMapping.setInternalExpression(expression + "." + c.getMapping().getInternalName());
+                compositeMapping.setComplexIndex(complexIndex);
+                compositeMapping.setVirtualAccess(true);
+                newComposite.setForeignKey(true);
+                newProperty.addComposite(newComposite);
+              }
+            }
+
+            SimpleProperty best = (SimpleProperty) findBestDisplayField(findEntityType(edmSchema, newProperty.getOriginalType().getSimpleName()));
+            if (best != null) {
+              if (property.getComposite() != null) {
+                addProperty(orgName, mainType, edmSchema,
+                    ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
+                    newProperty.getName() + "_" + best.getName(),
+                    mapping.getInternalName() + "." + best.getName(), mapping.getInternalExpression() + "." + best.getName(), properties,
+                    propertyRefList, expression, complexIndex, mainAlias);
+              } else {
+                addProperty(orgName, mainType, edmSchema,
+                    ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
+                    newProperty.getName() + "_" + best.getName(),
+                    mapping.getInternalName().substring(0, mapping.getInternalName().lastIndexOf(".")) + "." + best.getName(), mapping.getInternalExpression().substring(0, mapping.getInternalName().lastIndexOf(".")) + "." + best.getName(), properties,
+                    propertyRefList, expression, complexIndex, mainAlias);
+              }
+            }
+          }
+        }
+        return null;
       }
 
-      if (first != null) {
-        SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
+      String internalExpression = expression.substring(expression.indexOf(".") + 1);
+      List<Property> keys = findOriginalKeys(complexType);
+      String prefix = alias != null ? alias : internalExpression.replace(".", "_");
+      SimpleProperty added = addProperty(orgName, mainType, edmSchema,
+          String.class,
+          prefix,
+          "[name]." + orgName, expression + "." + orgName, properties,
+          propertyRefList, expression, complexIndex, mainAlias);
+      for (Property key : keys) {
+        Property newKey = CloneUtils.getClone(key);
+        newKey.setName(added.getName() + "_" + newKey.getName());
+        newKey.setMapping(CloneUtils.getClone(key.getMapping()));
+        JPAEdmMappingImpl mapping = ((JPAEdmMappingImpl) newKey.getMapping());
+        mapping.setVirtualAccess(true);
+        mapping.setInternalName(added.getName() + "." + mapping.getInternalName());
+        mapping.setInternalExpression(expression + "." + key.getMapping().getInternalName());
+        newKey.setForeignKey(true);
+        added.addComposite(newKey);
+        if (ODataJPAConfig.EXPAND_COMPOSITE_KEYS) {
+          properties.add(newKey);
+        }
+      }
+
+      SimpleProperty best = (SimpleProperty) findBestDisplayField(complexType);
+      if (best != null) {
         addProperty(orgName, mainType, edmSchema,
             ((JPAEdmMappingImpl) best.getMapping()).getJPAType(),
-            alias != null ? alias + "_" + best.getName()
-                : internalExpression.replace(".", "_") + "_" + best.getName(),
-            first.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
-            propertyRefList, extras, true, expression, tmpComplexIndex, mainAlias);
+            added.getName() + "_" + best.getName(),
+            added.getName() + "." + best.getName(), expression + "." + best.getName(), properties,
+            propertyRefList, expression, complexIndex, mainAlias);
       }
     } else {
 
@@ -456,13 +559,6 @@ public class DatasourceExtension implements JPAEdmExtension {
         }
       }
 
-      for (Property prop : extras) {
-        if (prop.getName().equals(name)) {
-          total++;
-          name = property.getName() + "_" + total;
-        }
-      }
-
       if (total > 0) {
         property.setName(name);
       }
@@ -475,8 +571,8 @@ public class DatasourceExtension implements JPAEdmExtension {
       if (complexPath != null) {
         String path = complexPath.substring(complexPath.indexOf(".") + 1);
         mapping.setComplexPath(path);
-        mapping.setComplexIndex(complexIndex);
       }
+      mapping.setComplexIndex(complexIndex);
       if (plainExpression && count > 1) {
         mapping.setIsPath(true);
         String path = expression.substring(expression.indexOf(".") + 1);
@@ -486,11 +582,8 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       property.setMapping(mapping);
 
-      if (isExtra) {
-        extras.add(property);
-      } else {
-        properties.add(property);
-      }
+      properties.add(property);
+
 
       return property;
     }
@@ -521,6 +614,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       key.setKeys(propertyRefList);
 
       List<Property> properties = new ArrayList<>();
+      List<Property> keys = new LinkedList<>();
       boolean keysSet = false;
 
       JsonElement defaultValuesPropertiesElement = entity.get("defaultValuesProperties");
@@ -546,9 +640,8 @@ public class DatasourceExtension implements JPAEdmExtension {
           properties.add(property);
 
           if (entry.getValue().getAsJsonObject().get("key").getAsBoolean()) {
-            PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(entry.getKey());
-            propertyRefList.add(propertyRef);
+            keys.add(property);
+            property.setOriginalId(true);
             keysSet = true;
           }
 
@@ -560,11 +653,28 @@ public class DatasourceExtension implements JPAEdmExtension {
         propertyRefList.clear();
         canEdit = false;
         for (Property item : properties) {
-          PropertyRef propertyRef = new PropertyRef();
-          propertyRef.setName(item.getName());
-          propertyRefList.add(propertyRef);
+          keys.add(item);
         }
       }
+
+      SimpleProperty objectKey = new SimpleProperty();
+      objectKey.setName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+      objectKey.setType(EdmSimpleTypeKind.String);
+
+      JPAEdmMappingImpl keymapping = new JPAEdmMappingImpl();
+      keymapping.setInternalName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+      keymapping.setJPAType(EdmString.class);
+      keymapping.setVirtualAccess(true);
+
+      objectKey.setMapping(keymapping);
+
+      objectKey.setComposite(keys);
+
+      PropertyRef propertyRef = new PropertyRef();
+      propertyRef.setName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+      propertyRefList.add(propertyRef);
+
+      properties.add(objectKey);
 
       EntityType type = new EntityType();
 
@@ -663,7 +773,10 @@ public class DatasourceExtension implements JPAEdmExtension {
       if (complexType != null) {
         if (mainAlias.equals(expression.toString())) {
           for (Property prop : complexType.getProperties()) {
-            String reportItem = expression + "." + prop.getName();
+            if (prop.getComposite() != null) {
+              continue;
+            }
+            String reportItem = expression + "." + prop.getMapping().getInternalName();
             if (!StringUtils.isEmpty(alias)) {
               reportItem += " as " + alias + "_" + prop.getName();
             }
@@ -706,7 +819,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         return createEntityDataSource(edmSchema, id, entity, addFields);
       } else {
 
-        String newJpql = expandJPQL(jpql, edmSchema);
+        String newJpql = jpql;
         boolean changed = false;
 
         if (!newJpql.equals(jpql)) {
@@ -737,13 +850,14 @@ public class DatasourceExtension implements JPAEdmExtension {
             .getQueryStatement()).getSelectClause()).getSelectExpression().children();
         ListIterator<Expression> expressions = children.iterator();
         Key key = new Key();
-        List<PropertyRef> propertyRefList = new ArrayList<>();
+        List<PropertyRef> propertyRefList = new LinkedList<>();
         key.setKeys(propertyRefList);
 
-        List<Property> properties = new ArrayList<>();
-        List<Property> extras = new ArrayList<>();
-        boolean keysSet = false;
+        List<Property> properties = new LinkedList<>();
+        List<Property> keys = new LinkedList<>();
+        int index = -1;
         for (ReportItem item : reportQuery.getItems()) {
+          index++;
           String alias = null;
           Expression expression = expressions.next();
           if (expression instanceof IdentificationVariable && !(expression
@@ -784,32 +898,57 @@ public class DatasourceExtension implements JPAEdmExtension {
             name = "expression";
           }
 
-          SimpleProperty added = addProperty(alias, mainType, edmSchema, type, name, name,
-              expression.toString(), properties, propertyRefList, extras, false, null, -1, mainAlias);
-
-          if (added != null) {
-            if (findKey(mainType, added.getName()) != null) {
-              PropertyRef propertyRef = new PropertyRef();
-              propertyRef.setName(name);
-              propertyRefList.add(propertyRef);
-              keysSet = true;
-            }
-          }
-
+          addProperty(alias, mainType, edmSchema, type, name, name, expression.toString(), properties, propertyRefList, null, index, mainAlias);
         }
-
-        properties.addAll(extras);
 
         boolean canEdit = true;
-        if (!keysSet || propertyRefList.size() != mainType.getKey().getKeys().size()) {
-          propertyRefList.clear();
-          canEdit = false;
-          for (Property item : properties) {
-            PropertyRef propertyRef = new PropertyRef();
-            propertyRef.setName(item.getName());
-            propertyRefList.add(propertyRef);
+        canEdit = false;
+        for (Property item : properties) {
+          if (isOriginalKey(mainType, item.getName())) {
+            if (item.getComposite() != null) {
+              for (Property c : item.getComposite()) {
+                keys.add(c);
+              }
+            } else {
+              keys.add(item);
+            }
           }
         }
+
+        if (keys.size() == 0) {
+          for (Property item : properties) {
+            if (item.getComposite() != null) {
+              for (Property c : item.getComposite()) {
+                keys.add(c);
+              }
+            } else {
+              keys.add(item);
+            }
+          }
+        }
+
+        if (findOriginalKeys(mainType).size() == keys.size()) {
+          canEdit = true;
+        }
+
+        SimpleProperty objectKey = new SimpleProperty();
+        objectKey.setName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+        objectKey.setType(EdmSimpleTypeKind.String);
+
+        JPAEdmMappingImpl keymapping = new JPAEdmMappingImpl();
+        keymapping.setInternalName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+        keymapping.setJPAType(EdmString.class);
+        keymapping.setVirtualAccess(true);
+
+        objectKey.setMapping(keymapping);
+
+        objectKey.setComposite(keys);
+
+        PropertyRef propertyRef = new PropertyRef();
+        propertyRef.setName(ODataJPAConfig.COMPOSITE_KEY_NAME);
+        propertyRefList.add(propertyRef);
+
+        properties.add(objectKey);
 
         EntityType type = new EntityType();
 
@@ -835,7 +974,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         return set;
       }
     } else {
-      if (entity == null && query instanceof ReadAllQuery) {
+      if (query instanceof ReadAllQuery) {
         entity = ((ReadAllQuery) query).getExpressionBuilder().getQueryClass().getSimpleName();
       }
       return createEntityDataSource(edmSchema, id, entity, addFields);

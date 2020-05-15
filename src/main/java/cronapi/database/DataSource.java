@@ -15,6 +15,7 @@ import cronapi.odata.server.JPQLParserUtil;
 import cronapi.rest.security.CronappSecurity;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.olingo.odata2.api.edm.provider.Property;
+import org.apache.olingo.odata2.jpa.processor.core.ODataJPAConfig;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmModel;
 import org.eclipse.persistence.annotations.Multitenant;
@@ -402,40 +403,34 @@ public class DataSource implements JsonSerializable {
           }
 
           Var entity = Var.valueOf(new LinkedHashMap<>());
-          if (obj.getClass().isArray()) {
-            int i = 0;
 
-            for (Object o : (Object[]) obj) {
-              JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) entityType.getProperties().get(i).getMapping();
-              String key = entityType.getProperties().get(i).getName();
-              if (mapping != null && mapping.isPath()) {
-                Var sub;
-                if (mapping.getComplexIndex() != -1) {
-                  sub = Var.valueOf(((Object[]) obj)[mapping.getComplexIndex()]);
-                } else {
-                  sub = Var.valueOf(o);
+          for (Property property : entityType.getProperties()) {
+            if (property.getComposite() != null) {
+              String value = "";
+              for (Property p : property.getComposite()) {
+                if (!value.isEmpty()) {
+                  value += ODataJPAConfig.COMPOSITE_SEPARATOR;
                 }
-                entity.set(key, sub.get(mapping.getPath()));
-              } else {
-                entity.set(key, o);
-              }
-
-              i++;
-            }
-          } else {
-            if (entityType.getProperties().size() == 1) {
-              String key = entityType.getProperties().get(0).getName();
-              entity.set(key, obj);
-            } else {
-              Var sub = Var.valueOf(obj);
-              for (Property property : entityType.getProperties()) {
                 JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) property.getMapping();
-                String key = property.getName();
-                entity.set(key, sub.get(mapping.getInternalName()));
+                Object compositeObj;
+                if (mapping.getComplexIndex() != -1 && obj.getClass().isArray() && !(obj instanceof byte[])) {
+                  compositeObj = Var.valueOf(((Object[]) obj)[mapping.getComplexIndex()]);
+                } else {
+                  compositeObj = obj;
+                }
+                Object compositeValue = getPropertyValue(p, compositeObj, p.isForeignKey());
+                if (compositeValue == null) {
+                  value += "null";
+                } else {
+                  value += Var.valueOf(compositeValue).getObjectAsString();
+                }
               }
+              entity.set(property.getName(), value);
+            } else {
+              String key = property.getName();
+              entity.set(key, getPropertyValue(property, obj, property.isForeignKey()));
             }
           }
-
           newEntities.add(entity);
         }
 
@@ -446,6 +441,29 @@ public class DataSource implements JsonSerializable {
     }
 
     return entities;
+  }
+
+  private Object getPropertyValue(Property property, Object obj, boolean isForeignKey) {
+    JPAEdmMappingImpl mapping = (JPAEdmMappingImpl) property.getMapping();
+    Var sub;
+    if (mapping != null) {
+      if (mapping.getComplexIndex() != -1 && obj.getClass().isArray() && !(obj instanceof byte[])) {
+        sub = Var.valueOf(((Object[]) obj)[mapping.getComplexIndex()]);
+      } else {
+        sub = Var.valueOf(obj);
+      }
+      if (mapping.isPath()) {
+        return sub.get(mapping.getPath());
+      } else {
+        if (!isForeignKey) {
+          return sub.get(mapping.getInternalName());
+        } else {
+          return sub.get(mapping.getInternalName().substring(mapping.getInternalName().indexOf(".")+1));
+        }
+      }
+    }
+
+    return null;
   }
 
   public EntityMetadata getMetadata() {
@@ -783,14 +801,12 @@ public class DataSource implements JsonSerializable {
 
     if (this.page.getNumberOfElements() > (this.current + 1)) {
       this.current++;
-    }
-    else {
+    } else {
       this.pageRequest = PageRequest.of(this.page.getNumber() + 1, pageSize);
       this.fetch();
       if (this.page.getNumberOfElements() > 0) {
         this.current = 0;
-      }
-      else {
+      } else {
         this.current = -1;
         this.isEor = true;
       }

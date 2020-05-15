@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cronapi.util.Operations;
+import org.apache.olingo.odata2.jpa.processor.core.ODataJPAConfig;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,14 +19,26 @@ public class AppConfig {
     JSON = loadJSON();
   }
 
+  private static void configureOData(JsonObject config) {
+    if (!isNull(config.get("odata"))) {
+      JsonElement elem = config.get("odata").getAsJsonObject().get("expandCompositeKeys");
+      ODataJPAConfig.EXPAND_COMPOSITE_KEYS =  !isNull(elem) ? elem.getAsBoolean() : false;
+      elem = config.get("odata").getAsJsonObject().get("addDisplayFields");
+      ODataJPAConfig.ADD_DISPLAY_FIELDS =  !isNull(elem) ? elem.getAsBoolean() : true;
+    }
+  }
+
   private static JsonObject loadJSON() {
     ClassLoader classLoader = QueryManager.class.getClassLoader();
     try (InputStream stream = classLoader.getResourceAsStream("META-INF/app.config")) {
       InputStreamReader reader = new InputStreamReader(stream);
       JsonElement jsonElement = new JsonParser().parse(reader);
+      configureOData(jsonElement.getAsJsonObject());
       return jsonElement.getAsJsonObject();
     } catch (Exception e) {
-      return new JsonObject();
+      JsonElement jsonElement = new JsonObject();
+      configureOData(jsonElement.getAsJsonObject());
+      return jsonElement.getAsJsonObject();
     }
   }
 

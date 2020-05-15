@@ -346,7 +346,11 @@ public class Operations {
     if (checkSOAP && !isSoap) {
       throw new Exception(Messages.getString("accessDenied"));
     }
-
+    for (int i = 0; i < callParams.length; i++) {
+      if (callParams[i] == null) {
+        callParams[i] = Var.VAR_NULL;
+      }
+    }
     Object o = methodToCall.invoke(clazz, callParams);
     Var result = Var.valueOf(o);
     if (audit) {

@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static cronapi.math.Operations.divisor;
 import static cronapi.math.Operations.pow;
 
 public class MathTest {
@@ -76,7 +77,14 @@ public class MathTest {
     }
 
     @Test
-    public void testDivisor() {
+    public void testDivisor() throws Exception {
+       Double expected = Var.valueOf(33.333333333333336).getObjectAsDouble();
+       Assert.assertEquals(expected, divisor(Var.valueOf(100),Var.valueOf(3)).getObjectAsDouble());
+       Assert.assertEquals(expected, divisor(Var.valueOf(100.00),Var.valueOf(3.00)).getObjectAsDouble());
+       Assert.assertEquals(expected, divisor(Var.valueOf("100"),Var.valueOf("3")).getObjectAsDouble());
+       Assert.assertEquals(expected, divisor(Var.valueOf("100.00"),Var.valueOf("3.00")).getObjectAsDouble());
+       Assert.assertEquals("Infinity", divisor(Var.valueOf("100.00"),Var.valueOf("0.00")).getObjectAsString());
+       Assert.assertEquals(Var.valueOf(0).getObjectAsDouble(), divisor(Var.valueOf("0.00"),Var.valueOf("100.00")).getObjectAsDouble());
     }
 
     @Test
