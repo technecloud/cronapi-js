@@ -517,5 +517,8 @@
   "functionToHandleValueToPromise": "Function to handle value to a promise object, you can resolve or reject the value",
   "promise": "Promise",
   "createObjectLoginJson": "Create object Login",
-  "createObjectLoginJsonDescription": "Function that create an object Login from a text"
+  "createObjectLoginJsonDescription": "Function that create an object Login from a text",
+  "CEP": "Zip Code",
+  "getCEPName": "Get zip code",
+  "getCEPDescription": "Function to fetch zip code data"  
 }

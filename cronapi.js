@@ -960,6 +960,27 @@ if (!window.fixedTimeZone) {
   };
 
   /**
+   * @type function
+   * @name {{getCEPName}}
+   * @description {{getCEPDescription}}
+   * @param {ObjectType.STRING} cep {{CEP}}
+   * @param {ObjectType.STRING} success {{success}}
+   */
+  this.cronapi.util.getCEP = function(/** @type {ObjectType.STRING} @description {{CEP}} */ cep, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success) {
+
+    if(this.cronapi.logic.isNullOrEmpty(cep)) throw new Error("Informe o CEP");
+
+    cep = cep.replace(/\.|\-/g, '').split(' ').join('');
+
+    if(cep.length < 8) throw new Error("CEP inválido");
+
+    let url = "https://viacep.com.br/ws/" + cep + "/json/?callback=?";
+
+    $.getJSON(url, success.bind(this));
+    
+  }; 
+
+  /**
    * @category CategoryType.SCREEN
    * @categoryTags Screen|Tela
    */
