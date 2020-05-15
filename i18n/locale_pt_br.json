@@ -517,5 +517,8 @@
   "functionToHandleValueToPromise": "Você pode resolver ou rejeitar o valor para a promessa",
   "promise": "Promessa",
   "createObjectLoginJson": "Criar objeto login Json",
-  "createObjectLoginJsonDescription": "Função para criar objeto login Json"
+  "createObjectLoginJsonDescription": "Função para criar objeto login Json",
+  "CEP": "CEP",
+  "getCEPName": "Buscar CEP",
+  "getCEPDescription": "Função para buscar os dados do CEP"
 }
