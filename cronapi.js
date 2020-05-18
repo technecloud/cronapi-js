@@ -4523,7 +4523,7 @@ if (!window.fixedTimeZone) {
         }
       });
     }else{
-      //TODO LOGIN ON WEB
+      window.location.href = "signin/"+socialNetwork+"/";
     }
   }
 
