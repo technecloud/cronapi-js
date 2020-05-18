@@ -4510,7 +4510,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork, /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true*/ clearCache) {
     var that = this;
     var u = window.hostApp+"signin/"+socialNetwork+"/";
-    if(cordova.InAppBrowser){
+    if(window.cordova && cordova.InAppBrowser){
       var clearCacheString = '';
       if(clearCache === true || clearCache === 'true'){
         clearCacheString = ',clearcache=yes';
