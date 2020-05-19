@@ -75,5 +75,10 @@ public class ConversionTest {
     Assert.assertEquals(new String((byte[]) Operations.convert(Var.valueOf(b64), Var.valueOf("BYTEARRAY")).getObject()), new String(test));
     Assert.assertEquals(new String((byte[]) Operations.convert(Var.valueOf("teste"), Var.valueOf("BYTEARRAY")).getObject()), new String(test));
 
+    Assert.assertEquals(Var.valueOf("null").getObjectAsInt(), Integer.valueOf(0));
+    Assert.assertEquals(Var.valueOf("null").getObjectAsLong(), Long.valueOf(0));
+    Assert.assertEquals(Var.valueOf("null").getObjectAsDouble(), Double.valueOf(0));
+    Assert.assertEquals(Var.valueOf("null").getObjectAsBoolean(), Boolean.FALSE);
+    Assert.assertEquals(Var.valueOf("null").getObjectAsDateTime(), Var.VAR_DATE_ZERO.getObjectAsDateTime());
   }
 }
