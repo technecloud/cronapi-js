@@ -960,6 +960,27 @@ if (!window.fixedTimeZone) {
   };
 
   /**
+   * @type function
+   * @name {{getCEPName}}
+   * @description {{getCEPDescription}}
+   * @param {ObjectType.STRING} cep {{CEP}}
+   * @param {ObjectType.STRING} success {{success}}
+   */
+  this.cronapi.util.getCEP = function(/** @type {ObjectType.STRING} @description {{CEP}} */ cep, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success) {
+
+    if(this.cronapi.logic.isNullOrEmpty(cep)) throw new Error("Informe o CEP");
+
+    cep = cep.replace(/\.|\-/g, '').split(' ').join('');
+
+    if(cep.length < 8) throw new Error("CEP inválido");
+
+    let url = "https://viacep.com.br/ws/" + cep + "/json/?callback=?";
+
+    $.getJSON(url, success.bind(this));
+    
+  }; 
+
+  /**
    * @category CategoryType.SCREEN
    * @categoryTags Screen|Tela
    */
@@ -4489,7 +4510,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.social.sociaLogin = function(/** @type {ObjectType.STRING} @description socialNetwork @blockType util_dropdown @keys facebook|github|google|linkedin @values facebook|github|google|linkedin  */ socialNetwork, /** @type {ObjectType.BOOLEAN} @blockType util_dropdown @keys false|true*/ clearCache) {
     var that = this;
     var u = window.hostApp+"signin/"+socialNetwork+"/";
-    if(cordova.InAppBrowser){
+    if(window.cordova && cordova.InAppBrowser){
       var clearCacheString = '';
       if(clearCache === true || clearCache === 'true'){
         clearCacheString = ',clearcache=yes';
@@ -4502,7 +4523,7 @@ if (!window.fixedTimeZone) {
         }
       });
     }else{
-      //TODO LOGIN ON WEB
+      window.location.href = "signin/"+socialNetwork+"/";
     }
   }
 
