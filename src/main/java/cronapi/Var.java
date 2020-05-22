@@ -490,6 +490,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
         if (isEmptyOrNull()) {
           return 0;
         }
+        if (((String)getObject()).equalsIgnoreCase("null")) {
+          return 0;
+        }
         try {
           return Integer.parseInt((String) getObject());
         } catch (Exception e) {
@@ -522,6 +525,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     switch (getType()) {
       case STRING:
         if (isEmptyOrNull()) {
+          return 0L;
+        }
+        if (((String)getObject()).equalsIgnoreCase("null")) {
           return 0L;
         }
         try {
@@ -613,6 +619,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Calendar getObjectAsDateTime() {
     switch (getType()) {
       case STRING:
+        if (((String)getObject()).equalsIgnoreCase("null")) {
+          return VAR_DATE_ZERO.getObjectAsDateTime();
+        }
         String s = (String) getObject();
         return Utils.toCalendar(s, null);
       case INT:
@@ -654,6 +663,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
   public Boolean getObjectAsBoolean() {
     switch (getType()) {
       case STRING:
+        if (((String)getObject()).equalsIgnoreCase("null")) {
+          return false;
+        }
         String s = (String) getObject();
         if (s.equals("1") || s.equalsIgnoreCase("true") || s.equalsIgnoreCase("yes") || s.equalsIgnoreCase("sim") || s.equalsIgnoreCase("y") || s.equalsIgnoreCase("s") || s.equalsIgnoreCase("t")) {
           s = "true";
@@ -703,6 +715,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
     switch (getType()) {
       case STRING:
         if (isEmptyOrNull()) {
+          return 0.0;
+        }
+        if (((String)getObject()).equalsIgnoreCase("null")) {
           return 0.0;
         }
         return Double.parseDouble((String) getObject());
