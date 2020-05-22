@@ -680,6 +680,23 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     }
   }
 
+  private List<EdmProperty> findOriginalKeys(EdmEntityType entityType) {
+    List<EdmProperty> keys = new LinkedList<>();
+    try {
+      for (EdmProperty item : entityType.getKeyProperties()) {
+        EdmSimplePropertyImplProv key = (EdmSimplePropertyImplProv) item;
+        if (key.getComposite() != null) {
+          keys.addAll(key.getComposite());
+        } else {
+          keys.add(item);
+        }
+      }
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+    return keys;
+  }
+
   @Override
   public Object execEvent(final UriInfo infoView, final EdmEntityType entityType, String type, Object data) {
     if (infoView != null) {
@@ -706,8 +723,8 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
           List<Object> keys = new LinkedList<>();
           try {
-            for (String key : entityType.getKeyPropertyNames()) {
-              keys.add(ReflectionUtil.getter(data, key));
+            for (EdmProperty key : findOriginalKeys(entityType)) {
+              keys.add(ReflectionUtil.getter(data, key.getName()));
             }
           } catch (Exception e) {
             e.printStackTrace();
