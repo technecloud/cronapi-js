@@ -196,7 +196,7 @@
     <dependency>
       <groupId>io.cronapp</groupId>
       <artifactId>cronapp-reports-exec</artifactId>
-      <version>2.5.0</version>
+      <version>${reports.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -286,5 +286,6 @@
     <project.cronospass.resource mimetype="folder/src">src/main/java</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
     <odata.version>2.6.0-SNAPSHOT</odata.version>
+    <reports.version>2.6.0-SNAPSHOT</reports.version>
   </properties>
 </project>
