@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.cronapp</groupId>
   <artifactId>cronapi-java</artifactId>
@@ -231,7 +229,6 @@
       <artifactId>commons-dbcp</artifactId>
       <version>1.4</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.json/json -->
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
@@ -254,8 +251,8 @@
       <version>3.3.4</version>
       <exclusions>
         <exclusion>
-            <groupId>com.fasterxml.woodstox</groupId>
-            <artifactId>woodstox-core</artifactId>
+          <groupId>com.fasterxml.woodstox</groupId>
+          <artifactId>woodstox-core</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -285,7 +282,9 @@
     <project.cronospass.resource mimetype="folder/libs">lib</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/main/java</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
-    <odata.version>2.6.0-SNAPSHOT</odata.version>
-    <reports.version>2.6.0-SNAPSHOT</reports.version>
+    <odata.version>2.6.0
+</odata.version>
+    <reports.version>2.6.0
+</reports.version>
   </properties>
 </project>
