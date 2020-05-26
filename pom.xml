@@ -282,9 +282,9 @@
     <project.cronospass.resource mimetype="folder/libs">lib</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/main/java</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
-    <odata.version>2.6.0
+    <odata.version>2.6.1
 </odata.version>
-    <reports.version>2.6.0
+    <reports.version>2.6.1
 </reports.version>
   </properties>
 </project>
