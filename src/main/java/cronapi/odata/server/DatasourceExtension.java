@@ -127,6 +127,12 @@ public class DatasourceExtension implements JPAEdmExtension {
               CalcField field = new CalcField();
               field.name = entryObj.getKey();
               field.type = entryObj.getValue().getAsJsonObject().get("type").getAsString();
+              if (!QueryManager.isNull(customObj.get("calcFields"))) {
+                JsonElement value = customObj.get("calcFields").getAsJsonObject().get(field.name);
+                if (!QueryManager.isNull(value) && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString() && StringUtils.isNotEmpty(value.getAsString())) {
+                  field.expression = value.getAsString();
+                }
+              }
               calcFields.add(field);
             }
           }
@@ -291,7 +297,7 @@ public class DatasourceExtension implements JPAEdmExtension {
     return null;
   }
 
-  private void addCalcFields(EntityType newType, List<CalcField> addFields) {
+  private void addCalcFields(EntityType newType, List<CalcField> addFields, String mainAlias, boolean addAlias) {
     if (addFields != null) {
       for (CalcField field : addFields) {
         SimpleProperty property = new SimpleProperty();
@@ -306,9 +312,18 @@ public class DatasourceExtension implements JPAEdmExtension {
 
         JPAEdmMappingImpl mapping = new JPAEdmMappingImpl();
         mapping.setInternalName(field.name);
+        if (StringUtils.isNotEmpty(mainAlias) && StringUtils.isNotEmpty(field.expression) && field.expression.startsWith("this.")) {
+          if (addAlias) {
+            mapping.setVirtualAccess(true);
+            mapping.setInternalExpression(mainAlias + "." + field.expression.substring(5));
+          } else {
+            mapping.setInternalName(field.expression.substring(5));
+          }
+        } else {
+          mapping.setCalculated(true);
+          mapping.setVirtualAccess(true);
+        }
         mapping.setJPAType(EdmSimpleTypeFacadeImpl.getEdmClassType(kind));
-        mapping.setVirtualAccess(true);
-        mapping.setCalculated(true);
 
         property.setMapping(mapping);
 
@@ -691,7 +706,7 @@ public class DatasourceExtension implements JPAEdmExtension {
       }
       type.setMapping(mapping);
 
-      addCalcFields(type, addFields);
+      addCalcFields(type, addFields, null, false);
 
       edmSchema.getEntityTypes().add(type);
 
@@ -967,7 +982,7 @@ public class DatasourceExtension implements JPAEdmExtension {
         }
         type.setMapping(mapping);
 
-        addCalcFields(type, addFields);
+        addCalcFields(type, addFields, mainAlias, true);
 
         edmSchema.getEntityTypes().add(type);
 
@@ -1005,7 +1020,7 @@ public class DatasourceExtension implements JPAEdmExtension {
 
       addDisplayFields(edmSchema, newType);
 
-      addCalcFields(newType, addFields);
+      addCalcFields(newType, addFields, "u", false);
 
       edmSchema.getEntityTypes().add(newType);
 
@@ -1058,6 +1073,7 @@ public class DatasourceExtension implements JPAEdmExtension {
   public static class CalcField {
 
     String name = null;
+    String expression = null;
     String type = null;
   }
 
