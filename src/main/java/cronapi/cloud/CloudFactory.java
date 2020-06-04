@@ -17,11 +17,19 @@ public final class CloudFactory {
 		this.files = files;
 	}
 
-	public CloudService dropbox(String accessToken) {
-		DbxRequestConfig.Builder builder = DbxRequestConfig.newBuilder("cronapp/app");
-		DbxRequestConfig requestConfig = builder.build();
-		DbxClientV2 client = new DbxClientV2(requestConfig, accessToken);
-		return new DropboxService(client, files);
+	public CloudService send(FieldData fieldData) {
+	  if ("dropbox".equals(fieldData.data.type())) {
+      DbxRequestConfig.Builder builder = DbxRequestConfig.newBuilder("cronapp/app");
+      DbxRequestConfig requestConfig = builder.build();
+      DbxClientV2 client = new DbxClientV2(requestConfig, fieldData.data.value());
+      return new DropboxService(client, files);
+    }
+
+    if ("S3".equals(fieldData.data.type()) || "cloudservices".equals(fieldData.data.type()) ) {
+      return new S3Service(fieldData, files);
+    }
+
+	  return null;
 	}
 	
 	public List<FileObject> getFiles() {

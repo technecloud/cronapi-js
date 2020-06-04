@@ -17,4 +17,6 @@ public @interface CronapiCloud {
   
   String type() default "";
   String value() default "";
+  String id() default "";
+  String secret() default "";
 }

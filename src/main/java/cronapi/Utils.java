@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.google.gson.*;
 import cronapi.cloud.CloudFactory;
 import cronapi.cloud.CloudManager;
+import cronapi.cloud.FieldData;
 import cronapi.database.DataSource;
 import cronapi.i18n.Messages;
 import cronapi.rest.CronapiREST.TranslationPath;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.olingo.odata2.api.edm.EdmLiteralKind;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeException;
@@ -44,7 +44,7 @@ public class Utils {
 
   private static final Map<String, DateFormat> PARSE_DATETIME_FORMAT = new HashMap<>();
 
-  private static final ISO8601DateFormat ISO_FORMAT = new ISO8601DateFormat();;
+  private static final ISO8601DateFormat ISO_FORMAT = new ISO8601DateFormat();
 
   static {
     DATE_FORMATS.put("pt", getGenericParseDateFormat(new Locale("pt", "BR")));
@@ -172,8 +172,8 @@ public class Utils {
     return null;
   }
 
-  public static List<String> getFieldsWithAnnotationCloud(Object obj, String type) {
-    List<String> fields = new ArrayList<String>();
+  public static List<FieldData> getFieldsWithAnnotationCloud(Object obj) {
+    List<FieldData> fields = new LinkedList<>();
     Class<?> c;
     if (obj instanceof Class) c = (Class) obj;
     else c = obj.getClass();
@@ -188,8 +188,12 @@ public class Utils {
         for (int i = 0; i < fieldAnnots.length; i++) {
           if (fieldAnnots[i].toString().contains("CronapiCloud")) {
             CronapiCloud ann = ((CronapiCloud) fieldAnnots[i]);
-            if (ann.type() != null && type.equals(ann.type().toLowerCase().trim())) {
-              fields.add(field.getName());
+            if (ann.type() != null) {
+              FieldData fieldData = new FieldData();
+              fieldData.field = field;
+              fieldData.data = ann;
+
+              fields.add(fieldData);
             }
           }
         }
@@ -314,7 +318,7 @@ public class Utils {
       //Suport a formato ODATA
 
       if (value.startsWith("cronapi.toDate(") && value.endsWith(")")) {
-        value = value.substring(16, value.length()-2);
+        value = value.substring(16, value.length() - 2);
       }
 
       if (value.startsWith("datetime'")) {
@@ -788,14 +792,13 @@ public class Utils {
   public static void processCloudFields(Object toSaveParam) {
     Object toSave = toSaveParam;
 
-    List<String> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave, "dropbox");
+    List<FieldData> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(toSave);
     List<String> fieldsIds = Utils.getFieldsWithAnnotationId(toSave);
-    if (fieldsAnnotationCloud.size() > 0) {
+    for (FieldData fieldData : fieldsAnnotationCloud) {
 
-      String dropAppAccessToken = Utils.getAnnotationCloud(toSave, fieldsAnnotationCloud.get(0)).value();
-      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toFields(fieldsAnnotationCloud.toArray(new String[0]));
+      CloudManager cloudManager = CloudManager.newInstance().byID(fieldsIds.toArray(new String[0])).toField(fieldData.field.getName());
       CloudFactory factory = cloudManager.byEntity(toSave).build();
-      factory.dropbox(dropAppAccessToken).upload();
+      factory.send(fieldData).upload();
       factory.getFiles().forEach(f -> {
         updateFieldOnFiltered(toSave, f.getFieldReference(), f.getFileDirectUrl());
       });
