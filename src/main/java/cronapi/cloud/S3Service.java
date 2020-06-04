@@ -45,7 +45,7 @@ public final class S3Service implements CloudService {
   @Override
   public void upload() {
     if (files == null || files.isEmpty()) {
-      log.warn("File content not found to Dropbox upload");
+      log.warn("File content not found to upload");
       return;
     }
     files.forEach(fileObject -> {
@@ -64,35 +64,12 @@ public final class S3Service implements CloudService {
 
   @Override
   public void popule(Object target) {
-	/*	this.files.forEach(fileObject -> {
-			try {
-				String fileName = fileObject.getFileName();
-				String[] strings = fileName.split("/");
-				if (strings.length > 0) {
-					String fieldTarget = strings[2];
-					Field declaredField = target.getClass().getDeclaredField(fieldTarget);
-					declaredField.setAccessible(true);
-
-					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					client.files().downloadBuilder(fileName).download(outputStream);
-
-					declaredField.set(target, outputStream.toByteArray());
-				}
-			} catch (DbxException | IOException | NoSuchFieldException | IllegalAccessException e) {
-				log.error(e.getMessage());
-			}
-		});*/
+    throw new RuntimeException("Not Implemented");
   }
 
   @Override
   public void delete() {
-	/*	this.files.forEach(fileObject -> {
-			try {
-				client.files().delete(fileObject.getFileName());
-			} catch (DbxException e) {
-				log.error(e.getMessage());
-			}
-		});*/
+    throw new RuntimeException("Not Implemented");
   }
 
 }
