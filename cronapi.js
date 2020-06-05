@@ -4639,4 +4639,119 @@ if (!window.fixedTimeZone) {
     return new RegExp(regex).test(text);
   }
 
+  /**
+   * @category Chat
+   * @categoryTags chat|chatbot|message
+   */
+  this.cronapi.chat = {};
+
+  /**
+    * @type function
+    * @name {{getChatUser}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{getChatUserDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @returns {ObjectType.OBJECT}
+    */
+  this.cronapi.chat.getChatUser = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) { 
+    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+    return chat.getUser();
+  }
+
+   /**
+    * @type function
+    * @name {{postChatMessage}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{postChatMessageDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.STRING} textMessage {{textMessage}}
+    */
+   this.cronapi.chat.postChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ textMessage) {
+    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+    chat.postMessage(textMessage);
+   }
+
+    /**
+    * @type function
+    * @name {{renderChatMessage}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{renderChatMessageDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatMessage {{chatMessage}}
+    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+    */
+   this.cronapi.chat.renderChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatMessage, /** @type {ObjectType.OBJECT} */ chatUser) { 
+    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+    chat.renderMessage(chatMessage, chatUser);
+   }
+
+    /**
+    * @type function
+    * @name {{renderChatAttachments}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{renderChatAttachmentsDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+    * @param {ObjectType.OBJECT} chatAttachments {{chatAttachments}}
+    * @param {ObjectType.STRING} chatAttachmentLayout {{chatAttachmentLayout}}
+    */
+   this.cronapi.chat.renderChatAttachments = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatAttachments, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout ) {
+    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+
+    if(chatAttachments && )
+    
+    chat.renderAttachments({
+      attachments: chatAttachments,
+      attachmentLayout: chatAttachmentLayout
+      }, chatUser);
+   }
+
+    /**
+    * @type function
+    * @name {{renderChatSuggestedActions}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{renderChatSuggestedActionsDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatSuggestedActions {{chatSuggestedActions}}
+    */
+   this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatSuggestedActions ) { }
+
+    /**
+    * @type function
+    * @name {{renderChatUserTypingIndicator}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{renderChatUserTypingIndicatorDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+    */
+   this.cronapi.chat.renderChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) { }
+
+    /**
+    * @type function
+    * @name {{clearChatUserTypingIndicator}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{clearChatUserTypingIndicatorDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+    */
+   this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) { }
+
+    /**
+    * @type function
+    * @name {{removeChatTypingIndicator}}
+    * @nameTags Chat
+    * @platform M
+    * @description {{removeChatTypingIndicatorDesc}}
+    * @param {ObjectType.STRING} component {{ComponentParam}}
+    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+    */
+   this.cronapi.chat.removeChatTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) { }
+
 }).bind(window)();
