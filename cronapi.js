@@ -4244,9 +4244,20 @@ if (!window.fixedTimeZone) {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
   };
 
-  this.cronapi.internal.getErrorMessage = function(data, message) {
+  this.cronapi.internal.getErrorMessage = function (data, message) {
     try {
-      var json = JSON.parse(data);
+      var json = null;
+      if (typeof data === 'object') {
+        if (data.data) {
+          if (typeof data.data === 'object') {
+            json = data.data;
+          } else if (typeof data.data === 'string') {
+            json = JSON.parse(data.data);
+          }
+        }
+      } else if (typeof data === 'string') {
+        json = JSON.parse(data);
+      }
       if (json && json.error) {
         return json.error;
       }
