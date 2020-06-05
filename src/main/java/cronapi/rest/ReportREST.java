@@ -1,25 +1,27 @@
 package cronapi.rest;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import cronapi.ErrorResponse;
+import cronapi.QueryManager;
+import cronapi.RestClient;
+import cronapi.i18n.Messages;
 import cronapi.report.DataSourcesInBand;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import cronapi.report.ReportService;
+import cronapp.reports.commons.ReportFront;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.*;
 
-import cronapi.ErrorResponse;
-import cronapi.report.ReportService;
-import cronapp.reports.commons.ReportFront;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
@@ -33,7 +35,7 @@ public class ReportREST {
 
   @RequestMapping(value = "/report", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<ReportFront> getReport(@RequestBody ReportFront reportFront) {
-    if(reportFront == null)
+    if (reportFront == null)
       return ResponseEntity.badRequest().header("Error", "Report is null").body(new ReportFront());
     log.debug("Get report [" + reportFront + "].");
     ReportFront reportResult = reportService.getReport(reportFront.getReportName());
@@ -42,19 +44,53 @@ public class ReportREST {
 
   @RequestMapping(value = "/report/contentasstring", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> getContentAsString(@RequestBody ReportFront reportFront, HttpServletResponse response) {
-    if(reportFront == null)
+    if (reportFront == null)
       return ResponseEntity.badRequest().header("Error", "Report is null").body("Error read content file");
     String reportName = reportFront.getReportName();
     log.debug("Print report [" + reportName + "]");
     response.setHeader("Content-Disposition", "inline; filename=" + reportName);
     response.setContentType("application/plain");
     String reportResult = reportService.getContentReport(reportName);
+    ResponseEntity error = checkSecurity(reportResult);
+    if (error != null) {
+      return error;
+    }
     return ResponseEntity.ok().body(reportResult);
+  }
+
+  private ResponseEntity checkSecurity(String reportResult)  {
+    JsonObject reportsJson = (JsonObject) new JsonParser().parse(reportResult);
+    JsonElement reportsConfig = reportsJson.get("reportConfig");
+    if (!QueryManager.isNull(reportsConfig) && !QueryManager.isNull(reportsConfig.getAsJsonObject().get("restSecurity"))) {
+      JsonElement getValue = reportsConfig.getAsJsonObject().get("restSecurity").getAsJsonObject().get("get");
+      if (!QueryManager.isNull(getValue)) {
+        String security = getValue.getAsJsonPrimitive().getAsString();
+        if (StringUtils.isNotEmpty(security)) {
+          boolean authorized = false;
+          String[] roles = security.split(",");
+          for (String role : roles) {
+            for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+              if (role.trim().equalsIgnoreCase(authority.getAuthority())) {
+                authorized = true;
+                break;
+              }
+            }
+          }
+          if (!authorized) {
+            JsonObject error = new JsonObject();
+            error.addProperty("error", Messages.getString("notAllowed"));
+            return ResponseEntity.status(403).body(error.toString());
+          }
+        }
+      }
+    }
+
+    return null;
   }
 
   @RequestMapping(value = "/report/getdatasourcesparams", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<DataSourcesInBand> getDataSourcesParams(@RequestBody DataSourcesInBand dataSourcesInBand) {
-    if(dataSourcesInBand == null)
+    if (dataSourcesInBand == null)
       return ResponseEntity.badRequest().header("Error", "Datasources is null").body(new DataSourcesInBand());
     log.debug("Get datasources params");
     DataSourcesInBand dataSourcesParams = reportService.getDataSourcesParams(dataSourcesInBand);
@@ -62,10 +98,9 @@ public class ReportREST {
   }
 
 
-
   @RequestMapping(value = "/report/pdf", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<byte[]> getPDF(@RequestBody ReportFront reportFront, HttpServletResponse response) {
-    if(reportFront == null)
+    if (reportFront == null)
       return ResponseEntity.badRequest().header("Error", "Report is null").body(new byte[0]);
     String reportName = reportFront.getReportName();
     log.debug("Print report [" + reportName + "]");
@@ -77,7 +112,7 @@ public class ReportREST {
 
   @RequestMapping(value = "/report/pdfasfile", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<String> getPDFAsFile(@RequestBody ReportFront reportFront, HttpServletResponse response) {
-    if(reportFront == null)
+    if (reportFront == null)
       return ResponseEntity.badRequest().header("Error", "Report is null").body("");
     String reportName = reportFront.getReportName();
     log.debug("Print report [" + reportName + "]");
