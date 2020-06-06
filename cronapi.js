@@ -82,7 +82,7 @@ if (!window.fixedTimeZone) {
   };
 
   var serverMap = {};
-  
+
   this.cronapi.server = function(pack) {
     var attr = false;
     var toPromise = false;
@@ -102,11 +102,11 @@ if (!window.fixedTimeZone) {
       },
       run: function() {
         var key = pack;
-        
+
         for (var i = 0;i <arguments.length;i++) {
           key += String(arguments[i]);
         }
-        
+
         if (attr) {
           if (serverMap.hasOwnProperty(key)) {
             if (serverMap[key] != "$$loading") {
@@ -117,21 +117,21 @@ if (!window.fixedTimeZone) {
           }
           serverMap[key] = "$$loading";
         }
-        
+
         var parts = pack.split(".");
         var func = parts[parts.length-1];
         parts.pop();
         var namespace = parts.join(".");
-        
+
         var blocklyName = namespace + ":" + func;
-        
+
         var resolveForPromise;
         var rejectForPromise;
         var promise = new Promise((resolve, reject) => {
           resolveForPromise = resolve;
           rejectForPromise = reject;
         });
-        
+
         var success = function(data) {
           this.safeApply(function() {
             if (attr) {
@@ -140,7 +140,7 @@ if (!window.fixedTimeZone) {
             resolveForPromise(data);
           });
         }.bind(this);
-        
+
         var error = function(error) {
           this.safeApply(function() {
             if (attr) {
@@ -151,16 +151,16 @@ if (!window.fixedTimeZone) {
           if (error)
             this.cronapi.$scope.Notification.error(error);
         }.bind(this);
-        
+
         var args = [blocklyName];
-        
+
         if (async) {
           args.push(success);
           args.push(error);
           for (var i = 0;i <arguments.length;i++) {
             args.push(arguments[i]);
           }
-          
+
           this.cronapi.util.makeCallServerBlocklyAsync.apply(this, args);
           if (toPromise)
             return promise;
@@ -169,14 +169,14 @@ if (!window.fixedTimeZone) {
           for (var i = 0;i <arguments.length;i++) {
             args.push(arguments[i]);
           }
-          
+
           let resultData = this.cronapi.util.callServerBlockly.apply(this, args);
           if (attr) {
             serverMap[key] = resultData;
           }
           return resultData;
         }
-        
+
       }.bind(this)
     }
   };
@@ -414,7 +414,7 @@ if (!window.fixedTimeZone) {
    * @arbitraryParams true
    */
   this.cronapi.util.callServerBlocklyAsync = function(classNameWithMethod, fields, callbackSuccess, callbackError) {
-  
+
     const getCircularReplacer = () => {
       const seen = new WeakSet();
       return (key, value) => {
@@ -427,23 +427,23 @@ if (!window.fixedTimeZone) {
         return value;
       };
     };
-  
+
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = this.cronapi.$scope.http;
     var params = [];
     $(arguments).each(function() {
       params.push(this);
     });
-  
+
     var token = "";
     if (window.uToken)
       token = window.uToken;
-  
+
     var dataCall = {
       "fields": fields,
       "inputs": params.slice(4)
     };
-  
+
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
     let contentData = undefined;
     try {
@@ -452,7 +452,7 @@ if (!window.fixedTimeZone) {
     catch (e) {
       contentData = JSON.stringify(dataCall, getCircularReplacer());
     }
-  
+
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
@@ -467,7 +467,7 @@ if (!window.fixedTimeZone) {
       success : callbackSuccess,
       error : callbackError
     });
-  
+
   };
   /**
    * @type internal
@@ -649,7 +649,7 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
-  
+
     const getCircularReplacer = () => {
       const seen = new WeakSet();
       return (key, value) => {
@@ -662,24 +662,24 @@ if (!window.fixedTimeZone) {
         return value;
       };
     };
-    
+
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var params = [];
-  
+
     var fields = this.cronapi.util.getScreenFields();
-  
+
     var dataCall = {
       "fields": fields,
       "inputs": params
     };
-  
+
     for (var i = 1; i<arguments.length; i++)
       params.push(arguments[i]);
-  
+
     var token = "";
     if (window.uToken)
       token = window.uToken;
-  
+
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
     let contentData = undefined;
     try {
@@ -688,7 +688,7 @@ if (!window.fixedTimeZone) {
     catch (e) {
       contentData = JSON.stringify(dataCall, getCircularReplacer());
     }
-  
+
     var resultData = $.ajax({
       type: 'POST',
       url: finalUrl,
@@ -702,7 +702,7 @@ if (!window.fixedTimeZone) {
         'timezone': moment().utcOffset()
       }
     });
-  
+
     var result;
     if (resultData.status == 200) {
       if (resultData.responseJSON)
@@ -977,8 +977,8 @@ if (!window.fixedTimeZone) {
     let url = "https://viacep.com.br/ws/" + cep + "/json/?callback=?";
 
     $.getJSON(url, success.bind(this));
-    
-  }; 
+
+  };
 
   /**
    * @category CategoryType.SCREEN
@@ -1559,8 +1559,8 @@ if (!window.fixedTimeZone) {
                 let lastLink = findLastLink(lastHovers);
                 lastLink.focus();
               }
-  
-  
+
+
           }).modal({backdrop: 'static', keyboard: false});
       }catch(e){
           $(modalToShow).show();
@@ -4573,7 +4573,7 @@ if (!window.fixedTimeZone) {
    * @category CategoryType.REGEX
    * @categoryTags REGEX|regex
    */
-   
+
   this.cronapi.regex = {};
 
    /**
@@ -4600,21 +4600,21 @@ if (!window.fixedTimeZone) {
 
     let matches, output = [];
     let idx = null;
-    
+
     while (matches = regexInstance.exec(text)) {
 
         if(idx != null && idx == matches.index) break;
-        
+
         let occurrence =  [];
 
         for(i = 1; i < matches.length ; i++){
           occurrence.push(matches[i]);
         }
-        
+
         idx = matches.index;
-        
+
         output.push(occurrence);
-        
+
     }
 
     return output;
@@ -4646,112 +4646,187 @@ if (!window.fixedTimeZone) {
   this.cronapi.chat = {};
 
   /**
-    * @type function
-    * @name {{getChatUser}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{getChatUserDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @returns {ObjectType.OBJECT}
-    */
-  this.cronapi.chat.getChatUser = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) { 
-    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+   * @type function
+   * @name {{chatUserObj}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{chatUserObjDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.STRING} name {{name}}
+   * @param {ObjectType.STRING} iconUrl {{iconUrl}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.chat.chatUserObj = function (/** @type {ObjectType.STRING} */ id, /** @type {ObjectType.STRING} */ name, /** @type {ObjectType.STRING} */ iconUrl) {
+    return {
+      id: id,
+      name: name,
+      iconUrl: iconUrl
+    };
+  };
+
+  /**
+   * @type function
+   * @name {{chatAttachmentObj}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{chatAttachmentObjDesc}}
+   * @param {ObjectType.STRING} attachmentTitle {{attachmentTitle}}
+   * @param {ObjectType.STRING} attachmentSubtitle {{attachmentSubtitle}}
+   * @param {ObjectType.STRING} attachmentText {{attachmentText}}
+   * @param {ObjectType.OBJECT} attachmentImage {{attachmentImage}}
+   * @param {ObjectType.OBJECT} attachmentImageAlt {{attachmentImageAlt}}
+   * @param {ObjectType.OBJECT} attachmentButtons {{attachmentButtons}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.chat.chatAttachmentObj = function ( /** @type {ObjectType.STRING} */ attachmentTitle, /** @type {ObjectType.STRING} */ attachmentSubtitle, /** @type {ObjectType.STRING} */ attachmentText,  /** @type {ObjectType.STRING} */ attachmentImage, /** @type {ObjectType.STRING} */ attachmentButtons, /** @type {ObjectType.STRING} */ attachmentImageAlt) {
+    return {
+      contentType: 'heroCard',
+      content: {
+        title: attachmentTitle,
+        subtitle: attachmentSubtitle,
+        text: attachmentText,
+        images: [{
+          url: attachmentImage,
+          alt: attachmentImageAlt
+        }],
+        buttons: (Array.isArray(attachmentButtons) ? attachmentButtons : [attachmentButtons])
+      }
+    };
+  };
+
+  /**
+   * @type function
+   * @name {{chatSuggestedActionObj}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{chatSuggestedActionObjDesc}}
+   * @param {ObjectType.STRING} suggestedActionTitle {{suggestedActionTitle}}
+   * @param {ObjectType.STRING} suggestedActionValue {{suggestedActionValue}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.chat.chatSuggestedActionObj = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
+    return {
+      title: suggestedActionTitle,
+      value: suggestedActionValue
+    };
+  };
+
+  /**
+   * @type function
+   * @name {{getChatUser}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{getChatUserDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.chat.getChatUser = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
     return chat.getUser();
-  }
+  };
 
-   /**
-    * @type function
-    * @name {{postChatMessage}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{postChatMessageDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.STRING} textMessage {{textMessage}}
-    */
-   this.cronapi.chat.postChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ textMessage) {
-    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
+  /**
+   * @type function
+   * @name {{postChatMessage}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{postChatMessageDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.STRING} textMessage {{textMessage}}
+   */
+  this.cronapi.chat.postChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ textMessage) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
     chat.postMessage(textMessage);
-   }
+  };
 
-    /**
-    * @type function
-    * @name {{renderChatMessage}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{renderChatMessageDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatMessage {{chatMessage}}
-    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
-    */
-   this.cronapi.chat.renderChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatMessage, /** @type {ObjectType.OBJECT} */ chatUser) { 
-    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
-    chat.renderMessage(chatMessage, chatUser);
-   }
+  /**
+   * @type function
+   * @name {{renderChatMessage}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{renderChatMessageDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.STRING} chatMessage {{chatMessage}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   */
+  this.cronapi.chat.renderChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ chatMessage, /** @type {ObjectType.OBJECT} */ chatUser) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
+    chat.renderMessage({'type': 'text', 'text': chatMessage}, chatUser);
+  };
 
-    /**
-    * @type function
-    * @name {{renderChatAttachments}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{renderChatAttachmentsDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
-    * @param {ObjectType.OBJECT} chatAttachments {{chatAttachments}}
-    * @param {ObjectType.STRING} chatAttachmentLayout {{chatAttachmentLayout}}
-    */
-   this.cronapi.chat.renderChatAttachments = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatAttachments, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout ) {
-    let chat = $('#'+ id + ' .k-chat').data("kendoChat");
-
-    if(chatAttachments && )
-    
+  /**
+   * @type function
+   * @name {{renderChatAttachments}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{renderChatAttachmentsDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @param {ObjectType.OBJECT} chatAttachments {{chatAttachments}}
+   * @param {ObjectType.STRING} chatAttachmentLayout {{chatAttachmentLayout}}
+   */
+  this.cronapi.chat.renderChatAttachments = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatAttachments, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
     chat.renderAttachments({
-      attachments: chatAttachments,
+      attachments: (Array.isArray(chatAttachments) ? chatAttachments : [chatAttachments]),
       attachmentLayout: chatAttachmentLayout
-      }, chatUser);
-   }
+    }, chatUser);
+  };
 
-    /**
-    * @type function
-    * @name {{renderChatSuggestedActions}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{renderChatSuggestedActionsDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatSuggestedActions {{chatSuggestedActions}}
-    */
-   this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatSuggestedActions ) { }
+  /**
+   * @type function
+   * @name {{renderChatSuggestedActions}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{renderChatSuggestedActionsDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatSuggestedActions {{chatSuggestedActions}}
+   */
+  this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatSuggestedActions) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
+    chat.renderSuggestedActions((Array.isArray(chatSuggestedActions) ? chatSuggestedActions : [chatSuggestedActions]));
+  };
 
-    /**
-    * @type function
-    * @name {{renderChatUserTypingIndicator}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{renderChatUserTypingIndicatorDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
-    */
-   this.cronapi.chat.renderChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) { }
+  /**
+   * @type function
+   * @name {{renderChatUserTypingIndicator}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{renderChatUserTypingIndicatorDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   */
+  this.cronapi.chat.renderChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
+    chat.renderUserTypingIndicator(chatUser);
+  };
 
-    /**
-    * @type function
-    * @name {{clearChatUserTypingIndicator}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{clearChatUserTypingIndicatorDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
-    */
-   this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) { }
+  /**
+   * @type function
+   * @name {{clearChatUserTypingIndicator}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{clearChatUserTypingIndicatorDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   */
+  this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
+    chat.renderUserTypingIndicator(chatUser);
+  };
 
-    /**
-    * @type function
-    * @name {{removeChatTypingIndicator}}
-    * @nameTags Chat
-    * @platform M
-    * @description {{removeChatTypingIndicatorDesc}}
-    * @param {ObjectType.STRING} component {{ComponentParam}}
-    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
-    */
-   this.cronapi.chat.removeChatTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) { }
+  /**
+   * @type function
+   * @name {{removeChatTypingIndicator}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{removeChatTypingIndicatorDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   */
+  this.cronapi.chat.removeChatTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+    let chat = $('#' + id + ' .k-chat').data("kendoChat");
+    chat.removeTypingIndicator();
+  };
 
 }).bind(window)();
