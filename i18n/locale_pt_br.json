@@ -52,6 +52,7 @@
   "changeView": "Mudar formulário",
   "chatAttachmentCarousel": "Carrossel",
   "chatAttachmentLayout": "Layout de Anexo",
+  "chatAttachmentLayoutDesc":"Layout do Anexo",
   "chatAttachmentList": "Lista",
   "chatAttachmentObj": "Anexo",
   "chatAttachmentObjDesc": "Este bloco representa anexo do chat",

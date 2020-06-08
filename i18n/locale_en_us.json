@@ -52,6 +52,7 @@
   "changeView": "Change view",
   "chatAttachmentCarousel": "Carousel",
   "chatAttachmentLayout": "Chat Attachment Layout",
+  "chatAttachmentLayoutDesc":"Attachment Layout",
   "chatAttachmentList": "List",
   "chatAttachmentObj": "Chat Attachment Object",
   "chatAttachmentObjDesc": "This blockly represents an Attachment Object",

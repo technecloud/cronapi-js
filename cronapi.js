@@ -4782,7 +4782,7 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.OBJECT} chatSuggestedActions {{chatSuggestedActions}}
    */
-  this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatSuggestedActions) {
+  this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatSuggestedActions) {
     let chat = $('#' + id + ' .k-chat').data("kendoChat");
     chat.renderSuggestedActions((Array.isArray(chatSuggestedActions) ? chatSuggestedActions : [chatSuggestedActions]));
   };
