@@ -2913,18 +2913,9 @@ if (!window.fixedTimeZone) {
       }
     }
   };
-
-  this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData) {
-
-    function downloadUrl(url, fileName) {
-      var link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute("download", fileName);
-      var event = document.createEvent('MouseEvents');
-      event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-      link.dispatchEvent(event);
-    }
-
+  
+  this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData, fileInfo) {
+    
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -2947,36 +2938,22 @@ if (!window.fixedTimeZone) {
       var tempJsonFileUploaded = JSON.parse(valueContent);
     }
     catch(e) { }
-
+    
     if (tempJsonFileUploaded) {
       var finalUrl = this.cronapi.internal.getAddressWithHostApp('/api/cronapi/filePreview/');
       window.open(finalUrl + tempJsonFileUploaded.path, '_system');
     }
-    else if (valueContent.indexOf('dropboxusercontent') > -1) {
+    else if (valueContent.startsWith('https://') || valueContent.startsWith('http://')) {
       window.open(valueContent, '_system');
     }
     else {
       if (datasource.isOData()) {
-        var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
-        var bytesOrFileInput;
-        var fileName = 'download';
-
-        if (valueContent.match(/__odataFile_/g)) {
-          bytesOrFileInput = eval(valueContent);
-          fileName = bytesOrFileInput.name
-        }
-        else {
-          fileName += this.cronapi.internal.getExtensionBase64(valueContent);
-          valueContent = window.atob(valueContent);
-          bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
-        }
-        var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput], {type: 'application/octet-stream'}));
-        downloadUrl(url, fileName);
+        cronapi.internal.makeDownloadFromBytes(valueContent, fileInfo);
       }
       else {
         var url = '/api/cronapi/downloadFile';
         var splited = datasource.entity.split('/');
-
+        
         var entity = splited[splited.length - 1];
         if (entity.indexOf(":") > -1) {
           //Siginifica que é relacionamento, pega a entidade do relacionamento
@@ -3033,12 +3010,18 @@ if (!window.fixedTimeZone) {
   this.cronapi.internal.castByteArrayToString = function(bytes) {
     return String.fromCharCode.apply(null, new Uint16Array(bytes));
   };
-
-  this.cronapi.internal.generatePreviewDescriptionByte = function(data) {
+  
+  this.cronapi.internal.generatePreviewDescriptionByte = function(data, fileInfo) {
     var json;
+    let fileInfoContent = eval(fileInfo);
     try {
-      //Verificando se é JSON Uploaded file
-      json = JSON.parse(data);
+      if (fileInfoContent) {
+        json = JSON.parse(fileInfoContent);
+      }
+      else {
+        //Verificando se é JSON Uploaded file
+        json = JSON.parse(data);
+      }
     }
     catch (e) {
       try {
@@ -3046,8 +3029,12 @@ if (!window.fixedTimeZone) {
         json = JSON.parse(window.atob(data));
       }
       catch (e) {
-        //Verifica se é drpobox
-        if (data && data.indexOf('dropboxusercontent') > -1) {
+        if (data && data.match(/__odataFile_/g)) {
+          var file = eval(data);
+          json = cronapi.internal.getJsonDescriptionFromFile(file);
+        }
+        //Verifica se é url
+        else if (data && (data.startsWith('http://') || data.startsWith('https://'))) {
           json = {};
           var urlSplited = data.split('/');
           var fullName = urlSplited[urlSplited.length - 1].replace('?dl=0','');
@@ -3056,16 +3043,6 @@ if (!window.fixedTimeZone) {
           json.fileExtension = extension;
           json.name = fullName.replace(extension, '');
           json.contentType = 'file/'+extension.replace('.','');
-        }
-        else if (data && data.match(/__odataFile_/g)) {
-          var file = eval(data);
-          var fullNameSplited = file.name.split('.');
-          var extension = '.' + fullNameSplited[fullNameSplited.length - 1];
-
-          json = {};
-          json.fileExtension = extension;
-          json.name = file.name;
-          json.contentType = file.type || 'unknown';
         }
         else if (data && this.cronapi.internal.isBase64(data)) {
           var fileName = 'download';
@@ -3082,7 +3059,7 @@ if (!window.fixedTimeZone) {
     if (json) {
       if (json.name.length > 25)
         json.name = json.name.substr(0,22)+'...';
-
+      
       var result = (this.cronapi.$translate.use() == 'pt_br' ? "<b>Nome:</b> <br/>" : "<b>Name:</b> <br/>") + (json.contentType !== undefined ? json.name +"<br/>" : "");
       result += json.contentType !== undefined ? "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>" : "";
       result += json.fileExtension !== "" ? this.cronapi.$translate.use() == 'pt_br' ? "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>" : "<b>Extension:</b> <br/>" + json.fileExtension +"<br/>" : "";
@@ -3159,18 +3136,45 @@ if (!window.fixedTimeZone) {
       return false;
     }
   };
-
-  this.cronapi.internal.downloadFileEntity = function(datasource, field, indexData) {
-
-    function downloadUrl(url, fileName) {
-      var link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute("download", fileName);
-      var event = document.createEvent('MouseEvents');
-      event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
-      link.dispatchEvent(event);
+  
+  this.cronapi.internal.downloadUrl = function(url, fileName) {
+    let link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute("download", fileName);
+    let event = document.createEvent('MouseEvents');
+    event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+    link.dispatchEvent(event);
+  };
+  
+  this.cronapi.internal.makeDownloadFromBytes = function(valueContent, fileInfo) {
+    var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
+    var bytesOrFileInput;
+    var fileName = 'download';
+    
+    if (valueContent.match(/__odataFile_/g)) {
+      bytesOrFileInput = eval(valueContent);
+      fileName = bytesOrFileInput.name
     }
-
+    else {
+      fileName += cronapi.internal.getExtensionBase64(valueContent);
+      try {
+        valueContent = window.atob(valueContent);
+      } catch (e) {
+        //NoCommand
+      }
+      bytesOrFileInput = cronapi.internal.castBinaryStringToByteArray(valueContent);
+    }
+    let fileInfoDescription = eval(fileInfo);
+    if (fileInfoDescription) {
+      let fileInfoJson = JSON.parse(fileInfoDescription);
+      fileName = fileInfoJson.name;
+    }
+    var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
+    cronapi.internal.downloadUrl(url, fileName);
+  };
+  
+  this.cronapi.internal.downloadFileEntity = function(datasource, field, indexData, fileInfo) {
+    
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -3193,40 +3197,22 @@ if (!window.fixedTimeZone) {
       var tempJsonFileUploaded = JSON.parse(valueContent);
     }
     catch(e) { }
-
+    
     if (tempJsonFileUploaded) {
       window.open('/api/cronapi/filePreview/'+tempJsonFileUploaded.path);
     }
-    else if (valueContent.indexOf('dropboxusercontent') > -1) {
+    else if (valueContent.startsWith('https://') || valueContent.startsWith('http://')) {
       window.open(valueContent);
     }
     else {
-
+      
       if (datasource.isOData()) {
-        var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
-        var bytesOrFileInput;
-        var fileName = 'download';
-
-        if (valueContent.match(/__odataFile_/g)) {
-          bytesOrFileInput = eval(valueContent);
-          fileName = bytesOrFileInput.name
-        }
-        else {
-          fileName += this.cronapi.internal.getExtensionBase64(valueContent);
-          try {
-            valueContent = window.atob(valueContent);
-          } catch (e) {
-            //NoCommand
-          }
-          bytesOrFileInput = this.cronapi.internal.castBinaryStringToByteArray(valueContent);
-        }
-        var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
-        downloadUrl(url, fileName);
+        cronapi.internal.makeDownloadFromBytes(valueContent, fileInfo);
       }
       else {
         var url = '/api/cronapi/downloadFile';
         var splited = datasource.entity.split('/');
-
+        
         var entity = splited[splited.length-1];
         if (entity.indexOf(":") > -1) {
           //Siginifica que é relacionamento, pega a entidade do relacionamento
@@ -3237,14 +3223,14 @@ if (!window.fixedTimeZone) {
           var entityRelationSplited = entity.split(':');
           entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
         }
-
+        
         url += '/' + entity;
         url += '/' + field;
         var _u = JSON.parse(localStorage.getItem('_u')) || {};
         var object = itemActive;
-
+        
         var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
-
+        
         this.$promise = this.cronapi.$scope.$http({
           method: 'POST',
           url: finalUrl,
@@ -3261,7 +3247,7 @@ if (!window.fixedTimeZone) {
           try
           {
             var url = urlCreator.createObjectURL(data);
-            downloadUrl(url, filename);
+            cronapi.internal.downloadUrl(url, filename);
           } catch(ex) {
             console.log('Error downloading file');
             console.log(ex);
@@ -3270,9 +3256,9 @@ if (!window.fixedTimeZone) {
           console.log('Error downloading file');
         }.bind(this));
       }
-
+      
     }
-
+    
   };
 
   this.cronapi.internal.uploadFileAjax = function(field, file, progressId) {
@@ -3321,38 +3307,51 @@ if (!window.fixedTimeZone) {
     }.bind(this));
 
   };
-
-  this.cronapi.internal.uploadFile = function(field, file, progressId) {
+  
+  this.cronapi.internal.getFieldFromActiveString = function(rawActive) {
+    var regexForField = /.active.([a-zA-Z0-9_-]*)/g;
+    var groupField = regexForField.exec(rawActive);
+    var fieldName = groupField[1];
+    return fieldName;
+  };
+  
+  this.cronapi.internal.getJsonDescriptionFromFile = function(file) {
+    let json = {};
+    if (file) {
+      let fullNameSplited = file.name.split('.');
+      let extension = '.' + fullNameSplited[fullNameSplited.length - 1];
+      json.fileExtension = extension;
+      json.name = file.name;
+      json.contentType = file.type || 'unknown';
+    }
+    return json;
+  };
+  
+  this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo) {
     if (!file)
       return;
-
+    
     var regexForDatasource = /(.*?).active./g;
     var groupDatasource = regexForDatasource.exec(field);
     //Verificar se é campo de um datasource
     if (groupDatasource) {
       var datasource = eval(groupDatasource[1]);
       if (datasource.isOData()) {
-
-        var regexForField = /.active.([a-zA-Z0-9_-]*)/g;
-        var groupField = regexForField.exec(field);
-        var fieldName = groupField[1];
-
-        var schemaField = datasource.getFieldSchema(fieldName);
+        let fieldName = cronapi.internal.getFieldFromActiveString(field);
+        let schemaField = datasource.getFieldSchema(fieldName);
         if (schemaField && schemaField.type == 'Binary') {
           datasource.active['__odataFile_' + fieldName] = file;
           datasource.active[fieldName] = datasource.name + '.active.__odataFile_' +  fieldName;
-        }
-        else {
-          this.cronapi.internal.uploadFileAjax(field, file, progressId);
+          if (fileInfo) {
+            let json = cronapi.internal.getJsonDescriptionFromFile(file);
+            let fieldFileInfo = cronapi.internal.getFieldFromActiveString(fileInfo);
+            datasource.active[fieldFileInfo] = JSON.stringify(json);
+          }
+          return;
         }
       }
-      else {
-        this.cronapi.internal.uploadFileAjax(field, file, progressId);
-      }
     }
-    else {
-      this.cronapi.internal.uploadFileAjax(field, file, progressId);
-    }
+    this.cronapi.internal.uploadFileAjax(field, file, progressId);
   };
 
   /**
