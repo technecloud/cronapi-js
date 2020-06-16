@@ -3594,8 +3594,17 @@ if (!window.fixedTimeZone) {
    * @description {{getFirebaseTokenDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.cordova.device.getFirebaseToken = function(success,error){
-    window.FirebasePlugin.getToken(success,error);
+  this.cronapi.cordova.device.getFirebaseToken = function (success, error) {
+    function onDeviceReady() {
+      try {
+        window.FirebasePlugin.getToken(success, error);
+      } catch (e) {
+        console.error(e);
+        error(e);
+      }
+    }
+    // The deviceready event fires once Cordova has fully loaded. Once the event fires, you can safely make calls to Cordova APIs.
+    document.addEventListener("deviceready", onDeviceReady, false);
   };
 
 
@@ -3609,13 +3618,35 @@ if (!window.fixedTimeZone) {
    * @description {{getFirebaseNotificationDataDesc}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.cordova.device.getFirebaseNotificationData = function(success,error){
-    function onDeviceReady() { window.FirebasePlugin.onNotificationOpen(function(notification) {
-      success(notification);
-    }, function(err) {
-      error(err);
-    });
-    };
+  this.cronapi.cordova.device.getFirebaseNotificationData = function (success, error) {
+    // Full documentation on https://github.com/dpa99c/cordova-plugin-firebasex
+    // onNotificationOpen() renamed to onMessageReceived() on cordova-plugin-firebasex
+    function onDeviceReady() {
+      try {
+        // Available on cronapi-firebase-push@2.0.0
+        window.FirebasePlugin.onMessageReceived(function (notification) {
+          success(notification);
+        }, function (err) {
+          error(err);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+
+      // Keep old code if user is using deprecated cordova-plugin-firebase that still works on android
+      try {
+        // @deprecated
+        // Available on cronapi-firebase-push@1.0.0
+        window.FirebasePlugin.onNotificationOpen(function (notification) {
+          success(notification);
+        }, function (err) {
+          error(err);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
     document.addEventListener("deviceready", onDeviceReady, false);
   };
 
