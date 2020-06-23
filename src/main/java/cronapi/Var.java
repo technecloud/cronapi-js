@@ -803,7 +803,7 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       Element element = (Element) object;
       XMLOutputter outputter = new XMLOutputter();
       return outputter.outputString(element);
-    } else if (object instanceof String || object instanceof File) {
+    } else if (object instanceof String || object instanceof File || object instanceof DataSource) {
       return object.toString();
     }
     if (_type == Type.DATETIME) {
