@@ -172,6 +172,7 @@ public class Operations {
     ds.insert();
     ds.updateFields(params);
     ds.save();
+    ds.flush();
   }
 
   public static void insert(Var entity, Var object) {
