@@ -4705,10 +4705,10 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} attachmentText {{attachmentText}}
    * @param {ObjectType.OBJECT} attachmentImage {{attachmentImage}}
    * @param {ObjectType.OBJECT} attachmentImageAlt {{attachmentImageAlt}}
-   * @param {ObjectType.OBJECT} attachmentButtons {{attachmentButtons}}
+   * @param {ObjectType.OBJECT} attachmentButtons {{chatSuggestedActions}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.chat.chatAttachmentObj = function ( /** @type {ObjectType.STRING} */ attachmentTitle, /** @type {ObjectType.STRING} */ attachmentSubtitle, /** @type {ObjectType.STRING} */ attachmentText,  /** @type {ObjectType.STRING} */ attachmentImage, /** @type {ObjectType.STRING} */ attachmentButtons, /** @type {ObjectType.STRING} */ attachmentImageAlt) {
+  this.cronapi.chat.chatAttachmentObj = function ( /** @type {ObjectType.STRING} */ attachmentTitle, /** @type {ObjectType.STRING} */ attachmentSubtitle, /** @type {ObjectType.STRING} */ attachmentText,  /** @type {ObjectType.STRING} */ attachmentImage, /** @type {ObjectType.OBJECT} */ attachmentButtons, /** @type {ObjectType.STRING} */ attachmentImageAlt) {
     return {
       contentType: 'heroCard',
       content: {
@@ -4842,7 +4842,7 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) {
     let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.renderUserTypingIndicator(chatUser);
+    chat.clearUserTypingIndicator(chatUser);
   };
 
   /**
