@@ -9,6 +9,9 @@ import cronapi.QueryManager;
 import cronapi.RestClient;
 import cronapi.Utils;
 import cronapi.Var;
+import cronapi.cloud.CloudFactory;
+import cronapi.cloud.CloudManager;
+import cronapi.cloud.FieldData;
 import cronapi.i18n.Messages;
 import cronapi.odata.server.DatasourceExtension;
 import cronapi.odata.server.JPQLParserUtil;
@@ -1296,6 +1299,8 @@ public class DataSource implements JsonSerializable {
         }
 
         processCloudFields(instanceForUpdate);
+        //Quando o usuario atualiza com query, é necessário atualizar os parametros setados, caso haja Dropbox
+        updateQueryParamsValues(instanceForUpdate, paramsValues, parsedParams, strQuery);
 
         try {
           if (!em.getTransaction().isActive()) {
@@ -1311,6 +1316,26 @@ public class DataSource implements JsonSerializable {
       }
     } finally {
       endMultitetant();
+    }
+  }
+
+  private void updateQueryParamsValues(Object instanceForUpdate, Map<String, Var> paramsValues, List<String> parsedParams, TypedQuery<?> strQuery) {
+    List<FieldData> fieldsAnnotationCloud = Utils.getFieldsWithAnnotationCloud(instanceForUpdate);
+    for (FieldData fieldData : fieldsAnnotationCloud) {
+      String field = fieldData.field.getName();
+      if (paramsValues.containsKey(field) && !paramsValues.get(field).isNull()) {
+        Object content = Utils.getFieldValue(instanceForUpdate, field);
+        if (!content.toString().equals(paramsValues.get(field).getObjectAsString())) {
+          for (int fi = 0; fi < parsedParams.size(); fi++) {
+            String paramName = "param" + fi;
+            String realParamName = parsedParams.get(fi);
+            if (realParamName.equals(field)) {
+              strQuery.setParameter(paramName, content);
+              break;
+            }
+          }
+        }
+      }
     }
   }
 

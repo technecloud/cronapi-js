@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URLConnection;
 import java.util.ArrayList;
-
+import cronapi.util.Operations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,14 @@ public final class CloudManager {
             identify = identify.concat("-");
           Field declaredId = aClass.getDeclaredField(id);
           declaredId.setAccessible(true);
-          identify = identify.concat(id).concat("-").concat(String.valueOf(declaredId.get(sourceObject)));
+          Object content = declaredId.get(sourceObject);
+          String contentAsString;
+          if (content == null)
+            contentAsString = "randonGen" + Operations.generateUUID();
+          else
+            contentAsString = String.valueOf(content);
+
+          identify = identify.concat(id).concat("-").concat(contentAsString);
         }
         identify = identify.concat(".").concat(fileExtension);
         files.add(new FileObject("/".concat(filePath).concat(identify), fieldName, fileContent));
