@@ -2818,7 +2818,7 @@ if (!window.fixedTimeZone) {
       }, {
         quality: parseInt(quality), //Mobile images are very big to be stored into database, so reducing their quality (same as whatsapp images) improve performance and reduce db size
         destinationType: Camera.DestinationType.DATA_URL,
-        encodingType: Camera.EncodingType.PNG,
+        encodingType: Camera.EncodingType.JPEG,
         correctOrientation: true,
         allowEdit: (allowEdit == 'true'),
         targetWidth: parseInt(targetWidth),
