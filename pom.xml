@@ -222,12 +222,12 @@
     <dependency>
       <groupId>io.cronapp</groupId>
       <artifactId>olingo-odata2-client-core</artifactId>
-       <version>${odata.version}</version>
+      <version>${odata.version}</version>
     </dependency>
     <dependency>
       <groupId>io.cronapp</groupId>
       <artifactId>olingo-odata2-client-api</artifactId>
-       <version>${odata.version}</version>
+      <version>${odata.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-dbcp</groupId>
@@ -298,9 +298,7 @@
     <project.cronospass.resource mimetype="folder/libs">lib</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/main/java</project.cronospass.resource>
     <project.cronospass.resource mimetype="folder/src">src/test/java</project.cronospass.resource>
-    <odata.version>2.6.1
-</odata.version>
-    <reports.version>2.6.1
-</reports.version>
+    <odata.version>2.6.3</odata.version>
+    <reports.version>2.6.1</reports.version>
   </properties>
 </project>
