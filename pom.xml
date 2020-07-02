@@ -220,9 +220,14 @@
       <version>${odata.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-      <version>2.0.1.RELEASE</version>
+      <groupId>io.cronapp</groupId>
+      <artifactId>olingo-odata2-client-core</artifactId>
+       <version>${odata.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.cronapp</groupId>
+      <artifactId>olingo-odata2-client-api</artifactId>
+       <version>${odata.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-dbcp</groupId>
@@ -265,6 +270,11 @@
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
       <version>${amazon.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.stimulsoft</groupId>
+      <artifactId>stimulsoft-reports-report</artifactId>
+      <version>2020.3.2</version>
     </dependency>
   </dependencies>
   <distributionManagement>
