@@ -761,7 +761,16 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} error {{error}}
    */
   this.cronapi.util.getURLFromOthers = function(/** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE @values GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE  */  method , /** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys application/x-www-form-urlencoded|application/json @values application/x-www-form-urlencoded|application/json  */  contentType , /** @type {ObjectType.STRING} @description {{URLAddress}} */ url, /** @type {ObjectType.OBJECT} @description {{paramsHTTP}} */ params, /** @type {ObjectType.OBJECT} @description {{headers}} */ headers, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
-
+    
+    if (params && contentType === "application/x-www-form-urlencoded") {
+      for (var key in params) {
+        if (params[key] instanceof Array) {
+          var arrayContent = params[key].toString();
+          params[key] = `[${arrayContent}]`;
+        }
+      }
+    }
+    
     var header = Object.create(headers);
     header["Content-Type"] = contentType;
     // Angular has a .run that inject X-AUTH-TOKEN, so we use JQuery
