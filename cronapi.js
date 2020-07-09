@@ -4409,6 +4409,8 @@ if (!window.fixedTimeZone) {
     }
 
     var ctx = document.getElementById(chartId);
+    if (!ctx)
+      return;
     if (ctx._chart) {
       ctx._chart.destroy();
     }
