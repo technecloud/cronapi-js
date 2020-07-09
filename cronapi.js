@@ -770,6 +770,9 @@ if (!window.fixedTimeZone) {
         }
       }
     }
+    else if (params && contentType === "application/json") {
+      params = JSON.stringify(params);
+    }
     
     var header = Object.create(headers);
     header["Content-Type"] = contentType;
