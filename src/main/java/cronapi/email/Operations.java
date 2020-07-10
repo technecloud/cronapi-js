@@ -11,6 +11,8 @@ import cronapi.Var;
 import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 
+import javax.activation.FileDataSource;
+
 /**
  * Classe que representa ...
  * 
@@ -93,17 +95,19 @@ public class Operations {
 			if (!attachments.equals(Var.VAR_NULL)) {
 				if (attachments.getType() == Var.Type.LIST) {
 					for (Object v : attachments.getObjectAsList()) {
+						FileDataSource fileSource = new FileDataSource(Var.valueOf(v).getObjectAsString().trim());
 						EmailAttachment anexo = new EmailAttachment();
 						anexo.setPath(Var.valueOf(v).getObjectAsString());
 						anexo.setDisposition(EmailAttachment.ATTACHMENT);
-						anexo.setName(Var.valueOf(v).getObjectAsString());
+						anexo.setName(Var.valueOf(fileSource.getName()).getObjectAsString());
 						email.attach(anexo);
 					}
 				} else if (attachments.getType() == Var.Type.STRING) {
+					FileDataSource fileSource = new FileDataSource(Var.valueOf(attachments).getObjectAsString().trim());
 					EmailAttachment anexo = new EmailAttachment();
 					anexo.setPath(attachments.getObjectAsString());
 					anexo.setDisposition(EmailAttachment.ATTACHMENT);
-					anexo.setName(attachments.getObjectAsString());
+					anexo.setName(fileSource.getName());
 					email.attach(anexo);
 				}
 			}
