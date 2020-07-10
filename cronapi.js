@@ -830,6 +830,9 @@ if (!window.fixedTimeZone) {
         }
       }
     }
+    else if (params && contentType === "application/json") {
+      params = JSON.stringify(params);
+    }
     
     var header = Object.create(headers);
     header["Content-Type"] = contentType;
@@ -4409,6 +4412,8 @@ if (!window.fixedTimeZone) {
     }
 
     var ctx = document.getElementById(chartId);
+    if (!ctx)
+      return;
     if (ctx._chart) {
       ctx._chart.destroy();
     }
