@@ -4881,6 +4881,72 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{renderChatHtml}}
+   * @nameTags Chat
+   * @platform M
+   * @description {{renderChatHtmlDesc}}
+   * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @param {ObjectType.OBJECT} html Html
+   * @param {ObjectType.STRING} chatAttachmentLayout {{chatAttachmentLayout}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
+   */
+  this.cronapi.chat.renderChatHtml = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ html, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    const kendoChatHtmlTemplate = kendo.template(`
+              <div class="#=styles.card# #=styles.cardRich#">
+                  <div class="#=styles.cardBody#">
+                    <div>
+                    #=text#
+                    </div>
+                  </div>
+              </div>`);
+
+    if(!kendo.chat.Templates.kendoChatHtmlTemplate){
+      kendo.chat.registerTemplate("kendoChatHtmlTemplate", kendoChatHtmlTemplate);
+    }
+
+    let attachments = [];
+
+    if (Array.isArray(html)) {
+      for(let index in html){
+        let attachment = {
+          contentType: "kendoChatHtmlTemplate",
+          content: {
+            "text": html[index]
+          }
+        };
+        attachments.push(attachment)
+      }
+    } else {
+      let attachment = {
+        contentType: "kendoChatHtmlTemplate",
+        content: {
+          "text": html
+        }
+      };
+      attachments.push(attachment)
+    }
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.renderAttachments({
+          attachments: attachments,
+          attachmentLayout: chatAttachmentLayout
+        }, chatUser);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
+  };
+
+  /**
+   * @type function
    * @name {{renderChatSuggestedActions}}
    * @nameTags Chat
    * @platform M
