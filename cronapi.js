@@ -4689,6 +4689,22 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.chat = {};
 
+  function getChat(id) {
+    let start = Date.now();
+    let timeout = 10000;
+    let waitForChatData = (resolve, reject) => {
+      let chat = $('#' + id + ' .k-chat').data("kendoChat");
+      if (chat) {
+        resolve(chat);
+      } else if (timeout && (Date.now() - start) >= timeout) {
+        resolve();
+      } else {
+        setTimeout(() => waitForChatData(resolve, reject), 200);
+      }
+    };
+    return new Promise(waitForChatData);
+  }
+
   /**
    * @type function
    * @name {{chatUserObj}}
@@ -4718,11 +4734,11 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} attachmentSubtitle {{attachmentSubtitle}}
    * @param {ObjectType.STRING} attachmentText {{attachmentText}}
    * @param {ObjectType.OBJECT} attachmentImage {{attachmentImage}}
-   * @param {ObjectType.OBJECT} attachmentImageAlt {{attachmentImageAlt}}
+   * @param {ObjectType.STRING} attachmentImageAlt {{attachmentImageAlt}}
    * @param {ObjectType.OBJECT} attachmentButtons {{chatSuggestedActions}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.chat.chatAttachmentObj = function ( /** @type {ObjectType.STRING} */ attachmentTitle, /** @type {ObjectType.STRING} */ attachmentSubtitle, /** @type {ObjectType.STRING} */ attachmentText,  /** @type {ObjectType.STRING} */ attachmentImage, /** @type {ObjectType.OBJECT} */ attachmentButtons, /** @type {ObjectType.STRING} */ attachmentImageAlt) {
+  this.cronapi.chat.chatAttachmentObj = function ( /** @type {ObjectType.STRING} */ attachmentTitle, /** @type {ObjectType.STRING} */ attachmentSubtitle, /** @type {ObjectType.STRING} */ attachmentText,  /** @type {ObjectType.STRING} */ attachmentImage, /** @type {ObjectType.STRING} */ attachmentImageAlt, /** @type {ObjectType.OBJECT} */ attachmentButtons) {
     return {
       contentType: 'heroCard',
       content: {
@@ -4762,11 +4778,21 @@ if (!window.fixedTimeZone) {
    * @platform M
    * @description {{getChatUserDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
-   * @returns {ObjectType.OBJECT}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.getChatUser = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    return chat.getUser();
+  this.cronapi.chat.getChatUser = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        success(chat.getUser());
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4777,10 +4803,22 @@ if (!window.fixedTimeZone) {
    * @description {{postChatMessageDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.STRING} textMessage {{textMessage}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.postChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ textMessage) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.postMessage(textMessage);
+  this.cronapi.chat.postChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ textMessage, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.postMessage(textMessage);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4792,10 +4830,22 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.STRING} chatMessage {{chatMessage}}
    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.renderChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ chatMessage, /** @type {ObjectType.OBJECT} */ chatUser) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.renderMessage({'type': 'text', 'text': chatMessage}, chatUser);
+  this.cronapi.chat.renderChatMessage = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STRING} */ chatMessage, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.renderMessage({'type': 'text', 'text': chatMessage}, chatUser);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4808,13 +4858,25 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
    * @param {ObjectType.OBJECT} chatAttachments {{chatAttachments}}
    * @param {ObjectType.STRING} chatAttachmentLayout {{chatAttachmentLayout}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.renderChatAttachments = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatAttachments, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.renderAttachments({
-      attachments: (Array.isArray(chatAttachments) ? chatAttachments : [chatAttachments]),
-      attachmentLayout: chatAttachmentLayout
-    }, chatUser);
+  this.cronapi.chat.renderChatAttachments = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ chatAttachments, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.renderAttachments({
+          attachments: (Array.isArray(chatAttachments) ? chatAttachments : [chatAttachments]),
+          attachmentLayout: chatAttachmentLayout
+        }, chatUser);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4825,10 +4887,22 @@ if (!window.fixedTimeZone) {
    * @description {{renderChatSuggestedActionsDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.OBJECT} chatSuggestedActions {{chatSuggestedActions}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatSuggestedActions) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.renderSuggestedActions((Array.isArray(chatSuggestedActions) ? chatSuggestedActions : [chatSuggestedActions]));
+  this.cronapi.chat.renderChatSuggestedActions = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatSuggestedActions, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.renderSuggestedActions((Array.isArray(chatSuggestedActions) ? chatSuggestedActions : [chatSuggestedActions]));
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4839,10 +4913,22 @@ if (!window.fixedTimeZone) {
    * @description {{renderChatUserTypingIndicatorDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.renderChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.renderUserTypingIndicator(chatUser);
+  this.cronapi.chat.renderChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.renderUserTypingIndicator(chatUser);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4853,10 +4939,22 @@ if (!window.fixedTimeZone) {
    * @description {{clearChatUserTypingIndicatorDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.clearUserTypingIndicator(chatUser);
+  this.cronapi.chat.clearChatUserTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.clearUserTypingIndicator(chatUser);
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
   };
 
   /**
@@ -4867,10 +4965,22 @@ if (!window.fixedTimeZone) {
    * @description {{removeChatTypingIndicatorDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
    * @param {ObjectType.OBJECT} chatUser {{chatUser}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{success}}
+   * @type {ObjectType.STATEMENTSENDER} @description {{error}}
    */
-  this.cronapi.chat.removeChatTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    let chat = $('#' + id + ' .k-chat').data("kendoChat");
-    chat.removeTypingIndicator();
-  };
+  this.cronapi.chat.removeChatTypingIndicator = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
+
+    getChat(id).then((chat) => {
+      if (chat) {
+        chat.removeTypingIndicator();
+        success();
+      } else {
+        let errorMsg = this.cronapi.$translate.instant("chatElementNotPresent");
+        this.cronapi.$scope.Notification.error(errorMsg);
+        error(errorMsg);
+      }
+    });
+
+  }
 
 }).bind(window)();
