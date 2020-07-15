@@ -59,12 +59,22 @@ if (!window.fixedTimeZone) {
     }
   }
 
+  let clientMap = {};
+
   this.cronapi.client = function(pack) {
+    let attr = false;
     return {
       attr: function() {
+        attr = true;
         return this;
       },
       run: function() {
+        var key = pack;
+
+        for (var i = 0;i <arguments.length;i++) {
+          key += String(arguments[i]);
+        }
+
         var bk;
         try {
           bk = eval('blockly.'+pack);
@@ -76,7 +86,32 @@ if (!window.fixedTimeZone) {
           bk = eval(pack);
         }
 
-        return bk.apply(this, arguments);
+        if (attr) {
+          let result = bk.apply(this, arguments);
+          if (result !== undefined && result !== null && result.then && typeof result.then === 'function') {
+            result.then(value => {
+              if (clientMap[key] !== value) {
+                this.safeApply(() => {
+                  clientMap[key] = value;
+                });
+              }
+            }).catch((error) => {
+                if (clientMap[key] !== error) {
+                this.safeApply(() => {
+                  clientMap[key] = error;
+                });
+              }
+            });
+
+            return clientMap[key];
+          } else {
+            return result;
+          }
+        } else {
+          return bk.apply(this, arguments).catch((error) => {
+            this.cronapi.$scope.Notification.error(error);
+          });
+        }
       }.bind(this)
     }
   };
@@ -403,6 +438,22 @@ if (!window.fixedTimeZone) {
   }
 
   /**
+   * @type function
+   * @name {{sleep}}
+   * @nameTags sleep, dormir, wait, interval
+   * @description {{sleepDescription}}
+   * @param {ObjectType.LONG} interval {{sleepInterval}}
+   */
+  this.cronapi.util.sleep = async function (interval) {
+    var promise = new Promise((resolve) => {
+      setInterval(() => {
+        resolve(interval);
+      }, interval)
+    });
+    return promise;
+  }
+
+  /**
    * @type internal
    * @name {{callServerBlocklyAsync}}
    * @nameTags callServerBlocklyAsync
@@ -648,74 +699,25 @@ if (!window.fixedTimeZone) {
    * @wizard procedures_callblockly_callreturn
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.util.callServerBlockly = function(classNameWithMethod) {
-
-    const getCircularReplacer = () => {
-      const seen = new WeakSet();
-      return (key, value) => {
-        if (typeof value === "object" && value !== null) {
-          if (seen.has(value)) {
-            return;
-          }
-          seen.add(value);
-        }
-        return value;
-      };
+  this.cronapi.util.callServerBlockly = async function(classNameWithMethod) {
+    var params = []
+    params.push(classNameWithMethod);
+    params.push(null);
+    params.push(null);
+    var idx = 2;
+    for(idx; idx < arguments.length ; idx ++){
+      params.push(arguments[idx]);
     };
 
-    var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
-    var params = [];
-
-    var fields = this.cronapi.util.getScreenFields();
-
-    var dataCall = {
-      "fields": fields,
-      "inputs": params
-    };
-
-    for (var i = 1; i<arguments.length; i++)
-      params.push(arguments[i]);
-
-    var token = "";
-    if (window.uToken)
-      token = window.uToken;
-
-    var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
-    let contentData = undefined;
-    try {
-      contentData = JSON.stringify(dataCall);
-    }
-    catch (e) {
-      contentData = JSON.stringify(dataCall, getCircularReplacer());
-    }
-
-    var resultData = $.ajax({
-      type: 'POST',
-      url: finalUrl,
-      dataType: 'html',
-      data : contentData,
-      async: false,
-      headers : {
-        'Content-Type' : 'application/json',
-        'X-AUTH-TOKEN' : token,
-        'toJS' : true,
-        'timezone': moment().utcOffset()
-      }
-    });
-
-    var result;
-    if (resultData.status == 200) {
-      if (resultData.responseJSON)
-        result = resultData.responseJSON;
-      else
-        result = this.cronapi.evalInContext(resultData.responseText);
-    }
-    else {
-      var message = this.cronapi.internal.getErrorMessage(resultData.responseText, resultData.statusText);
-      this.cronapi.$scope.Notification.error(message);
-      throw message;
-    }
-    return result;
+    return  new Promise(((resolve, reject) => {
+      params[1] = ((data) => {
+        resolve(data);
+      }).bind(this);
+      params[2] = ((error) => {
+        reject(error);
+      }).bind(this);
+      this.cronapi.util.makeCallServerBlocklyAsync.apply(this, params);
+    }).bind(this));
   };
 
     /**
