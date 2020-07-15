@@ -438,6 +438,22 @@ if (!window.fixedTimeZone) {
   }
 
   /**
+   * @type function
+   * @name {{sleep}}
+   * @nameTags sleep, dormir, wait, interval
+   * @description {{sleepDescription}}
+   * @param {ObjectType.LONG} interval {{sleepInterval}}
+   */
+  this.cronapi.util.sleep = async function (interval) {
+    var promise = new Promise((resolve) => {
+      setInterval(() => {
+        resolve(interval);
+      }, interval)
+    });
+    return promise;
+  }
+
+  /**
    * @type internal
    * @name {{callServerBlocklyAsync}}
    * @nameTags callServerBlocklyAsync
