@@ -413,7 +413,6 @@ public class Operations {
 
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace.getObjectAsString());
         EntityManager em = factory.createEntityManager();
-        Class<?> clazz = Class.forName(nameClass.getObjectAsString());
 
         List<Var> values = param.getObjectAsList();
         List<String> args = new ArrayList<>();
@@ -427,29 +426,133 @@ public class Operations {
         }
 
         List<Object[]> result = query.getResultList();
-        Field[] fieldArray = clazz.getDeclaredFields();
         List<Object> returnValues = new ArrayList<>();
 
         // try parse
-        try {
-            for (Object value : result) {
-                Object instance = clazz.newInstance();
-                if (!(value instanceof Object[])) {
-                    fieldArray[0].setAccessible(true);
-                    fieldArray[0].set(instance, value);
-                } else {
-                    for (int i = 0; i < fieldArray.length; i++) {
-                        fieldArray[i].setAccessible(true);
-                        fieldArray[i].set(instance, ((Object[]) value)[i]);
+        if (!nameClass.isEmptyOrNull()) {
+
+            try {
+
+                Class<?> clazz = Class.forName(nameClass.getObjectAsString());
+                Field[] fieldArray = clazz.getDeclaredFields();
+
+                for (Object value : result) {
+                    Object instance = clazz.newInstance();
+                    if (!(value instanceof Object[])) {
+                        fieldArray[0].setAccessible(true);
+                        fieldArray[0].set(instance, value);
+                    } else {
+                        for (int i = 0; i < fieldArray.length; i++) {
+                            fieldArray[i].setAccessible(true);
+                            fieldArray[i].set(instance, ((Object[]) value)[i]);
+                        }
                     }
+                    returnValues.add(instance);
                 }
-                returnValues.add(instance);
+                return Var.valueOf(returnValues);
+
+            } catch (Exception e) {
             }
-        } catch (Exception e) {
-            // return result
-            return Var.valueOf(result);
         }
-        return Var.valueOf(returnValues);
+
+        return Var.valueOf(result);
+    }
+
+
+    @CronapiMetaData(type = "function", name = "{{executeProcedureWithInOut}}", nameTags = {"execute",
+            "procedure"}, description = "{{executeProcedureWithInOutDescription}}", params = {"{{namespace}}", "{{procedureName}}", "{{parameterMap}}",
+            "{{paramteterListTypes}}", "{{paramteterListModes}}"}, paramsType = {ObjectType.STRING, ObjectType.STRING,
+            ObjectType.MAP, ObjectType.LIST, ObjectType.LIST}, returnType = ObjectType.MAP)
+    public static Var executeProcedureInOut(Var namespace,
+                                            Var storeProcedure,
+                                            Var param,
+                                            Var paramModes,
+                                            Var paramTypes
+    ) throws Exception {
+
+        Map mapReturn = new LinkedHashMap<>();
+
+        Map<String, ParameterMode> paramModeMap = new HashMap<>();
+        paramModeMap.put("IN", ParameterMode.IN);
+        paramModeMap.put("OUT", ParameterMode.OUT);
+        paramModeMap.put("INOUT", ParameterMode.INOUT);
+        paramModeMap.put("CURSOR", ParameterMode.REF_CURSOR);
+
+        // prepare entity manager
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(namespace.getObjectAsString());
+        EntityManager em = factory.createEntityManager();
+        StoredProcedureQuery sp = em.createStoredProcedureQuery(storeProcedure.getObjectAsString());
+
+        // params
+        List keys = new ArrayList(param.getObjectAsMap().keySet());
+        List<Var> modes = paramModes.getObjectAsList();
+
+        // types is not null
+        List<Var> types = null;
+        if (paramTypes != null && !paramTypes.isEmptyOrNull()) types = paramTypes.getObjectAsList();
+
+        // set class name default
+        String nameClass = "java.lang.String";
+        Class<?> clazz = Class.forName(nameClass);
+
+        // has ref cursor
+        int posCursor = modes.indexOf(Var.valueOf("CURSOR"));
+        Boolean hasOut = modes.indexOf(Var.valueOf("OUT")) > -1 || modes.indexOf(Var.valueOf("INOUT")) > -1;
+        Boolean hasCursor = posCursor > -1;
+
+        for (int i = 0; i < keys.size(); i++) {
+
+            // get params
+            String paramName = keys.get(i).toString();
+            String paramModeName = modes.get(i).getObjectAsString();
+            ParameterMode paramMode = paramModeMap.get(paramModeName);
+
+            // get class name by param
+            if (types != null) {
+                nameClass = types.get(i).getObjectAsString();
+            } else {
+                try {
+                    // force get class name
+                    nameClass = param.get(paramName).getClass().getName();
+                } catch (Exception e) {
+                }
+            }
+
+            clazz = Class.forName(nameClass);
+            sp.registerStoredProcedureParameter(paramName, clazz, paramMode);
+
+            // set parameters IN and INOUT
+            if ("IN".equals(paramModeName) || "INOUT".equals(paramModeName))
+                sp.setParameter(paramName, param.get(paramName));
+        }
+
+        // execute sp
+        sp.execute();
+
+        if (hasCursor || !hasOut) {
+
+            // get result ref cursor
+            List<Object[]> result = sp.getResultList();
+            String key = hasOut ? keys.get(posCursor).toString() : "result";
+            mapReturn.put(key, result);
+
+        } else {
+
+            // get parameters out
+            for (int i = 0; i < keys.size(); i++) {
+                //get params
+                String paramName = keys.get(i).toString();
+                String paramModeName = modes.get(i).getObjectAsString();
+
+                // get parameters OUT and INOUT
+                if ("OUT".equals(paramModeName) || "INOUT".equals(paramModeName)) {
+                    Object value = sp.getOutputParameterValue(paramName);
+                    mapReturn.put(paramName, value);
+                }
+            }
+        }
+
+        return Var.valueOf(mapReturn);
     }
 
 }
