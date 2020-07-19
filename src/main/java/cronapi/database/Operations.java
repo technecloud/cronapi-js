@@ -12,14 +12,8 @@ import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.*;
-
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Classe que representa operações de acesso ao banco
