@@ -12,8 +12,14 @@ import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.*;
+
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Classe que representa operações de acesso ao banco
@@ -440,7 +446,7 @@ public class Operations {
                             fieldArray[i].set(instance, ((Object[]) value)[i]);
                         }
                     }
-                    returnValues.add(instance);
+                    returnValues.add(Var.valueOf(instance));
                 }
                 return Var.valueOf(returnValues);
 
@@ -448,7 +454,7 @@ public class Operations {
             }
         }
 
-        return Var.valueOf(result);
+        return  Var.valueOf(result);
     }
 
 
@@ -457,10 +463,10 @@ public class Operations {
             "{{paramteterListTypes}}", "{{paramteterListModes}}"}, paramsType = {ObjectType.STRING, ObjectType.STRING,
             ObjectType.MAP, ObjectType.LIST, ObjectType.LIST}, returnType = ObjectType.MAP)
     public static Var executeProcedureInOut(Var namespace,
-                                            Var storeProcedure,
-                                            Var param,
-                                            Var paramModes,
-                                            Var paramTypes
+                                       Var storeProcedure,
+                                       Var param,
+                                       Var paramModes,
+                                       Var paramTypes
     ) throws Exception {
 
         Map mapReturn = new LinkedHashMap<>();
