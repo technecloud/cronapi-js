@@ -564,5 +564,8 @@
   "XMLHasRootElementDescription": "Function that verify if exists a XML root element on XML document",
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
-  "yearsToIncrement": "Years to increase"
+  "yearsToIncrement": "Years to increase",
+  "sleep": "Sleep",
+  "sleepDescription": "Stops the execution of the block for the informed interval",
+  "sleepInterval": "Interval in milliseconds"
 }
