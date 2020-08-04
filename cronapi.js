@@ -46,13 +46,13 @@ if (!window.fixedTimeZone) {
     return arg;
   }
 
-  this.cronapi.evalInContext = function(js) {
+  this.cronapi.evalInContext = async function(js) {
     var result = eval('this.cronapi.doEval('+js+')');
     if (result) {
       if (result.commands) {
         for (var i = 0; i < result.commands.length; i++) {
           var func = eval(result.commands[i].function);
-          func.apply(this, result.commands[i].params);
+          await func.apply(this, result.commands[i].params);
         }
       }
       return result.value;
@@ -591,12 +591,13 @@ if (!window.fixedTimeZone) {
     paramsApply.push(blocklyWithFunction);
     paramsApply.push(fields);
     paramsApply.push(function(data) {
-      var result = this.cronapi.evalInContext(data);
-      if (typeof callbackSuccess == "string") {
-        eval(callbackSuccess)(result);
-      } else if (callbackSuccess) {
-        callbackSuccess(result);
-      }
+      this.cronapi.evalInContext(data).then((result) => {
+        if (typeof callbackSuccess == "string") {
+          eval(callbackSuccess)(result);
+        } else if (callbackSuccess) {
+          callbackSuccess(result);
+        }
+      });
     }.bind(this));
     paramsApply.push(function(data, status, errorThrown) {
       var message = this.cronapi.internal.getErrorMessage(data.responseText, errorThrown);
@@ -4896,6 +4897,18 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.chat.renderChatHtml = function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ chatUser, /** @type {ObjectType.OBJECT} */ html, /** @type {ObjectType.STRING} @description {{chatAttachmentLayoutDesc}} @blockType util_dropdown @keys list|carousel @values {{chatAttachmentList}}|{{chatAttachmentCarousel}}  */ chatAttachmentLayout, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error) {
 
+    // Remove any script in the html message
+    const stripScripts = function (s) {
+      let div = document.createElement('div');
+      div.innerHTML = s;
+      let scripts = div.getElementsByTagName('script');
+      let i = scripts.length;
+      while (i--) {
+        scripts[i].parentNode.removeChild(scripts[i]);
+      }
+      return div.innerHTML;
+    };
+
     const kendoChatHtmlTemplate = kendo.template(`
               <div class="#=styles.card# #=styles.cardRich#">
                   <div class="#=styles.cardBody#">
@@ -4916,7 +4929,7 @@ if (!window.fixedTimeZone) {
         let attachment = {
           contentType: "kendoChatHtmlTemplate",
           content: {
-            "text": html[index]
+            "text": stripScripts(html[index])
           }
         };
         attachments.push(attachment)
@@ -4925,7 +4938,7 @@ if (!window.fixedTimeZone) {
       let attachment = {
         contentType: "kendoChatHtmlTemplate",
         content: {
-          "text": html
+          "text": stripScripts(html)
         }
       };
       attachments.push(attachment)
