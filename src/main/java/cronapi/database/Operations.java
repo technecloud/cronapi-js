@@ -461,7 +461,7 @@ public class Operations {
 
     @CronapiMetaData(type = "function", name = "{{executeProcedureWithInOut}}", nameTags = {"execute",
             "procedure"}, description = "{{executeProcedureWithInOutDescription}}", params = {"{{namespace}}", "{{procedureName}}", "{{parameterMap}}",
-            "{{paramteterListTypes}}", "{{paramteterListModes}}"}, paramsType = {ObjectType.STRING, ObjectType.STRING,
+        "{{paramteterListModes}}" , "{{paramteterListTypes}}"}, paramsType = {ObjectType.STRING, ObjectType.STRING,
             ObjectType.MAP, ObjectType.LIST, ObjectType.LIST}, returnType = ObjectType.MAP)
     public static Var executeProcedureInOut(Var namespace,
                                        Var storeProcedure,
