@@ -1580,6 +1580,7 @@ if (!window.fixedTimeZone) {
       }catch(e){
           $(modalToShow).show();
       }
+      $(modalToShow).css('overflow-y', 'auto');
   };
 
   /**
