@@ -1401,6 +1401,7 @@ if (!window.fixedTimeZone) {
     }catch(e){
       $('#'+id).show();
     }
+    $('#'+id).css('overflow-y', 'auto');
   };
 
   /**
