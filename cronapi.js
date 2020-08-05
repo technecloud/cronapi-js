@@ -5066,3 +5066,5 @@ if (!window.fixedTimeZone) {
   }
 
 }).bind(window)();
+
+var ___ok = "ok";
