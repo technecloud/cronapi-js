@@ -858,10 +858,15 @@ public class QueryManager {
         if (authorized) {
           JsonElement element = calcObj.get(name);
           if (!isNull(element)) {
-            Var value;
+            Var value = Var.VAR_NULL;
 
             if (element.isJsonPrimitive()) {
-              value = parseExpressionValue(element);
+              if (bean instanceof HashMap) {
+                value = Var.valueOf(((HashMap)bean).get(name));
+              }
+              if (value.isEmptyOrNull()) {
+                value = parseExpressionValue(element);
+              }
             } else {
               try {
                 JsonObject object = element.getAsJsonObject();
