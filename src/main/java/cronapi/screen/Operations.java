@@ -21,7 +21,7 @@ public class Operations {
     return result;
   }
 
-  @CronapiMetaData(type = "function", name = "{{result}}", nameTags = {
+  @CronapiMetaData(type = "function", name = "{{getParamFromQueryString}}", nameTags = {
       "parameter", "Parametro", "request", "requisição"}, description = "{{getParamDescription}}", returnType = ObjectType.STRING)
   public static final Var getParam(
       @ParamMetaData( type = ObjectType.STRING, description="{{getValueOfFieldParam0}}") Var name) throws Exception {
