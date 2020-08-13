@@ -108,9 +108,11 @@ if (!window.fixedTimeZone) {
             return result;
           }
         } else {
-          return bk.apply(this, arguments).catch((error) => {
-            this.cronapi.$scope.Notification.error(error);
-          });
+          let isAsync = bk.constructor.name === "AsyncFunction";
+          if (isAsync)
+            return bk.apply(this, arguments).catch((error) => this.cronapi.$scope.Notification.error(error));
+          else
+            return bk.apply(this, arguments);
         }
       }.bind(this)
     }
