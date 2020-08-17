@@ -1400,6 +1400,8 @@ if (!window.fixedTimeZone) {
 
       var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
       var viewToCheck = view + (view.indexOf("?") > -1 ? "": "?");
+  
+      this.cronapi.forceCloseAllModal();
 
       if(oldHashToCheck.indexOf(viewToCheck) >= 0){
         window.location.reload();
@@ -2808,6 +2810,14 @@ if (!window.fixedTimeZone) {
         }
       }, 100);
     }
+  };
+  
+  this.cronapi.forceCloseAllModal = function() {
+    var modals = $('.modal.fade.in');
+    if (modals) {
+      modals.each((idx, obj) => this.cronapi.screen.hideModal(obj.id));
+    }
+    $('.modal-backdrop.fade.in').remove();
   };
 
   this.cronapi.internal.setFile = function(field, file) {
