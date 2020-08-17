@@ -120,7 +120,7 @@ if (!window.fixedTimeZone) {
         var namespace = parts.join(".");
 
         var blocklyName = namespace + ":" + func;
-        
+
         var resolveForPromise;
         var rejectForPromise;
         var promise = new Promise((resolve, reject) => {
@@ -1279,6 +1279,8 @@ if (!window.fixedTimeZone) {
 
       var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
       var viewToCheck = view + (view.indexOf("?") > -1 ? "": "?");
+
+      this.cronapi.forceCloseAllModal();
 
       if(oldHashToCheck.indexOf(viewToCheck) >= 0){
         window.location.reload();
@@ -2618,6 +2620,27 @@ if (!window.fixedTimeZone) {
   };
 
   this.cronapi.internal = {};
+
+  this.cronapi.internal.focusFormInput = function () {
+    let $firstForm = $($('form')[0]);
+    let $firstInput = $($firstForm.find('input')[0]);
+    if ($firstInput && $firstInput.length) {
+      let waitBecomeVisible = setInterval(()=> {
+        if ($firstInput.is(':visible')) {
+          $firstInput.focus();
+          clearInterval(waitBecomeVisible);
+        }
+      }, 100);
+    }
+  };
+
+  this.cronapi.forceCloseAllModal = function() {
+    var modals = $('.modal.fade.in');
+    if (modals) {
+      modals.each((idx, obj) => this.cronapi.screen.hideModal(obj.id));
+    }
+    $('.modal-backdrop.fade.in').remove();
+  };
 
   this.cronapi.internal.setFile = function(field, file) {
     this.cronapi.internal.fileToBase64(file, function(base64) { this.cronapi.screen.changeValueOfField(field, base64); }.bind(this));
