@@ -4700,6 +4700,214 @@ if (!window.fixedTimeZone) {
   }
 
   /**
+   * @category Calendar
+   * @categoryTags calendar|calendário
+   */
+  this.cronapi.calendar = {};
+
+  function getCalendar(id) {
+    let start = Date.now();
+    let timeout = 10000;
+    let waitForChatData = (resolve, reject) => {
+      let calendar = $('#' + id + ' cron-calendar').data("kendoCalendar");
+      if (calendar) {
+        resolve(calendar);
+      } else if (timeout && (Date.now() - start) >= timeout) {
+        resolve();
+      } else {
+        setTimeout(() => waitForChatData(resolve, reject), 200);
+      }
+    };
+    return new Promise(waitForChatData);
+  }
+
+  /**
+   * @type function
+   * @name {{getCalendarValue}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{getCalendarValueDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.calendar.getCalendarValue = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      return calendar.value();
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+      return null;
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{setCalendarValue}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{setCalendarValueDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.calendar.setCalendarValue = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ value) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      calendar.value(value);
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{getCalendarMin}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{getCalendarMinDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.calendar.getCalendarMin = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      return calendar.min();
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+      return null;
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{setCalendarMin}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{setCalendarMinDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.calendar.setCalendarMin = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ value) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      calendar.min(value);
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{getCalendarMax}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{getCalendarMaxDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.calendar.getCalendarMax = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      return calendar.max();
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+      return null;
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{setCalendarMax}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{setCalendarMaxDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.calendar.setCalendarMax = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ value) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      calendar.max(value);
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+    }
+  };
+
+
+  /**
+   * @type function
+   * @name {{getCalendarSelectDates}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{getCalendarSelectDatesDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.calendar.getCalendarSelectDates = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      return calendar.selectDates();
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+      return null;
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{setCalendarSelectDates}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{setCalendarSelectDatesDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   */
+  this.cronapi.calendar.setCalendarSelectDates = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ value) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      calendar.selectDates((Array.isArray(value) ? value : [value]));
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+    }
+  };
+
+  /**
+   * @type function
+   * @name {{navigateCalendarTo}}
+   * @nameTags Calendar
+   * @platform W
+   * @description {{navigateCalendarToDesc}}
+   * @param {ObjectType.STRING} id {{id}}
+   * @param {ObjectType.OBJECT} value {{value}}
+   * @param {ObjectType.STRING} view {{calendarView}}
+   */
+  this.cronapi.calendar.navigateCalendarTo = async function (/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id, /** @type {ObjectType.OBJECT} */ value, /** @type {ObjectType.STRING} @description {{calendarView}} @blockType util_dropdown @keys month|year|decade|century @values {{month}}|{{year}}|{{decade}}|{{century}}  */ view) {
+
+    const calendar = await getCalendar(id);
+    if (calendar) {
+      calendar.navigate(value, view);
+    } else {
+      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
+      this.cronapi.$scope.Notification.error(errorMsg);
+    }
+  };
+
+  /**
    * @category Chat
    * @categoryTags chat|chatbot|message
    */
