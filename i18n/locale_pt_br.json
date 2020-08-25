@@ -19,6 +19,7 @@
   "backDescription": "Volta para formulário aberto anteriormente",
   "blocklyWithFunction": "Nome do Bloco",
   "Calendar":"Calendário",
+  "calendarElementNotPresent": "O componente de calendário não está presente na página.",
   "calendarView":"Visão do calendário",
   "callbackBlocklyError": "Callback erro: nome do bloco (completo) para ser chamado quando obter a resposta do servidor com erro",
   "callbackBlocklySuccess": "Callback sucesso: nome do bloco (completo) para ser chamado quando obter a resposta do servidor com sucesso",

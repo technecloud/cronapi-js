@@ -19,6 +19,7 @@
   "backDescription": "Returns to previously opened Form",
   "blocklyWithFunction": "Blockly name",
   "Calendar":"Calendar",
+  "calendarElementNotPresent": "The calendar component is not present on page.",
   "calendarView":"Calendar view",
   "callbackBlocklyError": "Callback error: blockly (full) name to be called when retrieving server response with error",
   "callbackBlocklySuccess": "Callback success: blockly (full) name to be called when to get the server response successfully",
