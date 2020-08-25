@@ -227,10 +227,10 @@ public class Operations {
 		return result;
 	}
 
-	@CronapiMetaData(type = "function", name = "{{ MATHTHEPOW }}", displayInline = true, nameTags = {
-			"Potência", "pow" }, description = "{{ MATHPOWDESCRIPTION }}", returnType = CronapiMetaData.ObjectType.DOUBLE)
-	public static final Var pow(@ParamMetaData(description = "{{ MATHPOWBASE }}", type = CronapiMetaData.ObjectType.DOUBLE) Var base,
-								@ParamMetaData(description = "^", type = CronapiMetaData.ObjectType.DOUBLE) Var exponent) throws Exception {
+	@CronapiMetaData(type = "function", name = "{{MATHTHEPOW}}", displayInline = true, nameTags = {
+			"Potência", "pow" }, description = "{{MATHPOWDESCRIPTION}}", returnType = CronapiMetaData.ObjectType.DOUBLE)
+	public static final Var pow(@ParamMetaData(description = "{{MATHPOWBASE}}", type = CronapiMetaData.ObjectType.DOUBLE) Var base,
+								@ParamMetaData(description = "{{MATHPOWEXPONENT}}", type = CronapiMetaData.ObjectType.DOUBLE) Var exponent) throws Exception {
 		return Var.valueOf(Math.pow(base.getObjectAsDouble(), exponent.getObjectAsDouble()));
 	}
 
