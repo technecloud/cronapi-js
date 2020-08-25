@@ -4721,6 +4721,11 @@ if (!window.fixedTimeZone) {
     return new Promise(waitForChatData);
   }
 
+  function showErrorNotification(errorMsgKey) {
+    const errorMsg = this.cronapi.$translate.instant(errorMsgKey);
+    this.cronapi.$scope.Notification.error(errorMsg);
+  }
+
   /**
    * @type function
    * @name {{getCalendarValue}}
@@ -4736,8 +4741,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       return calendar.value();
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
       return null;
     }
   };
@@ -4757,8 +4761,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       calendar.value(value);
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
     }
   };
 
@@ -4777,8 +4780,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       return calendar.min();
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
       return null;
     }
   };
@@ -4798,8 +4800,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       calendar.min(value);
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
     }
   };
 
@@ -4818,8 +4819,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       return calendar.max();
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
       return null;
     }
   };
@@ -4839,8 +4839,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       calendar.max(value);
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
     }
   };
 
@@ -4860,8 +4859,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       return calendar.selectDates();
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
       return null;
     }
   };
@@ -4881,8 +4879,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       calendar.selectDates((Array.isArray(value) ? value : [value]));
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
     }
   };
 
@@ -4902,8 +4899,7 @@ if (!window.fixedTimeZone) {
     if (calendar) {
       calendar.navigate(value, view);
     } else {
-      let errorMsg = this.cronapi.$translate.instant("calendarElementNotPresent");
-      this.cronapi.$scope.Notification.error(errorMsg);
+      showErrorNotification("calendarElementNotPresent");
     }
   };
 
