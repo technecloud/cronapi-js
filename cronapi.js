@@ -703,14 +703,14 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.util.callServerBlockly = async function(classNameWithMethod) {
-    var params = []
+    let params = []
     params.push(classNameWithMethod);
-    params.push(null);
-    params.push(null);
-    var idx = 2;
+    params.push(null); // This argument will be used as the resolve method callback
+    params.push(null); // This argument will be used as the reject method callback
+    let idx = 1; // idx should be 1 to ignore the declared argument 'classNameWithMethod'
     for(idx; idx < arguments.length ; idx ++){
       params.push(arguments[idx]);
-    };
+    }
 
     return  new Promise(((resolve, reject) => {
       params[1] = ((data) => {
