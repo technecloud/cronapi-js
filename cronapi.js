@@ -630,9 +630,9 @@ if (!window.fixedTimeZone) {
    * @arbitraryParams true
    * @wizard procedures_callblockly_callnoreturn
    */
-  this.cronapi.util.callServerBlocklyNoReturn = function() {
-    this.cronapi.util.callServerBlockly.apply(this, arguments);
-  }
+  this.cronapi.util.callServerBlocklyNoReturn = async function() {
+    return this.cronapi.util.callServerBlockly.apply(this, arguments);
+  };
 
   /**
    * @type function
