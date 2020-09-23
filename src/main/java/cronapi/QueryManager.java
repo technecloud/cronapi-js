@@ -529,40 +529,45 @@ public class QueryManager {
     }
   }
 
+  public static JsonObject createDefaultPermission(JsonElement permission, String method) {
+    String methodLowerCase = method.toLowerCase();
+    JsonObject permissionAsObject = isNull(permission) ? new JsonObject() : permission.getAsJsonObject();
+    if (isNull(permissionAsObject.get(methodLowerCase)))
+      permissionAsObject.addProperty(methodLowerCase, "authenticated");
+    return permissionAsObject;
+  }
+
   public static boolean isFieldAuthorized(JsonObject query, String field, String method)
       throws Exception {
     if (!isNull(query.get("security"))) {
       JsonObject security = query.get("security").getAsJsonObject();
 
-      JsonElement permissionElement = security.get(field);
+      //Criando o Authenticated caso não exista para o método, por padrão o cronapp não armazena a permissão authenticated no json
+      JsonObject permission = createDefaultPermission(security.get(field), method);
+      if (!isNull(permission.get(method.toLowerCase()))) {
+        String[] roles = permission.get(method.toLowerCase()).getAsString().toLowerCase()
+            .split(";");
 
-      if (!isNull(permissionElement)) {
-        JsonObject permission = permissionElement.getAsJsonObject();
-        if (!isNull(permission.get(method.toLowerCase()))) {
-          String[] roles = permission.get(method.toLowerCase()).getAsString().toLowerCase()
-              .split(";");
+        boolean authorized = false;
 
-          boolean authorized = false;
+        if (ArrayUtils.contains(roles, "public") || ArrayUtils.contains(roles, "permitAll")) {
+          authorized = true;
+        }
 
-          if (ArrayUtils.contains(roles, "public") || ArrayUtils.contains(roles, "permitAll")) {
-            authorized = true;
-          }
+        if (ArrayUtils.contains(roles, "authenticated")) {
+          authorized = RestClient.getRestClient().getUser() != null;
+        }
 
-          if (ArrayUtils.contains(roles, "authenticated")) {
-            authorized = RestClient.getRestClient().getUser() != null;
-          }
-
-          if (!authorized) {
-            for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
-              if (ArrayUtils.contains(roles, authority.getAuthority().toLowerCase())) {
-                authorized = true;
-                break;
-              }
+        if (!authorized) {
+          for (GrantedAuthority authority : RestClient.getRestClient().getAuthorities()) {
+            if (ArrayUtils.contains(roles, authority.getAuthority().toLowerCase())) {
+              authorized = true;
+              break;
             }
           }
-
-          return authorized;
         }
+
+        return authorized;
       }
     }
 
