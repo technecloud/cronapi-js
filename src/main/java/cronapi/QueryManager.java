@@ -413,6 +413,11 @@ public class QueryManager {
 
   public static boolean isFieldAuthorized(Class clazzToCheck, String key, String method)
       throws Exception {
+
+    if (QueryManager.DISABLE_AUTH) {
+      return true;
+    }
+
     RestClient client = RestClient.getRestClient();
     if (client.getRequest() != null) {
       if (clazzToCheck != null) {
@@ -539,6 +544,11 @@ public class QueryManager {
 
   public static boolean isFieldAuthorized(JsonObject query, String field, String method)
       throws Exception {
+
+    if (QueryManager.DISABLE_AUTH) {
+      return true;
+    }
+
     if (!isNull(query.get("security"))) {
       JsonObject security = query.get("security").getAsJsonObject();
 
