@@ -813,6 +813,22 @@ if (!window.fixedTimeZone) {
   };
 
   /**
+   * @type internal
+   */
+  this.cronapi.util.handleCallback = function(ref) {
+    if (ref) {
+      let isAsync = ref.constructor.name === "AsyncFunction";
+      if (isAsync) {
+        return function() {
+          (async ()=> await ref.apply(this, arguments))()
+        }.bind(this);
+      } else {
+        return ref.bind(this);
+      }
+    }
+  }
+
+  /**
    * @type function
    * @name {{getURLFromOthersName}}
    * @description {{getURLFromOthersDescription}}
@@ -847,7 +863,7 @@ if (!window.fixedTimeZone) {
       url : url,
       data: params,
       headers: header
-    }).success(success.bind(this)).error(error.bind(this));
+    }).success(this.cronapi.util.handleCallback(success).bind(this)).error(this.cronapi.util.handleCallback(error.bind(this)));
 
   };
 
