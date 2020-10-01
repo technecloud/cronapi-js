@@ -3946,7 +3946,7 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.cordova.file.createDirectory = function(dirParent, dirChildrenName, success, error) {
     window.resolveLocalFileSystemURL(dirParent,  function(directoryEntry) {
-      parentEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
+      directoryEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
         if (success)
           success(childrenEntry);
       }.bind(this),this.cronapi.util.handleCallback(error));
