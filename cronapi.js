@@ -3909,7 +3909,7 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.file.createFile = function(dirEntry, fileName, content, success, error) {
-    var path = (dirEntry || getDirectory(0));
+    const path = (dirEntry || getDirectory(0));
     window.resolveLocalFileSystemURL(dirEntry,  function(directoryEntry) {
       console.log(dirEntry);
       directoryEntry.getFile(fileName, {create: true }, function (fileEntry) {
@@ -3924,12 +3924,12 @@ if (!window.fixedTimeZone) {
           fileWriter.write(data);
           if (success) {
             setTimeout(function() {
-              success();
+              this.cronapi.util.handleCallback(success());
             }.bind(this),500);
           }
-        }.bind(this), error);
-      }.bind(this), error);
-    }.bind(this), error);
+        }.bind(this), this.cronapi.util.handleCallback(error) );
+      }.bind(this), this.cronapi.util.handleCallback(error) );
+    }.bind(this), this.cronapi.util.handleCallback(error) );
   };
 
   /**
