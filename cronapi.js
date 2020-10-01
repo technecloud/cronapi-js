@@ -1009,7 +1009,7 @@ if (!window.fixedTimeZone) {
 
     let url = "https://viacep.com.br/ws/" + cep + "/json/?callback=?";
 
-    $.getJSON(url, success.bind(this));
+    $.getJSON(url, this.cronapi.util.handleCallback( success.bind(this) ));
 
   };
 
