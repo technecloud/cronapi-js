@@ -3891,8 +3891,8 @@ if (!window.fixedTimeZone) {
             reader.readAsText(file);
           }
         };
-      }.bind(this),error);
-    }.bind(this),error);
+      }.bind(this),this.cronapi.util.handleCallback(error));
+    }.bind(this),this.cronapi.util.handleCallback(error));
   };
 
   /**
