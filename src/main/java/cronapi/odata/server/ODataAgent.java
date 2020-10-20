@@ -24,6 +24,7 @@ import org.eclipse.persistence.internal.jpa.metamodel.EntityTypeImpl;
 import org.eclipse.persistence.jpa.Archive;
 import org.springframework.data.domain.PageRequest;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -52,11 +53,87 @@ public class ODataAgent {
   private static final int DEFAULT_BUFFER_SIZE = 32768;
   private static final String DEFAULT_READ_CHARSET = "utf-8";
 
+  private static void cleanDuplicated(Document doc) {
+    List<Node> allNodes = new ArrayList<>(doc.getDocumentElement().getChildNodes().getLength());
+    for (int i = 0; i < doc.getDocumentElement().getChildNodes().getLength(); i++) {
+      Node node = doc.getDocumentElement().getChildNodes().item(i);
+      allNodes.add(node);
+    }
+
+    HashSet<String> ids = new HashSet<>();
+    for (Node node : allNodes) {
+      if (node instanceof Element) {
+        if (((Element) node).getTagName().equalsIgnoreCase("Profile")) {
+          doc.getDocumentElement().removeChild(node);
+        } else {
+          String name = ((Element) node).getAttribute("name");
+          if (ids.contains(name)) {
+            doc.getDocumentElement().removeChild(node);
+          } else {
+            ids.add(name);
+            if (((Element) node).hasAttribute("profile")) {
+              ((Element) node).removeAttribute("profile");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private static void updateProfile(Document doc, String activeProfile) {
+    List<Node> allNodes = new ArrayList<>(doc.getDocumentElement().getChildNodes().getLength());
+    List<Node> removeNodes = new ArrayList<>(doc.getDocumentElement().getChildNodes().getLength());
+    for (int i = 0; i < doc.getDocumentElement().getChildNodes().getLength(); i++) {
+      if (doc.getDocumentElement().getChildNodes().item(i) instanceof Element) {
+        allNodes.add(doc.getDocumentElement().getChildNodes().item(i));
+      }
+      removeNodes.add(doc.getDocumentElement().getChildNodes().item(i));
+    }
+
+    for (Node node : removeNodes) {
+      doc.getDocumentElement().removeChild(node);
+    }
+
+    Collections.sort(allNodes, (o1, o2) -> {
+      if (o1 instanceof Element && o2 instanceof Element) {
+        String profile1 = ((Element) o1).getAttribute("profile");
+        String profile2 = ((Element) o2).getAttribute("profile");
+        String tag1 = ((Element) o1).getTagName();
+        String tag2 = ((Element) o2).getTagName();
+        int score1 = 0;
+        int score2 = 0;
+
+        if ("resource".equalsIgnoreCase(tag1))
+          score1++;
+
+        if ("resource".equalsIgnoreCase(tag2))
+          score2++;
+
+        if (activeProfile.equalsIgnoreCase(profile1))
+          score1++;
+
+        if (activeProfile.equalsIgnoreCase(profile2))
+          score2++;
+
+        return Integer.compare(score2, score1);
+      }
+
+      return 0;
+    });
+
+    for (Node node : allNodes) {
+      doc.getDocumentElement().appendChild(node);
+    }
+  }
+
   private static void bind(File contextFile, String activeProfile) throws Exception {
     System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "cronapi.osjava.sj.memory.MemoryContextFactory");
     System.setProperty("org.osjava.sj.jndi.shared", "true");
 
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(contextFile);
+    updateProfile(doc, activeProfile);
+    cleanDuplicated(doc);
+
     XPath xpath = XPathFactory.newInstance().newXPath();
     NodeList nodes = (NodeList) xpath.evaluate("//Resource", doc, XPathConstants.NODESET);
 
@@ -65,9 +142,8 @@ public class ODataAgent {
     for (int i = 0; i < nodes.getLength(); i++) {
       Node elem = nodes.item(i);
       String name = elem.getAttributes().getNamedItem("name").getTextContent();
-      String profile = elem.getAttributes().getNamedItem("profile").getTextContent();
 
-      if (activeProfile.equalsIgnoreCase(profile) && !added.contains(name)) {
+      if (!added.contains(name)) {
         final BasicDataSource ds = createDataSource(elem);
 
         final Context context = new InitialContext();
