@@ -3370,8 +3370,16 @@ if (!window.fixedTimeZone) {
     }
     return json;
   };
+  
+  this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo, errorFile) {
 
-  this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo) {
+    if (errorFile && errorFile.length) {
+      if (errorFile[0].$errorMessages && errorFile[0].$errorMessages.maxSize) {
+        let error = this.cronapi.$translate.instant("maxFileSize");
+        showErrorNotification.bind(this)(`${error} ${errorFile[0].$errorParam}`);
+      }
+    }
+
     if (!file)
       return;
 
