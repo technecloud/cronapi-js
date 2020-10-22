@@ -129,7 +129,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         String selectExpression = null;
         SelectStatement selectStatement = null;
         String jpqlStatement = "";
-        String alias = null;
+        String mainAlias = null;
         String orderBy = null;
         List<String> inputs = new LinkedList<>();
         boolean hasGroupBy = false;
@@ -154,12 +154,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           findInputParams(jpqlExpression, inputs);
 
           selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-          String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
-          String mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
-
-          if (!selection.contains(".") && !selection.contains(",")) {
-            alias = mainAlias;
-          }
+          mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
 
           if (uriInfo.rawEntity()) {
             ReflectionUtils.setField(selectStatement, "selectClause", null);
@@ -177,7 +172,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           }
 
           if (uriInfo.getOrderBy() != null) {
-            String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), alias);
+            String orderExpression = ODataExpressionParser.parseToJPAOrderByExpression(uriInfo.getOrderBy(), mainAlias);
             orderBy = "ORDER BY " + orderExpression;
           }
 
@@ -188,14 +183,14 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
 
         if (uriInfo.getFilter() != null) {
           checkFilter(entityType, uriInfo.getFilter());
-          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(uriInfo.getFilter(), alias);
+          whereExpression = ODataExpressionParser.parseToJPAWhereExpression(uriInfo.getFilter(), mainAlias);
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
           ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
           ODataExpressionParser.reInitializePositionalParameters();
         }
 
         if (uriInfo.getKeyPredicates().size() > 0) {
-          whereExpression = ODataExpressionParser.parseKeyPredicates(uriInfo.getKeyPredicates(), alias);
+          whereExpression = ODataExpressionParser.parseKeyPredicates(uriInfo.getKeyPredicates(), mainAlias);
           parameterizedExpressionMap.put(whereExpression, ODataExpressionParser.getPositionalParameters());
           ODataParameterizedWhereExpressionUtil.setParameterizedQueryMap(parameterizedExpressionMap);
           ODataExpressionParser.reInitializePositionalParameters();
