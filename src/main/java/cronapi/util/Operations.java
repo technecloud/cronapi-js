@@ -464,29 +464,36 @@ public class Operations {
   private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
   private static final String APPLICATION_JSON = "application/json";
 
+  private static boolean isMethodWithBodyNonDefault(Var postData, Var params, String methodAsString) {
+    return !postData.isNull() && params.isNull() && (HttpDelete.METHOD_NAME.equalsIgnoreCase(methodAsString)
+            || HttpGet.METHOD_NAME.equalsIgnoreCase(methodAsString));
+  }
+
   private static final Var getContentFromURL(Var method, Var contentType, Var address, Var params,
                                              Var cookieContainer, Var returnType, Var postData) throws Exception {
 
+    String methodAsString = method.getObjectAsString();
     HttpClient httpClient = HttpClients.createSystem();
     final HttpRequestBase httpMethod;
 
-    if (method.getObjectAsString().equalsIgnoreCase("POST")) {
+    if (HttpPost.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpPost(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("PUT")) {
+    } else if (HttpPut.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpPut(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("DELETE")) {
+    } else if (HttpDelete.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpDelete(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("PATCH")) {
+    } else if (HttpPatch.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpPatch(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("HEAD")) {
+    } else if (HttpHead.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpHead(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("OPTIONS")) {
+    } else if (HttpOptions.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpOptions(address.getObjectAsString());
-    } else if (method.getObjectAsString().equalsIgnoreCase("TRACE")) {
+    } else if (HttpTrace.METHOD_NAME.equalsIgnoreCase(methodAsString)) {
       httpMethod = new HttpTrace(address.getObjectAsString());
     } else {
       httpMethod = new HttpGet(address.getObjectAsString());
     }
+
 
     if (!cookieContainer.isNull()) {
       Map<?, ?> headerObject = cookieContainer.getObjectAsMap();
@@ -500,35 +507,20 @@ public class Operations {
     HttpResponse httpResponse;
     Map<String, String> responseMap = new HashMap<String, String>();
 
-    if (!postData.isNull() && params.isNull()
-        && (method.getObjectAsString().equalsIgnoreCase("DELETE")
-        || method.getObjectAsString().equalsIgnoreCase("GET"))) {
-
-      StringEntity postDataList = new StringEntity(postData.getObjectAsString(),
-          Charset.forName(cronapi.CronapiConfigurator.ENCODING));
+    if (isMethodWithBodyNonDefault(postData, params, methodAsString)) {
+      StringEntity postDataList = new StringEntity(postData.getObjectAsString(), Charset.forName(cronapi.CronapiConfigurator.ENCODING));
       postDataList.setContentType(contentType.getObjectAsString());
 
-      if (method.getObjectAsString().equalsIgnoreCase("DELETE")) {
-        HttpDeleteWithBody deleteWithBody = new HttpDeleteWithBody(address.getObjectAsString());
-        deleteWithBody.setEntity(postDataList);
-
-        URI uri = new URIBuilder(deleteWithBody.getURI()).build();
-        deleteWithBody.setURI(uri);
-        httpResponse = httpClient.execute(deleteWithBody);
-      } else {
-        HttpGetWithBody getWithBody = new HttpGetWithBody(address.getObjectAsString());
-        getWithBody.setEntity(postDataList);
-
-        URI uri = new URIBuilder(getWithBody.getURI()).build();
-        getWithBody.setURI(uri);
-        httpResponse = httpClient.execute(getWithBody);
-      }
+      HttpWithBody httpMethodWidthBody;
+      httpMethodWidthBody = HttpDelete.METHOD_NAME.equalsIgnoreCase(methodAsString) ? new HttpDeleteWithBody(httpMethod) : new HttpGetWithBody(httpMethod);
+      httpMethodWidthBody.setEntity(postDataList);
+      httpResponse = httpClient.execute(httpMethodWidthBody);
     } else if (!params.isNull() && postData.isNull()) {
       if (httpMethod instanceof HttpEntityEnclosingRequestBase) {
 
         HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
 
-        if (params.getObject() instanceof Map && contentType.getObjectAsString().equals(APPLICATION_X_WWW_FORM_URLENCODED)) {
+        if (params.getObject() instanceof Map && APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString())) {
 
           Map<?, ?> mapObject = params.getObjectAsMap();
           List<NameValuePair> paramsData = new LinkedList<>();
@@ -583,7 +575,7 @@ public class Operations {
 
         HttpEntityEnclosingRequestBase httpEntityEnclosingRequestBase = (HttpEntityEnclosingRequestBase) httpMethod;
 
-        if (contentType.getObjectAsString().equals(APPLICATION_X_WWW_FORM_URLENCODED)) {
+        if (APPLICATION_X_WWW_FORM_URLENCODED.equals(contentType.getObjectAsString())) {
           httpEntityEnclosingRequestBase.setEntity(new UrlEncodedFormEntity(bothDataList, cronapi.CronapiConfigurator.ENCODING));
         } else {
           JsonObject fusionObject = new JsonObject();

@@ -549,6 +549,19 @@ public class QueryManager {
       return true;
     }
 
+    //Caso o field seja o _objectKey, será verificado a permissão do verbo, pois é campo gerado dinamicamente, o usuário não seta permissão
+    //específica para esse campo na fonte de dados
+    if ("_objectKey".equalsIgnoreCase(field)) {
+      try {
+        checkSecurity(query, method, true);
+        return true;
+      }
+      catch (Exception e) {
+        return false;
+      }
+
+    }
+
     if (!isNull(query.get("security"))) {
       JsonObject security = query.get("security").getAsJsonObject();
 

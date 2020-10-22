@@ -1,28 +1,15 @@
 package cronapi;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpRequestBase;
 
-import java.net.URI;
-
-public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+public class HttpDeleteWithBody extends HttpWithBody {
 
   public final static String METHOD_NAME = "DELETE";
 
-  public HttpDeleteWithBody() {
+  public HttpDeleteWithBody(final HttpRequestBase http) {
     super();
-  }
-
-  public HttpDeleteWithBody(final URI uri) {
-    super();
-    setURI(uri);
-  }
-
-  /**
-   * @throws IllegalArgumentException if the uri is invalid.
-   */
-  public HttpDeleteWithBody(final String uri) {
-    super();
-    setURI(URI.create(uri));
+    setURI(http.getURI());
+    this.setHeaders(http.getAllHeaders());
   }
 
   @Override
