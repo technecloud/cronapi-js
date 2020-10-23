@@ -863,7 +863,7 @@ if (!window.fixedTimeZone) {
       url : url,
       data: params,
       headers: header
-    }).success(this.cronapi.util.handleCallback(success).bind(this)).error(this.cronapi.util.handleCallback(error.bind(this)));
+    }).done(this.cronapi.util.handleCallback(success).bind(this)).fail(this.cronapi.util.handleCallback(error.bind(this)));
 
   };
 
