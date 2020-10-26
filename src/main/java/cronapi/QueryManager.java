@@ -542,6 +542,15 @@ public class QueryManager {
     return permissionAsObject;
   }
 
+  public static boolean isDynamicField(JsonObject query, String field) {
+    JsonElement dfv = query.get("defaultValuesProperties");
+    if (!isNull(dfv) && dfv.isJsonObject()) {
+      JsonObject defaultValuesProperties = dfv.getAsJsonObject();
+      return !defaultValuesProperties.has(field);
+    }
+    return true;
+  }
+
   public static boolean isFieldAuthorized(JsonObject query, String field, String method)
       throws Exception {
 
@@ -549,9 +558,7 @@ public class QueryManager {
       return true;
     }
 
-    //Caso o field seja o _objectKey, será verificado a permissão do verbo, pois é campo gerado dinamicamente, o usuário não seta permissão
-    //específica para esse campo na fonte de dados
-    if ("_objectKey".equalsIgnoreCase(field)) {
+    if (isDynamicField(query, field)) {
       try {
         checkSecurity(query, method, true);
         return true;
