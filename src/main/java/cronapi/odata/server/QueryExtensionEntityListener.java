@@ -130,6 +130,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
         SelectStatement selectStatement = null;
         String jpqlStatement = "";
         String mainAlias = null;
+        String aliasForRawEntity = null;
         String orderBy = null;
         List<String> inputs = new LinkedList<>();
         boolean hasGroupBy = false;
@@ -154,12 +155,16 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           findInputParams(jpqlExpression, inputs);
 
           selectStatement = ((SelectStatement) jpqlExpression.getQueryStatement());
-          mainAlias = JPQLParserUtil.getMainAlias(jpqlExpression);
+          String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
+          aliasForRawEntity = JPQLParserUtil.getMainAlias(jpqlExpression);
+          mainAlias = aliasForRawEntity;
+          if (selection.contains(mainAlias+"."))
+            mainAlias = null;
 
           if (uriInfo.rawEntity()) {
             ReflectionUtils.setField(selectStatement, "selectClause", null);
             if (uriInfo.rawEntity()) {
-              selectExpression = "SELECT " + mainAlias + " ";
+              selectExpression = "SELECT " + aliasForRawEntity + " ";
             }
 
             jpqlStatement = selectStatement.toString();
