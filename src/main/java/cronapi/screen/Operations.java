@@ -90,13 +90,49 @@ public class Operations {
 	  if (fromAuth) {
       RestClient.getRestClient().getRequest().setAttribute("CronappToken:" + key.getObjectAsString(), value.getObjectAsString());
     } else {
-      String token = RestClient.getRestClient().getRequest().getHeader(TokenUtils.AUTH_HEADER_NAME);
+      String token = RestClient.getRestClient().getToken();
       if (StringUtils.isNotEmpty(token)) {
         String newToken = TokenUtils.addClaimToToken(token, key.getObjectAsString(), value.getObjectAsString());
         ClientCommand command = new ClientCommand("cronapi.util.setToken");
         command.addParam(newToken);
 
         RestClient.getRestClient().addCommand(command);
+        RestClient.getRestClient().setToken(newToken);
+      } else {
+        throw new RuntimeException("Token is not in the header");
+      }
+    }
+  }
+
+  @CronapiMetaData(type = "function", name = "{{getTokenExpiration}}", nameTags = {
+      "token", "claim" }, description = "{{getTokenExpirationDescription}}", returnType = ObjectType.DATETIME)
+  public static final Var getTokenExpiration() throws Exception {
+    Claims claims = TokenUtils.getClaimsFromToken(RestClient.getRestClient().getHeader(TokenUtils.AUTH_HEADER_NAME));
+    return Var.valueOf(claims.getExpiration());
+  }
+
+  @CronapiMetaData(type = "function", name = "{{setTokenExpiration}}", nameTags = {
+      "token", "claim" }, description = "{{setTokenExpirationDescription}}", returnType = ObjectType.STRING)
+  public static final void setTokenExpiration(
+      @ParamMetaData( type = ObjectType.DATETIME, description="{{setTokenExpirationParam}}") Var value) throws Exception {
+    boolean fromAuth = false;
+    for (StackTraceElement element: Thread.currentThread().getStackTrace()) {
+      if (element.getClassName().equals("cronapp.framework.authentication.token.AuthenticationController")) {
+        fromAuth = true;
+        break;
+      }
+    }
+    if (fromAuth) {
+      RestClient.getRestClient().getRequest().setAttribute("CronappTokenExpiration", value.getObjectAsDateTime());
+    } else {
+      String token = RestClient.getRestClient().getToken();
+      if (StringUtils.isNotEmpty(token)) {
+        String newToken = TokenUtils.setExpiration(token, value.getObjectAsDateTime().getTime());
+        ClientCommand command = new ClientCommand("cronapi.util.setToken");
+        command.addParam(newToken);
+
+        RestClient.getRestClient().addCommand(command);
+        RestClient.getRestClient().setToken(newToken);
       } else {
         throw new RuntimeException("Token is not in the header");
       }

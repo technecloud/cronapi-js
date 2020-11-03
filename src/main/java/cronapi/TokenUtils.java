@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.util.Date;
+
 public class TokenUtils {
 
   private static String secret;
@@ -39,6 +41,16 @@ public class TokenUtils {
       Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
       claims.put(key, value);
       return Jwts.builder().setClaims(claims).setExpiration(claims.getExpiration())
+          .signWith(SignatureAlgorithm.HS512, secret).compact();
+    } catch (Exception e) {
+      throw new RuntimeException("Token is not in the header");
+    }
+  }
+
+  public static String setExpiration(String token, Date expiration) {
+    try {
+      Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+      return Jwts.builder().setClaims(claims).setExpiration(expiration)
           .signWith(SignatureAlgorithm.HS512, secret).compact();
     } catch (Exception e) {
       throw new RuntimeException("Token is not in the header");

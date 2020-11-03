@@ -43,6 +43,7 @@ public class RestClient {
   private Map<String, String> headers;
   private Object entity;
   private List<Object> keys;
+  private String token;
 
   private static List<GrantedAuthority> DEFAULT_AUTHORITIES;
 
@@ -430,5 +431,18 @@ public class RestClient {
       }
     }
     return request.getRemoteAddr();
+  }
+
+  public String getToken() {
+    if (token != null) return token;
+    else {
+      if (getRequest() != null) return getRequest().getHeader(TokenUtils.AUTH_HEADER_NAME);
+    }
+
+    return null;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
   }
 }
