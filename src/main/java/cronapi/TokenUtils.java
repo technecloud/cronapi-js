@@ -2,6 +2,7 @@ package cronapi;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 public class TokenUtils {
 
@@ -23,7 +24,7 @@ public class TokenUtils {
     return username;
   }
 
-  private static Claims getClaimsFromToken(String token) {
+  public static Claims getClaimsFromToken(String token) {
     Claims claims;
     try {
       claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
@@ -31,5 +32,16 @@ public class TokenUtils {
       claims = null;
     }
     return claims;
+  }
+
+  public static String addClaimToToken(String token, String key, Object value) {
+    try {
+      Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+      claims.put(key, value);
+      return Jwts.builder().setClaims(claims).setExpiration(claims.getExpiration())
+          .signWith(SignatureAlgorithm.HS512, secret).compact();
+    } catch (Exception e) {
+      throw new RuntimeException("Token is not in the header");
+    }
   }
 }
