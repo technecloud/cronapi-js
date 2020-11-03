@@ -394,6 +394,23 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
+   * @name {{setRequestToken}}
+   * @nameTags token
+   * @description {{setRequestTokenDescription}}
+   * @param {ObjectType.STRING} token {{setRequesTokenParam}}
+   */
+  this.cronapi.util.setToken = function(token) {
+    let currentSession = {};
+    if (localStorage.getItem("_u")) {
+      currentSession = JSON.parse(localStorage.getItem("_u"));
+      currentSession.token = token;
+    }
+    localStorage.setItem("_u", JSON.stringify(currentSession));
+    window.uToken = token;
+  };
+
+  /**
+   * @type function
    * @name {{getApplicationName}}
    * @nameTags getApplicationName
    * @description {{functionToGetApplicationName}}
