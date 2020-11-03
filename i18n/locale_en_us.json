@@ -591,5 +591,7 @@
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
   "yearsToIncrement": "Years to increase",
-  "maxFileSize": "Maximum file size:"
+  "maxFileSize": "Maximum file size:",
+  "setRequestToken": "Define Token",
+  "setRequestTokenDescription": "Modify token that will be used in requests"
 }
