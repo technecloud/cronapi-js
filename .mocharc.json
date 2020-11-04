@@ -1,0 +1,6 @@
+{
+    "spec": [
+        "test/src/test/**/*.spec.ts"
+    ],
+    "recursive": true
+}
