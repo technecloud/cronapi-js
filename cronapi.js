@@ -17,7 +17,7 @@ if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
-module.exports = (function() {
+(function() {
   'use strict';
 
   this.$evt = function(str) {
