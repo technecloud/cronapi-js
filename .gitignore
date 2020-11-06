@@ -70,3 +70,5 @@ pom.xml
 .classpath*
 /node_modules
 /.idea/**
+
+coverage/**
