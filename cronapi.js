@@ -1,3 +1,4 @@
+
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
 }
@@ -16,7 +17,7 @@ if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
-(function() {
+exports.cronapi = (function() {
   'use strict';
 
   this.$evt = function(str) {
@@ -5297,4 +5298,6 @@ if (!window.fixedTimeZone) {
 
   }
 
+
+return this;
 }).bind(window)();

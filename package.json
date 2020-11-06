@@ -4,7 +4,7 @@
   "description": "Public library for CronApp's users",
   "main": "cronapi.js",
   "scripts": {
-    "test": "node ./node_modules/mocha/bin/mocha"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
