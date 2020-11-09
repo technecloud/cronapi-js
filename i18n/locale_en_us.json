@@ -590,5 +590,8 @@
   "XMLHasRootElementDescription": "Function that verify if exists a XML root element on XML document",
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
-  "yearsToIncrement": "Years to increase"
+  "yearsToIncrement": "Years to increase",
+  "maxFileSize": "Maximum file size:",
+  "setRequestToken": "Define Token",
+  "setRequestTokenDescription": "Modify token that will be used in requests"
 }

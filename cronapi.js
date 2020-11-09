@@ -395,6 +395,23 @@ function cronapi() {
 
   /**
    * @type function
+   * @name {{setRequestToken}}
+   * @nameTags token
+   * @description {{setRequestTokenDescription}}
+   * @param {ObjectType.STRING} token {{setRequesTokenParam}}
+   */
+  this.cronapi.util.setToken = function(token) {
+    let currentSession = {};
+    if (localStorage.getItem("_u")) {
+      currentSession = JSON.parse(localStorage.getItem("_u"));
+      currentSession.token = token;
+    }
+    localStorage.setItem("_u", JSON.stringify(currentSession));
+    window.uToken = token;
+  };
+
+  /**
+   * @type function
    * @name {{getApplicationName}}
    * @nameTags getApplicationName
    * @description {{functionToGetApplicationName}}
@@ -864,7 +881,7 @@ function cronapi() {
       url : url,
       data: params,
       headers: header
-    }).success(this.cronapi.util.handleCallback(success).bind(this)).error(this.cronapi.util.handleCallback(error.bind(this)));
+    }).done(this.cronapi.util.handleCallback(success).bind(this)).fail(this.cronapi.util.handleCallback(error.bind(this)));
 
   };
 
@@ -3371,8 +3388,16 @@ function cronapi() {
     }
     return json;
   };
+  
+  this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo, errorFile) {
 
-  this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo) {
+    if (errorFile && errorFile.length) {
+      if (errorFile[0].$errorMessages && errorFile[0].$errorMessages.maxSize) {
+        let error = this.cronapi.$translate.instant("maxFileSize");
+        showErrorNotification.bind(this)(`${error} ${errorFile[0].$errorParam}`);
+      }
+    }
+
     if (!file)
       return;
 
