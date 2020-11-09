@@ -2,28 +2,27 @@
 describe('Test suit for category conversion from Cronapi.js', function() {
 
 const ch = require('chai');
-const wd = require('../../../../../cronapi');
-const cronapi = wd['cronapi']; 
+let {window} = require('../../../../../cronapi');
 ch.should();
-
+const cronapi = window["cronapi"];
 
 
   it('asciiToBinary', function() {
-    let value = cronapi.conversion.asciiToBinary.bind(wd)("");
+    let value = cronapi.conversion.asciiToBinary("");
     value.should.equal("");
   });
 
   it('toBoolean', function() {
-    let value = cronapi.conversion.toBoolean.bind(wd)(true);
+    let value = cronapi.conversion.toBoolean.bind(window)(true);
     value.should.equal(true);
 
-    value = cronapi.conversion.toBoolean.bind(wd)(null);
+    value = cronapi.conversion.toBoolean.bind(window)(null);
     value.should.equal(false);
 
-    value = cronapi.conversion.toBoolean.bind(wd)("1");
+    value = cronapi.conversion.toBoolean.bind(window)("1");
     value.should.equal(true);
 
-    value = cronapi.conversion.toBoolean.bind(wd)("true");
+    value = cronapi.conversion.toBoolean.bind(window)("true");
     value.should.equal(true);
   });
 

@@ -17,7 +17,7 @@ if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
-(function() {
+function cronapi() {
   'use strict';
 
   this.$evt = function(str) {
@@ -5322,7 +5322,16 @@ if (!window.fixedTimeZone) {
     });
 
   }
+}
+
+(cronapi).bind(window)();
 
 
-return this;
-}).bind(window)();
+// This is only for test purpose
+try{
+if(module){
+  module.exports = {
+    window
+  };
+}
+}catch(err){}
