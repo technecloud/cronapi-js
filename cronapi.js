@@ -1815,6 +1815,8 @@ if (!window.fixedTimeZone) {
                   $('#'+id).data("kendoComboBox").enable(false);
               } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(false);
+              } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
+                  this.cronapi.internal.coverElement($('#'+id));
               } else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
               }
@@ -1849,7 +1851,9 @@ if (!window.fixedTimeZone) {
                   $('#'+id).data("kendoComboBox").enable(true);
               } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(true);
-              }  else {
+              } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
+                  this.cronapi.internal.discoverElement($('#'+id));
+              } else {
                   $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
               }
           } else {
@@ -2831,6 +2835,33 @@ if (!window.fixedTimeZone) {
   };
 
   this.cronapi.internal = {};
+
+  this.cronapi.internal.coverElement = function($element) {
+
+    let cover = (id, obj) => {
+      let width = obj.eq(0).outerWidth();
+      let height = obj.eq(0).outerHeight();
+      obj.each( function(index){
+        let position = $(this).offset();
+        $(`<div class='cover-${id}'>`).css({
+          "width": width,
+          "height": height,
+          "position": "absolute",
+          "top": position.top,
+          "left": position.left,
+          "z-index": 999999
+        }).appendTo($("body"));
+      });
+    };
+
+    let id = $element.attr('id');
+    cover(id, $element);
+  };
+
+  this.cronapi.internal.discoverElement = function($element) {
+    let id = $element.attr('id');
+    $(`.cover-${id}`).remove();
+  };
 
   this.cronapi.internal.focusFormInput = function () {
     let $firstForm = $($('form')[0]);
