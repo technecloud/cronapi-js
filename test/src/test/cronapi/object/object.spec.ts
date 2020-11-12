@@ -75,14 +75,12 @@ function() {
 
     let value = cronapi.object.newObject.bind(window)();
     (JSON.stringify(value)).should.equal('{}');
-    
-    // Dúvida - Não cobrindo arguments com param.name e param.value
-    const username = 'admin';
-    value = cronapi.object.newObject.bind(window)(username);
-    (JSON.stringify(value)).should.equal('{"username":"admin"}');
 
-    // value = cronapi.object.newObject.bind(window)('username', 'admin');
-    // (JSON.stringify(value)).should.equal('{"username":"admin"}');
+    value = cronapi.object.newObject.bind(window)({username: 'admin'});
+    (JSON.stringify(value)).should.equal('{}');
+
+    value = cronapi.object.newObject.bind(window)({name: 'username', value: 'admin'});
+    (JSON.stringify(value)).should.equal('{"username":"admin"}');
   });
 
   it('getObjectField', function() {
