@@ -91,6 +91,10 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
     return restMethod;
   }
 
+  private boolean hasManyFields(String selection) {
+    return selection.contains(",");
+  }
+
   public Query getBaseQuery(UriInfo uriInfo, EntityManager em) throws ODataJPARuntimeException {
 
     try {
@@ -158,7 +162,7 @@ public class QueryExtensionEntityListener extends ODataJPAQueryExtensionEntityLi
           String selection = ((SelectClause) selectStatement.getSelectClause()).getSelectExpression().toActualText();
           aliasForRawEntity = JPQLParserUtil.getMainAlias(jpqlExpression);
           mainAlias = aliasForRawEntity;
-          if (selection.contains(mainAlias+"."))
+          if (hasManyFields(selection))
             mainAlias = null;
 
           if (uriInfo.rawEntity()) {
