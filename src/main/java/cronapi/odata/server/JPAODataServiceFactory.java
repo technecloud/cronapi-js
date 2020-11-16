@@ -1,10 +1,10 @@
 package cronapi.odata.server;
 
+import cronapi.AppConfig;
 import cronapi.ErrorResponse;
 import cronapi.RestClient;
 import cronapi.database.TransactionManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
 
 import org.apache.olingo.odata2.api.ODataService;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
@@ -36,7 +36,7 @@ public class JPAODataServiceFactory extends ODataJPAServiceFactory {
 
     TransactionManager.addNamespace(namespace, context.getEntityManager());
 
-    context.getEntityManager().setFlushMode(FlushModeType.COMMIT);
+    context.getEntityManager().setFlushMode(AppConfig.flushMode());
     context.setJPAEdmExtension(new DatasourceExtension(context, order));
     context.setoDataJPAQueryExtensionEntityListener(new QueryExtensionEntityListener());
 

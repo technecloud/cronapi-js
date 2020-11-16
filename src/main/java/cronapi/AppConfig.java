@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import cronapi.util.Operations;
 import org.apache.olingo.odata2.jpa.processor.core.ODataJPAConfig;
 
+import javax.persistence.FlushModeType;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -250,5 +251,18 @@ public class AppConfig {
     }
 
     return 0;
+  }
+
+  public static FlushModeType flushMode() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("flushMode"))) {
+      if ("AUTO".equalsIgnoreCase(config.get("flushMode").getAsString())) {
+        return FlushModeType.AUTO;
+      }
+      else {
+        return FlushModeType.COMMIT;
+      }
+    }
+    return FlushModeType.AUTO;
   }
 }

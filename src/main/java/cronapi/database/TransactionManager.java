@@ -1,5 +1,6 @@
 package cronapi.database;
 
+import cronapi.AppConfig;
 import cronapi.RestClient;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
@@ -52,7 +52,7 @@ public class TransactionManager {
     EntityManagerFactory factory = findEntityManagerFactory(domainClass);
 
     EntityManager em = factory.createEntityManager();
-    em.setFlushMode(FlushModeType.COMMIT);
+    em.setFlushMode(AppConfig.flushMode());
     if (cache) {
       CACHE_NAMESPACE.get().put(namespace, em);
     }
