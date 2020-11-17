@@ -1,8 +1,8 @@
 describe('Test suit for category Util from Cronapi.js', function() {
 
   const chai = require('chai');
-  let {window} = require('../../../../../cronapi');
   let should = chai.should();
+  let {window} = require('../../../../../cronapi');
   const cronapi = window["cronapi"];
 
   it('setToken', () => {
@@ -20,7 +20,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   });
 
   it('getApplicationName', () => {
-    
+
   });
 
   it('createPromise', () => {
@@ -87,7 +87,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   });
 
   it('share', () => {
-
+    
   }); 
 
   it('callServerBlockly', () => {
@@ -137,7 +137,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('getURLFromOthers', () => {
-
+    
   });
 
   it('getUserToken', () => {
@@ -178,7 +178,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('scheduleExecution', () => {
-    
+
   });
 
   it('openReport', () => {
@@ -186,7 +186,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('getCEP', () => {
-    
+
   });
 
 });
