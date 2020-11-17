@@ -8,7 +8,6 @@ import cronapi.RestClient;
 import cronapi.Var;
 import cronapi.odata.server.JPQLParserUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.persistence.internal.jpa.QueryImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.persistence.*;
@@ -553,4 +552,20 @@ public class Operations {
         return Var.valueOf(mapReturn);
     }
 
+
+  @CronapiMetaData(type = "function", name = "{{setFlushMode}}", nameTags = {"Definir Modo", "Descarga Dados", "Transação", "Set Flush", "Transaction Data", "setFlushMode"},
+      description = "{{setFlushModeDescription}}", returnType = ObjectType.VOID )
+  public static void setFlushMode(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{persistenceUnit}}", blockType = "util_persistence_unit_list")
+          Var persistenceUnit,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{flushMode}}", blockType = "util_dropdown",
+          keys = {"AUTO", "COMMIT"},
+          values = {"{{always}}", "{{onCommit}}"},
+          defaultValue = "AUTO"
+      ) Var type) throws Exception {
+
+    if (!persistenceUnit.equals(Var.VAR_NULL)) {
+      TransactionManager.setFlushMode(persistenceUnit.getObjectAsString(), type.getObjectAsString());
+    }
+  }
 }

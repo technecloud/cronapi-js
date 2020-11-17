@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import org.eclipse.persistence.internal.jpa.deployment.PersistenceUnitProcessor;
 import org.eclipse.persistence.internal.jpa.deployment.SEPersistenceUnitInfo;
@@ -16,6 +16,7 @@ import org.eclipse.persistence.jpa.Archive;
 
 public class TransactionManager {
 
+  public static final String AUTO = "AUTO";
   private static ThreadLocal<Map<String, EntityManager>> CACHE_NAMESPACE = new ThreadLocal<>();
 
   public static void addNamespace(String namespace, EntityManager entityManager) {
@@ -28,11 +29,17 @@ public class TransactionManager {
     map.put(namespace, entityManager);
   }
 
+
   public static EntityManager getEntityManager(Class domainClass) {
     return getEntityManager(domainClass, true);
   }
 
   public static EntityManager getEntityManager(Class domainClass, boolean cache) {
+    String namespace = domainClass.getPackage().getName().replace(".entity", "");
+    return getEntityManager(namespace, cache);
+  }
+
+  public static EntityManager getEntityManager(String namespace, boolean cache) {
 
     Map<String, EntityManager> mapNamespace = CACHE_NAMESPACE.get();
 
@@ -41,7 +48,7 @@ public class TransactionManager {
       CACHE_NAMESPACE.set(mapNamespace);
     }
 
-    String namespace = domainClass.getPackage().getName().replace(".entity", "");
+
     if (mapNamespace != null && cache) {
       EntityManager emNamespace = mapNamespace.get(namespace);
       if (emNamespace != null) {
@@ -49,7 +56,7 @@ public class TransactionManager {
       }
     }
 
-    EntityManagerFactory factory = findEntityManagerFactory(domainClass);
+    EntityManagerFactory factory = findEntityManagerFactory(namespace);
 
     EntityManager em = factory.createEntityManager();
     em.setFlushMode(AppConfig.flushMode());
@@ -74,6 +81,10 @@ public class TransactionManager {
 
   public static EntityManagerFactory findEntityManagerFactory(Class domainClass) {
     String namespace = domainClass.getPackage().getName().replace(".entity", "");
+    return findEntityManagerFactory(namespace);
+  }
+
+  public static EntityManagerFactory findEntityManagerFactory(String namespace) {
 
     Set<Archive> archives = PersistenceUnitProcessor.findPersistenceArchives();
 
@@ -193,5 +204,13 @@ public class TransactionManager {
 
     CACHE_NAMESPACE.set(null);
     CACHE_NAMESPACE.remove();
+  }
+
+  public static void setFlushMode(String namespace, String flushMode) {
+    EntityManager em = getEntityManager(namespace, true);
+    if (AUTO.equalsIgnoreCase(flushMode))
+      em.setFlushMode(FlushModeType.AUTO);
+    else
+      em.setFlushMode(FlushModeType.COMMIT);
   }
 }
