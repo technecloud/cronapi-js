@@ -30,23 +30,19 @@ function() {
     value.should.equal(true);
   });
 
-  it('toBytes', function() {
-    const textoBinario = '0110100001100101011011000110110001101111';
+it('toBytes', function() {
+  let value = cronapi.conversion.toBytes.bind(window)();
+  value.should.equal('');
 
-    let value = cronapi.conversion.toBytes.bind(window)();
-    value.should.equal('');
+  value = cronapi.conversion.toBytes.bind(window)(null);
+  value.should.equal('');
 
-    // Dúvida - Valor retornado está sendo a própria string sem conversão nenhuma.
-    value = cronapi.conversion.toBytes.bind(window)(textoBinario);
-    // let expected = '';
-    // for (let i = 0; i < textoBinario.length; i++) {
-    //   let textoBinarioParcial = textoBinario.substr(i, 8);
-    //   expected += String.fromCharCode(parseInt(textoBinarioParcial, 2));
-    //   i += 7;
-    // }
-    // value.should.equal(expected);
-    // value.should.equal('hello');
-  });
+  value = cronapi.conversion.toBytes.bind(window)(undefined);
+  value.should.equal('');
+
+  value = cronapi.conversion.toBytes.bind(window)(10);
+  value.should.equal('10');
+});
 
   it('chrToAscii ', function() {
     let value = cronapi.conversion.chrToAscii.bind(window)();
