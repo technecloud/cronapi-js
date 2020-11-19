@@ -26,6 +26,11 @@ describe('Test suit for category xml from Cronapi.js', function() {
   });
 
   it('XMLHasRootElement', function() {
+    let value = cronapi.xml.XMLHasRootElement($.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>'));
+    value.should.eql(true);
+
+    value = cronapi.xml.XMLHasRootElement(null);
+    value.should.eql(false);
   });
 
   it('XMLGetRootElement', function() {
