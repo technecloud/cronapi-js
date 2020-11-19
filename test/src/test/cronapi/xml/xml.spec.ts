@@ -21,7 +21,7 @@ describe('Test suit for category xml from Cronapi.js', function() {
   });
 
   it('addXMLElement', function() {
-    let value = cronapi.xml.addXMLElement(null, new Object());
+    let value = cronapi.xml.addXMLElement(null, $.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>'));
     value.should.eql(false);
   });
 
