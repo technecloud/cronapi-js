@@ -34,6 +34,8 @@ describe('Test suit for category xml from Cronapi.js', function() {
   });
 
   it('XMLGetRootElement', function() {
+    let value = cronapi.xml.XMLGetRootElement($.parseXML('<?xml version="1.0" encoding="UTF-8"?><root></root>'));
+    (value === undefined || value === null || value === '').should.equal(false);
   });
 
   it('XMLDocumentToText', function() {
