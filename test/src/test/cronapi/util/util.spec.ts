@@ -189,4 +189,19 @@ describe('Test suit for category Util from Cronapi.js', function() {
 
   });
 
+  it('getBaseUrl', () => {
+    cronapi.util.getBaseUrl().should.equal('http://localhost');
+
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'https://ide.cronapp.io/'
+      }
+    });
+    cronapi.util.getBaseUrl.bind(window)().should.equal('https://ide.cronapp.io/');
+  });
+
+  it('upload', () => {
+    
+  });
+
 });
