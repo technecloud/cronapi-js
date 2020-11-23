@@ -53,19 +53,6 @@ describe('Test suit for category Util from Cronapi.js', function() {
 
   it('getScreenFields', () => {
 
-    const originalGoogle = window.$scope;
-    window.$scope = { 
-      params: [
-        {
-
-        }
-      ]
-    };
-    
-
-    cronapi.util.getScreenFields();
-
-
   }); 
 
   it('makeCallServerBlocklyAsync', () => {
@@ -108,10 +95,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('callServerBlocklyAsynchronous', () => {
-    let callback = () => {
-      console.log('Cronapp');
-    } 
-    cronapi.util.callServerBlocklyAsynchronous.bind(window)('cronapi.internal.parseBoolean', callback, 2, 2);
+
   });
 
   it('executeJavascriptNoReturn', () => {
