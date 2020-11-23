@@ -48,10 +48,23 @@ describe('Test suit for category Util from Cronapi.js', function() {
   });
 
   it('callServerBlocklyAsync', () => {
-
+    cronapi.util.callServerBlocklyAsync.bind(window);
   });
 
   it('getScreenFields', () => {
+
+    const originalGoogle = window.$scope;
+    window.$scope = { 
+      params: [
+        {
+
+        }
+      ]
+    };
+    
+
+    cronapi.util.getScreenFields();
+
 
   }); 
 
@@ -95,7 +108,10 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('callServerBlocklyAsynchronous', () => {
-
+    let callback = () => {
+      console.log('Cronapp');
+    } 
+    cronapi.util.callServerBlocklyAsynchronous.bind(window)('cronapi.internal.parseBoolean', callback, 2, 2);
   });
 
   it('executeJavascriptNoReturn', () => {
@@ -134,6 +150,15 @@ describe('Test suit for category Util from Cronapi.js', function() {
   it('handleCallback', () => {
     let refWithoutAsyncFunction = { bind: () => { return 'Cronapp is the best' } };
     should.equal(cronapi.util.handleCallback(refWithoutAsyncFunction), 'Cronapp is the best');
+    let refWithAsync = {
+      constructor: {
+        name: 'AsyncFunction'
+      },
+      teste () {
+        return 'Cronapp is the best';
+      }
+    }
+    expect(cronapi.util.handleCallback(refWithAsync)).toBeInstanceOf(Function);
   }); 
 
   it('getURLFromOthers', () => {
