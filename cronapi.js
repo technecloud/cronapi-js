@@ -4094,7 +4094,6 @@ function cronapi() {
   };
 
   this.cronapi.cordova.database = {};
-  this.cronapi.cordova.database.nameDefault = "cronappDB";
 
   this.cronapi.cordova.database.DatabaseModule = class DatabaseModule {
     DEFAULT_DATABASE_NAME = "cronappDB";
@@ -4106,13 +4105,14 @@ function cronapi() {
       let myOpenDatabaseMethod = window.openDatabase;
       // If in mobile environment use native sqlite
       if (window.sqlitePlugin) myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
-      this.dbInstance = myOpenDatabaseMethod(dbName, "1.0", dbName ? dbName : this.cronapi.cordova.database.nameDefault, 1000000);
+      this.dbInstance = myOpenDatabaseMethod(dbName, "1.0", dbName, 1000000);
       return this;
       }
-    executeSQL(rawSQL, params){
-      const handleResult = (resultObject) => resultObject._array ?  resultObject._array : resultObject;
-      const handleMultipleCommands = (command)=> command.trim().split(';').filter(str => str ? str : null);
-      const splitedRawSQL = handleMultipleCommands(rawSQL);
+    executeSQL(rawSQL = "", params = []){
+      const errorHandler = (err) => {console.log(err); throw err};
+      const extractSQLResult = (resultQuery) => resultQuery._array ?  resultQuery._array : resultQuery;
+      const extractMultipleSQLQueries = (command)=> command.trim().split(';').filter(str => str ? str : null);
+      const splitedRawSQL = extractMultipleSQLQueries(rawSQL);
       try{
       this.result = Promise.resolve( new Promise( (resultResolve, resultReject) => {
         const promises = [];
@@ -4132,13 +4132,15 @@ function cronapi() {
             });
             promises.push(command);
           });
-          Promise.all(promises).then((values)=> resultResolve(handleResult(values.pop())));
+          Promise.all(promises)
+          .then((values)=> resultResolve(extractSQLResult(values.pop())))
+          .catch(errorHandler);
         });
       })
       );  
     }catch(err){
-      console.log(err);
-    }
+     errorHandler(err);
+    };
     return this;
   }
   async getData(){
@@ -4165,7 +4167,7 @@ function cronapi() {
    * @type function
    * @platform M
    * @name {{executeSql}}
-   * @nameTags executesql
+   * @nameTags executeSQL
    * @param {ObjectType.STRING} dbName {{dbName}}
    * @param {ObjectType.STRING} text SQL
    * @param {ObjectType.OBJECT} array {{arrayParams}}
@@ -4181,6 +4183,13 @@ function cronapi() {
 
   /**
    * @deprecated true
+   * @platform M
+   * @nameTags executesql
+   * @param {ObjectType.STRING} dbName {{dbName}}
+   * @param {ObjectType.STRING} text SQL
+   * @param {ObjectType.OBJECT} array {{arrayParams}}
+   * @description {{executeSqlDescription}}
+   * @returns {ObjectType.OBJECT}
    */
   this.cronapi.cordova.database.executeSql = function(dbName,text, array, success , error){
 
