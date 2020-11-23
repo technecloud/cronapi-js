@@ -4098,53 +4098,58 @@ function cronapi() {
   this.cronapi.cordova.database.DatabaseModule = class DatabaseModule {
     DEFAULT_DATABASE_NAME = "cronappDB";
     dbInstance = null;
-    result = null;
     constructor(){}
 
     connect(dbName  = DEFAULT_DATABASE_NAME){
       let myOpenDatabaseMethod = window.openDatabase;
       // If in mobile environment use native sqlite
       if (window.sqlitePlugin) myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
-      this.dbInstance = myOpenDatabaseMethod(dbName, "1.0", dbName, 1000000);
-      return this;
-      }
-    executeSQL(rawSQL = "", params = []){
-      const errorHandler = (err) => {console.log(err); throw err};
-      const extractSQLResult = (resultQuery) => resultQuery._array ?  resultQuery._array : resultQuery;
+      return myOpenDatabaseMethod(dbName, "1.0", dbName, 1000000);
+    }
+
+    async executeSQL(dbName  = DEFAULT_DATABASE_NAME, rawSQL = "", params = []){
+      const dbInstance = this.connect(dbName);
       const extractMultipleSQLQueries = (command)=> command.trim().split(';').filter(str => str ? str : null);
-      const splitedRawSQL = extractMultipleSQLQueries(rawSQL);
       try{
-      this.result = Promise.resolve( new Promise( (resultResolve, resultReject) => {
-        const promises = [];
-        //Needed for keep a single transaction for all commands
-        this.dbInstance.transaction( (connect) =>{
-          //Needed for execute multiple raw SQL commands, i.e: INSERT, UPDATE.
-          splitedRawSQL.forEach( (raw)=>{
-            let command = new Promise( (resolve, reject) =>{
-              connect.executeSql(raw, params, (tx, resultSet) => {
-                try{
-                  resolve(resultSet.rows);
-                }catch(err){
-                  resultReject(err);
-                  reject(err);
-                }
-              });
-            });
-            promises.push(command);
-          });
-          Promise.all(promises)
-          .then((values)=> resultResolve(extractSQLResult(values.pop())))
-          .catch(errorHandler);
-        });
-      })
-      );  
-    }catch(err){
-     errorHandler(err);
-    };
-    return this;
+        const splitedRawSQL = extractMultipleSQLQueries(rawSQL);
+        return this.handleExecuteTransaction(dbInstance, splitedRawSQL, params);
+      }catch(err){
+        console.log(err);
+        throw err;
+      }
   }
-  async getData(){
-    return this.result;
+
+  extractSQLResult(resultQuery){
+    return resultQuery._array ?  resultQuery._array : resultQuery;
+  }
+
+  async handleExecuteSQL(transaction, raw, params){
+    return new Promise( (resolve, reject) =>{
+      transaction.executeSql(raw, params, (tx, resultSet) => {
+        try{
+          resolve(resultSet.rows);
+        }catch(err){
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async handleExecuteTransaction(dbInstance, splitedRawSQL, params){
+    return new Promise((resultResolve, resultReject) => {
+      try{
+        dbInstance.transaction(async (transaction) =>{
+        let partial;
+        for (let raw of splitedRawSQL) {
+          partial = await this.handleExecuteSQL(transaction, raw, params);       
+        }
+        resultResolve(this.extractSQLResult(partial));
+      });
+      }catch(err){
+        resultReject(err);
+      }
+    })
+    
   }
 }
 
@@ -4160,7 +4165,7 @@ function cronapi() {
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
     const database = new this.cronapi.cordova.database.DatabaseModule();
-    return database.connect(dbName).dbInstance;
+    return database.connect(dbName);
   };
 
     /**
@@ -4176,9 +4181,7 @@ function cronapi() {
    */
   this.cronapi.cordova.database.executeSQL = async function(dbName,rawSQL, params){
     let dbModule = new this.cronapi.cordova.database.DatabaseModule(); 
-    return dbModule.connect(dbName).
-    executeSQL(rawSQL,params).
-    getData();
+    return dbModule.executeSQL(dbName,rawSQL,params);
   };
 
   /**
