@@ -37,7 +37,7 @@ function() {
     user['info'] = {name: 'Administrator', birthday: '01/01/2000'};
 
     cronapi.json.deleteProperty.bind(window)(user, "info");
-    let value = cronapi.json.getProperty(user, "info");
+    let value = cronapi.json.getProperty.bind(window)(user, "info");
     (value === undefined).should.equal(true);
   });
 
