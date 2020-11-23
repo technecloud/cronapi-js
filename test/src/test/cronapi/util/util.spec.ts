@@ -4,6 +4,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   let should = chai.should();
   let {window} = require('../../../../../cronapi');
   const cronapi = window["cronapi"];
+  window.$ = require('jquery');
 
   it('setToken', () => {
     cronapi.util.setToken();
@@ -20,7 +21,14 @@ describe('Test suit for category Util from Cronapi.js', function() {
   });
 
   it('getApplicationName', () => {
+    document.body.innerHTML = '<form id="projectName"></form>'
+    cronapi.util.getApplicationName().should.equal('');
 
+    document.body.innerHTML = '<h1>    Cronapp is the best    </h1>'
+    cronapi.util.getApplicationName().should.equal('Cronapp is the best');
+
+    document.body.innerHTML = '<h1>     </h1>'
+    cronapi.util.getApplicationName().should.equal('');
   });
 
   it('createPromise', () => {
@@ -85,9 +93,24 @@ describe('Test suit for category Util from Cronapi.js', function() {
     Object.defineProperty(window.navigator, 'language', { value: null, writable: true });
     cronapi.util.language().should.equal('pt_br');
   });
-
+  
   it('share', () => {
-    
+
+    Object.defineProperty(window.navigator, 'share', { 
+      value: (title, text, url) => {
+        return new Promise((resolve, reject) => resolve());
+      }, writable: true, configurable: true 
+    });
+
+    cronapi.util.share.bind(window)('Google', 'Acesse o Google', 'www.google.com');
+
+    Object.defineProperty(window.navigator, 'share', { 
+      value: (title, text, url) => {
+        return new Promise((resolve, reject) => reject());
+      }, writable: true, configurable: true
+    });
+
+    cronapi.util.share.bind(window)('Google', 'Acesse o Google', 'www.google.com');
   }); 
 
   it('callServerBlockly', () => {
@@ -146,7 +169,7 @@ describe('Test suit for category Util from Cronapi.js', function() {
   }); 
 
   it('getURLFromOthers', () => {
-    
+
   });
 
   it('getUserToken', () => {
@@ -191,11 +214,11 @@ describe('Test suit for category Util from Cronapi.js', function() {
   });
 
   it('openReport', () => {
-    
+
   }); 
 
   it('getCEP', () => {
-
+    
   });
 
   it('getBaseUrl', () => {

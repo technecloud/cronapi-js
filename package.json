@@ -34,7 +34,8 @@
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
     "gulp-util": "^3.0.8",
-    "jest": "^26.6.3"
+    "jest": "^26.6.3",
+    "jquery": "^2.1.4"
   },
   "dependencies": {
     "natives": "1.1.6"
