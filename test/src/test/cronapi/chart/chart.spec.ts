@@ -9,6 +9,9 @@ describe('Test suit for category chart from Cronapi.js', function() {
   });
 
   it('createDataset', function() {
+    var element = document.querySelector('#user');
+    let value = cronapi.chart.createDataset(element, element, element);
+    value.should.eql({"data": [], "label": "", "options": null});
   });
 
 });
