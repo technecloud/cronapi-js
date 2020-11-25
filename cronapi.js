@@ -4096,18 +4096,18 @@ function cronapi() {
   this.cronapi.cordova.database = {};
 
   this.cronapi.cordova.database.DatabaseModule = class DatabaseModule {
-    DEFAULT_DATABASE_NAME = "cronappDB";
-    dbInstance = null;
-    constructor(){}
+    constructor(){
+      this.DEFAULT_DATABASE_NAME = "cronappDB";
+    }
 
-    connect(dbName  = DEFAULT_DATABASE_NAME){
+    connect(dbName  = this.DEFAULT_DATABASE_NAME){
       let myOpenDatabaseMethod = window.openDatabase;
       // If in mobile environment use native sqlite
       if (window.sqlitePlugin) myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
       return myOpenDatabaseMethod(dbName, "1.0", dbName, 1000000);
     }
 
-    async executeSQL(dbName  = DEFAULT_DATABASE_NAME, rawSQL = "", params = []){
+    async executeSQL(dbName  = this.DEFAULT_DATABASE_NAME, rawSQL = "", params = []){
       const dbInstance = this.connect(dbName);
       const extractMultipleSQLQueries = (command)=> command.trim().split(';').filter(str => str ? str : null);
       try{
