@@ -948,4 +948,9 @@ public class Operations {
 
     }
   }
+
+  @CronapiMetaData(type = "function", name = "{{getApplicationId}}", nameTags = {"application", "id"}, description = "{{getApplicationIdDescription}}", returnType = ObjectType.STRING)
+  public static Var getApplicationId() {
+    return Var.valueOf(AppConfig.getApplicationId());
+  }
 }

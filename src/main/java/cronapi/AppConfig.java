@@ -265,4 +265,14 @@ public class AppConfig {
     }
     return FlushModeType.AUTO;
   }
+
+  public static String getApplicationId() {
+    JsonObject config = loadJSON();
+    if (!isNull(config.get("app"))) {
+      JsonObject app = config.get("app").getAsJsonObject();
+      if (!isNull(app.get("guid")))
+        return app.get("guid").getAsString();
+    }
+    return "";
+  }
 }
