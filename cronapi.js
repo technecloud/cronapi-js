@@ -4094,7 +4094,65 @@ function cronapi() {
   };
 
   this.cronapi.cordova.database = {};
-  this.cronapi.cordova.database.nameDefault = "cronappDB";
+
+  this.cronapi.cordova.database.DatabaseModule = class DatabaseModule {
+    constructor(){
+      this.DEFAULT_DATABASE_NAME = "cronappDB";
+    }
+
+    connect(dbName  = this.DEFAULT_DATABASE_NAME){
+      let myOpenDatabaseMethod = window.openDatabase;
+      // If in mobile environment use native sqlite
+      if (window.sqlitePlugin) myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
+      return myOpenDatabaseMethod(dbName, "1.0", dbName, 1000000);
+    }
+
+    async executeSQL(dbName  = this.DEFAULT_DATABASE_NAME, rawSQL = "", params = []){
+      const dbInstance = this.connect(dbName);
+      const extractMultipleSQLQueries = (command)=> command.trim().split(';').filter(str => str ? str : null);
+      try{
+        const splitedRawSQL = extractMultipleSQLQueries(rawSQL);
+        return this.handleExecuteTransaction(dbInstance, splitedRawSQL, params);
+      }catch(err){
+        console.log(err);
+        throw err;
+      }
+  }
+
+  extractSQLResult(resultQuery){
+    return resultQuery._array ?  resultQuery._array : resultQuery;
+  }
+
+  async handleExecuteSQL(transaction, raw, params){
+    return new Promise( (resolve, reject) =>{
+      transaction.executeSql(raw, params, (tx, resultSet) => {
+        try{
+          resolve(resultSet.rows);
+        }catch(err){
+          reject(err);
+        }
+      });
+    });
+  }
+
+  async handleExecuteTransaction(dbInstance, splitedRawSQL, params){
+    return new Promise((resultResolve, resultReject) => {
+      try{
+        dbInstance.transaction(async (transaction) =>{
+        let partial;
+        for (let raw of splitedRawSQL) {
+          partial = await this.handleExecuteSQL(transaction, raw, params);       
+        }
+        resultResolve(this.extractSQLResult(partial));
+      });
+      }catch(err){
+        resultReject(err);
+      }
+    })
+    
+  }
+}
+
 
   /**
    * @type function
@@ -4106,27 +4164,35 @@ function cronapi() {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.database.openDatabase = function(dbName) {
-    // Starts using browser WebSQL
-    let myOpenDatabaseMethod = window.openDatabase;
-    // If in mobile environment use native sqlite
-    if (window.sqlitePlugin) {
-      myOpenDatabaseMethod = window.sqlitePlugin.openDatabase;
-    }
-    return myOpenDatabaseMethod(dbName ? dbName : this.cronapi.cordova.database.nameDefault, "1.0", dbName ? dbName : this.cronapi.cordova.database.nameDefault, 1000000);
+    const database = new this.cronapi.cordova.database.DatabaseModule();
+    return database.connect(dbName);
   };
 
-  /**
+    /**
    * @type function
    * @platform M
    * @name {{executeSql}}
+   * @nameTags executeSQL
+   * @param {ObjectType.STRING} dbName {{dbName}}
+   * @param {ObjectType.STRING} text SQL
+   * @param {ObjectType.OBJECT} array {{arrayParams}}
+   * @description {{executeSqlDescription}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.cordova.database.executeSQL = async function(dbName,rawSQL, params){
+    let dbModule = new this.cronapi.cordova.database.DatabaseModule(); 
+    return dbModule.executeSQL(dbName,rawSQL,params);
+  };
+
+  /**
+   * @deprecated true
+   * @platform M
    * @nameTags executesql
    * @param {ObjectType.STRING} dbName {{dbName}}
    * @param {ObjectType.STRING} text SQL
    * @param {ObjectType.OBJECT} array {{arrayParams}}
-   * @param {ObjectType.STATEMENTSENDER} success {{success}}
-   * @param {ObjectType.STATEMENTSENDER} error {{error}}
    * @description {{executeSqlDescription}}
-   * @returns {ObjectType.VOID}
+   * @returns {ObjectType.OBJECT}
    */
   this.cronapi.cordova.database.executeSql = function(dbName,text, array, success , error){
 
@@ -4145,17 +4211,9 @@ function cronapi() {
 
   };
 
+
   /**
-   * @type function
-   * @platform M
-   * @name {{executeMultipleSql}}
-   * @nameTags executesql
-   * @param {ObjectType.STRING} dbName {{dbName}}
-   * @param {ObjectType.STRING} text SQL
-   * @param {ObjectType.STATEMENTSENDER} success {{success}}
-   * @param {ObjectType.STATEMENTSENDER} error {{error}}
-   * @description {{executeMultipleSqlDescription}}
-   * @returns {ObjectType.VOID}
+   * @deprecated true
    */
   this.cronapi.cordova.database.executeMultipleSql = function (dbName, text, success, error) {
 
