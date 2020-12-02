@@ -125,6 +125,7 @@ function cronapi() {
     var attr = false;
     var toPromise = false;
     var async = true;
+    var notificationOnError = true;
     return {
       attr: function() {
         attr = true;
@@ -136,6 +137,10 @@ function cronapi() {
       },
       notAsync: function() {
         async = false;
+        return this;
+      },
+      disableNotification: function() {
+        notificationOnError = false;
         return this;
       },
       run: function() {
@@ -186,7 +191,7 @@ function cronapi() {
             }
             rejectForPromise(error);
           });
-          if (error)
+          if (error && notificationOnError)
             this.cronapi.$scope.Notification.error(error);
         }.bind(this);
 
