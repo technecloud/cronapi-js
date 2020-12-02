@@ -124,6 +124,7 @@ if (!window.fixedTimeZone) {
     var attr = false;
     var toPromise = false;
     var async = true;
+    var notificationOnError = true;
     return {
       attr: function() {
         attr = true;
@@ -135,6 +136,10 @@ if (!window.fixedTimeZone) {
       },
       notAsync: function() {
         async = false;
+        return this;
+      },
+      disableNotification: function() {
+        notificationOnError = false;
         return this;
       },
       run: function() {
@@ -185,7 +190,7 @@ if (!window.fixedTimeZone) {
             }
             rejectForPromise(error);
           });
-          if (error)
+          if (error && notificationOnError)
             this.cronapi.$scope.Notification.error(error);
         }.bind(this);
 
