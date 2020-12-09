@@ -1305,6 +1305,8 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
       _type = Type.DATETIME;
     } else if (_object instanceof Long) {
       _type = Type.INT;
+    } else if (_object instanceof Short) {
+      _type = Type.INT;
     } else if (_object instanceof Integer) {
       _type = Type.INT;
       _object = Long.valueOf((Integer) _object);
