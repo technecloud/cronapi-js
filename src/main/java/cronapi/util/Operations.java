@@ -546,7 +546,10 @@ public class Operations {
           paramsData.add(new BasicNameValuePair(Var.valueOf(entry.getKey()).getObjectAsString(),
               Var.valueOf(entry.getValue()).getObjectAsString()));
         });
-        URI uri = new URIBuilder(httpMethod.getURI()).addParameters(paramsData).build();
+        URI uri = httpMethod.getURI();
+        if (paramsData != null && !paramsData.isEmpty()) {
+          uri = new URIBuilder(httpMethod.getURI()).addParameters(paramsData).build();
+        }
         httpMethod.setURI(uri);
       }
       httpResponse = httpClient.execute(httpMethod);
@@ -588,7 +591,10 @@ public class Operations {
           httpEntityEnclosingRequestBase.setEntity(postToData);
         }
       } else {
-        URI uri = new URIBuilder(httpMethod.getURI()).addParameters(bothDataList).build();
+        URI uri = httpMethod.getURI();
+        if (bothDataList != null && !bothDataList.isEmpty()) {
+          uri = new URIBuilder(httpMethod.getURI()).addParameters(bothDataList).build();
+        }
         httpMethod.setURI(uri);
       }
       httpResponse = httpClient.execute(httpMethod);
