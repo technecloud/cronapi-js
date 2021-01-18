@@ -38,6 +38,21 @@ public class ConversionTest {
     Assert.assertEquals(Operations.convert(Var.valueOf("false"), Var.valueOf("BOOLEAN")).getObject(), false);
     Assert.assertEquals(Operations.convert(Var.valueOf("2012-05-12T04:05:24Z"), Var.valueOf("DATETIME")).getObject(), getTestDate());
 
+    // SHORT ASSERTION
+   Assert.assertEquals(Operations.convert(Var.valueOf(1), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf(1L), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf("1"), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf('1'), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf(1.0), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf("1.0"), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf(true), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf(false), Var.valueOf("SHORT")).getObject(), (short) 0);
+   Assert.assertEquals(Operations.convert(Var.valueOf("true"), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf(" true "), Var.valueOf("SHORT")).getObject(), (short) 1);
+   Assert.assertEquals(Operations.convert(Var.valueOf("false"), Var.valueOf("SHORT")).getObject(), (short) 0);
+   Assert.assertEquals(Operations.convert(Var.valueOf(null), Var.valueOf("SHORT")).getObject(), (short) 0);
+   Assert.assertEquals(Operations.convert(Var.valueOf("null"), Var.valueOf("SHORT")).getObject(), (short) 0);
+
     Calendar cal = Calendar.getInstance();
     cal.setTime(getTestDate().getTime());
     cal.set(Calendar.HOUR_OF_DAY, 0);

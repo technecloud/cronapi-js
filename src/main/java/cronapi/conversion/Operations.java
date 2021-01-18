@@ -200,8 +200,8 @@ public class Operations {
   public static Var convert(
       @ParamMetaData(type = ObjectType.OBJECT, description = "{{convertValue}}") Var object,
       @ParamMetaData(type = ObjectType.STRING, description = "{{convertTo}}", blockType = "util_dropdown",
-          keys = {"STRING", "BOOLEAN", "LONG", "INTEGER", "DOUBLE", "DATETIME", "DATE", "ISODATE", "TIME", "TEXTTIME", "MAP", "JSON", "LIST", "BYTEARRAY"},
-          values = {"{{STRING}}", "{{BOOLEAN}}", "{{LONG}}", "{{INTEGER}}", "{{DOUBLE}}", "{{DATETIME}}", "{{DATE}}", "{{ISODATE}}", "{{TIME}}", "{{TEXTTIME}}", "{{MAP}}", "{{JSON}}", "{{LIST}}", "{{BYTEARRAY}}"},
+          keys = {"STRING", "BOOLEAN", "LONG", "INTEGER", "DOUBLE", "DATETIME", "DATE", "ISODATE", "TIME", "TEXTTIME", "MAP", "JSON", "LIST", "BYTEARRAY", "SHORT"},
+          values = {"{{STRING}}", "{{BOOLEAN}}", "{{LONG}}", "{{INTEGER}}", "{{DOUBLE}}", "{{DATETIME}}", "{{DATE}}", "{{ISODATE}}", "{{TIME}}", "{{TEXTTIME}}", "{{MAP}}", "{{JSON}}", "{{LIST}}", "{{BYTEARRAY}}", "{{SHORT}}"},
           defaultValue = "STRING"
       ) Var type
   ) {
@@ -212,6 +212,8 @@ public class Operations {
       return Var.valueOf(object.getObjectAsBoolean());
     } else if (type.equals("LONG")) {
       return Var.valueOf(object.getObjectAsLong());
+    } else if (type.equals("SHORT")) {
+      return Var.valueOf(object.getObjectAsShort());
     } else if (type.equals("INTEGER")) {
       return Var.valueOf(object.getObjectAsInt());
     } else if (type.equals("DOUBLE")) {
