@@ -50,11 +50,15 @@ public class DataSourceMapREST {
           String defaultNamespace = null;
           for (Archive archive : currentArchives) {
             List<SEPersistenceUnitInfo> persistenceUnitInfos = PersistenceUnitProcessor.getPersistenceUnits(archive, Thread.currentThread().getContextClassLoader());
-            for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
-              defaultNamespace = pui.getPersistenceUnitName();
+            defaultNamespace = persistenceUnitInfos.stream()
+                    .filter(object -> "app".equals(object.getPersistenceUnitName()))
+                    .findFirst()
+                    .map(SEPersistenceUnitInfo::getPersistenceUnitName).orElse(null);
+            if (defaultNamespace != null) {
               break;
             }
-            if (defaultNamespace != null) {
+            for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
+              defaultNamespace = pui.getPersistenceUnitName();
               break;
             }
           }

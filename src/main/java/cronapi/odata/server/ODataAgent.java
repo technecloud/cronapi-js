@@ -266,6 +266,17 @@ public class ODataAgent {
       for (Archive archive : archives) {
         List<SEPersistenceUnitInfo> persistenceUnitInfos = getPersistenceUnits(archive);
 
+        persistenceUnitInfos.sort((p1, p2) -> {
+          if (p1.getPersistenceUnitName().equals("app")) {
+            return -1;
+          }
+          if (p2.getPersistenceUnitName().equals("app")) {
+            return 1;
+          }
+
+          return p1.getPersistenceUnitName().compareTo(p2.getPersistenceUnitName());
+        });
+
         for (SEPersistenceUnitInfo pui : persistenceUnitInfos) {
           String namespace = pui.getPersistenceUnitName();
 
