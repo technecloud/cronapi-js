@@ -54,7 +54,7 @@ public final class S3Service implements CloudService {
 
         getClient().putObject(request);
 
-        fileObject.setFileDirectUrl("http://" + fieldData.data.id() + "/" + AppConfig.guid() + fileObject.getFileName());
+        fileObject.setFileDirectUrl("https://s3.amazonaws.com/" + fieldData.data.id() + "/" + AppConfig.guid() + fileObject.getFileName());
 
       } catch (Throwable e) {
         log.error(e.getMessage(), e);
