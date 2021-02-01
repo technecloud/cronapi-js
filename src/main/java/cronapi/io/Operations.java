@@ -24,6 +24,7 @@ import cronapi.CronapiMetaData.CategoryType;
 import cronapi.CronapiMetaData.ObjectType;
 import cronapi.rest.DownloadREST;
 import cronapi.util.Callback;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -776,4 +777,21 @@ public class Operations {
 
     return Var.valueOf("");
   }
+
+  /**
+   * Gerar Arquivo através de byte
+   */
+  @CronapiMetaData(type = "function",
+          name = "{{ArrayByteToFileName}}",
+          nameTags = {"byte array", "arquivo", "criar", "gerar"},
+          description = "{{ArrayByteToFileDescription}}",
+          returnType = ObjectType.STRING)
+  public static final void fileCreateWithByteArray(
+          @ParamMetaData(type = ObjectType.STRING, description = "{{pathOfFile}}") Var path,
+          @ParamMetaData(type = ObjectType.STRING, description = "{{byteArray}}") Var byteArray) throws Exception {
+    if (!path.equals(Var.VAR_NULL) && !byteArray.equals(Var.VAR_NULL)) {
+      FileUtils.writeByteArrayToFile(new File(path.getObjectAsString()), byteArray.getObjectAsByteArray());
+    }
+  }
+
 }
