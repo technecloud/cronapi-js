@@ -19,10 +19,7 @@ import com.stimulsoft.report.export.settings.StiHtml5ExportSettings;
 import com.stimulsoft.report.export.settings.StiHtmlExportSettings;
 import com.stimulsoft.report.export.settings.StiPdfExportSettings;
 import com.stimulsoft.report.export.tools.html.StiHtmlExportQuality;
-import cronapi.CronapiConfigurator;
-import cronapi.CronapiException;
-import cronapi.QueryManager;
-import cronapi.Var;
+import cronapi.*;
 import cronapi.report.DataSourcesInBand.FieldParam;
 import cronapi.report.DataSourcesInBand.ParamValue;
 import cronapi.report.odata.StiODataDatabase;
@@ -266,12 +263,24 @@ public class ReportService {
     return result;
   }
 
+  private static String getIfIsDate(String value) {
+    Calendar c = Utils.toGenericCalendar(value);
+    if (c != null) {
+      return "datetimeoffset'" + Utils.getISODateFormat().format((c).getTime()) + "'";
+    }
+    return null;
+  }
+
   private static String parseParameter(String s, Map<String, String> values) {
     if (s.startsWith(":")) {
       String parameterName = s.substring(1);
 
       if (values.containsKey(parameterName)) {
-        return "'" + StringEscapeUtils.escapeEcmaScript(values.get(parameterName)) + "'";
+        String value = values.get(parameterName);
+        String date = getIfIsDate(value);
+        if (StringUtils.isNotEmpty(date))
+          return date;
+        return "'" + StringEscapeUtils.escapeEcmaScript(value) + "'";
       }
 
       return "''";
@@ -279,18 +288,8 @@ public class ReportService {
     return s;
   }
 
-  private static String toFilter(JsonObject expressionJson, Map<String, String> values) {
-    JsonArray expressionArgs = expressionJson.getAsJsonArray("args");
-    JsonPrimitive expressionType = expressionJson.getAsJsonPrimitive("type");
-    JsonPrimitive expressionLeft = expressionJson.getAsJsonPrimitive("left");
-    JsonPrimitive expressionRight = expressionJson.getAsJsonPrimitive("right");
-
-    JsonArray args = expressionArgs == null ? new JsonArray() : expressionArgs;
-    String left = expressionLeft == null ? "" : parseParameter(expressionLeft.getAsString(), values);
-    String right = expressionRight == null ? "" : parseParameter(expressionRight.getAsString(), values);
-    String type = expressionType == null ? "" : expressionType.getAsString();
-
-    switch (type) {
+  private static String getOperatorODATA (String left, String operator, String right) {
+    switch (operator) {
       case "%":
         return "substringof(" + right + ", " + left + ")";
       case "=":
@@ -305,35 +304,76 @@ public class ReportService {
         return left + " lt " + right;
       case "<=":
         return left + " le " + right;
-      case "AND":
-      case "OR":
-        if (args.size() == 1) {
-          return toFilter(args.get(0).getAsJsonObject(), values);
-        } else if (args.size() > 1) {
-
-        } else {
-          return "";
-        }
       default:
-        throw new CronapiException("Invalid filter expression type " + expressionType);
+        throw new CronapiException("Invalid filter expression type " + operator);
     }
+  }
+
+  private static String toFilter (JsonObject data, Map<String, String> values) {
+
+    String result = "";
+    if (data != null) {
+      JsonArray expressionArgs = data.getAsJsonArray("args");
+      JsonPrimitive expressionType = data.getAsJsonPrimitive("type");
+
+      JsonArray args = expressionArgs == null ? new JsonArray() : expressionArgs;
+      String type = expressionType == null ? "" : expressionType.getAsString();
+
+      if (args != null && args.size() > 0) {
+        for (int i = 0; i < args.size(); i++) {
+          JsonObject arg = args.get(i).getAsJsonObject();
+          String oper = type;
+          if (i == 0) {
+            oper = "";
+          }
+
+          JsonPrimitive expressionCurrentType = arg.getAsJsonPrimitive("type");
+          JsonPrimitive expressionLeft = arg.getAsJsonPrimitive("left");
+          JsonPrimitive expressionRight = arg.getAsJsonPrimitive("right");
+
+          String left = expressionLeft == null ? "" : parseParameter(expressionLeft.getAsString(), values);
+          String right = expressionRight == null ? "" : parseParameter(expressionRight.getAsString(), values);
+          String currentType = expressionCurrentType == null ? "" : expressionCurrentType.getAsString();
+
+          if (arg.getAsJsonArray("args") != null && arg.getAsJsonArray("args").size() > 0) {
+            result = result + " " + oper.toLowerCase() + " ( " + toFilter(arg, values) + " ) ";
+          } else {
+            result = result + " " + oper.toLowerCase() + " " + getOperatorODATA(left, currentType, right);
+          }
+        }
+      }
+    }
+    return result.trim();
+  }
+
+  private static String addParams(String filter, Map<String, String> values) {
+    if (values != null) {
+      for (Map.Entry<String, String> entry : values.entrySet()) {
+        String key = entry.getKey();
+        if (!filter.toLowerCase().contains(key.toLowerCase())) {
+          filter += (filter.contains("?") ? "&"  : "?") + key + "=" + entry.getValue();
+        }
+      }
+    }
+    return filter;
   }
 
   private static String bindParameters(String query, Map<String, String> values) {
     final String SERVICE_ROOT_URI = "https://localhost/";
     String[] querySlices = query.split("\\?", 2);
-    if (querySlices.length == 2) {
-      JsonParser jsonParser = new JsonParser();
-      JsonObject queryJson = (JsonObject) jsonParser.parse(querySlices[1]);
-      JsonObject expressionJson = queryJson.getAsJsonObject("expression");
-      String filter = toFilter(expressionJson, values);
+    JsonParser jsonParser = new JsonParser();
+    JsonObject queryJson = querySlices.length > 1 ? (JsonObject) jsonParser.parse(querySlices[1]) : null;
+    JsonObject expressionJson = queryJson != null ? queryJson.getAsJsonObject("expression") : null;
+    String filter = toFilter(expressionJson, values);
+    String queryString = query;
+    if (StringUtils.isNotEmpty(filter)) {
       URIBuilder uriBuilder = ODataClient.newInstance().uriBuilder(SERVICE_ROOT_URI);
       uriBuilder.appendEntitySetSegment(querySlices[0]);
       uriBuilder.filter(filter);
-      return uriBuilder.build().toString().replaceFirst(SERVICE_ROOT_URI, "");
+      queryString = uriBuilder.build().toString().replaceFirst(SERVICE_ROOT_URI, "");
     }
-
-    return query;
+    queryString = addParams(queryString, values);
+    return queryString;
   }
 
   public static void main(String[] args) throws Exception {
