@@ -461,7 +461,17 @@ public class DataSource implements JsonSerializable {
         if (!isForeignKey) {
           return sub.get(mapping.getInternalName());
         } else {
-          return sub.get(mapping.getInternalName().substring(mapping.getInternalName().indexOf(".")+1));
+          Object result = sub.get(mapping.getInternalName().substring(mapping.getInternalName().indexOf(".")+1));
+          if (result != null)
+            return result;
+          if (obj.getClass().isArray()) {
+            for (Object objCheck: (Object[]) obj) {
+              sub = Var.valueOf(objCheck);
+              result = sub.get(mapping.getInternalName().substring(mapping.getInternalName().indexOf(".")+1));
+              if (result != null)
+                return result;
+            }
+          }
         }
       }
     }
