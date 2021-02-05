@@ -23,6 +23,7 @@ import org.apache.olingo.odata2.jpa.processor.core.access.model.JPATypeConverter
 import org.apache.olingo.odata2.jpa.processor.core.model.JPAEdmMappingImpl;
 import org.eclipse.persistence.internal.expressions.ConstantExpression;
 import org.eclipse.persistence.internal.expressions.SubSelectExpression;
+import org.eclipse.persistence.internal.helper.DatabaseField;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.internal.jpa.jpql.HermesParser;
 import org.eclipse.persistence.internal.queries.ReportItem;
@@ -39,6 +40,7 @@ import java.util.regex.Pattern;
 
 public class DatasourceExtension implements JPAEdmExtension {
 
+  public static final String TIMESTAMP = "TIMESTAMP";
   public static Set<String> GRID_PREFERED_FIELDS;
 
   public static final String JPQL = "jpql";
@@ -814,6 +816,13 @@ public class DatasourceExtension implements JPAEdmExtension {
     }
   }
 
+  public Class getClassFromColumnDefinition(DatabaseField field) {
+    if (TIMESTAMP.equals(field.getColumnDefinition())) {
+      return Long.class;
+    }
+    return null;
+  }
+
   public EntitySet createJpqlDataSource(Schema edmSchema, String id, String jpql, String entity,
                                         List<CalcField> addFields) {
 
@@ -890,6 +899,9 @@ public class DatasourceExtension implements JPAEdmExtension {
           Class type = Object.class;
           if (item.getMapping() != null) {
             type = item.getMapping().getField().getType();
+            if (type == null) {
+              type = getClassFromColumnDefinition(item.getMapping().getField());
+            }
           } else if (item.getDescriptor() != null) {
             type = item.getDescriptor().getJavaClass();
           } else if (item.getResultType() != null) {
