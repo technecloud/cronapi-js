@@ -1216,8 +1216,19 @@ function cronapi() {
    * @param {ObjectType.STRING} datasource {{startInsertingModeParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.startInsertingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    getDatasource(datasource).$apply( function() { getDatasource(datasource).startInserting();});
+  this.cronapi.screen.startInsertingMode = async function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    return new Promise((resolve, reject) =>{
+      getDatasource(datasource).$apply(() => {
+        try {
+          getDatasource(datasource).startInserting(null, ()=> {
+            resolve();
+          });
+        }
+        catch(e) {
+          reject(e);
+        }
+      });
+    });
   };
 
   /**
@@ -1228,8 +1239,19 @@ function cronapi() {
    * @param {ObjectType.STRING} datasource {{startEditingModeParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.startEditingMode = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    getDatasource(datasource).$apply( new function(){getDatasource(datasource).startEditing();} );
+  this.cronapi.screen.startEditingMode = async function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    return new Promise((resolve, reject) =>{
+      getDatasource(datasource).$apply(() => {
+        try {
+          getDatasource(datasource).startEditing(null, ()=> {
+            resolve();
+          });
+        }
+        catch(e) {
+          reject(e);
+        }
+      });
+    });
   };
 
   /**
@@ -1298,8 +1320,21 @@ function cronapi() {
    * @param {ObjectType.STRING} datasource {{removeRecordParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.removeRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    getDatasource(datasource).$apply( new function(){getDatasource(datasource).removeSilent();} );
+  this.cronapi.screen.removeRecord = async function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    return new Promise((resolve, reject) =>{
+      getDatasource(datasource).$apply(() => {
+        try {
+          getDatasource(datasource).removeSilent(null, () => {
+            resolve();
+          }, (e) => {
+            reject(e);
+          });
+        }
+        catch(e) {
+          reject(e);
+        }
+      });
+    });
   };
 
   /**
@@ -1310,8 +1345,19 @@ function cronapi() {
    * @param {ObjectType.STRING} datasource {{refreshActiveRecordParam0}}
    * @multilayer true
    */
-  this.cronapi.screen.refreshActiveRecord = function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
-    getDatasource(datasource).refreshActive();
+  this.cronapi.screen.refreshActiveRecord = async function(/** @type {ObjectType.OBJECT} @blockType datasource_from_screen*/ datasource) {
+    return new Promise((resolve, reject) =>{
+      try {
+        getDatasource(datasource).refreshActive(() => {
+          resolve();
+        }, (e) => {
+          reject(e);
+        });
+      }
+      catch(e) {
+        reject(e);
+      }
+    });
   };
 
   /**
