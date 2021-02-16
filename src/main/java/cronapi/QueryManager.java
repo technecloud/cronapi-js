@@ -11,34 +11,36 @@ import cronapi.database.JPQLConverter;
 import cronapi.i18n.Messages;
 import cronapi.rest.security.CronappSecurity;
 import cronapi.util.Operations;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmProperty;
 import org.apache.olingo.odata2.api.uri.UriInfo;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.ReflectionUtils;
 
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+
 public class QueryManager {
+
+  private static final Logger log = LoggerFactory.getLogger(QueryManager.class);
+
+  private static final Pattern DATASOURCE_PATTERN = Pattern.compile(".*\\.datasource\\.json");
 
   private static JsonObject JSON;
 
   private static JsonArray DEFAULT_AUTHORITIES;
 
-  private static File fromFile = null;
+  private static File fromFolder = null;
 
   public static boolean DISABLE_AUTH = false;
 
@@ -48,29 +50,83 @@ public class QueryManager {
     DEFAULT_AUTHORITIES.add("authenticated");
   }
 
-  private static JsonObject loadJSON() {
-    if (fromFile != null) {
-      try (InputStream stream = new FileInputStream(fromFile)) {
-        InputStreamReader reader = new InputStreamReader(stream);
-        JsonElement jsonElement = new JsonParser().parse(reader);
-        return jsonElement.getAsJsonObject();
+  private static JsonObject loadJSONFromCustomQuery() {
+    if (fromFolder != null) {
+      try (InputStream stream = new FileInputStream(fromFolder)) {
+        try (InputStreamReader reader = new InputStreamReader(stream)) {
+          JsonElement jsonElement = new JsonParser().parse(reader);
+          return jsonElement.getAsJsonObject();
+        }
       } catch (Exception e) {
         return new JsonObject();
       }
     } else {
       ClassLoader classLoader = QueryManager.class.getClassLoader();
       try (InputStream stream = classLoader.getResourceAsStream("META-INF/customQuery.json")) {
-        InputStreamReader reader = new InputStreamReader(stream);
-        JsonElement jsonElement = new JsonParser().parse(reader);
-        return jsonElement.getAsJsonObject();
+        try (InputStreamReader reader = new InputStreamReader(stream)) {
+          JsonElement jsonElement = new JsonParser().parse(reader);
+          return jsonElement.getAsJsonObject();
+        }
       } catch (Exception e) {
         return new JsonObject();
       }
     }
   }
 
+  private static JsonObject loadJSON() {
+    JsonObject result = new JsonObject();
+    try {
+      if (fromFolder != null) {
+        if (fromFolder.isFile()) {
+          if (fromFolder.exists()) {
+            return loadJSONFromCustomQuery();
+          }
+          fromFolder = new File(fromFolder.getParentFile(), "datasources");
+        }
+        File[] files = fromFolder.listFiles();
+        for (File file : files) {
+          if (file.getName().endsWith(".datasource.json")) {
+            try (InputStream stream = new FileInputStream(file)) {
+              try (InputStreamReader reader = new InputStreamReader(stream)) {
+                JsonElement jsonElement = new JsonParser().parse(reader);
+                JsonObject object = jsonElement.getAsJsonObject();
+                result.add(object.get("customId").getAsString(), object);
+              }
+            } catch (Exception e) {
+              log.debug(e.getMessage(), e);
+            }
+          }
+        }
+      } else {
+        ClassLoader classLoader = QueryManager.class.getClassLoader();
+        if (classLoader.getResourceAsStream("META-INF/customQuery.json") != null) {
+          return loadJSONFromCustomQuery();
+        }
+        Reflections reflections = new Reflections("META-INF.datasources", new ResourcesScanner());
+        Set<String> files = reflections.getResources(DATASOURCE_PATTERN);
+        for (String file : files) {
+          if (file.endsWith(".datasource.json")) {
+            try (InputStream stream = classLoader.getResourceAsStream(file)) {
+              try (InputStreamReader reader = new InputStreamReader(stream)) {
+                JsonElement jsonElement = new JsonParser().parse(reader);
+                JsonObject object = jsonElement.getAsJsonObject();
+                result.add(object.get("customId").getAsString(), object);
+              }
+            } catch (Exception e) {
+              log.debug(e.getMessage(), e);
+            }
+          }
+        }
+      }
+    } catch (Throwable ex) {
+      throw new RuntimeException(ex);
+    }
+
+    return result;
+  }
+
   public static void loadJSONFromFile(File file) throws IOException {
-    fromFile = file;
+    fromFolder = file;
   }
 
   public static JsonObject getJSON() {
