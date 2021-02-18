@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.*;
 
 public class UtilTest {
@@ -75,5 +76,29 @@ public class UtilTest {
     Operations.log(Var.valueOf("Tests"), Var.valueOf("FINE"), Var.valueOf("Log Message"), Var.VAR_NULL);
     Assert.assertFalse(out.indexOf("Log Message") != -1);
 
+  }
+
+  @Test
+  public void crypt() throws Exception {
+    Var key = Var.valueOf(UUID.randomUUID().toString());
+    Var plain = Var.valueOf(UUID.randomUUID().toString());
+    Var crypted = Operations.encrypt(plain, key);
+    Var decrypted = Operations.decrypt(crypted, key);
+
+    Assert.assertEquals(crypted.getObject().getClass(), String.class);
+    Assert.assertEquals(decrypted.getObject().getClass(), String.class);
+    Assert.assertEquals(plain.getObjectAsString(), decrypted.getObjectAsString());
+
+    Var cryptedBytes = Operations.encrypt(Var.valueOf(plain.getObjectAsByteArray()), key);
+    Var decryptedBytes = Operations.decrypt(cryptedBytes, key);
+
+    Assert.assertEquals(cryptedBytes.getObject().getClass(), byte[].class);
+    Assert.assertEquals(decryptedBytes.getObject().getClass(), byte[].class);
+    Assert.assertEquals(plain.getObjectAsString(), new String(decryptedBytes.getObjectAsByteArray()));
+
+    Var item = cronapi.util.Operations.encrypt(Var.valueOf("value"), Var.valueOf("key"));
+    Var result = cronapi.util.Operations.decrypt(item, Var.valueOf("key"));
+
+    Assert.assertEquals(Var.valueOf("value").getObjectAsString(), result.getObjectAsString());
   }
 }

@@ -26,6 +26,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
@@ -33,6 +35,8 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.security.Key;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Handler;
@@ -955,8 +959,59 @@ public class Operations {
     }
   }
 
+  private static SecretKeySpec getKey(String myKey) throws Exception {
+    MessageDigest sha = null;
+    byte[] key = myKey.getBytes("UTF-8");
+    sha = MessageDigest.getInstance("SHA-1");
+    key = sha.digest(key);
+    key = Arrays.copyOf(key, 16);
+    return new SecretKeySpec(key, "AES");
+  }
+
   @CronapiMetaData(type = "function", name = "{{getApplicationId}}", nameTags = {"application", "id"}, description = "{{getApplicationIdDescription}}", returnType = ObjectType.STRING)
   public static Var getApplicationId() {
     return Var.valueOf(AppConfig.getApplicationId());
+  }
+
+  @CronapiMetaData(type = "function", name = "{{encryptName}}", nameTags = {
+      "encrypt"}, description = "{{encryptDescription}}", returnType = ObjectType.STRING)
+  public static final Var encrypt(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{encryptMessage}}") Var messageVar,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{encryptKey}}") Var keyVar
+  ) throws Exception {
+    byte[] message = (messageVar.getObject() instanceof byte[]) ? messageVar.getObjectAsByteArray() : messageVar.getObjectAsString().getBytes();
+
+    Key secretKey = getKey(keyVar.getObjectAsString());
+    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+    byte[] outputBytes = cipher.doFinal(message);
+
+    if (messageVar.getObject() instanceof byte[]) {
+      return Var.valueOf(outputBytes);
+    } else {
+      return Var.valueOf(new String(Base64.getEncoder().encode(outputBytes)));
+    }
+  }
+
+  @CronapiMetaData(type = "function", name = "{{decryptName}}", nameTags = {
+      "encrypt"}, description = "{{decryptDescription}}", returnType = ObjectType.STRING)
+  public static final Var decrypt(
+      @ParamMetaData(type = ObjectType.STRING, description = "{{decryptMessage}}") Var messageVar,
+      @ParamMetaData(type = ObjectType.STRING, description = "{{decryptKey}}") Var keyVar
+  ) throws Exception {
+    Key secretKey = getKey(keyVar.getObjectAsString());
+    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+    cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
+    byte[] message = (messageVar.getObject() instanceof byte[]) ? messageVar.getObjectAsByteArray() : Base64.getDecoder().decode(messageVar.getObjectAsString());
+
+    byte[] outputBytes = cipher.doFinal(message);
+
+    if (messageVar.getObject() instanceof byte[]) {
+      return Var.valueOf(outputBytes);
+    } else {
+      return Var.valueOf(new String(outputBytes));
+    }
   }
 }

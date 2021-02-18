@@ -12,6 +12,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import cronapi.AppConfig;
+import cronapi.Var;
+import cronapi.util.Operations;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +34,24 @@ public final class S3Service implements CloudService {
     this.files = files;
   }
 
+  private String decrypt(String value) {
+    if (!StringUtils.isEmpty(value) && value.startsWith("$")) {
+      value = value.substring(1);
+      try {
+        value = Operations.decrypt(Var.valueOf(value), Var.valueOf(AppConfig.guid())).getObjectAsString();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    return value;
+  }
+
   private AmazonS3 getClient() {
     if (this.client == null) {
-      AWSCredentials credentials = new BasicAWSCredentials(fieldData.data.value(), fieldData.data.secret());
+      String key = decrypt(fieldData.data.value());
+      String secret = decrypt(fieldData.data.secret());
+      AWSCredentials credentials = new BasicAWSCredentials(key, secret);
       AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(credentials);
 
       this.client = AmazonS3ClientBuilder.standard().withRegion(Regions.US_EAST_1).withCredentials(credentialsProvider).build();
