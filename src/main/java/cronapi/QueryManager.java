@@ -110,7 +110,7 @@ public class QueryManager {
               try (InputStreamReader reader = new InputStreamReader(stream)) {
                 JsonElement jsonElement = new JsonParser().parse(reader);
                 JsonObject object = jsonElement.getAsJsonObject();
-                result.add(object.get("customId").getAsString(), object);
+                result.add(file.replace(".datasource.json","").replace("META-INF/datasources/",""), object);
               }
             } catch (Exception e) {
               log.debug(e.getMessage(), e);
