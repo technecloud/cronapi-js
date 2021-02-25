@@ -38,6 +38,8 @@ import org.springframework.util.ReflectionUtils;
 
 public class QueryManager {
 
+  public static ThreadLocal<JsonObject> JSON_CACHE = new ThreadLocal<>();
+
   private static final Logger log = LoggerFactory.getLogger(QueryManager.class);
 
   private static final Pattern DATASOURCE_PATTERN = Pattern.compile(".*\\.datasource\\.json");
@@ -139,7 +141,12 @@ public class QueryManager {
 
   public static JsonObject getJSON() {
     if (Operations.IS_DEBUG) {
-      return loadJSON();
+      JsonObject json = JSON_CACHE.get();
+      if (json == null) {
+        json = loadJSON();
+        JSON_CACHE.set(json);
+      }
+      return json;
     } else {
       return JSON;
     }

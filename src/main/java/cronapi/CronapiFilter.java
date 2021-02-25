@@ -44,6 +44,8 @@ public class CronapiFilter implements Filter {
           TransactionManager.close();
           TransactionManager.clear();
           CronapiClassLoader.clear();
+          QueryManager.JSON_CACHE.set(null);
+          QueryManager.JSON_CACHE.remove();
         }
     }
 
