@@ -62,6 +62,7 @@ import java.util.*;
 public class DataSource implements JsonSerializable {
 
   private static final Logger log = LoggerFactory.getLogger(DataSource.class);
+  private JsonObject customQuery;
 
   private String entity;
   private String simpleEntity;
@@ -96,6 +97,7 @@ public class DataSource implements JsonSerializable {
 
   public DataSource(JsonObject query) {
     this(query.get("entityFullName").getAsString(), 100);
+    this.customQuery = query;
     QueryManager.checkMultiTenant(query, this);
   }
 
@@ -306,10 +308,12 @@ public class DataSource implements JsonSerializable {
           String paramName = "param" + i;
           String realParamName = parsedParams.get(i);
 
-          if (paramsValues != null) {
-            Var value = paramsValues.get(realParamName);
-            if (value != null) {
-              int idx = argsNames.indexOf(paramName);
+          Var value = paramsValues.get(realParamName);
+          if (value != null) {
+            int idx = argsNames.indexOf(paramName);
+            if (customQuery != null && QueryManager.hasParameterValue(customQuery, realParamName)) {
+              query.setParameter(paramName, QueryManager.getParameterValue(customQuery, realParamName, new HashMap<>()).getObject(argsTypes.get(idx)));
+            } else{
               query.setParameter(paramName, value.getObject(argsTypes.get(idx)));
             }
           }
@@ -318,12 +322,15 @@ public class DataSource implements JsonSerializable {
 
         for (int i = 0; i < parsedParams.size(); i++) {
           String param = "param" + i;
+          String realParamName = parsedParams.get(i);
+          int idx = argsNames.indexOf(param);
           Var p = null;
           if (i <= params.length - 1) {
             p = params[i];
           }
-          if (p != null) {
-            int idx = argsNames.indexOf(param);
+          if (customQuery != null && QueryManager.hasParameterValue(customQuery, realParamName)) {
+            query.setParameter(param, QueryManager.getParameterValue(customQuery, realParamName, new HashMap<>()).getObject(argsTypes.get(idx)));
+          } else if (p != null) {
             query.setParameter(param, p.getObject(argsTypes.get(idx)));
           } else {
             query.setParameter(param, null);
