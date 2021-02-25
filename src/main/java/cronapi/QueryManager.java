@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 public class QueryManager {
 
+  public static ThreadLocal<JsonObject> JSON_CACHE = new ThreadLocal<>();
+
   private static final Logger log = LoggerFactory.getLogger(QueryManager.class);
 
   private static final Pattern DATASOURCE_PATTERN = Pattern.compile(".*\\.datasource\\.json");
@@ -43,8 +45,6 @@ public class QueryManager {
   private static File fromFolder = null;
 
   public static boolean DISABLE_AUTH = false;
-
-  public static ThreadLocal<JsonObject> JSON_CACHE = new ThreadLocal<>();
 
   static {
     JSON = loadJSON();
