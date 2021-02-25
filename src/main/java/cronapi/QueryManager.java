@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public class QueryManager {
