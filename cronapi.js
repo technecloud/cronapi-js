@@ -2063,6 +2063,15 @@ if (!window.fixedTimeZone) {
       return currentMoment(value).utcOffset(window.timeZoneOffset);
     }
     else  {
+      if (value) {
+        let dateString = new RegExp("\/Date\((.*?)\)/");
+        let regexExecution = dateString.exec(value);
+        if (regexExecution && regexExecution.length > 1) {
+          let date = eval(`new Date${regexExecution[1]}`);
+          return currentMoment(date).utcOffset(window.timeZoneOffset);
+        }
+      }
+
       var formats = this.cronapi.dateTime.formats();
       var momentObj = null;
       for (var ix in formats) {
