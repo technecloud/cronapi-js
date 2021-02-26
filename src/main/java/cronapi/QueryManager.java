@@ -447,7 +447,7 @@ public class QueryManager {
         JsonElement prv = paramValues.get(x);
         if (param.equals(prv.getAsJsonObject().get("fieldName").getAsString())) {
           JsonElement fieldValue = prv.getAsJsonObject().get("fieldValue");
-          return fieldValue != null && !fieldValue.isJsonNull() && !fieldValue.getAsJsonPrimitive().getAsString().isBlank();
+          return fieldValue != null && !fieldValue.isJsonNull() && StringUtils.isNotBlank(fieldValue.getAsJsonPrimitive().getAsString());
         }
       }
     }
