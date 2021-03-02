@@ -956,7 +956,9 @@ public class Var implements Comparable<Var>, JsonSerializable, OlingoJsonSeriali
 
           if (getObject() instanceof DataSource) {
             return (Map) mapper.convertValue(((DataSource) getObject()).getObject(), Map.class);
-          } else {
+          } else if(getObject() instanceof JsonObject){
+            return new Gson().fromJson(_object.toString(), Map.class);
+          }else {
             return (Map) mapper.convertValue(_object, Map.class);
           }
         }
