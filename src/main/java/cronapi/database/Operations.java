@@ -156,7 +156,7 @@ public class Operations {
             "{{datasource}}", "{{fieldName}}", "{{fieldValue}}"}, paramsType = {ObjectType.DATASET, ObjectType.STRING,
             ObjectType.STRING}, returnType = ObjectType.VOID)
     public static void updateField(Var ds, Var fieldName, Var fieldValue) {
-        ds.setField(fieldName.getObjectAsString(), fieldValue.getObjectAsString());
+        ds.setField(fieldName.getObjectAsString(), fieldValue);
     }
 
     @CronapiMetaData(type = "function", name = "{{datasourceGetActiveData}}", nameTags = {"getElement",
