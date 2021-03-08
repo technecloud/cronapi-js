@@ -1864,6 +1864,8 @@ if (!window.fixedTimeZone) {
           if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
               if ($('#'+id).data("kendoComboBox")) {
                   $('#'+id).data("kendoComboBox").enable(false);
+              } else if ($('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
+                  $('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(false);
               } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(false);
               } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
@@ -1900,6 +1902,8 @@ if (!window.fixedTimeZone) {
           if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
               if($('#'+id).data("kendoComboBox")){
                   $('#'+id).data("kendoComboBox").enable(true);
+              } else if ($('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
+                  $('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(true);
               } else if ($('#'+id).data("kendoDropDownList")) {
                   $('#'+id).data("kendoDropDownList").enable(true);
               } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
