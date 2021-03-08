@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import freemarker.template.Configuration;
@@ -54,6 +55,8 @@ public class QueryManager {
 
   private static Configuration freemarkerConfiguration = new Configuration(Configuration.VERSION_2_3_28);
 
+  private static Pattern PATTERN_FOR_ID = Pattern.compile("\\/datasources\\/(.*?).datasource.json");
+
   static {
     JSON = loadJSON();
     DEFAULT_AUTHORITIES = new JsonArray();
@@ -83,6 +86,11 @@ public class QueryManager {
     }
   }
 
+  private static String getCustomQueryId(String path, JsonObject object) {
+    Matcher matcher = PATTERN_FOR_ID.matcher(path);
+    return matcher.find() ? matcher.group(1) : object.get("customId").getAsString();
+  }
+
   private static JsonObject loadJSON() {
     JsonObject result = new JsonObject();
     try {
@@ -100,7 +108,7 @@ public class QueryManager {
               try (InputStreamReader reader = new InputStreamReader(stream)) {
                 JsonElement jsonElement = new JsonParser().parse(reader);
                 JsonObject object = jsonElement.getAsJsonObject();
-                result.add(object.get("customId").getAsString(), object);
+                result.add(getCustomQueryId(file.getPath(), object), object);
               }
             } catch (Exception e) {
               log.debug(e.getMessage(), e);
@@ -120,7 +128,7 @@ public class QueryManager {
               try (InputStreamReader reader = new InputStreamReader(stream)) {
                 JsonElement jsonElement = new JsonParser().parse(reader);
                 JsonObject object = jsonElement.getAsJsonObject();
-                result.add(file.replace(".datasource.json","").replace("META-INF/datasources/",""), object);
+                result.add(getCustomQueryId(file, object), object);
               }
             } catch (Exception e) {
               log.debug(e.getMessage(), e);
