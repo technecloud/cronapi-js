@@ -1923,7 +1923,7 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.screen.focusComponent = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
     this.cronapi.$scope.safeApply( function() {
-      if( tinyMCE && tinyMCE.get(id) !== undefined) {
+      if(tinyMCE && tinyMCE.get(id)) {
         tinyMCE.get(id).focus();
       }else{
         $('#'+id).find('*').addBack().focus();
