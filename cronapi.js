@@ -1918,21 +1918,22 @@ if (!window.fixedTimeZone) {
       }
 
       let waitAngularReady = () => {
-          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
-              if ($('#'+id).data("kendoComboBox")) {
-                  $('#'+id).data("kendoComboBox").enable(false);
-              } else if ($('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
-                  $('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(false);
-              } else if ($('#'+id).data("kendoDropDownList")) {
-                  $('#'+id).data("kendoDropDownList").enable(false);
-              } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
-                  this.cronapi.internal.coverElement($('#'+id));
-              } else {
-                  $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
-              }
+        if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
+          let c = $('#'+id);
+          if (c.data("kendoComboBox")) {
+            c.data("kendoComboBox").enable(false);
+          } else if (c.hasClass('cronSelect') && c.closest('.form-group').find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
+            c.closest('.form-group').find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(false);
+          } else if (c.data("kendoDropDownList")) {
+            c.data("kendoDropDownList").enable(false);
+          } else if (c.find('[data-role=grid]').data('kendoGrid')) {
+            this.cronapi.internal.coverElement(c);
           } else {
-              setTimeout( () => waitAngularReady(), 200);
+            $.each( c.find('*').addBack(), function(index, value){ $(value).prop('disabled',true); });
           }
+        } else {
+          setTimeout( () => waitAngularReady(), 200);
+        }
       };
       waitAngularReady();
   };
@@ -1956,21 +1957,22 @@ if (!window.fixedTimeZone) {
       }
 
       let waitAngularReady = () => {
-          if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
-              if($('#'+id).data("kendoComboBox")){
-                  $('#'+id).data("kendoComboBox").enable(true);
-              } else if ($('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
-                  $('#'+id).parent().parent().find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(true);
-              } else if ($('#'+id).data("kendoDropDownList")) {
-                  $('#'+id).data("kendoDropDownList").enable(true);
-              } else if ($('#'+id).find('[data-role=grid]').data('kendoGrid')) {
-                  this.cronapi.internal.discoverElement($('#'+id));
-              } else {
-                  $.each( $('#'+id).find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
-              }
+        if ($scope.$$phase !== '$apply' && $scope.$$phase !== '$digest') {
+          let c = $('#'+id);
+          if(c.data("kendoComboBox")){
+            c.data("kendoComboBox").enable(true);
+          } else if (c.hasClass('cronSelect') && c.closest('.form-group').find('input.cronSelect[data-role=combobox]').data('kendoComboBox')) {
+            c.closest('.form-group').find('input.cronSelect[data-role=combobox]').data('kendoComboBox').enable(true);
+          } else if (c.data("kendoDropDownList")) {
+            c.data("kendoDropDownList").enable(true);
+          } else if (c.find('[data-role=grid]').data('kendoGrid')) {
+            this.cronapi.internal.discoverElement(c);
           } else {
-              setTimeout( () => waitAngularReady(), 200);
+            $.each( c.find('*').addBack(), function(index, value){ $(value).prop('disabled',false); });
           }
+        } else {
+          setTimeout( () => waitAngularReady(), 200);
+        }
       };
       waitAngularReady();
   };
