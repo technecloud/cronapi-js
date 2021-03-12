@@ -64,21 +64,36 @@ function cronapi() {
 
   this.cronapi.client = function(pack) {
     let attr = false;
+    let argsNames;
     return {
       attr: function() {
         attr = true;
         return this;
       },
+      names: function(names) {
+        argsNames = [];
+        for (let i = 0; i < arguments.length; i++) {
+          argsNames.push(arguments[i]);
+        }
+        return this;
+      },
       run: function() {
         var key = pack;
-
+        var args = [];
         for (var i = 0;i <arguments.length;i++) {
           key += String(arguments[i]);
+          args.push(arguments[i]);
         }
 
         var bk;
+        var argsMetadata;
         try {
           bk = eval('blockly.'+pack);
+        } catch(e) {
+          //
+        }
+        try {
+          argsMetadata = eval('blockly.'+pack+'Args');
         } catch(e) {
           //
         }
@@ -87,8 +102,23 @@ function cronapi() {
           bk = eval(pack);
         }
 
+        if (argsMetadata && argsMetadata.length && argsNames && argsNames.length) {
+          args = [];
+          for (var i = 0;i <argsMetadata.length;i++) {
+            args.push(null);
+          }
+          for (let i = 0; i<argsMetadata.length; i++) {
+            for (let j = 0; j<argsNames.length; j++) {
+              if (argsMetadata[i] == argsNames[j]) {
+                args[i] = arguments[j];
+                break;
+              }
+            }
+          }
+        }
+
         if (attr) {
-          let result = bk.apply(this, arguments);
+          let result = bk.apply(this, args);
           if (result !== undefined && result !== null && result.then && typeof result.then === 'function') {
             result.then(value => {
               if (clientMap[key] !== value) {
@@ -111,9 +141,9 @@ function cronapi() {
         } else {
           let isAsync = bk.constructor.name === "AsyncFunction";
           if (isAsync)
-            return bk.apply(this, arguments).catch((error) => this.cronapi.$scope.Notification.error(error));
+            return bk.apply(this, args).catch((error) => this.cronapi.$scope.Notification.error(error));
           else
-            return bk.apply(this, arguments);
+            return bk.apply(this, args);
         }
       }.bind(this)
     }
@@ -126,6 +156,7 @@ function cronapi() {
     var toPromise = false;
     var async = true;
     var notificationOnError = true;
+    let argsNames;
     return {
       attr: function() {
         attr = true;
@@ -137,6 +168,13 @@ function cronapi() {
       },
       notAsync: function() {
         async = false;
+        return this;
+      },
+      names: function() {
+        argsNames = [];
+        for (let i = 0; i < arguments.length; i++) {
+          argsNames.push(arguments[i]);
+        }
         return this;
       },
       disableNotification: function() {
@@ -200,6 +238,11 @@ function cronapi() {
         if (async) {
           args.push(success);
           args.push(error);
+          if (argsNames && argsNames.length) {
+            args.push({
+              argsNames: argsNames
+            });
+          }
           for (var i = 0;i <arguments.length;i++) {
             args.push(arguments[i]);
           }
@@ -209,6 +252,11 @@ function cronapi() {
             return promise;
         }
         else {
+          if (argsNames && argsNames.length) {
+            args.push({
+              argsNames: argsNames
+            });
+          }
           for (var i = 0;i <arguments.length;i++) {
             args.push(arguments[i]);
           }
@@ -507,8 +555,13 @@ function cronapi() {
     var serverUrl = 'api/cronapi/call/body/#classNameWithMethod#/'.replace('#classNameWithMethod#', classNameWithMethod);
     var http = this.cronapi.$scope.http;
     var params = [];
+    var names;
     $(arguments).each(function() {
-      params.push(this);
+      if (typeof this === 'object' && this.argsNames && this.argsNames.constructor === Array) {
+        names = this.argsNames;
+      } else {
+        params.push(this);
+      }
     });
 
     var token = "";
@@ -519,6 +572,10 @@ function cronapi() {
       "fields": fields,
       "inputs": params.slice(4)
     };
+
+    if (names) {
+      dataCall.names = names;
+    }
 
     var finalUrl = this.cronapi.internal.getAddressWithHostApp(serverUrl);
     let contentData = undefined;
@@ -3483,7 +3540,7 @@ function cronapi() {
     }
     return json;
   };
-  
+
   this.cronapi.internal.uploadFile = function(field, file, progressId, fileInfo, errorFile) {
 
     if (errorFile && errorFile.length) {
@@ -4205,7 +4262,7 @@ function cronapi() {
         dbInstance.transaction(async (transaction) =>{
         let partial;
         for (let raw of splitedRawSQL) {
-          partial = await this.handleExecuteSQL(transaction, raw, params);       
+          partial = await this.handleExecuteSQL(transaction, raw, params);
         }
         resultResolve(this.extractSQLResult(partial));
       });
@@ -4213,7 +4270,7 @@ function cronapi() {
         resultReject(err);
       }
     })
-    
+
   }
 }
 
@@ -4244,7 +4301,7 @@ function cronapi() {
    * @returns {ObjectType.OBJECT}
    */
   this.cronapi.cordova.database.executeSQL = async function(dbName,rawSQL, params){
-    let dbModule = new this.cronapi.cordova.database.DatabaseModule(); 
+    let dbModule = new this.cronapi.cordova.database.DatabaseModule();
     return dbModule.executeSQL(dbName,rawSQL,params);
   };
 
