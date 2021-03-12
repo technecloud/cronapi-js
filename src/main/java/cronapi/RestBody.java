@@ -4,6 +4,7 @@ import java.util.*;
 
 public class RestBody {
   private Var[] inputs;
+  private String[] names;
   private Map<String, Var> fields;
   private boolean processed = false;
   
@@ -12,6 +13,12 @@ public class RestBody {
       for (int i = 0; i<inputs.length; i++){
         if (inputs[i] == null) {
           inputs[i] = Var.valueOf(null);
+        }
+      }
+
+      if (names != null && names.length == inputs.length) {
+        for (int i = 0; i<inputs.length; i++){
+          inputs[i].setId(names[i]);
         }
       }
       processed = true;
@@ -56,5 +63,13 @@ public class RestBody {
     }
 
     return (RestBody) Var.valueOf(rawData).getObject(RestBody.class);
+  }
+
+  public String[] getNames() {
+    return names;
+  }
+
+  public void setNames(String[] names) {
+    this.names = names;
   }
 }

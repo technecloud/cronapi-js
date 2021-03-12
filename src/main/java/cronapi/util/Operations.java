@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.lang.reflect.Parameter;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.Key;
@@ -312,13 +313,39 @@ public class Operations {
 
     Var[] callParams = params;
 
-    if (methodToCall.getParameterCount() != callParams.length) {
-      callParams = new Var[methodToCall.getParameterCount()];
-      for (int i = 0; i < methodToCall.getParameterCount(); i++) {
-        if (i < params.length)
-          callParams[i] = params[i];
-        else
+    boolean namedParams = false;
+
+    if (params.length > 0 && methodToCall.getParameterCount() > 0 && !StringUtils.isEmpty(params[0].getId())) {
+      if (ReflectionUtils.getAnnotation(methodToCall.getParameters()[0], "cronapi.ParamMetaData") != null) {
+        namedParams = true;
+        callParams = new Var[methodToCall.getParameterCount()];
+        for (int i = 0; i < callParams.length; i++) {
           callParams[i] = Var.VAR_NULL;
+        }
+        int j = 0;
+        for (Parameter parameter: methodToCall.getParameters()) {
+          ParamMetaData annotation = (ParamMetaData) ReflectionUtils.getAnnotation(parameter, "cronapi.ParamMetaData");
+          String name = annotation.description();
+          for (Var param: params) {
+            if (param.getId().equals(name)) {
+              callParams[j] = param;
+              break;
+            }
+          }
+          j++;
+        }
+      }
+    }
+
+    if (!namedParams) {
+      if (methodToCall.getParameterCount() != callParams.length) {
+        callParams = new Var[methodToCall.getParameterCount()];
+        for (int i = 0; i < methodToCall.getParameterCount(); i++) {
+          if (i < params.length)
+            callParams[i] = params[i];
+          else
+            callParams[i] = Var.VAR_NULL;
+        }
       }
     }
 

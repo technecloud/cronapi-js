@@ -1,6 +1,8 @@
 package cronapi.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 
 public class ReflectionUtils {
   public static void setField(Object obj, String name, Object value) {
@@ -37,6 +39,16 @@ public class ReflectionUtils {
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+
+    return null;
+  }
+
+  public static Annotation getAnnotation(Parameter obj, String name) {
+    for (Annotation annotation : obj.getAnnotations()) {
+      if (annotation.annotationType().getName().equals(name)) {
+        return annotation;
+      }
     }
 
     return null;
