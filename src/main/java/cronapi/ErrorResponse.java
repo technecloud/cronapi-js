@@ -104,12 +104,7 @@ public class ErrorResponse {
     if (hasThrowable(ex, DatabaseException.class)) {
       Throwable dbException = getThrowable(ex, DatabaseException.class);
       if (!StringUtils.isEmpty(dbException.getCause().getMessage())) {
-        message = dbException.getCause().getMessage().trim();
-        Matcher matcher = EXCEPTION_NAME_PATTERN.matcher(message);
-        while (matcher.find()) {
-          message = message.substring(matcher.group(1).length()).trim();
-          matcher = EXCEPTION_NAME_PATTERN.matcher(message);
-        }
+        message = getMessageWithoutPackage(dbException.getCause());
       }
     }
 
@@ -201,6 +196,16 @@ public class ErrorResponse {
     return getExceptionMessage(ex, method, null);
   }
 
+  public static String getMessageWithoutPackage(Throwable ex) {
+    String message = ex.getMessage() == null ? "" : ex.getMessage();
+    Matcher matcher = EXCEPTION_NAME_PATTERN.matcher(message);
+    while (matcher.find()) {
+      message = message.substring(matcher.group(1).length()).trim();
+      matcher = EXCEPTION_NAME_PATTERN.matcher(message);
+    }
+    return message;
+  }
+
   public static String getExceptionMessage(Throwable ex, String method, String entity) {
 
     String message = null;
@@ -219,7 +224,7 @@ public class ErrorResponse {
           try {
             Map<String, Var> values = new LinkedHashMap<>();
             values.put("exception", Var.valueOf(ex));
-            values.put("exceptionMessage", Var.valueOf(ex.getMessage()));
+            values.put("exceptionMessage", Var.valueOf(getMessageWithoutPackage(ex)));
             values.put("data", Var.valueOf(RestClient.getRestClient().getEntity()));
             values.put("primaryKeys", Var.valueOf(RestClient.getRestClient().getKeys()));
             if (RestClient.getRestClient().getKeys() != null && RestClient.getRestClient().getKeys().size() > 0) {
@@ -235,12 +240,7 @@ public class ErrorResponse {
       }
 
       if (ex.getMessage() != null && !ex.getMessage().trim().isEmpty() && !hasIgnoredException(ex)) {
-        message = ex.getMessage();
-        Matcher matcher = EXCEPTION_NAME_PATTERN.matcher(message);
-        while (matcher.find()) {
-          message = message.substring(matcher.group(1).length()).trim();
-          matcher = EXCEPTION_NAME_PATTERN.matcher(message);
-        }
+        message = getMessageWithoutPackage(ex);
         if (hasThrowable(ex, javax.persistence.RollbackException.class) ||
             hasThrowable(ex, javax.persistence.PersistenceException.class) ||
             hasThrowable(ex, javax.persistence.OptimisticLockException.class)) {
