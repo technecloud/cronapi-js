@@ -556,7 +556,7 @@ if (!window.fixedTimeZone) {
     var params = [];
     var names;
     $(arguments).each(function() {
-      if (typeof this === 'object' && this.argsNames && this.argsNames.constructor === Array) {
+      if (this && typeof this === 'object' && this.argsNames && this.argsNames.constructor === Array) {
         names = this.argsNames;
       } else {
         params.push(this);
