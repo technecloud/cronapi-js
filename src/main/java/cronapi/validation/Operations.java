@@ -43,7 +43,7 @@ public class Operations {
             description = "{{validateEmailDescription}}", params = {"{{email}}"},
             paramsType = {ObjectType.STRING}, returnType = ObjectType.BOOLEAN)
     public static final Var validateEmail(Var email) throws Exception{
-        return cronapi.regex.Operations.validateTextWithRegex(email, new Var(org.apache.commons.lang3.StringEscapeUtils.escapeJava("^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$")),
+        return cronapi.regex.Operations.validateTextWithRegexUnscape(email, new Var("^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$"),
                 new Var("CASE_INSENSITIVE"));
     }
 
