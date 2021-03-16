@@ -47,13 +47,53 @@ function cronapi() {
     return arg;
   }
 
+  var reorderArgs = function(argsValues, argsMetadata, argsNames) {
+    if (argsMetadata && argsMetadata.length && argsNames && argsNames.length) {
+      let args = [];
+      for (var i = 0;i <argsMetadata.length;i++) {
+        args.push(null);
+      }
+      for (let i = 0; i<argsMetadata.length; i++) {
+        for (let j = 0; j<argsNames.length; j++) {
+          if (typeof argsMetadata[i] === 'string') {
+            if (argsMetadata[i] == argsNames[j]) {
+              args[i] = argsValues[j];
+              break;
+            }
+          } else {
+            if (argsMetadata[i].description == argsNames[j] || argsMetadata[i].id == argsNames[j] ) {
+              args[i] = argsValues[j];
+              break;
+            }
+          }
+
+        }
+      }
+
+      return args;
+    }
+
+    return argsValues;
+  }
+
   this.cronapi.evalInContext = async function(js) {
     var result = eval('this.cronapi.doEval('+js+')');
     if (result) {
       if (result.commands) {
         for (var i = 0; i < result.commands.length; i++) {
           var func = eval(result.commands[i].function);
-          await func.apply(this, result.commands[i].params);
+          let argsMetadata;
+          let argsNames = result.commands[i].names;
+          let args = result.commands[i].params;
+          try {
+            argsMetadata = eval(result.commands[i].function+'Args');
+          } catch(e) {
+            //
+          }
+
+          args = reorderArgs(args, argsMetadata, argsNames);
+
+          await func.apply(this, args);
         }
       }
       return result.value;
@@ -98,24 +138,19 @@ function cronapi() {
           //
         }
 
+        if (!argsMetadata) {
+          try {
+            argsMetadata = eval(pack+'Args');
+          } catch(e) {
+            //
+          }
+        }
+
         if (!bk) {
           bk = eval(pack);
         }
 
-        if (argsMetadata && argsMetadata.length && argsNames && argsNames.length) {
-          args = [];
-          for (var i = 0;i <argsMetadata.length;i++) {
-            args.push(null);
-          }
-          for (let i = 0; i<argsMetadata.length; i++) {
-            for (let j = 0; j<argsNames.length; j++) {
-              if (argsMetadata[i] == argsNames[j]) {
-                args[i] = arguments[j];
-                break;
-              }
-            }
-          }
-        }
+        args = reorderArgs(args, argsMetadata, argsNames);
 
         if (attr) {
           let result = bk.apply(this, args);
@@ -557,7 +592,7 @@ function cronapi() {
     var params = [];
     var names;
     $(arguments).each(function() {
-      if (typeof this === 'object' && this.argsNames && this.argsNames.constructor === Array) {
+      if (this && Array.isArray(this.argsNames)) {
         names = this.argsNames;
       } else {
         params.push(this);
