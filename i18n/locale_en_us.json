@@ -532,6 +532,8 @@
   "socialLoginDescription": "Function to login with social media(Facebook/Github|Google|Linkedin)",
   "socialNetwork": "Social Network",
   "sociaLoginDescription": "Function that login with selected social network",
+  "ssoLogin": "SSO Login (Oauth2)",
+  "ssoLoginDescription": "Function to login using SSO credentials. (Oauth2)",
   "startEditingModeDescription": "Function that receive a datasource and start the edition mode",
   "startEditingModeName": "Start edition mode",
   "startEditingModeParam0": "Datasource",
