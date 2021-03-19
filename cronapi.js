@@ -1,3 +1,4 @@
+
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
 }
@@ -16,7 +17,7 @@ if (!window.fixedTimeZone) {
   window.timeZoneOffset = moment().utcOffset();
 }
 
-(function() {
+function cronapi() {
   'use strict';
 
   this.$evt = function(str) {
@@ -46,13 +47,53 @@ if (!window.fixedTimeZone) {
     return arg;
   }
 
+  var reorderArgs = function(argsValues, argsMetadata, argsNames) {
+    if (argsMetadata && argsMetadata.length && argsNames && argsNames.length) {
+      let args = [];
+      for (var i = 0;i <argsMetadata.length;i++) {
+        args.push(null);
+      }
+      for (let i = 0; i<argsMetadata.length; i++) {
+        for (let j = 0; j<argsNames.length; j++) {
+          if (typeof argsMetadata[i] === 'string') {
+            if (argsMetadata[i] == argsNames[j]) {
+              args[i] = argsValues[j];
+              break;
+            }
+          } else {
+            if (argsMetadata[i].description == argsNames[j] || argsMetadata[i].id == argsNames[j] ) {
+              args[i] = argsValues[j];
+              break;
+            }
+          }
+
+        }
+      }
+
+      return args;
+    }
+
+    return argsValues;
+  }
+
   this.cronapi.evalInContext = async function(js) {
     var result = eval('this.cronapi.doEval('+js+')');
     if (result) {
       if (result.commands) {
         for (var i = 0; i < result.commands.length; i++) {
           var func = eval(result.commands[i].function);
-          await func.apply(this, result.commands[i].params);
+          let argsMetadata;
+          let argsNames = result.commands[i].names;
+          let args = result.commands[i].params;
+          try {
+            argsMetadata = eval(result.commands[i].function+'Args');
+          } catch(e) {
+            //
+          }
+
+          args = reorderArgs(args, argsMetadata, argsNames);
+
+          await func.apply(this, args);
         }
       }
       return result.value;
@@ -97,24 +138,19 @@ if (!window.fixedTimeZone) {
           //
         }
 
+        if (!argsMetadata) {
+          try {
+            argsMetadata = eval(pack+'Args');
+          } catch(e) {
+            //
+          }
+        }
+
         if (!bk) {
           bk = eval(pack);
         }
 
-        if (argsMetadata && argsMetadata.length && argsNames && argsNames.length) {
-          args = [];
-          for (var i = 0;i <argsMetadata.length;i++) {
-            args.push(null);
-          }
-          for (let i = 0; i<argsMetadata.length; i++) {
-            for (let j = 0; j<argsNames.length; j++) {
-              if (argsMetadata[i] == argsNames[j]) {
-                args[i] = arguments[j];
-                break;
-              }
-            }
-          }
-        }
+        args = reorderArgs(args, argsMetadata, argsNames);
 
         if (attr) {
           let result = bk.apply(this, args);
@@ -556,7 +592,7 @@ if (!window.fixedTimeZone) {
     var params = [];
     var names;
     $(arguments).each(function() {
-      if (this && typeof this === 'object' && this.argsNames && this.argsNames.constructor === Array) {
+      if (this && Array.isArray(this.argsNames)) {
         names = this.argsNames;
       } else {
         params.push(this);
@@ -921,7 +957,7 @@ if (!window.fixedTimeZone) {
    * @param {ObjectType.STRING} error {{error}}
    */
   this.cronapi.util.getURLFromOthers = function(/** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE @values GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|TRACE  */  method , /** @type {ObjectType.STRING} @description {{HTTPMethod}} @blockType util_dropdown @keys application/x-www-form-urlencoded|application/json @values application/x-www-form-urlencoded|application/json  */  contentType , /** @type {ObjectType.STRING} @description {{URLAddress}} */ url, /** @type {ObjectType.OBJECT} @description {{paramsHTTP}} */ params, /** @type {ObjectType.OBJECT} @description {{headers}} */ headers, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
-    
+
     if (params && contentType === "application/x-www-form-urlencoded") {
       for (var key in params) {
         if (params[key] instanceof Array) {
@@ -933,7 +969,7 @@ if (!window.fixedTimeZone) {
     else if (params && contentType === "application/json") {
       params = JSON.stringify(params);
     }
-    
+
     var header = Object.create(headers);
     header["Content-Type"] = contentType;
     // Angular has a .run that inject X-AUTH-TOKEN, so we use JQuery
@@ -1088,7 +1124,7 @@ if (!window.fixedTimeZone) {
 
     let url = "https://viacep.com.br/ws/" + cep + "/json/?callback=?";
 
-    $.getJSON(url, success.bind(this));
+    $.getJSON(url, this.cronapi.util.handleCallback( success.bind(this) ));
 
   };
 
@@ -1541,7 +1577,7 @@ if (!window.fixedTimeZone) {
 
       var oldHashToCheck = oldHash + (oldHash.indexOf("?") > -1 ? "": "?");
       var viewToCheck = view + (view.indexOf("?") > -1 ? "": "?");
-  
+
       this.cronapi.forceCloseAllModal();
 
       if(oldHashToCheck.indexOf(viewToCheck) >= 0){
@@ -2998,7 +3034,7 @@ if (!window.fixedTimeZone) {
       }, 100);
     }
   };
-  
+
   this.cronapi.forceCloseAllModal = function() {
     var modals = $('.modal.fade.in');
     if (modals) {
@@ -3128,9 +3164,9 @@ if (!window.fixedTimeZone) {
       }
     }
   };
-  
+
   this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData, fileInfo) {
-    
+
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -3153,7 +3189,7 @@ if (!window.fixedTimeZone) {
       var tempJsonFileUploaded = JSON.parse(valueContent);
     }
     catch(e) { }
-    
+
     if (tempJsonFileUploaded) {
       var finalUrl = this.cronapi.internal.getAddressWithHostApp('/api/cronapi/filePreview/');
       window.open(finalUrl + tempJsonFileUploaded.path, '_system');
@@ -3168,7 +3204,7 @@ if (!window.fixedTimeZone) {
       else {
         var url = '/api/cronapi/downloadFile';
         var splited = datasource.entity.split('/');
-        
+
         var entity = splited[splited.length - 1];
         if (entity.indexOf(":") > -1) {
           //Siginifica que é relacionamento, pega a entidade do relacionamento
@@ -3225,7 +3261,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.internal.castByteArrayToString = function(bytes) {
     return String.fromCharCode.apply(null, new Uint16Array(bytes));
   };
-  
+
   this.cronapi.internal.generatePreviewDescriptionByte = function(data, fileInfo) {
     var json;
     let fileInfoContent = eval(fileInfo);
@@ -3274,7 +3310,7 @@ if (!window.fixedTimeZone) {
     if (json) {
       if (json.name.length > 25)
         json.name = json.name.substr(0,22)+'...';
-      
+
       var result = (this.cronapi.$translate.use() == 'pt_br' ? "<b>Nome:</b> <br/>" : "<b>Name:</b> <br/>") + (json.contentType !== undefined ? json.name +"<br/>" : "");
       result += json.contentType !== undefined ? "<b>Content-Type:</b> <br/>" + json.contentType +"<br/>" : "";
       result += json.fileExtension !== "" ? this.cronapi.$translate.use() == 'pt_br' ? "<b>Extensão:</b> <br/>" + json.fileExtension +"<br/>" : "<b>Extension:</b> <br/>" + json.fileExtension +"<br/>" : "";
@@ -3351,7 +3387,7 @@ if (!window.fixedTimeZone) {
       return false;
     }
   };
-  
+
   this.cronapi.internal.downloadUrl = function(url, fileName) {
     let link = document.createElement('a');
     link.setAttribute('href', url);
@@ -3360,12 +3396,12 @@ if (!window.fixedTimeZone) {
     event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
     link.dispatchEvent(event);
   };
-  
+
   this.cronapi.internal.makeDownloadFromBytes = function(valueContent, fileInfo) {
     var urlCreator = window.URL || window.webkitURL || window.mozURL || window.msURL;
     var bytesOrFileInput;
     var fileName = 'download';
-    
+
     if (valueContent.match(/__odataFile_/g)) {
       bytesOrFileInput = eval(valueContent);
       fileName = bytesOrFileInput.name
@@ -3387,9 +3423,9 @@ if (!window.fixedTimeZone) {
     var url = urlCreator.createObjectURL(new Blob([bytesOrFileInput],{type: 'application/octet-stream'}));
     cronapi.internal.downloadUrl(url, fileName);
   };
-  
+
   this.cronapi.internal.downloadFileEntity = function(datasource, field, indexData, fileInfo) {
-    
+
     var tempJsonFileUploaded = null;
     var valueContent;
     var itemActive;
@@ -3412,7 +3448,7 @@ if (!window.fixedTimeZone) {
       var tempJsonFileUploaded = JSON.parse(valueContent);
     }
     catch(e) { }
-    
+
     if (tempJsonFileUploaded) {
       window.open('/api/cronapi/filePreview/'+tempJsonFileUploaded.path);
     }
@@ -3420,14 +3456,14 @@ if (!window.fixedTimeZone) {
       window.open(valueContent);
     }
     else {
-      
+
       if (datasource.isOData()) {
         cronapi.internal.makeDownloadFromBytes(valueContent, fileInfo);
       }
       else {
         var url = '/api/cronapi/downloadFile';
         var splited = datasource.entity.split('/');
-        
+
         var entity = splited[splited.length-1];
         if (entity.indexOf(":") > -1) {
           //Siginifica que é relacionamento, pega a entidade do relacionamento
@@ -3438,14 +3474,14 @@ if (!window.fixedTimeZone) {
           var entityRelationSplited = entity.split(':');
           entity = entityRelation + entityRelationSplited[entityRelationSplited.length-1];
         }
-        
+
         url += '/' + entity;
         url += '/' + field;
         var _u = JSON.parse(localStorage.getItem('_u')) || {};
         var object = itemActive;
-        
+
         var finalUrl = this.cronapi.internal.getAddressWithHostApp(url);
-        
+
         this.$promise = this.cronapi.$scope.$http({
           method: 'POST',
           url: finalUrl,
@@ -3471,9 +3507,9 @@ if (!window.fixedTimeZone) {
           console.log('Error downloading file');
         }.bind(this));
       }
-      
+
     }
-    
+
   };
 
   this.cronapi.internal.uploadFileAjax = function(field, file, progressId) {
@@ -3522,14 +3558,14 @@ if (!window.fixedTimeZone) {
     }.bind(this));
 
   };
-  
+
   this.cronapi.internal.getFieldFromActiveString = function(rawActive) {
     var regexForField = /.active.([a-zA-Z0-9_-]*)/g;
     var groupField = regexForField.exec(rawActive);
     var fieldName = groupField[1];
     return fieldName;
   };
-  
+
   this.cronapi.internal.getJsonDescriptionFromFile = function(file) {
     let json = {};
     if (file) {
@@ -3553,7 +3589,7 @@ if (!window.fixedTimeZone) {
 
     if (!file)
       return;
-    
+
     var regexForDatasource = /(.*?).active./g;
     var groupDatasource = regexForDatasource.exec(field);
     //Verificar se é campo de um datasource
@@ -3820,7 +3856,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.cordova.device.getFirebaseToken = function (success, error) {
     function onDeviceReady() {
       try {
-        window.FirebasePlugin.getToken(success, error);
+        window.FirebasePlugin.getToken(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error));
       } catch (e) {
         console.error(e);
         error(e);
@@ -3947,7 +3983,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType, /** @type {ObjectType.BOOLEAN} @description {{allowEdit}} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}  */ allowEdit) {
     if(mediaType === undefined || mediaType === null) mediaType = 0 ;
     allowEdit = (allowEdit === true || allowEdit === 'true');
-    navigator.camera.getPicture(success, error, { destinationType: Number(destinationType) , sourceType : Number(pictureSourceType) , mediaType: Number(mediaType) , allowEdit: allowEdit});
+    navigator.camera.getPicture(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error), { destinationType: Number(destinationType) , sourceType : Number(pictureSourceType) , mediaType: Number(mediaType) , allowEdit: allowEdit});
   };
 
   /**
@@ -4030,8 +4066,8 @@ if (!window.fixedTimeZone) {
       fileEntry.remove(function (entry) {
         if (success)
           success(entry);
-      }.bind(this),error);
-    }.bind(this),error);
+      }.bind(this),this.cronapi.util.handleCallback(error));
+    }.bind(this),this.cronapi.util.handleCallback(error));
   };
 
   /**
@@ -4070,8 +4106,8 @@ if (!window.fixedTimeZone) {
             reader.readAsText(file);
           }
         };
-      }.bind(this),error);
-    }.bind(this),error);
+      }.bind(this),this.cronapi.util.handleCallback(error));
+    }.bind(this),this.cronapi.util.handleCallback(error));
   };
 
   /**
@@ -4088,7 +4124,7 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.file.createFile = function(dirEntry, fileName, content, success, error) {
-    var path = (dirEntry || getDirectory(0));
+    const path = (dirEntry || getDirectory(0));
     window.resolveLocalFileSystemURL(dirEntry,  function(directoryEntry) {
       console.log(dirEntry);
       directoryEntry.getFile(fileName, {create: true }, function (fileEntry) {
@@ -4106,9 +4142,9 @@ if (!window.fixedTimeZone) {
               success();
             }.bind(this),500);
           }
-        }.bind(this), error);
-      }.bind(this), error);
-    }.bind(this), error);
+        }.bind(this), this.cronapi.util.handleCallback(error) );
+      }.bind(this), this.cronapi.util.handleCallback(error) );
+    }.bind(this), this.cronapi.util.handleCallback(error) );
   };
 
   /**
@@ -4125,11 +4161,11 @@ if (!window.fixedTimeZone) {
    */
   this.cronapi.cordova.file.createDirectory = function(dirParent, dirChildrenName, success, error) {
     window.resolveLocalFileSystemURL(dirParent,  function(directoryEntry) {
-      parentEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
+      directoryEntry.getDirectory(dirChildrenName, { create: true }, function (childrenEntry) {
         if (success)
           success(childrenEntry);
-      }.bind(this),error);
-    }.bind(this), error);
+      }.bind(this),this.cronapi.util.handleCallback(error));
+    }.bind(this), this.cronapi.util.handleCallback(error));
   };
 
   this.cronapi.cordova.storage = {};
@@ -5576,5 +5612,16 @@ if (!window.fixedTimeZone) {
     });
 
   }
+}
 
-}).bind(window)();
+(cronapi).bind(window)();
+
+
+// This is only for test purpose
+try{
+if(module){
+  module.exports = {
+    window
+  };
+}
+}catch(err){}
