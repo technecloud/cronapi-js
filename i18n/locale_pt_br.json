@@ -533,6 +533,8 @@
   "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
   "socialNetwork": "Rede Social",
   "sociaLoginDescription": "Função que realiza o login a partir de uma determinada  rede social",
+  "ssoLogin": "Login via SSO (Oauth2)",
+  "ssoLoginDescription": "Função que realiza o login  através de credenciais SSO (Oauth2)",
   "startEditingModeDescription": "Função que recebe uma fonte de dados e inicia seu modo de edição",
   "startEditingModeName": "Entra em modo de edição",
   "startEditingModeParam0": "Fonte de dados",
