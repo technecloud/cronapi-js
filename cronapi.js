@@ -4885,7 +4885,48 @@ function cronapi() {
     }else{
       window.location.href = "signin/"+socialNetwork+"/";
     }
-  }
+  };
+
+  /**
+   * @type function
+   * @name {{ssoLogin}}
+   * @nameTags login|social|oauth
+   * @description {{ssoLoginDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.social.ssoLogin = () => {
+      if(window.cordova && cordova.InAppBrowser) {
+        const ref = cordova.InAppBrowser.open(window.hostApp + 'login', '_blank', 'location=no,footer=yes,zoom=no,enableViewportScale=yes,hidenavigationbuttons=yes');
+        const handlerChange = (event) => {
+          const url = new URL(event.url);
+          const urlParams = new URLSearchParams(url.search);
+
+          if (urlParams.has('sso_user')) {
+
+            ref.executeScript({code: 'document.cookie'}, (result) => {
+              document.cookie = result;
+            });
+
+            ref.close();
+            this.cronapi.util.setLocalStorage('_u', urlParams.get('sso-user'));
+            const injector = window.angular.element('body').injector();
+            const rootScope = injector.get('$rootScope');
+            rootScope.session = JSON.parse(localStorage._u);
+
+            try {
+              rootScope.blockly.js.blockly.auth.Home.change();
+            } catch(errro) {
+              this.cronapi.screen.changeView("#/app/logged/home", []);
+            }
+
+          }
+        };
+
+        ref.addEventListener('loadstart', handlerChange);
+      } else {
+        window.location.assign("login");
+      }
+  };
 
   /**
    * @type function
