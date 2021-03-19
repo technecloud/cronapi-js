@@ -381,6 +381,7 @@
   "logoutDescription": "Função que faz o logout do usuário",
   "logoutName": "Logout",
   "makeCallServerBlocklyAsync": "Chamar bloco servidor assíncrono - callback com bloco",
+  "maxFileSize": "Tamanho máximo para arquivo:",
   "maximumAge": "Tempo Máximo",
   "mediaType": "Tipo de Mídia",
   "messageQRCode": "Mensagem: Mensagem exibida enquanto a camera esta aberta",
@@ -508,6 +509,8 @@
   "setLocalStorageDesc": "Função que adiciona um item na sessão global do navegador. Esse item é mantido ao fechar o navegador e é visível em todas as abas",
   "setProperty": "Atribuir valor",
   "setPropertyDescription": "Função para atribuir o valor ao objeto",
+  "setRequestToken": "Definir Token",
+  "setRequestTokenDescription": "Modifica token que será usado nas requisições"
   "setSessionStorage": "Adicionar Item na Sessão da Aba",
   "setSessionStorageDesc": "Função que adiciona um item na sessão local do navagedor. Esse Item é limpo ao fechar o navegador e é visível apenas na aba em que for criado",
   "setStorageItem": "Adicionar item de armazenamento",
@@ -530,7 +533,7 @@
   "sleepInterval": "Intervalo em milisegundos",
   "smallerDateToBeSubtracted": "Menor data a ser subtraida",
   "socialLogin": "Login por Redes Sociais",
-  "socialLoginDescription": "Função que realiza o login por Redes Sociais(Facebook/Github|Google|Linkedin)",
+  "socialLoginDescription": "Função que realiza o login por Redes Sociais (Facebook|Github|Google|Linkedin)",
   "socialNetwork": "Rede Social",
   "sociaLoginDescription": "Função que realiza o login a partir de uma determinada  rede social",
   "ssoLogin": "Login via SSO (Oauth2)",
@@ -593,7 +596,4 @@
   "XMLHasRootElementName": "Existe elemento raiz?",
   "year": "Ano",
   "yearsToIncrement": "Anos a incrementar",
-  "maxFileSize": "Tamanho máximo para arquivo:",
-  "setRequestToken": "Definir Token",
-  "setRequestTokenDescription": "Modifica token que será usado nas requisições"
 }
