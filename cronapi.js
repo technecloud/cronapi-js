@@ -4858,7 +4858,7 @@ if (!window.fixedTimeZone) {
    * @description {{ssoLoginDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.social.ssoLogin = () => {
+  this.cronapi.social.ssoLogin = function() {
       if(window.cordova && cordova.InAppBrowser) {
         const ref = cordova.InAppBrowser.open(window.hostApp + 'login', '_blank', 'location=no,footer=yes,zoom=no,enableViewportScale=yes,hidenavigationbuttons=yes');
         const handlerChange = (event) => {
