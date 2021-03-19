@@ -4,7 +4,8 @@
   "description": "Public library for CronApp's users",
   "main": "cronapi.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "build": "gulp"
   },
   "repository": {
     "type": "git",
