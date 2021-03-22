@@ -509,7 +509,7 @@
   "setProperty": "Set Value",
   "setPropertyDescription": "Function to assign value to object.",
   "setRequestToken": "Define Token",
-  "setRequestTokenDescription": "Modify token that will be used in requests"
+  "setRequestTokenDescription": "Modify token that will be used in requests",
   "setSessionStorage": "Set Session Storage Item",
   "setSessionStorageDesc": "Function that set an item in session storage on browser. This item is clear when browser is closed and are only visible on current tab.",
   "setStorageItem": "Add Storage Item",
@@ -595,5 +595,5 @@
   "XMLHasRootElementDescription": "Function that verify if exists a XML root element on XML document",
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
-  "yearsToIncrement": "Years to increase",
+  "yearsToIncrement": "Years to increase"
 }

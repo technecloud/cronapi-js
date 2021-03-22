@@ -510,7 +510,7 @@
   "setProperty": "Atribuir valor",
   "setPropertyDescription": "Função para atribuir o valor ao objeto",
   "setRequestToken": "Definir Token",
-  "setRequestTokenDescription": "Modifica token que será usado nas requisições"
+  "setRequestTokenDescription": "Modifica token que será usado nas requisições",
   "setSessionStorage": "Adicionar Item na Sessão da Aba",
   "setSessionStorageDesc": "Função que adiciona um item na sessão local do navagedor. Esse Item é limpo ao fechar o navegador e é visível apenas na aba em que for criado",
   "setStorageItem": "Adicionar item de armazenamento",
@@ -595,5 +595,5 @@
   "XMLHasRootElementDescription": "Função que verifica se existe elemento raiz no documento XML",
   "XMLHasRootElementName": "Existe elemento raiz?",
   "year": "Ano",
-  "yearsToIncrement": "Anos a incrementar",
+  "yearsToIncrement": "Anos a incrementar"
 }
