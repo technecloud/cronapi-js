@@ -4871,15 +4871,16 @@ if (!window.fixedTimeZone) {
               document.cookie = result;
             });
 
+            ref.removeEventListener('loadstart', handlerChange);
+
             ref.close();
-            this.cronapi.util.setLocalStorage('_u', urlParams.get('sso-user'));
-            const injector = window.angular.element('body').injector();
-            const rootScope = injector.get('$rootScope');
-            rootScope.session = JSON.parse(localStorage._u);
+
+            this.cronapi.util.setLocalStorage('_u', urlParams.get('sso_user'));
+            this.$root.session = JSON.parse(localStorage._u);
 
             try {
-              rootScope.blockly.js.blockly.auth.Home.change();
-            } catch(errro) {
+              this.blockly.js.blockly.auth.Home.change();
+            } catch(error) {
               this.cronapi.screen.changeView("#/app/logged/home", []);
             }
 
@@ -4887,6 +4888,7 @@ if (!window.fixedTimeZone) {
         };
 
         ref.addEventListener('loadstart', handlerChange);
+
       } else {
         window.location.assign("login");
       }
