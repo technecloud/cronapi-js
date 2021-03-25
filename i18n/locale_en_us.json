@@ -1,6 +1,7 @@
 {
   "addXMLElementDescription": "Function that add a XML element inside a parent element",
   "addXMLElementName": "Add XML element",
+  "allFormats":"All formats",
   "allowEdit": "Allow Edition",
   "array": "List",
   "arrayParams": "List of parameters",
@@ -433,6 +434,7 @@
   "previusRecordParam0": "Datasource",
   "promise": "Promise",
   "property": "Property",
+  "qrCode":"QR Code",
   "qrCodeScanner": "Read barcode",
   "qrCodeScannerDescription": "Function that read know formats. Example: QR_CODE.",
   "quantityRecordsDescription": "Function that returns the quantity of all records on datasource",

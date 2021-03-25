@@ -1,6 +1,7 @@
 {
   "addXMLElementDescription": "Função que adiciona um elemento XML no elemento pai",
   "addXMLElementName": "Adiciona elemento XML",
+  "allFormats":"Todos os formatos",
   "allowEdit": "Permitir edição",
   "array": "Lista",
   "arrayParams": "Lista de parâmetros",
@@ -434,6 +435,7 @@
   "previusRecordParam0": "Fonte de dados",
   "promise": "Promessa",
   "property": "Propriedade",
+  "qrCode":"Código QR",
   "qrCodeScanner": "Ler código de barras",
   "qrCodeScannerDescription": "Função que lê alguns formatos conhecidos e retorna o conteúdo. Exemplo: QR_CODE",
   "quantityRecordsDescription": "Função que retorna a quantidade total de registros da Fonte de dados",
