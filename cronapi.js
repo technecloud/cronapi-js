@@ -3996,7 +3996,23 @@ function cronapi() {
    * @description {{qrCodeScannerDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.cordova.camera.qrCodeScanner = function(/** @type {ObjectType.STRING} @description {{formatQRCode}} @blockType util_dropdown @keys QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128 @values QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128  */  format,/** @type {ObjectType.STRING} @description {{messageQRCode}} */ message, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
+  this.cronapi.cordova.camera.qrCodeScanner = function(/** @type {ObjectType.STRING} @description {{formatQRCode}} @blockType util_dropdown @keys all|QR_CODE|DATA_MATRIX|UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128|CODABAR|ITF|RSS14|PDF_417|RSS_EXPANDED|AZTEC @values {{allFormats}}|{{qrCode}}|DATA-MATRIX|UPC-A|UPC-E|EAN-8|EAN-13|Code 39|Code 128|Codabar|ITF|RSS14|PDF-417|RSS Expanded|AZTEC */  format,/** @type {ObjectType.STRING} @description {{messageQRCode}} */ message, /** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error ) {
+    const scanOptions = {
+      preferFrontCamera : false,
+      showFlipCameraButton : true,
+      showTorchButton : true,
+      saveHistory: true,
+      prompt : message,
+      resultDisplayDuration: 500,
+      orientation : "portrait",
+      disableAnimations : true,
+      disableSuccessBeep: false
+    };
+
+    if('all' !== format){
+      scanOptions.formats = format
+    }
+
     cordova.plugins.barcodeScanner.scan(
         function (result) {
           success(result.text);
@@ -4006,19 +4022,7 @@ function cronapi() {
             // Verification in order to avoid issue: https://github.com/phonegap/phonegap-plugin-barcodescanner/issues/660
             error(errorMsg);
           }
-        },
-        {
-          preferFrontCamera : false,
-          showFlipCameraButton : true,
-          showTorchButton : true,
-          saveHistory: true,
-          prompt : message,
-          resultDisplayDuration: 500,
-          formats : format,
-          orientation : "portrait",
-          disableAnimations : true,
-          disableSuccessBeep: false
-        }
+        }, scanOptions
     );
   };
 
