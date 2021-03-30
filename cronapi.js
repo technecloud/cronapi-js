@@ -4893,6 +4893,8 @@ if (!window.fixedTimeZone) {
 
         ref.addEventListener('loadstart', handlerChange);
 
+      } else if(window.ionic && window.hostApp) {
+        window.location = this.cronapi.internal.getAddressWithHostApp("login");
       } else {
         window.location.assign("login");
       }
