@@ -4929,10 +4929,8 @@ function cronapi() {
 
         ref.addEventListener('loadstart', handlerChange);
 
-      } else if(window.ionic && window.hostApp) {
-        window.location = this.cronapi.internal.getAddressWithHostApp("login");
       } else {
-        window.location.assign("login");
+        window.ssoWindow = window.open(this.cronapi.internal.getAddressWithHostApp("login"));
       }
   };
 
