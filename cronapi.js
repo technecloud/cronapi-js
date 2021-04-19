@@ -3244,6 +3244,71 @@ function cronapi() {
     this.cronapi.screen.changeValueOfField(field, base64);
   };
 
+  this.cronapi.internal.qrCodeScanner = function(success, fail, scanOptions){
+    let selectedDeviceId;
+    let barCodeOneD = "UPC_A|UPC_E|EAN_8|EAN_13|CODE_39|CODE_128|ITF|RSS14|RSS_EXPANDED";
+    let codeReader;
+
+    switch (scanOptions.formats) {
+      case "AZTEC":
+        codeReader = new ZXing.BrowserAztecCodeReader();      
+        break;
+      case "DATA_MATRIX":
+        codeReader = new ZXing.BrowserDatamatrixCodeReader();      
+        break;        
+      case "QR_CODE":
+        codeReader = new ZXing.BrowserQRCodeReader();      
+        break;
+      case "PDF_417":
+        codeReader = new ZXing.BrowserPDF417Reader();      
+        break;
+      default:
+        codeReader = new ZXing.BrowserMultiFormatReader();
+    }
+
+    if(scanOptions.formats && barCodeOneD.indexOf(scanOptions.formats) != -1){
+      codeReader = new ZXing.BrowserBarcodeReader();
+    }
+
+    codeReader.listVideoInputDevices()
+    .then((videoInputDevices) => {
+        selectedDeviceId = videoInputDevices[0].deviceId
+        var cameraContainer = '<div style="position: fixed; display: flex; width: 100%; height: 100%; top: 0; left: 0; right: 0; bottom: 0; background-color: \
+              rgb(0 0 0 / 72%); z-index: 9999999; cursor: pointer; justify-content: center; align-items: center;">\
+              <div style="position: absolute">\
+                <video id="video" style="width: 100%; max-width: 600px; border-radius: 5px;"></video>\
+                <button class="btn btn-danger button button-assertive" id="cronapiBarCodeCancel" style="position: absolute; right: 0; z-index: 999999999;">\
+                    <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
+                    <span class="sr-only">{{"Cancel" | translate}}</span>\
+                </button>\
+              </div>\
+            </div>';
+        var cronappVideoBarCode = $(cameraContainer);
+        cronappVideoBarCode.prependTo("body");
+        cronappVideoBarCode.find('#cronapiBarCodeCancel').on('click', function() {
+            codeReader.reset();
+            $(cronappVideoBarCode).remove();
+            fail();
+        }.bind(this));
+
+        codeReader.decodeOnceFromVideoDevice(selectedDeviceId, 'video').then((result) => {
+            if (result) {
+                success(result.text);
+                $(cronappVideoBarCode).remove();
+                codeReader.reset();
+            }
+        }).catch((err) => {
+            fail(err);
+            $(cronappVideoBarCode).remove();
+            codeReader.reset();
+        });
+
+    }).catch((err) => {
+        fail(err);
+        codeReader.reset();
+    });
+  }
+
   this.cronapi.internal.castBinaryStringToByteArray = function(binary_string) {
     var len = binary_string.length;
     var bytes = new Uint8Array( len );
@@ -3988,7 +4053,6 @@ function cronapi() {
 
   /**
    * @type function
-   * @platform M
    * @name {{qrCodeScanner}}
    * @nameTags QRCODE|QR|BAR|Scanner|BARCODE
    * @param {ObjectType.STRING} format {{formatQRCode}}
@@ -4013,17 +4077,21 @@ function cronapi() {
       scanOptions.formats = format
     }
 
-    cordova.plugins.barcodeScanner.scan(
-        function (result) {
-          success(result.text);
-        },
-        function (errorMsg) {
-          if (errorMsg !== 'Scan is already in progress') {
-            // Verification in order to avoid issue: https://github.com/phonegap/phonegap-plugin-barcodescanner/issues/660
-            error(errorMsg);
-          }
-        }, scanOptions
-    );
+    if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
+      cordova.plugins.barcodeScanner.scan(
+          function (result) {
+            success(result.text);
+          },
+          function (errorMsg) {
+            if (errorMsg !== 'Scan is already in progress') {
+              // Verification in order to avoid issue: https://github.com/phonegap/phonegap-plugin-barcodescanner/issues/660
+              error(errorMsg);
+            }
+          }, scanOptions
+      );
+    }else{
+      this.cronapi.internal.qrCodeScanner(success, error, scanOptions);
+    }
   };
 
 
