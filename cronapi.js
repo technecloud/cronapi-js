@@ -3176,12 +3176,12 @@ function cronapi() {
       $("#captureChooser").kendoDialog(
         {
           title: "",
-          content: "Obter imagem da...",
+          content: this.cronapi.i18n.translate("getImageFrom", []),
           buttonLayout:"normal",
           actions:
           [
             {
-              text:"Câmera",
+              text: this.cronapi.i18n.translate("camera", []),
               primary:!0,
               action: function(){
                 cronapi.internal.getPictureFromCamera(options);
@@ -3189,7 +3189,7 @@ function cronapi() {
               }
             },
             {
-              text:"Galeria",
+              text: this.cronapi.i18n.translate("gallery", []),
               action: function(){
                 cronapi.internal.getPictureFromFile(options);
                 return true;
