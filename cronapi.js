@@ -3020,6 +3020,30 @@ if (!window.fixedTimeZone) {
     };
   };
 
+  this.cronapi.internal.getMaxResolution = function getMaxResolution(width, height) {
+    var maxWidth = window.innerWidth;
+    var maxHeight = window.innerHeight;
+    var ratio = 0;
+
+    ratio = maxWidth / width;
+    height = height * ratio;
+    width = width * ratio;
+
+    if(width > maxWidth){
+      ratio = maxWidth / width;
+      height = height * ratio;
+      width = width * ratio;
+    }
+
+    if(height > maxHeight){
+      ratio = maxHeight / height;
+      width = width * ratio;
+      height = height * ratio;
+    }
+
+    return { width: width, height: height };
+  }
+
   this.cronapi.internal.startCamera = function(field, quality, allowEdit, targetWidth, targetHeight) {
     //verify if user is on Browser or not
     if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
@@ -3052,31 +3076,6 @@ if (!window.fixedTimeZone) {
                                       <video id="cronapiVideoCapture" style="height: $height$; width: $width$;" autoplay=""></video>\
                               </div>';
 
-
-      function getMaxResolution(width, height) {
-        var maxWidth = window.innerWidth;
-        var maxHeight = window.innerHeight;
-        var ratio = 0;
-
-        ratio = maxWidth / width;
-        height = height * ratio;
-        width = width * ratio;
-
-        if(width > maxWidth){
-          ratio = maxWidth / width;
-          height = height * ratio;
-          width = width * ratio;
-        }
-
-        if(height > maxHeight){
-          ratio = maxHeight / height;
-          width = width * ratio;
-          height = height * ratio;
-        }
-
-        return { width: width, height: height };
-      }
-
       var streaming = null;
       var mediaConfig =  { video: true };
       var errBack = function(e) {
@@ -3087,7 +3086,7 @@ if (!window.fixedTimeZone) {
         navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
           streaming = stream;
 
-          var res = getMaxResolution(stream.getTracks()[0].getSettings().width, stream.getTracks()[0].getSettings().height);
+          var res = cronapi.internal.getMaxResolution(stream.getTracks()[0].getSettings().width, stream.getTracks()[0].getSettings().height);
           var halfWidth = res.width;
           var halfHeight = res.height;
           try {
@@ -3128,6 +3127,213 @@ if (!window.fixedTimeZone) {
       }
     }
   };
+
+  this.cronapi.internal.getPicture = function(options) {
+
+    if(options.sourceType === 1){//Cãmera
+      cronapi.internal.getPictureFromCamera(options);
+    }else if (options.sourceType === 0 || options.sourceType === 2){// Galeria
+      cronapi.internal.getPictureFromFile(options);
+    }else{
+      var captureChooser = '<div id="captureChooser"></div>';
+      $(captureChooser).prependTo("body");
+      $("#captureChooser").kendoDialog(
+        {
+          title: "",
+          content: this.cronapi.i18n.translate("getImageFrom", []),
+          buttonLayout:"normal",
+          actions:
+          [
+            {
+              text: this.cronapi.i18n.translate("camera", []),
+              primary:!0,
+              action: function(){
+                cronapi.internal.getPictureFromCamera(options);
+                return true;
+              }
+            },
+            {
+              text: this.cronapi.i18n.translate("gallery", []),
+              action: function(){
+                cronapi.internal.getPictureFromFile(options);
+                return true;
+              }
+            }
+          ]
+        });
+    }
+
+  };
+
+  this.cronapi.internal.getPictureFromCamera = function(options){
+
+    var streaming = null;
+    var mediaConfig =  { video: true };
+
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+        streaming = stream;
+
+        var res = cronapi.internal.getMaxResolution(stream.getTracks()[0].getSettings().width, stream.getTracks()[0].getSettings().height);
+        var halfWidth = res.width;
+        var halfHeight = res.height;
+        try {
+          halfWidth = parseInt(halfWidth/2);
+          halfHeight = parseInt(halfHeight/2);
+        }
+        catch (e) { }
+
+        var cameraContainer =   '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$">\
+                                    <button class="btn btn-success button button-balanced" id="cronapiFileBrowserOk" style="position: absolute; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
+                                        <span class="sr-only">{{"Upload.camera" | translate}}</span>\
+                                    </button>\
+                                    <button class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiFileBrowserCancel" style="position: absolute; margin-left: 42px; z-index: 999999999;">\
+                                        <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
+                                        <span class="sr-only">{{"Cancel" | translate}}</span>\
+                                    </button>\
+                                    <video id="cronapiFileBrowser" style="height: $height$; width: $width$;" autoplay=""></video>\
+                                </div>\
+                                </div>';
+
+        cameraContainer =
+            cameraContainer
+            .split('$height$').join(res.height+'px')
+            .split('$width$').join(res.width+'px')
+            .split('$marginleft$').join(halfWidth+'px')
+            .split('$margintop$').join(halfHeight+'px')
+        ;
+        var cronapiFileBrowser = $(cameraContainer);
+        cronapiFileBrowser.prependTo("body");
+        var videoDOM = document.getElementById('cronapiFileBrowser');
+
+        cronapiFileBrowser.find('#cronapiFileBrowserCancel').on('click',function() {
+          if (streaming!= null && streaming.getTracks().length > 0)
+            streaming.getTracks()[0].stop();
+          if(options.errorCallback){
+            options.errorCallback("Operação cancelada");
+          }
+          $(cronapiFileBrowser).remove();
+        }.bind(this));
+
+        cronapiFileBrowser.find('#cronapiFileBrowserOk').on('click',function() {
+          cronapi.internal.getPictureSuccess(options, res.width, res.height);
+          if (streaming!= null && streaming.getTracks().length > 0)
+            streaming.getTracks()[0].stop();
+          $(cronapiFileBrowser).remove();
+        }.bind(this));
+
+        videoDOM.srcObject = stream;
+        videoDOM.onloadedmetadata = function(e) {
+          videoDOM.play();
+        };
+      }.bind(this))
+      .catch(function(error) {
+        if(options.errorCallback){
+          options.errorCallback(error.toString());
+        }
+      }.bind(this));
+    }else{
+      if(options.errorCallback){
+        options.errorCallback("Recurso não suportado ou não autorizado");
+      }
+    }
+  }
+
+  this.cronapi.internal.getPictureFromFile = function(options){
+
+    var res = cronapi.internal.getMaxResolution(window.innerWidth, window.innerHeight);
+    var halfWidth = res.width;
+    var halfHeight = res.height;
+    try {
+      halfWidth = parseInt(halfWidth/2);
+      halfHeight = parseInt(halfHeight/2);
+    }catch (e) {console.log(e)}
+
+    var cameraContainer =
+      '<div class="camera-container" style="margin-left:-$marginleft$;margin-top:-$margintop$; height: $height$; width: $width$; display: flex; align-items: center; flex-direction: column; justify-content: center; background: #848484a3;">\
+          <div style="overflow: hidden;max-width: 80%;overflow-y: scroll;"><img style="width: 100%; border-radius: 5px;" id="imgPreview" src="data:image/png;base64,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"/></div>\
+          <input type="file" id="imageBrowser" accept="image/*" style="width: 0px; height: 0px; overflow: hidden;">\
+          <div>\
+            <button class="btn btn-success button button-balanced" id="cronapiFileBrowserOK" style="position: absolute; z-index: 999999999; bottom: 5px; left: calc(50% - 52px);">\
+              <span class="glyphicon glyphicon-ok icon ion-checkmark-round"></span>\
+              <span class="sr-only">{{"Upload.camera" | translate}}</span>\
+            </button>\
+            <button class="btn btn-danger button button-assertive button-cancel-capture" id="cronapiFileBrowserCancel" style="position: absolute; z-index: 999999999; bottom: 5px; right: calc(50% - 52px); margin-right: -5px;">\
+              <span class="glyphicon glyphicon-remove icon ion-android-close"></span>\
+              <span class="sr-only">{{"Cancel" | translate}}</span>\
+            </button>\
+          <\div>\
+      </div>';
+
+    cameraContainer =
+        cameraContainer
+        .split('$height$').join(res.height+'px')
+        .split('$width$').join(res.width+'px')
+        .split('$marginleft$').join(halfWidth+'px')
+        .split('$margintop$').join(halfHeight+'px');
+
+    var cronapiFileBrowser = $(cameraContainer);
+    cronapiFileBrowser.prependTo("body");
+
+    cronapiFileBrowser.find('#cronapiFileBrowserCancel').on('click',function() {
+      if(options.errorCallback){
+        options.errorCallback("Operação cancelada");
+      }
+      $(cronapiFileBrowser).remove();
+    }.bind(this));
+
+    cronapiFileBrowser.find('#cronapiFileBrowserOK').on('click',function() {
+      cronapi.internal.getPictureSuccess(options, res.width, res.height, true);
+      $(cronapiFileBrowser).remove();
+    }.bind(this));
+
+    cronapiFileBrowser.find('#imgPreview').on('touchend click',function(e) {
+      if(e.type == 'touchend'){
+        $(this).off('click');
+      }
+      $('#imageBrowser').trigger('click');
+    });
+
+    cronapiFileBrowser.find('#imageBrowser').on('change', function () {
+      $("img#imgPreview").attr('src', '');
+      if (typeof (FileReader) != 'undefined') {
+        var frImage = new FileReader();
+        frImage.onload = function (e) {
+            $("img#imgPreview").attr('src', e.target.result);
+        }
+        frImage.readAsDataURL($(this)[0].files[0]);
+      }
+    });
+  }
+
+  this.cronapi.internal.getPictureSuccess = function(options, width, height, fromGallery){
+
+    if(options.successCallback){
+      if(fromGallery){
+        var file = document.getElementById('imageBrowser').files[0];
+        if(file){
+          var reader  = new FileReader();
+          reader.onload = function(e){
+            var binaryData = e.target.result;
+            options.successCallback(binaryData);
+          }
+          reader.readAsDataURL(file);
+        }else{
+          options.successCallback(null);
+        }
+      }else{
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext('2d');
+        var videoDOM = document.getElementById('cronapiFileBrowser');
+        context.drawImage(videoDOM, 0, 0, width, height);
+        let base64 = 'data:image/jpeg;base64, ' + canvas.toDataURL().substr(22);
+        options.successCallback(base64);
+      }
+    }
+  }
   
   this.cronapi.internal.downloadFileEntityMobile = function(datasource, field, indexData, fileInfo) {
     
@@ -4002,7 +4208,6 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
-   * @platform M
    * @name {{getPicture}}
    * @nameTags geolocation|getPicture
    * @description {{getPictureDescription}}
@@ -4012,7 +4217,17 @@ if (!window.fixedTimeZone) {
   this.cronapi.cordova.camera.getPicture = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success, /** @type {ObjectType.STATEMENTSENDER} @description {{error}} */  error, /** @type {ObjectType.LONG} @description {{destinationType}} @blockType util_dropdown @keys 0|1|2 @values DATA_URL|FILE_URI|NATIVE_URI  */  destinationType, /** @type {ObjectType.LONG} @description {{pictureSourceType}} @blockType util_dropdown @keys 0|1|2 @values PHOTOLIBRARY|CAMERA|SAVEDPHOTOALBUM  */ pictureSourceType, /** @type {ObjectType.LONG} @description {{mediaType}} @blockType util_dropdown @keys 0|1|2 @values PICTURE|VIDEO|ALLMEDIA  */ mediaType, /** @type {ObjectType.BOOLEAN} @description {{allowEdit}} @blockType util_dropdown @keys false|true @values {{false}}|{{true}}  */ allowEdit) {
     if(mediaType === undefined || mediaType === null) mediaType = 0 ;
     allowEdit = (allowEdit === true || allowEdit === 'true');
-    navigator.camera.getPicture(success, error, { destinationType: Number(destinationType) , sourceType : Number(pictureSourceType) , mediaType: Number(mediaType) , allowEdit: allowEdit});
+    let options = { destinationType: Number(destinationType) , sourceType : Number(pictureSourceType) , mediaType: Number(mediaType) , allowEdit: allowEdit};
+    if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
+      navigator.camera.getPicture(success, error, options);
+    }else{
+      options.allowEdit = allowEdit;
+      options.successCallback = success;
+      options.errorCallback = error;
+      options.targetWidth = 640;
+      options.targetHeight = 480;
+      this.cronapi.internal.getPicture(options);
+    }
   };
 
   /**
