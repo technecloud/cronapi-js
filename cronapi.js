@@ -437,6 +437,22 @@ function cronapi() {
 
   /**
    * @type function
+   * @name {{convertStringToDate}}
+   * @nameTags stringToDate
+   * @description {{functionToConvertStringToDate}}
+   * @param {ObjectType.STRING} value {{content}}
+   * @param {ObjectType.STRING} format {{format}}
+   * @returns {ObjectType.DATETIME}
+   */
+  this.cronapi.conversion.stringToDateWithFormat = function(value, format) {
+    let result = moment(value, format);
+    if (result.isValid())
+      result.toDate();
+    return null;
+  };
+
+  /**
+   * @type function
    * @name {{convertIntToHex}}
    * @nameTags intToHex
    * @description {{functionToConvertIntToHex}}
