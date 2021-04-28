@@ -5161,8 +5161,9 @@ if (!window.fixedTimeZone) {
    * @description {{ssoLoginDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.social.ssoLogin = function() {
-      if(window.cordova && cordova.InAppBrowser) {
+  this.cronapi.social.ssoLogin = async function () {
+    let future = new Promise((resolve, reject) => {
+      if (window.cordova && cordova.InAppBrowser) {
         const ref = cordova.InAppBrowser.open(window.hostApp + 'login', '_blank', 'location=no,footer=yes,zoom=no,enableViewportScale=yes,hidenavigationbuttons=yes');
         const handlerChange = (event) => {
           const url = new URL(event.url);
@@ -5183,10 +5184,13 @@ if (!window.fixedTimeZone) {
 
             try {
               this.blockly.js.blockly.auth.Home.change();
-            } catch(error) {
+            } catch (error) {
               this.cronapi.screen.changeView("#/app/logged/home", []);
+            } finally {
+              resolve();
             }
-
+          } else {
+            reject();
           }
         };
 
@@ -5194,7 +5198,40 @@ if (!window.fixedTimeZone) {
 
       } else {
         window.ssoWindow = window.open(this.cronapi.internal.getAddressWithHostApp("login"));
+
+        window.addEventListener('message', function (e) {
+          if (e.data && e.data.type === 'sso_user') {
+
+            this.cronapi.util.setLocalStorage('_u', JSON.stringify(e.data.user));
+            this.cronapi.util.setSessionStorage('ssoAccessToken', JSON.stringify(e.data.ssoAccessToken));
+            this.$root.session = e.data.user;
+
+            // close sso window
+            if (window.ssoWindow) {
+              window.ssoWindow.close();
+            }
+            if (window.ionic) {
+              //Is Mobile (PWA or Native)
+              try {
+                this.blockly.js.blockly.auth.Home.change();
+                resolve();
+              } catch (error) {
+                resolve();
+                // If the page is reloaded the blockly sequence is interrupted
+                window.location.reload();
+              }
+            } else {
+              // Is Web
+              resolve();
+              // If the page is reloaded the blockly sequence is interrupted
+              window.location.reload();
+            }
+          }
+        }, false);
       }
+    });
+
+    return future;
   };
 
   /**
