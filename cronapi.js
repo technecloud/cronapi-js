@@ -411,7 +411,7 @@ if (!window.fixedTimeZone) {
   this.cronapi.conversion.stringToDateWithFormat = function(value, format) {
     let result = moment(value, format);
     if (result.isValid())
-      result.toDate();
+      return result.toDate();
     return null;
   };
 
