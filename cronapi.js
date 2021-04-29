@@ -5198,6 +5198,8 @@ function cronapi() {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.social.ssoLogin = async function () {
+    let scope = this.cronapi.$scope;
+
     let future = new Promise((resolve, reject) => {
       if (window.cordova && cordova.InAppBrowser) {
         const ref = cordova.InAppBrowser.open(window.hostApp + 'login', '_blank', 'location=no,footer=yes,zoom=no,enableViewportScale=yes,hidenavigationbuttons=yes');
@@ -5212,7 +5214,7 @@ function cronapi() {
             ref.close();
 
             // If the page is reloaded the blockly sequence is interrupted
-            this.login("#OAUTH#", "#OAUTH#", urlParams.get('_ctk'));
+            scope.login("#OAUTH#", "#OAUTH#", urlParams.get('_ctk'));
             resolve();
 
           } else {
@@ -5234,7 +5236,7 @@ function cronapi() {
             }
 
             // If the page is reloaded the blockly sequence is interrupted
-            this.login("#OAUTH#", "#OAUTH#", e.data._ctk);
+            scope.login("#OAUTH#", "#OAUTH#", e.data._ctk);
             resolve();
 
           }
