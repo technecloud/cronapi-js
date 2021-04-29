@@ -5161,32 +5161,26 @@ if (!window.fixedTimeZone) {
    * @description {{ssoLoginDescription}}
    * @returns {ObjectType.VOID}
    */
-  this.cronapi.social.ssoLogin = function() {
-      if(window.cordova && cordova.InAppBrowser) {
+  this.cronapi.social.ssoLogin = async function () {
+    let future = new Promise((resolve, reject) => {
+      if (window.cordova && cordova.InAppBrowser) {
         const ref = cordova.InAppBrowser.open(window.hostApp + 'login', '_blank', 'location=no,footer=yes,zoom=no,enableViewportScale=yes,hidenavigationbuttons=yes');
         const handlerChange = (event) => {
           const url = new URL(event.url);
           const urlParams = new URLSearchParams(url.search);
 
-          if (urlParams.has('sso_user')) {
-
-            ref.executeScript({code: 'document.cookie'}, (result) => {
-              document.cookie = result;
-            });
+          if (urlParams.has('_ctk')) {
 
             ref.removeEventListener('loadstart', handlerChange);
-
+            // close sso window
             ref.close();
 
-            this.cronapi.util.setLocalStorage('_u', urlParams.get('sso_user'));
-            this.$root.session = JSON.parse(localStorage._u);
+            // If the page is reloaded the blockly sequence is interrupted
+            this.login("#OAUTH#", "#OAUTH#", urlParams.get('_ctk'));
+            resolve();
 
-            try {
-              this.blockly.js.blockly.auth.Home.change();
-            } catch(error) {
-              this.cronapi.screen.changeView("#/app/logged/home", []);
-            }
-
+          } else {
+            reject();
           }
         };
 
@@ -5194,7 +5188,25 @@ if (!window.fixedTimeZone) {
 
       } else {
         window.ssoWindow = window.open(this.cronapi.internal.getAddressWithHostApp("login"));
+
+        window.addEventListener('message', function (e) {
+          if (e.data && e.data.type === 'sso_user') {
+
+            // close sso window
+            if (window.ssoWindow) {
+              window.ssoWindow.close();
+            }
+
+            // If the page is reloaded the blockly sequence is interrupted
+            this.login("#OAUTH#", "#OAUTH#", e.data._ctk);
+            resolve();
+
+          }
+        }, false);
       }
+    });
+
+    return future;
   };
 
   /**
