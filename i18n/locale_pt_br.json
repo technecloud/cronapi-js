@@ -485,10 +485,30 @@
   "scheduleExecutionParam1": "Tempo inicial: Tempo inicial necessário até que a função execute pela primeira o(s) comando(s) definido(s)",
   "scheduleExecutionParam2": "Tempo para Atualização: Tempo de espera entre as execuções do(s) comandos(s)",
   "scheduleExecutionParam3": "Unidade de Tempo: Unidade de medida do tempo passado como parâmetro",
-  "screenNotifyDescription": "Função que exibe notificação",
+  "screenNotifyDescription": "Função que exibe notificação",  
   "screenNotifyName": "Exibe notificação",
   "screenNotifyParam0": "Tipo da notificação: pode ser success, error, warning, info ou primary",
   "screenNotifyParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
+  
+  
+  
+  "screenNotifySimpleDescription": "Função que exibe notificação simples",  
+  "screenNotifySimpleName": "Exibe notificação simples",
+  "screenNotifySimpleParam0": "Tipo da notificação: pode ser success, error, warning, info ou primary",
+  "screenNotifySimpleParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
+  "warning": "Aviso",
+  "info": "Informação",
+  "status": "Estado",
+  "animation": "Animação",
+  "top": "Topo",
+  "bottom": "embaixo",
+  "left": "Esquerda",
+  "center": "Central",
+  "right": "Direita",
+
+
+  
+
   "searchIds": "Identificador",
   "searchIdsDescription": "Identificador do campo da tela",
   "second": "Segundo",

@@ -1,3 +1,4 @@
+const { info } = require("node:console");
 
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
@@ -1285,6 +1286,7 @@ function cronapi() {
   };
 
   /**
+   * @deprecated true
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
@@ -1301,6 +1303,52 @@ function cronapi() {
 
     this.cronapi.$scope.Notification({'message':message.toString() },type);
   };
+
+
+  
+  /**
+   * @type function
+   * @name {{screenNotifySimpleName}}
+   * @description {{screenNotifySimpleDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação | jaque
+   * @param {ObjectType.STRING} status {{screenNotifyParam0}}
+   * @param {ObjectType.STRING} message {{screenNotifyParam1}}
+   * @param {ObjectType.STRING} animation {{screenNotifyParam1}}  
+   * @param {ObjectType.STRING} verticalPosition {{screenNotifyParam1}}  
+   * @param {ObjectType.STRING} horizontalPosition {{screenNotifyParam1}}  
+   */
+   this.cronapi.screen.notifyKendo = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys slideLeft|slideRight @values slide_left|slide_right  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition,
+     
+     ) {
+  
+    $('#notification').remove();
+    $('body').append($("<span  id='notification'></span>"));
+
+    $("#notification").kendoNotification({
+
+      type: "error",
+      position: {
+          pinned: true,
+          top: 30,
+          right: 30,
+          left: 0,
+          bottom: 0
+      },
+      animation: false
+    });
+    
+    $("#notification").getKendoNotification().show("Kendo Notification");
+
+   
+
+    // status - {{error}}|{{success}}|{{warning}}|{{info}}
+    // animação - expand|fade|flip|pageturn|slideInLeft|tileLeft|transfer|zoomOut
+    // posição vertical - {{top}}|{{bottom}}
+    // posição horizontal - {{left}}|{{center}}|{{right}}
+    // content - message
+    
+};
+
 
   /**
    * @type function

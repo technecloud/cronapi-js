@@ -488,6 +488,22 @@
   "screenNotifyName": "Show notification",
   "screenNotifyParam0": "Notification type: Can receive values success, error, warning, info or primary",
   "screenNotifyParam1": "Message",
+
+  "screenNotifySimpleDescription": "Função que exibe notificação simples",  
+  "screenNotifySimpleName": "Exibe notificação simples",
+  "screenNotifySimpleParam0": "Tipo da notificação: pode ser success, error, warning, info",
+  "screenNotifySimpleParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
+  "warning": "Warning",
+  "info": "Info",
+  "status": "Status",
+  "animation": "Animation",
+  "top": "Top",
+  "bottom": "Bottom",
+  "left": "Left",
+  "center": "Center",
+  "right": "Right",
+
+
   "searchIds": "Identifier",
   "searchIdsDescription": "Identifier field from screen",
   "second": "Second",
