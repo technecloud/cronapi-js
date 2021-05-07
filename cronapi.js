@@ -1,5 +1,3 @@
-const { info } = require("node:console");
-
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
 }
@@ -1331,16 +1329,60 @@ function cronapi() {
       }
     }   
 
-    var dataNotification = {
-      stacking: "down",
+    var dataNotification = {      
       position: {
         pinned: true
-      }   
+      },
+      animation:{
+        open: {
+          effects: null
+        },
+        close: {
+          effects: null
+        }
+      },
+      stacking: "left"
     };
+
+    switch(verticalPosition){
+      case "bottom":
+        dataNotification.position.bottom = 20;
+        break;
+
+      default:
+        dataNotification.position.top = 60;
+
+    }
+
+    switch(horizontalPosition){
+      case "left":
+        dataNotification.position.right = 20;
+        break;
+
+      case "center":
+        dataNotification.show = onShow;
+        break;
+
+      default:
+        dataNotification.position.left = 20;
+                
+    }
 
     switch(animation){
       case "slide":
-        dataNotification.animation.open.effects = "slideIn";
+        if (dataNotification.show && dataNotification.position.bottom != null){
+          dataNotification.animation.open.effects = "slideIn:up";       
+
+        }else if (dataNotification.show && dataNotification.position.top != null){
+          dataNotification.animation.open.effects = "slideIn:down"; 
+
+        } else if (dataNotification.position.left != null){
+          dataNotification.animation.open.effects = "slideIn:right";     
+
+        }else if(dataNotification.position.left == null){
+          dataNotification.animation.open.effects = "slideIn:left";
+        }
+
         dataNotification.animation.close.effects = "slideOut";
         break;
 
@@ -1354,37 +1396,9 @@ function cronapi() {
         dataNotification.animation.close.effects = "fadeOut";
     }
 
-    switch(verticalPosition){
-      case "bottom":
-        dataNotification.position.top = null;
-        dataNotification.position.bottom = 20;
-        break;
-
-      default:
-        dataNotification.position.top = 60;
-        dataNotification.position.bottom = null;
-
-    }
-
-    switch(horizontalPosition){
-      case "left":
-        dataNotification.position.left = null;
-        dataNotification.position.right = 20;
-        break;
-
-      case "center":
-        dataNotification.show = onShow;
-        break;
-
-      default:
-        dataNotification.position.left = 20;
-        dataNotification.position.right = null;
-                
-    }
-
     $('body').append($("<span  id='notification'></span>"));
     $("#notification").kendoNotification(dataNotification);    
-    $("#notification").getKendoNotification().show('message', 'error');   
+    $("#notification").getKendoNotification().show(message, status);   
     
   };
 

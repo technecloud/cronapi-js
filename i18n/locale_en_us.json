@@ -507,6 +507,8 @@
   "fade": "Fade",
   "slide": "Slide",
   "zoom": "Zoom",
+  "horizontalPosition": "Horizontal Position",
+  "verticalPosition": "Vertical Position",
   "searchIds": "Identifier",
   "searchIdsDescription": "Identifier field from screen",
   "second": "Second",

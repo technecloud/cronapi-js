@@ -508,6 +508,8 @@
   "fade": "Desaparecer",
   "slide": "Deslizar",
   "zoom": "Zoom",
+  "horizontalPosition": "Posição horizontal",
+  "verticalPosition": "Posição vertical",
   "searchIds": "Identificador",
   "searchIdsDescription": "Identificador do campo da tela",
   "second": "Segundo",

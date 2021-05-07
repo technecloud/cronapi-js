@@ -136,11 +136,7 @@ describe('Test suit for category Screen from Cronapi.js', function() {
     });
 
     it('notifySimple', () => {
-        cronapi['$scope'] = {};
-        cronapi.$scope['Notification'] = function (json, type) {
-            this.json = json;
-            this.type = type;
-        }
+        cronapi.screen.notifySimple.bind(window)();
     });
 
     it('datasourceFromScreen', () => {
