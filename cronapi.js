@@ -1307,7 +1307,7 @@ function cronapi() {
    * @type function
    * @name {{screenNotifySimpleName}}
    * @description {{screenNotifySimpleDescription}}
-   * @nameTags show | exibir | exibe | notification | notificação | jaque
+   * @nameTags show | exibir | exibe | notification | notificação
    * @param {ObjectType.STRING} status {{screenNotifySimpleParam0}}
    * @param {ObjectType.STRING} message {{screenNotifySimpleParam1}}
    * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}  
