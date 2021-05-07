@@ -489,13 +489,13 @@
   "screenNotifyName": "Exibe notificação",
   "screenNotifyParam0": "Tipo da notificação: pode ser success, error, warning, info ou primary",
   "screenNotifyParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
-  
-  
-  
   "screenNotifySimpleDescription": "Função que exibe notificação simples",  
   "screenNotifySimpleName": "Exibe notificação simples",
-  "screenNotifySimpleParam0": "Tipo da notificação: pode ser success, error, warning, info ou primary",
+  "screenNotifySimpleParam0": "Tipo da notificação: pode ser success, error, warning, info",
   "screenNotifySimpleParam1": "Mensagem: Mensagem ou conteúdo html a ser exibido",
+  "screenNotifySimpleParam2": "Animação: pode ser desaparecer, deslizar, zoom",
+  "screenNotifySimpleParam3": "Posição na vertical: pode ser topo ou embaixo",
+  "screenNotifySimpleParam4": "Posição na horizontal: pode ser esquerda, centro, direita",
   "warning": "Aviso",
   "info": "Informação",
   "status": "Estado",
@@ -505,10 +505,9 @@
   "left": "Esquerda",
   "center": "Central",
   "right": "Direita",
-
-
-  
-
+  "fade": "Desaparecer",
+  "slide": "Deslizar",
+  "zoom": "Zoom",
   "searchIds": "Identificador",
   "searchIdsDescription": "Identificador do campo da tela",
   "second": "Segundo",

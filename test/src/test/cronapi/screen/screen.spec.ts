@@ -135,6 +135,14 @@ describe('Test suit for category Screen from Cronapi.js', function() {
         cronapi.$scope.type.should.equal('Successful');
     });
 
+    it('notifySimple', () => {
+        cronapi['$scope'] = {};
+        cronapi.$scope['Notification'] = function (json, type) {
+            this.json = json;
+            this.type = type;
+        }
+    });
+
     it('datasourceFromScreen', () => {
         cronapi.screen.startInsertingMode.bind(window)(dataSource);
         cronapi.screen.datasourceFromScreen(dataSource).should.equal(dataSource);
