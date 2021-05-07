@@ -1316,6 +1316,8 @@ function cronapi() {
    */
    this.cronapi.screen.notifySimple = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition) {
 
+    $('body').append($("<span  id='notification'></span>"));
+
     function onShow(e) {
       if (e.sender.getNotifications().length == 1) {
           var element = e.element.parent(),
@@ -1329,7 +1331,8 @@ function cronapi() {
       }
     }   
 
-    var dataNotification = {      
+    var dataNotification = {  
+      stacking: "default",
       position: {
         pinned: true
       },
@@ -1340,8 +1343,7 @@ function cronapi() {
         close: {
           effects: null
         }
-      },
-      stacking: "left"
+      }
     };
 
     switch(verticalPosition){
@@ -1395,10 +1397,9 @@ function cronapi() {
         dataNotification.animation.open.effects = "fadeIn";
         dataNotification.animation.close.effects = "fadeOut";
     }
-
-    $('body').append($("<span  id='notification'></span>"));
+    
     $("#notification").kendoNotification(dataNotification);    
-    $("#notification").getKendoNotification().show(message, status);   
+    $("#notification").getKendoNotification().show('message', 'error');   
     
   };
 
