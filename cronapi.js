@@ -1316,91 +1316,9 @@ function cronapi() {
    */
    this.cronapi.screen.notifySimple = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition) {
 
-    $('body').append($("<span  id='notification'></span>"));
+      let notificationInstance = new NotificationHandler();
+      notificationInstance.notify(message, status, options);
 
-    function onShow(e) {
-      if (e.sender.getNotifications().length == 1) {
-          var element = e.element.parent(),
-              eWidth = element.width(),
-              wWidth = $(window).width()            
-          var newLeft;
-  
-          newLeft = Math.floor(wWidth / 2 - eWidth / 2);
-  
-          e.element.parent().css({ left: newLeft });
-      }
-    }   
-
-    var dataNotification = {  
-      stacking: "default",
-      position: {
-        pinned: true
-      },
-      animation:{
-        open: {
-          effects: null
-        },
-        close: {
-          effects: null
-        }
-      }
-    };
-
-    switch(verticalPosition){
-      case "bottom":
-        dataNotification.position.bottom = 20;
-        break;
-
-      default:
-        dataNotification.position.top = 60;
-
-    }
-
-    switch(horizontalPosition){
-      case "left":
-        dataNotification.position.right = 20;
-        break;
-
-      case "center":
-        dataNotification.show = onShow;
-        break;
-
-      default:
-        dataNotification.position.left = 20;
-                
-    }
-
-    switch(animation){
-      case "slide":
-        if (dataNotification.show && dataNotification.position.bottom != null){
-          dataNotification.animation.open.effects = "slideIn:up";       
-
-        }else if (dataNotification.show && dataNotification.position.top != null){
-          dataNotification.animation.open.effects = "slideIn:down"; 
-
-        } else if (dataNotification.position.left != null){
-          dataNotification.animation.open.effects = "slideIn:right";     
-
-        }else if(dataNotification.position.left == null){
-          dataNotification.animation.open.effects = "slideIn:left";
-        }
-
-        dataNotification.animation.close.effects = "slideOut";
-        break;
-
-      case "zoom":
-        dataNotification.animation.open.effects = "zoomIn";
-        dataNotification.animation.close.effects = "zoomOut";
-        break;
-
-      default:
-        dataNotification.animation.open.effects = "fadeIn";
-        dataNotification.animation.close.effects = "fadeOut";
-    }
-    
-    $("#notification").kendoNotification(dataNotification);    
-    $("#notification").getKendoNotification().show('message', 'error');   
-    
   };
 
 
