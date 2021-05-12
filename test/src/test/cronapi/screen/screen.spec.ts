@@ -135,8 +135,8 @@ describe('Test suit for category Screen from Cronapi.js', function() {
         cronapi.$scope.type.should.equal('Successful');
     });
 
-    it('notifySimple', () => {
-        cronapi.screen.notifySimple.bind(window)();
+    it('customNotify', () => {
+        cronapi.screen.customNotify.bind(window)();
     });
 
     it('datasourceFromScreen', () => {

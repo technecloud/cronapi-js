@@ -1314,10 +1314,167 @@ function cronapi() {
    * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}  
    * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}  
    */
-   this.cronapi.screen.notifySimple = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition) {
+   this.cronapi.screen.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition) {
 
-      let notificationInstance = new NotificationHandler();
-      notificationInstance.notify(message, status, options);
+    class NotificationHandler {
+
+      notify = async function notify(message, status, ...options) {
+        if (options.length) {
+          this.customNotification(message, status, ...options);
+        } else {
+          this.defaultNotification(message, status);
+        }
+      }
+    
+      defaultNotification = async function defaultNotification(message, status) {
+        let clientConfig = await getClientConfig();
+        if (!this.isNotificationInitialized(clientConfig.id)) {
+          this.initializeNotification(clientConfig.id, clientConfig.options);
+        }
+        this.showNotification(clientConfig.id, message, status);
+    
+      }
+    
+      customNotification = async function customNotification(message, status, ...options) {
+        console.log('options', options);
+    
+        function onShow(e) {
+          if (e.sender.getNotifications().length == 1) {
+            var element = e.element.parent(),
+              eWidth = element.width(),
+              wWidth = $(window).width()
+            var newLeft;
+    
+            newLeft = Math.floor(wWidth / 2 - eWidth / 2);
+    
+            e.element.parent().css({ left: newLeft });
+          }
+        }
+    
+        let dataNotification = {
+          stacking: "default",
+          position: {
+            pinned: true
+          },
+          animation: {
+            open: {
+              effects: null
+            },
+            close: {
+              effects: null
+            }
+          },
+          height: 52
+        };
+    
+        switch (verticalPosition) {
+          case "bottom":
+            dataNotification.position.bottom = 20;
+            break;
+    
+          default:
+            dataNotification.position.top = 60;
+    
+        }
+    
+        switch (horizontalPosition) {
+          case "left":
+            dataNotification.position.right = 20;
+            break;
+    
+          case "center":
+            dataNotification.show = onShow;
+            break;
+    
+          default:
+            dataNotification.position.left = 20;
+    
+        }
+    
+        switch (animation) {
+          case "slide":
+            if (dataNotification.show && dataNotification.position.bottom != null) {
+              dataNotification.animation.open.effects = "slideIn:up";
+    
+            } else if (dataNotification.show && dataNotification.position.top != null) {
+              dataNotification.animation.open.effects = "slideIn:down";
+    
+            } else if (dataNotification.position.left != null) {
+              dataNotification.animation.open.effects = "slideIn:right";
+    
+            } else if (dataNotification.position.left == null) {
+              dataNotification.animation.open.effects = "slideIn:left";
+            }
+    
+            dataNotification.animation.close.effects = "slideOut";
+            break;
+    
+          case "zoom":
+            dataNotification.animation.open.effects = "zoomIn";
+            dataNotification.animation.close.effects = "zoomOut";
+            break;
+    
+          default:
+            dataNotification.animation.open.effects = "fadeIn";
+            dataNotification.animation.close.effects = "fadeOut";
+        }
+    
+        console.log('dataNotification', dataNotification);
+    
+        let clientConfig = await getClientConfig();
+        if (!this.isNotificationInitialized(clientConfig.id)) {
+          this.initializeNotification(clientConfig.id, dataNotification);
+        }
+        this.showNotification(clientConfig.id, message, status);
+    
+      }
+    
+      initializeNotification = function initializeNotification(id, options) {
+        if (!this.hasHTMLElement(id)) {
+          this.createAndIncludeHTMLElement();
+        }
+        $(this.formatJqueryID(id)).kendoNotification(options);
+      }
+    
+      formatJqueryID = function formatJqueryID(id) {
+        return `#${id}`;
+      }
+    
+      getClientConfig = async function getClientConfig() {
+        return window.getClientConfig();
+      }
+    
+      isNotificationInitialized = function isNotificationInitialized(id) {
+        return $(this.formatJqueryID(id)).getKendoNotification();
+      }
+    
+      showNotification = function showNotification(id, message, status) {
+        $(this.formatJqueryID(id)).getKendoNotification().show(message, status);
+      }
+    
+      hasHTMLElement = function hasHTMLElement(id) {
+        return document.getElementById(id);
+      }
+    
+      createSpan = function createSpan(id) {
+        let span = document.createElement("SPAN");
+        span.id = id;
+        return span;
+      }
+    
+      createAndIncludeHTMLElement = function createAndIncludeHTMLElement(id) {
+        let span = this.createSpan(id);
+        this.appendSpanIntoBody(span);
+      }
+    
+      appendSpanIntoBody = function appendSpanIntoBody(span) {
+        document.querySelector('body').appendChild(span);
+      }
+    
+    }
+
+    let notificationInstance = new NotificationHandler();
+    notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition);
 
   };
 
