@@ -509,6 +509,8 @@
   "fade": "Desaparecer",
   "slide": "Deslizar",
   "zoom": "Zoom",
+  "yes": "Sim",
+  "no": "Não",
   "horizontalPosition": "Posição horizontal",
   "verticalPosition": "Posição vertical",
   "autoHide": "Ocultar notificação",

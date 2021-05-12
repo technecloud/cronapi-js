@@ -508,6 +508,8 @@
   "fade": "Fade",
   "slide": "Slide",
   "zoom": "Zoom",
+  "yes": "Yes",
+  "no": "No",
   "horizontalPosition": "Horizontal Position",
   "verticalPosition": "Vertical Position",
   "autoHide": "Hide notification",
