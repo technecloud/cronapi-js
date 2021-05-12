@@ -1354,6 +1354,7 @@ function cronapi() {
     
         let dataNotification = {
           stacking: "default",
+          autoHideAfter: 5000,
           position: {
             pinned: true
           },
@@ -1367,28 +1368,35 @@ function cronapi() {
           },
           height: 52
         };
+
+        let idCustomNotification = "customNotification" ;
     
         switch (verticalPosition) {
           case "bottom":
             dataNotification.position.bottom = 20;
+            idCustomNotification = idCustomNotification.concat('-bottom');
             break;
     
           default:
             dataNotification.position.top = 60;
+            idCustomNotification = idCustomNotification.concat('-top');
     
         }
     
         switch (horizontalPosition) {
           case "left":
             dataNotification.position.right = 20;
+            idCustomNotification = idCustomNotification.concat('-right');
             break;
     
           case "center":
             dataNotification.show = onShow;
+            idCustomNotification = idCustomNotification.concat('-center');
             break;
     
           default:
             dataNotification.position.left = 20;
+            idCustomNotification = idCustomNotification.concat('-left');
     
         }
     
@@ -1396,15 +1404,19 @@ function cronapi() {
           case "slide":
             if (dataNotification.show && dataNotification.position.bottom != null) {
               dataNotification.animation.open.effects = "slideIn:up";
+              idCustomNotification = idCustomNotification.concat('-slideIn-up');
     
             } else if (dataNotification.show && dataNotification.position.top != null) {
               dataNotification.animation.open.effects = "slideIn:down";
+              idCustomNotification = idCustomNotification.concat('-slideIn-dow');
     
             } else if (dataNotification.position.left != null) {
               dataNotification.animation.open.effects = "slideIn:right";
+              idCustomNotification = idCustomNotification.concat('-slideIn-right');
     
             } else if (dataNotification.position.left == null) {
               dataNotification.animation.open.effects = "slideIn:left";
+              idCustomNotification = idCustomNotification.concat('-slideIn-left');
             }
     
             dataNotification.animation.close.effects = "slideOut";
@@ -1413,32 +1425,34 @@ function cronapi() {
           case "zoom":
             dataNotification.animation.open.effects = "zoomIn";
             dataNotification.animation.close.effects = "zoomOut";
+            idCustomNotification = idCustomNotification.concat('-zoom');
             break;
     
           default:
             dataNotification.animation.open.effects = "fadeIn";
             dataNotification.animation.close.effects = "fadeOut";
+            idCustomNotification = idCustomNotification.concat('-fade');
         }
 
-        if(autoHide){
-          dataNotification.autoHideAfter = 3000;
+        if(autoHide == "false"){
+          console.log
+          dataNotification.autoHideAfter = 0;
+          idCustomNotification = idCustomNotification.concat('-autoHideAfter');
         }
-    
-        console.log('dataNotification', dataNotification);
-    
-        let clientConfig = await getClientConfig();
-        if (!this.isNotificationInitialized(clientConfig.id)) {
-          this.initializeNotification(clientConfig.id, dataNotification);
-        }
-        this.showNotification(clientConfig.id, message, status);
-    
+
+         this.initializeNotification(idCustomNotification, dataNotification);
+         this.showNotification(idCustomNotification, message, status);
+        
       }
     
       initializeNotification = function initializeNotification(id, options) {
+        console.log(this.hasHTMLElement(id));
+
         if (!this.hasHTMLElement(id)) {
-          this.createAndIncludeHTMLElement();
+          this.createAndIncludeHTMLElement(id);
+          $(this.formatJqueryID(id)).kendoNotification(options);
         }
-        $(this.formatJqueryID(id)).kendoNotification(options);
+        
       }
     
       formatJqueryID = function formatJqueryID(id) {
@@ -1479,8 +1493,8 @@ function cronapi() {
     }
 
     let notificationInstance = new NotificationHandler();
-    notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition);
-
+    notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
+    
   };
 
 
