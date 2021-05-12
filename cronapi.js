@@ -1313,8 +1313,9 @@ function cronapi() {
    * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}  
    * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}  
    * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}  
+   * @param {ObjectType.STRING} autoHide {{screenNotifySimpleParam5}}  
    */
-   this.cronapi.screen.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition) {
+   this.cronapi.screen.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}} */ autoHide) {
 
     class NotificationHandler {
 
@@ -1417,6 +1418,10 @@ function cronapi() {
           default:
             dataNotification.animation.open.effects = "fadeIn";
             dataNotification.animation.close.effects = "fadeOut";
+        }
+
+        if(autoHide){
+          dataNotification.autoHideAfter = 3000;
         }
     
         console.log('dataNotification', dataNotification);
