@@ -1454,11 +1454,11 @@ function cronapi() {
         }
       }
     
-      initializeNotification = function initializeNotification(id, options) {
+      initializeNotification = async function initializeNotification(id, options) {
         if (!this.hasHTMLElement(id)) {
-          this.createAndIncludeHTMLElement(id);
-          this.centerElementScreen(e);
-          $(this.formatJqueryID(id)).kendoNotification(options);
+          this.createAndIncludeHTMLElement(id);          
+          await $(this.formatJqueryID(id)).kendoNotification(options);
+          await this.centerElementScreen(e);
         }        
       }
     
