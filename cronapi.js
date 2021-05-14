@@ -1691,7 +1691,7 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    * @multilayer true
    */
-   this.cronapi.screen.confimDialog = function(title, msg, buttonCancelName, buttonSaveName) {
+   this.cronapi.screen.confimDialogAlert = function(title, msg, buttonCancelName, buttonSaveName) {
 
     // icone 
     // titulo 
