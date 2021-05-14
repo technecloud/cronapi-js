@@ -1682,9 +1682,9 @@ function cronapi() {
 
   /**
    * @type function
-   * @name {{confirmDialogName}}
+   * @name {{confirmDialogAlertName}}
    * @nameTags confirmDialog | Confirmar | alert | modal | jaque
-   * @description {{confirmDialogDescription}}
+   * @description {{confirmDialogAlertDescription}}
    * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
    * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
    * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
@@ -1693,7 +1693,24 @@ function cronapi() {
    */
    this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
 
-    $('#confirmDialogTemplateIcon').text(icon);  
+    switch (icon){
+      case "error":
+        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error"> <span class="cronapp-x-mark"> <span class="cronapp-x-mark-line-left"></span> <span class="cronapp-x-mark-line-right"></span> </span> </div>'); 
+        break
+
+      case "sucess":
+        break
+
+      case "warning":
+        break
+
+      case "info":
+        break
+
+    }
+
+    
+   
     $('#confirmDialogTemplateTitle').text(title); 
     $('#confirmDialogTemplateSubtitle').text(subtitle); 
     
@@ -1709,8 +1726,8 @@ function cronapi() {
 
   /**
    * @type function
-   * @name {{showConfirmDialog}}
-   * @nameTags Show| Exibir | ModalConfirmDialog
+   * @name {{showConfirmDialogAlert}}
+   * @nameTags Show| Exibir | ModalConfirmDialog 
    * @platform W
    * @description {{showModalDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}

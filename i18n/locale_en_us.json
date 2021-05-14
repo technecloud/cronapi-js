@@ -600,5 +600,11 @@
   "XMLHasRootElementDescription": "Function that verify if exists a XML root element on XML document",
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
-  "yearsToIncrement": "Years to increase"
+  "yearsToIncrement": "Years to increase",
+  "confirmDialogAlertName": "Confirmation modal",
+  "confirmDialogAlertDescription": "Function that displays confirmation mode, being able to customize the icon, title, subtitle and add function in the save and cancel buttons",
+  "showConfirmDialogAlert": "Show confirmation modal",
+  "confimDialogAlert.icon": "Icon",
+  "confimDialogAlert.title": "Title",
+  "confimDialogAlert.subtitle": "Subtitle"
 }

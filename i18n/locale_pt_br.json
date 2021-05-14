@@ -601,8 +601,10 @@
   "XMLHasRootElementName": "Existe elemento raiz?",
   "year": "Ano",
   "yearsToIncrement": "Anos a incrementar",
-  "showConfirmDialog": "Exibir alerta",
-  "confimDialogAlert.icon": "Estado",
+  "confirmDialogAlertName": "Modal de confirmação",
+  "confirmDialogAlertDescription": "Função que exibe modal de confirmação, podendo personalizar o ícone, título, subtítulo e adicionar função nos botões salvar e cancelar",
+  "showConfirmDialogAlert": "Exibir modal de confirmação",
+  "confimDialogAlert.icon": "Ícone",
   "confimDialogAlert.title": "Título",
   "confimDialogAlert.subtitle": "Subtítulo"
 }
