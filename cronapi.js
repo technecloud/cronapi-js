@@ -1691,33 +1691,37 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonCancel}} @blockType util_dropdown @keys true|false @values {{true}}|{{false}} */ hidebuttonCancel, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
 
     switch (icon){
-      case "error":
-        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"> <span class="cronapp-x-mark-line-left"></span> <span class="cronapp-x-mark-line-right"></span> </span> </div>'); 
-        break
-
-      case "sucess":
-        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-success"> <div class="cronapp-success-circular-line-left"></div> <span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span> <div class="cronapp-success-ring"></div> <div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div> </div>'); 
-        break
-
-      case "warning":
-        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-warning"> <div class="cronapp-icon-content">!</div> </div>'); 
-        break
-
-      case "info":
-        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-info"> <div class="cronapp-icon-content">i</div> </div>'); 
-        break
+        case "error":
+          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'); 
+          break;
+  
+        case "success":
+          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'); 
+          break;
+  
+        case "warning":
+          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'); 
+          break;
+  
+        case "info":
+          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'); 
+          break;
 
     }
    
     $('#confirmDialogTemplateTitle').text(title); 
     $('#confirmDialogTemplateSubtitle').text(subtitle); 
-    
-    $('#confirmDialogTemplateCancel').text(buttonCancelName);
-    $( "#confirmDialogTemplateCancel").unbind( "click" );
-    $('#confirmDialogTemplateCancel').click(onError);
+
+    if(hidebuttonCancel == "false"){
+      $('#confirmDialogTemplateCancel').text(buttonCancelName);
+      $( "#confirmDialogTemplateCancel").unbind( "click" );
+      $('#confirmDialogTemplateCancel').click(onError);
+    } else{
+      $('#confirmDialogTemplateCancel').css('display', 'none');
+    }
 
     $('#confirmDialogTemplateSave').text(buttonSaveName);
     $( "#confirmDialogTemplateSave").unbind( "click" );

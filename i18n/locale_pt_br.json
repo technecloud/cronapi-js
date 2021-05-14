@@ -606,5 +606,6 @@
   "showConfirmDialogAlert": "Exibir modal de confirmação",
   "confimDialogAlert.icon": "Ícone",
   "confimDialogAlert.title": "Título",
-  "confimDialogAlert.subtitle": "Subtítulo"
+  "confimDialogAlert.subtitle": "Subtítulo",
+  "hidebuttonCancel": "Esconder o botão cancelar"
 }
