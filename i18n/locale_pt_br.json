@@ -607,5 +607,5 @@
   "confimDialogAlert.icon": "Ícone",
   "confimDialogAlert.title": "Título",
   "confimDialogAlert.subtitle": "Subtítulo",
-  "buttonSaveName": "Esconder o botão confirmar"
+  "hidebuttonSave": "Esconder o botão confirmar"
 }
