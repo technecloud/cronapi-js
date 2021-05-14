@@ -1689,10 +1689,10 @@ function cronapi() {
    * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
    * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
-   * @param {ObjectType.STRING} hidebuttonCancel {{hidebuttonCancel}}
+   * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonCancel}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonCancel, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
 
     switch (icon){
         case "error":
@@ -1716,17 +1716,18 @@ function cronapi() {
     $('#confirmDialogTemplateTitle').text(title); 
     $('#confirmDialogTemplateSubtitle').text(subtitle); 
 
-    if(hidebuttonCancel == "no"){
-      $('#confirmDialogTemplateCancel').text(buttonCancelName);
-      $( "#confirmDialogTemplateCancel").unbind( "click" );
-      $('#confirmDialogTemplateCancel').click(onError);
+    if(hidebuttonSave == "no"){
+      $('#confirmDialogTemplateSave').text(buttonSaveName);
+      $( "#confirmDialogTemplateSave").unbind( "click" );
+      $('#confirmDialogTemplateSave').click(onSuccess);
     } else{
-      $('#confirmDialogTemplateCancel').css('display', 'none');
+      $('#confirmDialogTemplateSave').css('display', 'none');
     }
 
-    $('#confirmDialogTemplateSave').text(buttonSaveName);
-    $( "#confirmDialogTemplateSave").unbind( "click" );
-    $('#confirmDialogTemplateSave').click(onSuccess);
+    $('#confirmDialogTemplateCancel').text(buttonCancelName);
+    $( "#confirmDialogTemplateCancel").unbind( "click" );
+    $('#confirmDialogTemplateCancel').click(onError);
+    
     this.cronapi.screen.showConfirmDialog('confirmDialogTemplate');
   };
 
