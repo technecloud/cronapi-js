@@ -601,5 +601,8 @@
   "XMLHasRootElementName": "Existe elemento raiz?",
   "year": "Ano",
   "yearsToIncrement": "Anos a incrementar",
-  "showConfirmDialog": "Exibir alerta"
+  "showConfirmDialog": "Exibir alerta",
+  "confimDialogAlert.icon": "Estado",
+  "confimDialogAlert.title": "Título",
+  "confimDialogAlert.subtitle": "Subtítulo"
 }

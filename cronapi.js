@@ -1685,18 +1685,18 @@ function cronapi() {
    * @name {{confirmDialogName}}
    * @nameTags confirmDialog | Confirmar | alert | modal | jaque
    * @description {{confirmDialogDescription}}
-   * @param {ObjectType.STRING} title {{createDefaultModalParam1}}
-   * @param {ObjectType.STRING} msg {{createDefaultModalParam2}}
+   * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
+   * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
+   * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    */
-   this.cronapi.screen.confimDialogAlert = function(title, msg, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError,/** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam7}}*/ onClose ) {
-    $('#confirmDialogTemplateTitle').text(title);
-    $('#confirmDialogTemplateBody').text(msg);    
-    
-    $( "#confirmDialogTemplateClose").unbind( "click" );
-    $('#confirmDialogTemplateClose').click(onClose);
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
 
+    $('#confirmDialogTemplateIcon').text(icon);  
+    $('#confirmDialogTemplateTitle').text(title); 
+    $('#confirmDialogTemplateSubtitle').text(subtitle); 
+    
     $('#confirmDialogTemplateCancel').text(buttonCancelName);
     $( "#confirmDialogTemplateCancel").unbind( "click" );
     $('#confirmDialogTemplateCancel').click(onError);
@@ -1705,17 +1705,6 @@ function cronapi() {
     $( "#confirmDialogTemplateSave").unbind( "click" );
     $('#confirmDialogTemplateSave').click(onSuccess);
     this.cronapi.screen.showConfirmDialog('confirmDialogTemplate');
-
-    
-    // icone 
-    // titulo 
-    // subtitulo
-    // botão
-
-    // var value = confirm(msg);
-    // return value;
-    
-
   };
 
   /**
