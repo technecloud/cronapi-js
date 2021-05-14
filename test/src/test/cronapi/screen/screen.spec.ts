@@ -139,6 +139,10 @@ describe('Test suit for category Screen from Cronapi.js', function() {
         cronapi.screen.confimDialogAlert.bind(window)();
     });
 
+    it('showConfirmDialog', () =>{
+        cronapi.screen.showConfirmDialog.bind(window)();
+    });
+
     it('datasourceFromScreen', () => {
         cronapi.screen.startInsertingMode.bind(window)(dataSource);
         cronapi.screen.datasourceFromScreen(dataSource).should.equal(dataSource);

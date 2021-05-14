@@ -1689,12 +1689,10 @@ function cronapi() {
    * @param {ObjectType.STRING} msg {{createDefaultModalParam2}}
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
-   * @multilayer true
    */
    this.cronapi.screen.confimDialogAlert = function(title, msg, buttonCancelName, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError,/** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam7}}*/ onClose ) {
     $('#confirmDialogTemplateTitle').text(title);
-    $('#confirmDialogTemplateBody').text(msg);
-    
+    $('#confirmDialogTemplateBody').text(msg);    
     
     $( "#confirmDialogTemplateClose").unbind( "click" );
     $('#confirmDialogTemplateClose').click(onClose);
@@ -1730,69 +1728,69 @@ function cronapi() {
    * @multilayer true
    */
   this.cronapi.screen.showConfirmDialog = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-      let modalToShow = `#${id}`;
-      let focused = $(':focus');
-      let allHover = $(':hover');
+    let modalToShow = `#${id}`;
+    let focused = $(':focus');
+    let allHover = $(':hover');
 
-      try{
-          $(modalToShow).one('shown.bs.confirmDialog', function (e) {
+   try{
+        $(modalToShow).one('shown.bs.confirmDialog', function (e) {
 
-              if (focused.length) {
-                  $(this).data('lastFocused', focused);
-                  $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
-              }
-              if (allHover.length) {
-                  $(this).data('lastHovers', allHover);
-              }
-              let firstInputVisible = $(this).find('input:not(:hidden)')[0];
-              if (firstInputVisible)
-                  firstInputVisible.focus();
+            if (focused.length) {
+                $(this).data('lastFocused', focused);
+                $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
+            }
+            if (allHover.length) {
+                $(this).data('lastHovers', allHover);
+            }
+            let firstInputVisible = $(this).find('input:not(:hidden)')[0];
+            if (firstInputVisible)
+                firstInputVisible.focus();
 
-          }).one('hidden.bs.modal', function(e) {
+        }).one('hidden.bs.confirmDialog', function(e) {
 
-              let lastFocusedClass = undefined;
-              let lastFocused = $(modalToShow).data('lastFocused');
-              let lastFocusedIsVisible = false;
+            let lastFocusedClass = undefined;
+            let lastFocused = $(modalToShow).data('lastFocused');
+            let lastFocusedIsVisible = false;
 
-              if (lastFocused && lastFocused.length) {
-                  //Verifica se o item que foi clicado ainda existe no documento (A grade remove o botao e adiciona novamente, perde a referencia)
-                  lastFocusedClass = $($(this).data('lastFocusedClass'));
-                  if ($('html').has(lastFocused).length) {
-                      //Se existir, verifica se o mesmo está visivel
-                      lastFocusedIsVisible = lastFocused.is(':visible');
-                  }
-                  else {
-                      //Se nao existir, e foi readicionado verifica se está visivel pelas classes
-                      lastFocusedIsVisible = lastFocusedClass.is(':visible');
-                  }
-              }
+            if (lastFocused && lastFocused.length) {
+                //Verifica se o item que foi clicado ainda existe no documento (A grade remove o botao e adiciona novamente, perde a referencia)
+                lastFocusedClass = $($(this).data('lastFocusedClass'));
+                if ($('html').has(lastFocused).length) {
+                    //Se existir, verifica se o mesmo está visivel
+                    lastFocusedIsVisible = lastFocused.is(':visible');
+                }
+                else {
+                    //Se nao existir, e foi readicionado verifica se está visivel pelas classes
+                    lastFocusedIsVisible = lastFocusedClass.is(':visible');
+                }
+            }
 
-              let findLastLink = function(element) {
-                return $(element[element.length - 1]).closest('li:visible').find('a:first');
-              };
+            let findLastLink = function(element) {
+              return $(element[element.length - 1]).closest('li:visible').find('a:first');
+            };
 
-              let lastHovers = $(modalToShow).data('lastHovers');
+            let lastHovers = $(modalToShow).data('lastHovers');
 
-              if (lastFocusedIsVisible) {
-                  lastFocusedClass.focus();
-                  lastFocused.focus();
-              }
-              //Tenta achar o mais proximo do ultimo click (link clicado)
-              else if ($('html').has(lastFocused).length) {
-                let lastLink = findLastLink(lastFocused);
-                lastLink.focus();
-              }
-              else if (lastHovers && lastHovers.length) {
-                let lastLink = findLastLink(lastHovers);
-                lastLink.focus();
-              }
+            if (lastFocusedIsVisible) {
+                lastFocusedClass.focus();
+                lastFocused.focus();
+            }
+            //Tenta achar o mais proximo do ultimo click (link clicado)
+            else if ($('html').has(lastFocused).length) {
+              let lastLink = findLastLink(lastFocused);
+              lastLink.focus();
+            }
+            else if (lastHovers && lastHovers.length) {
+              let lastLink = findLastLink(lastHovers);
+              lastLink.focus();
+            }
 
 
-          }).modal({backdrop: 'static', keyboard: false});
-      }catch(e){
-          $(modalToShow).show();
-      }
-      $(modalToShow).css('overflow-y', 'auto');
+        }).modal({backdrop: 'static', keyboard: false});
+    }catch(e){
+        $(modalToShow).show();
+    }
+    $(modalToShow).css('overflow-y', 'auto');
   };
 
   /**
