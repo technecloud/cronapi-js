@@ -1691,6 +1691,7 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * @platform W
    * @multilayer true
    */
    this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
@@ -1738,6 +1739,7 @@ function cronapi() {
    * @nameTags Show| Exibir | ModalConfirmDialog 
    * @description {{showModalDesc}}
    * @param {ObjectType.STRING} component {{ComponentParam}}
+   * @platform W
    * @multilayer true
    */
   this.cronapi.screen.showConfirmDialog = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
