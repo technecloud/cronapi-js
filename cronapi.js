@@ -1666,6 +1666,7 @@ function cronapi() {
 
 
   /**
+   * @deprecated true
    * @type function
    * @name {{confirmDialogName}}
    * @nameTags confirmDialog|Confirmar
@@ -1674,6 +1675,28 @@ function cronapi() {
    * @param {ObjectType.STRING} msg {{confirmDialogParam0}}
    */
   this.cronapi.screen.confimDialog = function(msg) {
+
+    var value = confirm(msg);
+    return value;
+  };
+
+  /**
+   * @type function
+   * @name {{confirmDialogName}}
+   * @nameTags confirmDialog | Confirmar | alert | modal | jaque
+   * @description {{confirmDialogDescription}}
+   * @param {ObjectType.STRING} title {{createDefaultModalParam1}}
+   * @param {ObjectType.STRING} msg {{createDefaultModalParam2}}
+   * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
+   * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * @multilayer true
+   */
+   this.cronapi.screen.confimDialog = function(title, msg, buttonCancelName, buttonSaveName) {
+
+    // icone 
+    // titulo 
+    // subtitulo
+    // botão
 
     var value = confirm(msg);
     return value;
