@@ -1695,21 +1695,22 @@ function cronapi() {
 
     switch (icon){
       case "error":
-        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error"> <span class="cronapp-x-mark"> <span class="cronapp-x-mark-line-left"></span> <span class="cronapp-x-mark-line-right"></span> </span> </div>'); 
+        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"> <span class="cronapp-x-mark-line-left"></span> <span class="cronapp-x-mark-line-right"></span> </span> </div>'); 
         break
 
       case "sucess":
+        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-success"> <div class="cronapp-success-circular-line-left"></div> <span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span> <div class="cronapp-success-ring"></div> <div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div> </div>'); 
         break
 
       case "warning":
+        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-warning"> <div class="cronapp-icon-content">!</div> </div>'); 
         break
 
       case "info":
+        $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-info"> <div class="cronapp-icon-content">i</div> </div>'); 
         break
 
     }
-
-    
    
     $('#confirmDialogTemplateTitle').text(title); 
     $('#confirmDialogTemplateSubtitle').text(subtitle); 
