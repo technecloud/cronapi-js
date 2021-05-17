@@ -1317,23 +1317,10 @@ function cronapi() {
    */
    this.cronapi.screen.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
     
-
-    let notificationInstance = new this.cronapi.internal.notificationHandler(message, status, animation, verticalPosition, horizontalPosition, autoHide);
-
-    debugger;
-
+    let notificationInstance = this.cronapi.internal.notificationHandler(message, status, animation, verticalPosition, horizontalPosition, autoHide);
     notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
     
   };
-
-
-    /**
-   * @type internal
-   */
-     this.cronapi.util.openReport = function(name, params, config) {
-      this.cronapi.$scope.getReport(name, params, config);
-    };
-
 
   /**
    * @type function
@@ -4953,25 +4940,25 @@ function cronapi() {
 
   this.cronapi.internal.notificationHandler = function (message, status, animation, verticalPosition, horizontalPosition, autoHide) {
 
-      let idCustomNotification = "customNotification" ;
+    let idCustomNotification = "customNotification" ;
         
-     let dataNotification = {
-          stacking: "default",
-          autoHideAfter: 5000,
-          position: {
-            pinned: true
-          },
-          animation: {
-            open: {
-              effects: null
-            },
-            close: {
-              effects: null
-            }
-          }
-        };
+    let dataNotification = {
+      stacking: "default",
+      autoHideAfter: 5000,
+      position: {
+        pinned: true
+      },
+      animation: {
+        open: {
+          effects: null
+        },
+        close: {
+          effects: null
+        }
+      }
+    };
 
-    async function notify(message, status, ...options) {
+    let notify = async function notify(message, status, ...options) {
         if (options.length) {
           customNotification(message, status, ...options);
         } else {
