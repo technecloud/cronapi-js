@@ -1697,116 +1697,61 @@ function cronapi() {
    this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
 
     switch (icon){
-        case "error":
-          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'); 
-          break;
-  
-        case "success":
-          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'); 
-          break;
-  
-        case "warning":
-          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'); 
-          break;
-  
-        case "info":
-          $('#confirmDialogTemplateIcon').html('<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'); 
-          break;
+      case "error":
+        icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'; 
+        break;
+
+      case "success":
+        icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'; 
+        break;
+
+      case "warning":
+        icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'; 
+        break;
+
+      case "info":
+        icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'; 
+        break;
 
     }
-   
-    $('#confirmDialogTemplateTitle').text(title); 
-    $('#confirmDialogTemplateSubtitle').text(subtitle); 
 
-    if(hidebuttonSave == "no"){
-      $('#confirmDialogTemplateSave').text(buttonSaveName);
-      $( "#confirmDialogTemplateSave").unbind( "click" );
-      $('#confirmDialogTemplateSave').click(onSuccess);
-    } else{
-      $('#confirmDialogTemplateSave').css('display', 'none');
+    var dialog = $('#dialog');
+
+    let dataDialog = {
+      width: "450px",
+      title: false,
+      content: '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>',
+      closable: true,
+      modal: true,
+      animation: {
+        open: {
+          effects: "zoom:in"
+        },
+        close: {
+          effects: "zoom:out"
+        }
+      },
+      actions: [{
+        text: buttonCancelName
+      }]
+    };
+
+    if(!hidebuttonSave){
+      dataDialog.actions.push(
+        {
+          text: buttonSaveName,
+          primary: true
+        }
+      );    
     }
 
-    $('#confirmDialogTemplateCancel').text(buttonCancelName);
-    $( "#confirmDialogTemplateCancel").unbind( "click" );
-    $('#confirmDialogTemplateCancel').click(onError);
+    console.log('dataDialog', dataDialog);
+
+    dialog.kendoDialog(dataDialog);
+    dialog.data("kendoDialog").open(); 
     
-    this.cronapi.screen.showConfirmDialog('confirmDialogTemplate');
   };
 
-  /**
-   * @type function
-   * @name {{showConfirmDialogAlert}}
-   * @nameTags Show| Exibir | ModalConfirmDialog 
-   * @description {{showModalDesc}}
-   * @param {ObjectType.STRING} component {{ComponentParam}}
-   * @platform W
-   * @multilayer true
-   */
-  this.cronapi.screen.showConfirmDialog = function(/** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id) {
-    let modalToShow = `#${id}`;
-    let focused = $(':focus');
-    let allHover = $(':hover');
-
-   try{
-        $(modalToShow).one('shown.bs.confirmDialog', function (e) {
-
-            if (focused.length) {
-                $(this).data('lastFocused', focused);
-                $(this).data('lastFocusedClass', '.' + focused.attr('class').split(' ').join('.'));
-            }
-            if (allHover.length) {
-                $(this).data('lastHovers', allHover);
-            }
-            let firstInputVisible = $(this).find('input:not(:hidden)')[0];
-            if (firstInputVisible)
-                firstInputVisible.focus();
-
-        }).one('hidden.bs.confirmDialog', function(e) {
-
-            let lastFocusedClass = undefined;
-            let lastFocused = $(modalToShow).data('lastFocused');
-            let lastFocusedIsVisible = false;
-
-            if (lastFocused && lastFocused.length) {
-                //Verifica se o item que foi clicado ainda existe no documento (A grade remove o botao e adiciona novamente, perde a referencia)
-                lastFocusedClass = $($(this).data('lastFocusedClass'));
-                if ($('html').has(lastFocused).length) {
-                    //Se existir, verifica se o mesmo está visivel
-                    lastFocusedIsVisible = lastFocused.is(':visible');
-                }
-                else {
-                    //Se nao existir, e foi readicionado verifica se está visivel pelas classes
-                    lastFocusedIsVisible = lastFocusedClass.is(':visible');
-                }
-            }
-
-            let findLastLink = function(element) {
-              return $(element[element.length - 1]).closest('li:visible').find('a:first');
-            };
-
-            let lastHovers = $(modalToShow).data('lastHovers');
-
-            if (lastFocusedIsVisible) {
-                lastFocusedClass.focus();
-                lastFocused.focus();
-            }
-            //Tenta achar o mais proximo do ultimo click (link clicado)
-            else if ($('html').has(lastFocused).length) {
-              let lastLink = findLastLink(lastFocused);
-              lastLink.focus();
-            }
-            else if (lastHovers && lastHovers.length) {
-              let lastLink = findLastLink(lastHovers);
-              lastLink.focus();
-            }
-
-
-        }).modal({backdrop: 'static', keyboard: false});
-    }catch(e){
-        $(modalToShow).show();
-    }
-    $(modalToShow).css('overflow-y', 'auto');
-  };
 
   /**
    * @type function
