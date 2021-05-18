@@ -4961,7 +4961,7 @@ function cronapi() {
 
     notify = async function notify(message, status, ...options) {
       if (options.length) {
-        this.customNotification(message, status, ...options);
+        this.customNotification(message, status, options[0], options[1], options[2], options[3]);
       } else {
         this.defaultNotification(message, status);
       }
@@ -4976,7 +4976,7 @@ function cronapi() {
   
     }
   
-    customNotification = async function customNotification(message, status, ...options) {      
+    customNotification = async function customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide) {   
            
       this.setVerticalPosition(verticalPosition);
       this.setHorizontalPosition(horizontalPosition);    
@@ -5119,11 +5119,6 @@ function cronapi() {
     appendSpanIntoBody = function appendSpanIntoBody(span) {
       document.querySelector('body').appendChild(span);
     }
-  
-  }
-
-  let notificationInstance = new NotificationHandler();
-  notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
   
   };
 
