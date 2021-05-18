@@ -1691,13 +1691,14 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * @param {ObjectType.STRING} id {{id}}
    * @platform W
    * @multilayer true
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel ) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel, /** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id ) {
 
     let instanceDialog = new this.cronapi.internal.confirmDialogKendo;
-    instanceDialog.setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel );
+    instanceDialog.setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel, id);
         
   };
 
