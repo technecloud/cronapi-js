@@ -1317,7 +1317,8 @@ function cronapi() {
    */
    this.cronapi.screen.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
     
-    let notificationInstance = this.cronapi.internal.notificationHandler(message, status, animation, verticalPosition, horizontalPosition, autoHide);
+    let notificationInstance = new this.cronapi.internal.notificationHandler;
+
     notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
     
   };
@@ -4938,11 +4939,11 @@ function cronapi() {
     return message;
   };
 
-  this.cronapi.internal.notificationHandler = function (message, status, animation, verticalPosition, horizontalPosition, autoHide) {
+  this.cronapi.internal.notificationHandler = class notificationHandler {
 
-    let idCustomNotification = "customNotification" ;
+    idCustomNotification = "customNotification" ;
         
-    let dataNotification = {
+    dataNotification = {
       stacking: "default",
       autoHideAfter: 5000,
       position: {
@@ -4958,167 +4959,172 @@ function cronapi() {
       }
     };
 
-    let notify = async function notify(message, status, ...options) {
-        if (options.length) {
-          customNotification(message, status, ...options);
-        } else {
-          defaultNotification(message, status);
-        }
+    notify = async function notify(message, status, ...options) {
+      if (options.length) {
+        this.customNotification(message, status, ...options);
+      } else {
+        this.defaultNotification(message, status);
       }
-    
-    let defaultNotification = async function defaultNotification(message, status) {
-        let clientConfig = getClientConfig();
-        if (!isNotificationInitialized(clientConfig.id)) {
-          initializeNotification(clientConfig.id, clientConfig.options);
-        }
-        showNotification(clientConfig.id, message, status);
-    
-      }
-    
-    let customNotification = async function customNotification(message, status, ...options) {      
-             
-        setVerticalPosition(verticalPosition);
-        setHorizontalPosition(horizontalPosition);    
-        setAnimation(animation);        
-        setAutoHide(autoHide);       
-
-        initializeNotification(idCustomNotification, dataNotification);
-        showNotification(idCustomNotification, message, status);
-        
-      }
-
-    let setVerticalPosition = function setVerticalPosition(verticalPosition){
-        switch (verticalPosition) {
-          case "bottom":
-            dataNotification.position.bottom = 20;
-            idCustomNotification = idCustomNotification.concat('-bottom');
-            break;
-    
-          default:
-            dataNotification.position.top = 60;
-            idCustomNotification = idCustomNotification.concat('-top');
-    
-        }
-      }
-
-    let setHorizontalPosition = function setHorizontalPosition(horizontalPosition){
-        switch (horizontalPosition) {
-          case "left":
-            dataNotification.position.right = 20;
-            idCustomNotification = idCustomNotification.concat('-right');
-            break;
-    
-          case "center":
-            dataNotification.show = centerElementScreen;
-            idCustomNotification = idCustomNotification.concat('-center');
-            break;
-    
-          default:
-            dataNotification.position.left = 20;
-            idCustomNotification = idCustomNotification.concat('-left');
-    
-        }
-      }
-
-    let centerElementScreen = function centerElementScreen(e){
-        if (e.sender.getNotifications().length == 1) {
-          var element = e.element.parent(),
-            eWidth = element.width(),
-            wWidth = $(window).width()
-          var newLeft;
+    }
   
-          newLeft = Math.floor(wWidth / 2 - eWidth / 2);
+    defaultNotification = async function defaultNotification(message, status) {
+      let clientConfig = await getClientConfig();
+      if (!this.isNotificationInitialized(clientConfig.id)) {
+        this.initializeNotification(clientConfig.id, clientConfig.options);
+      }
+      this.showNotification(clientConfig.id, message, status);
   
-          e.element.parent().css({ left: newLeft });
-        }
-      }
+    }
+  
+    customNotification = async function customNotification(message, status, ...options) {      
+           
+      this.setVerticalPosition(verticalPosition);
+      this.setHorizontalPosition(horizontalPosition);    
+      this.setAnimation(animation);        
+      this.setAutoHide(autoHide);       
 
-    let setAnimation = function setAnimation(animation){
-        switch (animation) {
-          case "slide":
-            if (dataNotification.show && dataNotification.position.bottom != null) {
-              dataNotification.animation.open.effects = "slideIn:up";
-              idCustomNotification = idCustomNotification.concat('-slideIn-up');
-    
-            } else if (dataNotification.show && dataNotification.position.top != null) {
-              dataNotification.animation.open.effects = "slideIn:down";
-              idCustomNotification = idCustomNotification.concat('-slideIn-dow');
-    
-            } else if (dataNotification.position.left != null) {
-              dataNotification.animation.open.effects = "slideIn:right";
-              idCustomNotification = idCustomNotification.concat('-slideIn-right');
-    
-            } else if (dataNotification.position.left == null) {
-              dataNotification.animation.open.effects = "slideIn:left";
-              idCustomNotification = idCustomNotification.concat('-slideIn-left');
-            }
-    
-            dataNotification.animation.close.effects = "slideOut";
-            break;
-    
-          case "zoom":
-            dataNotification.animation.open.effects = "zoomIn";
-            dataNotification.animation.close.effects = "zoomOut";
-            idCustomNotification = idCustomNotification.concat('-zoom');
-            break;
-    
-          default:
-            dataNotification.animation.open.effects = "fadeIn";
-            dataNotification.animation.close.effects = "fadeOut";
-            idCustomNotification = idCustomNotification.concat('-fade');
-        }
-      }
+      this.initializeNotification(this.idCustomNotification, this.dataNotification);
+      this.showNotification(this.idCustomNotification, message, status);
+      
+    }
 
-      let setAutoHide = function setAutoHide(autoHide){
-        if(autoHide == "false"){
-          dataNotification.autoHideAfter = 0;
-          idCustomNotification = idCustomNotification.concat('-autoHideAfter');
-        }
+    setVerticalPosition = function setVerticalPosition(verticalPosition){
+      switch (verticalPosition) {
+        case "bottom":
+          this.dataNotification.position.bottom = 20;
+          this.idCustomNotification = this.idCustomNotification.concat('-bottom');
+          break;
+  
+        default:
+          this.dataNotification.position.top = 60;
+          this.idCustomNotification = this.idCustomNotification.concat('-top');
+  
       }
-    
-      let initializeNotification = function initializeNotification(id, options) {
-        if (!hasHTMLElement(id)) {
-          createAndIncludeHTMLElement(id);          
-          $(formatJqueryID(id)).kendoNotification(options);
-          centerElementScreen(e);
-        }        
+    }
+
+    setHorizontalPosition = function setHorizontalPosition(horizontalPosition){
+      switch (horizontalPosition) {
+        case "left":
+          this.dataNotification.position.right = 20;
+          this.idCustomNotification = this.idCustomNotification.concat('-right');
+          break;
+  
+        case "center":
+          this.dataNotification.show = this.centerElementScreen;
+          this.idCustomNotification = this.idCustomNotification.concat('-center');
+          break;
+  
+        default:
+          this.dataNotification.position.left = 20;
+          this.idCustomNotification = this.idCustomNotification.concat('-left');
+  
       }
-    
-      let formatJqueryID = function formatJqueryID(id) {
-        return `#${id}`;
+    }
+
+    centerElementScreen = function centerElementScreen(e){
+      if (e.sender.getNotifications().length == 1) {
+        var element = e.element.parent(),
+          eWidth = element.width(),
+          wWidth = $(window).width()
+        var newLeft;
+
+        newLeft = Math.floor(wWidth / 2 - eWidth / 2);
+
+        e.element.parent().css({ left: newLeft });
       }
-    
-      let getClientConfig = async function getClientConfig() {
-        return window.getClientConfig();
+    }
+
+    setAnimation = function setAnimation(animation){
+      switch (animation) {
+        case "slide":
+          if (this.dataNotification.show && this.dataNotification.position.bottom != null) {
+            this.dataNotification.animation.open.effects = "slideIn:up";
+            this.idCustomNotification = this.idCustomNotification.concat('-slideIn-up');
+  
+          } else if (this.dataNotification.show && this.dataNotification.position.top != null) {
+            this.dataNotification.animation.open.effects = "slideIn:down";
+            this.idCustomNotification = this.idCustomNotification.concat('-slideIn-dow');
+  
+          } else if (this.dataNotification.position.left != null) {
+            this.dataNotification.animation.open.effects = "slideIn:right";
+            this.idCustomNotification = this.idCustomNotification.concat('-slideIn-right');
+  
+          } else if (this.dataNotification.position.left == null) {
+            this.dataNotification.animation.open.effects = "slideIn:left";
+            this.idCustomNotification = this.idCustomNotification.concat('-slideIn-left');
+          }
+  
+          this.dataNotification.animation.close.effects = "slideOut";
+          break;
+  
+        case "zoom":
+          this.dataNotification.animation.open.effects = "zoomIn";
+          this.dataNotification.animation.close.effects = "zoomOut";
+          this.idCustomNotification = this.idCustomNotification.concat('-zoom');
+          break;
+  
+        default:
+          this.dataNotification.animation.open.effects = "fadeIn";
+          this.dataNotification.animation.close.effects = "fadeOut";
+          this.idCustomNotification = this.idCustomNotification.concat('-fade');
       }
-    
-      let isNotificationInitialized = function isNotificationInitialized(id) {
-        return $(formatJqueryID(id)).getKendoNotification();
+    }
+
+    setAutoHide = function setAutoHide(autoHide){
+      if(autoHide == "false"){
+        this.dataNotification.autoHideAfter = 0;
+        this.idCustomNotification = this.idCustomNotification.concat('-autoHideAfter');
       }
-    
-      let showNotification = function showNotification(id, message, status) {
-        $(formatJqueryID(id)).getKendoNotification().show(message, status);
-      }
-    
-      let hasHTMLElement = function hasHTMLElement(id) {
-        return document.getElementById(id);
-      }
-    
-      let createSpan = function createSpan(id) {
-        let span = document.createElement("SPAN");
-        span.id = id;
-        return span;
-      }
-    
-      let createAndIncludeHTMLElement = function createAndIncludeHTMLElement(id) {
-        let span = createSpan(id);
-        appendSpanIntoBody(span);
-      }
-    
-      let appendSpanIntoBody = function appendSpanIntoBody(span) {
-        document.querySelector('body').appendChild(span);
-      }
-    
+    }
+  
+    initializeNotification = async function initializeNotification(id, options) {
+      if (!this.hasHTMLElement(id)) {
+        this.createAndIncludeHTMLElement(id);          
+        await $(this.formatJqueryID(id)).kendoNotification(options);
+        await this.centerElementScreen(e);
+      }        
+    }
+  
+    formatJqueryID = function formatJqueryID(id) {
+      return `#${id}`;
+    }
+  
+    getClientConfig = async function getClientConfig() {
+      return window.getClientConfig();
+    }
+  
+    isNotificationInitialized = function isNotificationInitialized(id) {
+      return $(this.formatJqueryID(id)).getKendoNotification();
+    }
+  
+    showNotification = function showNotification(id, message, status) {
+      $(this.formatJqueryID(id)).getKendoNotification().show(message, status);
+    }
+  
+    hasHTMLElement = function hasHTMLElement(id) {
+      return document.getElementById(id);
+    }
+  
+    createSpan = function createSpan(id) {
+      let span = document.createElement("SPAN");
+      span.id = id;
+      return span;
+    }
+  
+    createAndIncludeHTMLElement = function createAndIncludeHTMLElement(id) {
+      let span = this.createSpan(id);
+      this.appendSpanIntoBody(span);
+    }
+  
+    appendSpanIntoBody = function appendSpanIntoBody(span) {
+      document.querySelector('body').appendChild(span);
+    }
+  
+  }
+
+  let notificationInstance = new NotificationHandler();
+  notificationInstance.notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
+  
   };
 
   /**
