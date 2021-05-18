@@ -1694,60 +1694,10 @@ function cronapi() {
    * @platform W
    * @multilayer true
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onSuccess, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onError ) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel ) {
 
-    switch (icon){
-      case "error":
-        icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'; 
-        break;
-
-      case "success":
-        icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'; 
-        break;
-
-      case "warning":
-        icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'; 
-        break;
-
-      case "info":
-        icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'; 
-        break;
-
-    }
-
-    var dialog = $('#dialog');
-
-    let dataDialog = {
-      width: "450px",
-      title: false,
-      content: '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>',
-      closable: true,
-      modal: true,
-      animation: {
-        open: {
-          effects: "zoom:in"
-        },
-        close: {
-          effects: "zoom:out"
-        }
-      },
-      actions: [{
-        text: buttonCancelName
-      }]
-    };
-
-    if(!hidebuttonSave){
-      dataDialog.actions.push(
-        {
-          text: buttonSaveName,
-          primary: true
-        }
-      );    
-    }
-
-    console.log('dataDialog', dataDialog);
-
-    dialog.kendoDialog(dataDialog);
+    let instanceDialog = new this.cronapi.internal.confirmDialogKendo;
+    dialog.kendoDialog(instanceDialog);
     dialog.data("kendoDialog").open(); 
     
   };
@@ -4991,6 +4941,66 @@ function cronapi() {
 
     return message;
   };
+
+
+  this.cronapi.internal.confirmDialogKendo = class confirmDialogKendo {
+    
+    dialog = $('#dialog');
+
+    setIcon = function setIcon(icon){
+      switch (icon){
+        case "error":
+          icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'; 
+          break;
+
+        case "success":
+          icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'; 
+          break;
+
+        case "warning":
+          icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'; 
+          break;
+
+        case "info":
+          icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'; 
+          break;
+      }
+    }  
+
+    dataDialog = {
+      width: "450px",
+      title: false,
+      content: '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>',
+      closable: false,
+      modal: true,
+      animation: {
+        open: {
+          effects: "zoom:in"
+        },
+        close: {
+          effects: "zoom:out"
+        }
+      },
+      actions: [{
+        text: buttonCancelName,
+        action: setButtonCancel,
+      }]
+    };
+
+    setButtonCancel = function setButtonCancel(hidebuttonSave){
+      if(hidebuttonSave == "no"){
+        dataDialog.actions.push(
+          {
+            text: buttonSaveName,
+            action: onConfirm,
+            primary: true
+          }
+        );   
+      }
+    }
+  
+  };
+
 
   /**
    * @type internal
