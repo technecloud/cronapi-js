@@ -1691,14 +1691,13 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
    * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
-   * @param {ObjectType.STRING} id {{id}}
    * @platform W
    * @multilayer true
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel, /** @type {ObjectType.OBJECT} @blockType ids_from_screen*/ id ) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel ) {
 
     let instanceDialog = new this.cronapi.internal.confirmDialogKendo;
-    instanceDialog.setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel, id);
+    instanceDialog.setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel);
         
   };
 
@@ -4962,17 +4961,24 @@ function cronapi() {
       actions: []
     };
 
-    dialog = $('#dialog');
+    id = '#dialog';
+    dialog = $(id);
 
     setData = async function setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel){
       
       this.setIcon(icon, title, subtitle);
       this.setButtonCancel(buttonCancelName, onCancel);
       this.setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm);
+      this.createSpan(id);      
 
       this.dialog.kendoDialog(this.dataDialog);
       this.dialog.data("kendoDialog").open();
 
+    }
+
+    createSpan = function createSpan(id){
+      let span = new this.cronapi.internal.createSpanKendo;
+      span.createSpanKendo(id);
     }
 
     setIcon = async function setIcon(icon, title, subtitle){
@@ -5022,6 +5028,39 @@ function cronapi() {
     }   
   
   };
+
+  this.cronapi.internal.createSpanKendo = class createSpanKendo{
+
+    createSpanKendo = async function createSpanKendo(id) {
+      if (!this.hasHTMLElement(id)) {
+        this.createAndIncludeHTMLElement(id);  
+      }        
+    }
+
+    hasHTMLElement = function hasHTMLElement(id) {
+      return document.getElementById(id);
+    }
+
+    createAndIncludeHTMLElement = function createAndIncludeHTMLElement(id) {
+      let span = this.createSpan(id);
+      this.appendSpanIntoBody(span);
+    }
+
+    appendSpanIntoBody = function appendSpanIntoBody(span) {
+      document.querySelector('body').appendChild(span);
+    }
+
+    formatJqueryID = function formatJqueryID(id) {
+      return `#${id}`;
+    } 
+
+    createSpan = function createSpan(id) {
+      let span = document.createElement("SPAN");
+      span.id = id;
+      return span;
+    }
+
+  }
 
 
   /**
