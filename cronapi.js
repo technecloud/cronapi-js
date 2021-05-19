@@ -1693,14 +1693,72 @@ function cronapi() {
    * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
    * @platform W
    * @multilayer true
+   * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel ) {
+  this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel) {
 
-    let instanceDialog = new this.cronapi.internal.confirmDialogKendo;
-    instanceDialog.setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel);
-        
+    let dataDialog = {
+      width: "450px",
+      title: false,
+      closable: false,
+      modal: true,
+      content: '<div id="modalBodyConfirmDialog"> <div class="icon">' + icon + '</div> <h2 class="title">' + title + '</h2> <h3 class="subtitle">' + subtitle + '</h3> </div>',
+      animation: {
+        open: {
+          effects: "zoom:in"
+        },
+        close: {
+          effects: "zoom:out"
+        }
+      },
+      buttonLayout: "normal",
+      actions: []
+    };
+
+    let spanElement = $(`<span></span>`);
+    $('body').append(spanElement);
+
+    switch (icon) {
+      case "error":
+        icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>';
+        break;
+
+      case "success":
+        icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>';
+        break;
+
+      case "warning":
+        icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>';
+        break;
+
+      case "info":
+        icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>';
+        break;
+    }
+
+    setButtonConfirm = function setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm) {
+      if (hidebuttonSave == "no") {
+        this.dataDialog.actions.push(
+          {
+            text: buttonSaveName,
+            action: onConfirm,
+            primary: true
+          }
+        );
+      }
+    }
+
+    setButtonCancel = function setButtonCancel(buttonCancelName, onCancel) {
+      this.dataDialog.actions.push({
+        text: buttonCancelName,
+        action: onCancel,
+      });
+    }
+
+    spanElement.kendoDialog(dataDialog);
+    return spanElement;
+
   };
-
 
   /**
    * @type function
@@ -4941,128 +4999,6 @@ function cronapi() {
     return message;
   };
 
-
-  this.cronapi.internal.confirmDialogKendo = class confirmDialogKendo {
-    
-    dataDialog = {
-      width: "450px",
-      title: false,
-      closable: false,
-      modal: true,
-      animation: {
-        open: {
-          effects: "zoom:in"
-        },
-        close: {
-          effects: "zoom:out"
-        }
-      },
-      buttonLayout: "normal",
-      actions: []
-    };
-
-    id = '#dialog';
-    dialog = $(id);
-
-    setData = async function setData(icon, title, subtitle, buttonCancelName, hidebuttonSave, buttonSaveName, onConfirm, onCancel){
-      
-      this.setIcon(icon, title, subtitle);
-      this.setButtonCancel(buttonCancelName, onCancel);
-      this.setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm);
-      this.createSpan(id);      
-
-      this.dialog.kendoDialog(this.dataDialog);
-      this.dialog.data("kendoDialog").open();
-
-    }
-
-    createSpan = function createSpan(id){
-      let span = new this.cronapi.internal.createSpanKendo;
-      span.createSpanKendo(id);
-    }
-
-    setIcon = async function setIcon(icon, title, subtitle){
-      switch (icon){
-        case "error":
-          icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>'; 
-          break;
-
-        case "success":
-          icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>'; 
-          break;
-
-        case "warning":
-          icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>'; 
-          break;
-
-        case "info":
-          icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>'; 
-          break;
-      }
-      
-     await this.setContent(icon, title, subtitle);
-
-    } 
-
-    setContent = function setContent(icon, title, subtitle){
-       this.dataDialog.content = '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>';
-    } 
-
-    setButtonConfirm = function setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm){
-       if(hidebuttonSave == "no"){
-        this.dataDialog.actions.push(
-          {
-            text: buttonSaveName,
-            action: onConfirm,
-            primary: true
-          }
-        );   
-      }     
-    }
-
-    setButtonCancel = function setButtonCancel(buttonCancelName, onCancel){
-      this.dataDialog.actions.push({
-        text: buttonCancelName,
-        action: onCancel,
-      });     
-    }   
-  
-  };
-
-  this.cronapi.internal.createSpanKendo = class createSpanKendo{
-
-    createSpanKendo = async function createSpanKendo(id) {
-      if (!this.hasHTMLElement(id)) {
-        this.createAndIncludeHTMLElement(id);  
-      }        
-    }
-
-    hasHTMLElement = function hasHTMLElement(id) {
-      return document.getElementById(id);
-    }
-
-    createAndIncludeHTMLElement = function createAndIncludeHTMLElement(id) {
-      let span = this.createSpan(id);
-      this.appendSpanIntoBody(span);
-    }
-
-    appendSpanIntoBody = function appendSpanIntoBody(span) {
-      document.querySelector('body').appendChild(span);
-    }
-
-    formatJqueryID = function formatJqueryID(id) {
-      return `#${id}`;
-    } 
-
-    createSpan = function createSpan(id) {
-      let span = document.createElement("SPAN");
-      span.id = id;
-      return span;
-    }
-
-  }
-
-
   /**
    * @type internal
    */
@@ -5094,7 +5030,13 @@ function cronapi() {
    * @description {{createChartDescription}}
    * @arbitraryParams true
    */
-  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea  @values line|bar|horizontalBar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
+  this.cronapi.chart.createChart = function(
+    
+    /** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  
+    /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea  @values line|bar|horizontalBar|doughnut|pie|polarArea  */ type, 
+    /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, 
+    /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, 
+    /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
 
     var CSS_COLOR_NAMES = ["#FF5C00","#0E53A7","#48DD00","#FFD500","#7309AA","#CD0074","#00AF64","#BF8230","#F16D95","#A65000","#A65000","#AF66D5"];
     var colorIndex = 0;
