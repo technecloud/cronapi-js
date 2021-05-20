@@ -1714,7 +1714,9 @@ function cronapi() {
       actions: []
     };
 
-    let dialog = $('<span></span>');
+    let idDialog = 'cronapp-dialog-' + Math.random();
+
+    let dialog = $(`<span id="${idDialog}"></span>`);
     $('body').append(dialog);
     
     setIcon(icon, title, subtitle);    
@@ -1791,20 +1793,10 @@ function cronapi() {
    * @multilayer true
    */
    this.cronapi.screen.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
-
-    if(dialogRef){
       dialogRef.data("kendoDialog").close();
-      dialogRef.data("kendoDialog").destroy();
-
-    } else if(!dialogRef){
-      debugger
-      this.cronapi.screen.notify('error', this.cronapi.i18n.translate("InvalidDate",[  ]) );
-
-    } else if(!dialogRef.data("kendoDialog")){
-      debugger
-      this.cronapi.screen.notify('error', this.cronapi.i18n.translate("InvalidDate",[  ]) );
-    }
- 
+      setInterval(() => {
+        dialogRef.data("kendoDialog").destroy(); 
+      }, 3000);      
    };   
 
   /**
