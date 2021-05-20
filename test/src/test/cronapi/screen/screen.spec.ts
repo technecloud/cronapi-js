@@ -135,6 +135,14 @@ describe('Test suit for category Screen from Cronapi.js', function() {
         cronapi.$scope.type.should.equal('Successful');
     });
 
+    it('confimDialogAlert', () =>{
+        cronapi.screen.confimDialogAlert.bind(window)();
+    });
+
+    it('destroyConfirmDialogAlert', () =>{
+        cronapi.screen.confimDialogAlert.bind(window)();
+    });    
+
     it('datasourceFromScreen', () => {
         cronapi.screen.startInsertingMode.bind(window)(dataSource);
         cronapi.screen.datasourceFromScreen(dataSource).should.equal(dataSource);
