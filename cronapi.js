@@ -1683,7 +1683,7 @@ function cronapi() {
   /**
    * @type function
    * @name {{confirmDialogAlertName}}
-   * @nameTags confirmDialog | Confirmar | alert | modal | jaque
+   * @nameTags confirmDialog | Confirmar | alert | modal | alerta
    * @description {{confirmDialogAlertDescription}}
    * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
    * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
