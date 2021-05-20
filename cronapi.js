@@ -4939,7 +4939,7 @@ function cronapi() {
     return message;
   };
 
-  this.cronapi.internal.notificationHandler = class notificationHandler {
+  this.cronapi.internal.notificationHandler = class NotificationHandler {
 
     idCustomNotification = "customNotification" ;
         
