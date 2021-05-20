@@ -607,5 +607,7 @@
   "confimDialogAlert.icon": "Icon",
   "confimDialogAlert.title": "Title",
   "confimDialogAlert.subtitle": "Subtitle",
-  "hidebuttonSave": "Hide the confirm button"
+  "hidebuttonSave": "Hide the confirm button",
+  "destroyConfirmDialogAlert": "Close confirmation modal",
+  "dialogRef": "Modal identifier"
 }
