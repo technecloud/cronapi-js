@@ -1665,8 +1665,8 @@ function cronapi() {
   };
 
   /**
-   * @category notification
-   * @categoryTags {{notificationCategory}} | notification 
+   * @category {{notificationCategory}}
+   * @categoryTags notification | notification 
    */
    this.cronapi.notification = {};
 
@@ -1720,7 +1720,13 @@ function cronapi() {
         }
       },
       buttonLayout: "normal",
-      actions: []
+      actions: [],
+      close: function(e) {
+        dialog.data("kendoDialog").close();
+        setInterval(() => {
+          dialog.data("kendoDialog").destroy(); 
+        }, 3000); 
+      }
     };
 
     setIcon(icon, title, subtitle);  
@@ -1756,10 +1762,6 @@ function cronapi() {
     }
 
     function setButton(buttonConfirmDialogAlert){
-
-      console.log(buttonConfirmDialogAlert);
-      console.log('dataDialog', dataDialog)
-
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
 
       for (let i = 0; i < button.length; i++) {
@@ -1767,10 +1769,7 @@ function cronapi() {
           text: button[i].title,
           action: button[i].value,
         });
-      };
-
-      debugger;
-      
+      };      
     }
 
     return dialog;
@@ -1783,32 +1782,18 @@ function cronapi() {
    * @description {{buttonConfirmDialogAlertDescription}}
    * @platform W
    * @param {ObjectType.STRING} suggestedActionTitle {{suggestedActionTitle}}
-   * @param {ObjectType.STRING} suggestedActionValue {{suggestedActionValue}}
+   * @param {ObjectType.STRING} statementActionValue {{suggestedActionValue}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STATEMENT} @description {{createDefaultModal}} */ statementActionValue) {
+    debugger
     return {
       title: suggestedActionTitle,
-      value: suggestedActionValue
+      value: statementActionValue
     };
   };
 
-  /**
-   * @type function
-   * @name {{destroyConfirmDialogAlert}}
-   * @nameTags confirmDialog | dialog | modal | hide | destroy | alert | alerta | destroyConfirmDialogAlert | Esconder | Fechar
-   * @description {{hideModalDesc}}
-   * @param {ObjectType.OBJECT} dialogRef {{dialogRef}}
-   * @multilayer true
-   * @returns {ObjectType.OBJECT}
-   */
-   this.cronapi.notification.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
-      dialogRef.data("kendoDialog").close();
-      setInterval(() => {
-        dialogRef.data("kendoDialog").destroy(); 
-      }, 3000);      
-   };   
-
+  
   /**
    * @type function
    * @name {{createDefaultModalName}}
