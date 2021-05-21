@@ -1664,6 +1664,12 @@ function cronapi() {
     return null;
   };
 
+  /**
+   * @category notificationCategory
+   * @categoryTags {{notificationCategory}}
+   */
+   this.cronapi.notificationCategory = {};
+
 
   /**
    * @deprecated true
@@ -1693,7 +1699,7 @@ function cronapi() {
    * @multilayer true
    * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+   this.cronapi.notificationCategory.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
 
     let idDialog = 'cronapp-dialog-' + Math.random();
     let dialog = $(`<span id="${idDialog}"></span>`);
@@ -1750,21 +1756,21 @@ function cronapi() {
     }
 
     function setButton(buttonConfirmDialogAlert){
+
       console.log(buttonConfirmDialogAlert);
-      // ["lista", "lista2"]
+      console.log('dataDialog', dataDialog)
 
-
-      dataDialog.actions.push({
-        text: buttonCancelName,
-        action: onCancel,
-      });
-
-
-      
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
-      console.log(button);
+
+      for (let i = 0; i < button.length; i++) {
+        dataDialog.actions.push({
+          text: button[i].title,
+          action: button[i].value,
+        });
+      };
 
       debugger;
+      
     }
 
     return dialog;
@@ -1780,7 +1786,7 @@ function cronapi() {
    * @param {ObjectType.STRING} suggestedActionValue {{suggestedActionValue}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
+  this.cronapi.notificationCategory.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
     return {
       title: suggestedActionTitle,
       value: suggestedActionValue
@@ -1795,7 +1801,7 @@ function cronapi() {
    * @param {ObjectType.OBJECT} dialogRef {{dialogRef}}
    * @multilayer true
    */
-   this.cronapi.screen.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
+   this.cronapi.notificationCategory.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
       dialogRef.data("kendoDialog").close();
       setInterval(() => {
         dialogRef.data("kendoDialog").destroy(); 
