@@ -1691,10 +1691,10 @@ function cronapi() {
    * @name {{confirmDialogAlertName}}
    * @nameTags confirmDialog | Confirmar | alert | modal | alerta
    * @description {{confirmDialogAlertDescription}}
-   * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
-   * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
-   * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
-   * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{buttonConfirmDialogAlert}}
+   * @param {ObjectType.STRING} icon {{icon}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.STRING} subtitle {{subtitle}}
+   * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{confimDialogAlert.listButton}}
    * @platform W
    * @multilayer true
    * @returns {ObjectType.OBJECT}
@@ -1767,7 +1767,7 @@ function cronapi() {
         dataDialog.actions.push({
           text: buttonConfirmDialogAlert.title,
           action: buttonConfirmDialogAlert.value,
-          primary: primaryButton ? true : null
+          primary: buttonConfirmDialogAlert.primaryValue == 'true' ? true : null
         });
 
       } else {
@@ -1775,7 +1775,7 @@ function cronapi() {
           dataDialog.actions.push({
             text: button[i].title,
             action: button[i].value,
-            primary: primaryButton ? true : null
+            primary: button[i].primaryValue == 'true' ? true : null
           });
         }
       };      
@@ -1790,17 +1790,16 @@ function cronapi() {
    * @nameTags confirmDialog | botão | button | alert | modal | alerta
    * @description {{buttonConfirmDialogAlertDescription}}
    * @platform W
-   * @param {ObjectType.STRING} suggestedActionTitle {{suggestedActionTitle}}
-   * @param {ObjectType.STRING} primaryButton {{primaryButton}}
-   * @param {ObjectType.STRING} statementActionValue {{suggestedActionValue}}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.BOOLEAN} primaryButton {{buttonConfirmDialogAlert.primaryButton}}
+   * @param {ObjectType.STRING} value {{buttonConfirmDialogAlert.value}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{verticalPosition}}  @blockType util_dropdown  @keys yes|no  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STATEMENT} @description {{createDefaultModal}} */ statementActionValue) {
-    debugger
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{verticalPosition}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
     return {
-      title: suggestedActionTitle,
-      value: statementActionValue,
-      primary: primaryButton
+      title: title,
+      value: value,
+      primaryValue: primaryButton
     };
   };
 
