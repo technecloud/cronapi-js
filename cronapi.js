@@ -1688,20 +1688,23 @@ function cronapi() {
    * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
    * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
    * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
-   * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
-   * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
-   * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{buttonConfirmDialogAlert}}
    * @platform W
    * @multilayer true
    * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel) {
+   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+
+    let idDialog = 'cronapp-dialog-' + Math.random();
+    let dialog = $(`<span id="${idDialog}"></span>`);
+    $('body').append(dialog);
     
     let dataDialog = {
       width: "450px",
       title: false,
       closable: false,
       modal: true,
+      content: "",
       animation: {
         open: {
           effects: "zoom:in"
@@ -1714,17 +1717,11 @@ function cronapi() {
       actions: []
     };
 
-    let idDialog = 'cronapp-dialog-' + Math.random();
-
-    let dialog = $(`<span id="${idDialog}"></span>`);
-    $('body').append(dialog);
-    
-    setIcon(icon, title, subtitle);    
-    setButtonCancel(buttonCancelName, onCancel);
-    setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm);
+    setIcon(icon, title, subtitle);  
+    setButton(buttonConfirmDialogAlert);
 
     dialog.kendoDialog(dataDialog);
-    dialog.data("kendoDialog").open();
+    dialog.data("kendoDialog").open(); 
 
     async function setIcon(icon, title, subtitle){
       switch (icon){
@@ -1750,40 +1747,46 @@ function cronapi() {
 
     function setContent(icon, title, subtitle){
        dataDialog.content = '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>';
-    } 
-
-    function setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm){
-       if(hidebuttonSave == "no"){
-        dataDialog.actions.push(
-          {
-            text: buttonSaveName,
-            action: function(ev) {
-                if(onConfirm){
-                  onConfirm();
-                }
-                return false;
-            },
-            primary: true
-          }
-        );   
-      }     
     }
 
-    function setButtonCancel(buttonCancelName, onCancel){
+    function setButton(buttonConfirmDialogAlert){
+      console.log(buttonConfirmDialogAlert);
+      // ["lista", "lista2"]
+
+
       dataDialog.actions.push({
         text: buttonCancelName,
-        action: function(ev) {
-              if(onCancel){
-                onCancel();
-              }
-              return false;
-          },
-      });     
-    }   
+        action: onCancel,
+      });
+
+
+      
+      let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
+      console.log(button);
+
+      debugger;
+    }
 
     return dialog;
    };
     
+  /**
+   * @type function
+   * @name {{buttonConfirmDialogAlert}}
+   * @nameTags confirmDialog | botão | button | alert | modal | alerta
+   * @description {{buttonConfirmDialogAlertDescription}}
+   * @platform W
+   * @param {ObjectType.STRING} suggestedActionTitle {{suggestedActionTitle}}
+   * @param {ObjectType.STRING} suggestedActionValue {{suggestedActionValue}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
+    return {
+      title: suggestedActionTitle,
+      value: suggestedActionValue
+    };
+  };
+
   /**
    * @type function
    * @name {{destroyConfirmDialogAlert}}

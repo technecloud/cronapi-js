@@ -611,5 +611,7 @@
   "destroyConfirmDialogAlert": "Fechar modal de confirmação",
   "dialogRef": "Identificador do modal",
   "yes": "Sim",
-  "no": "Não"
+  "no": "Não",
+  "buttonConfirmDialogAlertDescription": "descrição botão do modal",
+  "buttonConfirmDialogAlert": "botão do modal"
 }
