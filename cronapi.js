@@ -1665,10 +1665,10 @@ function cronapi() {
   };
 
   /**
-   * @category notificationCategory
-   * @categoryTags {{notificationCategory}}
+   * @category notification
+   * @categoryTags {{notificationCategory}} | notification 
    */
-   this.cronapi.notificationCategory = {};
+   this.cronapi.notification = {};
 
 
   /**
@@ -1699,7 +1699,7 @@ function cronapi() {
    * @multilayer true
    * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.notificationCategory.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+   this.cronapi.notification.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
 
     let idDialog = 'cronapp-dialog-' + Math.random();
     let dialog = $(`<span id="${idDialog}"></span>`);
@@ -1786,7 +1786,7 @@ function cronapi() {
    * @param {ObjectType.STRING} suggestedActionValue {{suggestedActionValue}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notificationCategory.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STRING} */ suggestedActionValue) {
     return {
       title: suggestedActionTitle,
       value: suggestedActionValue
@@ -1800,8 +1800,9 @@ function cronapi() {
    * @description {{hideModalDesc}}
    * @param {ObjectType.OBJECT} dialogRef {{dialogRef}}
    * @multilayer true
+   * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.notificationCategory.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
+   this.cronapi.notification.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
       dialogRef.data("kendoDialog").close();
       setInterval(() => {
         dialogRef.data("kendoDialog").destroy(); 
