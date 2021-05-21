@@ -1697,7 +1697,6 @@ function cronapi() {
    * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{confimDialogAlert.listButton}}
    * @platform W
    * @multilayer true
-   * @returns {ObjectType.OBJECT}
    */
    this.cronapi.notification.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
 
@@ -1780,8 +1779,7 @@ function cronapi() {
         }
       };      
     }
-
-    return dialog;
+    
    };
     
   /**
