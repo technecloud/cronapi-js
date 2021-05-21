@@ -614,5 +614,6 @@
   "no": "Não",
   "buttonConfirmDialogAlertDescription": "descrição botão do modal",
   "buttonConfirmDialogAlert": "botão do modal",
-  "notificationCategory": "Notificações"
+  "notificationCategory": "Notificações",
+  "primaryButton": "Botão de destaque"
 }

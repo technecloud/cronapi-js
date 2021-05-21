@@ -1722,7 +1722,6 @@ function cronapi() {
       buttonLayout: "normal",
       actions: [],
       close: function(e) {
-        dialog.data("kendoDialog").close();
         setInterval(() => {
           dialog.data("kendoDialog").destroy(); 
         }, 3000); 
@@ -1764,11 +1763,21 @@ function cronapi() {
     function setButton(buttonConfirmDialogAlert){
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
 
-      for (let i = 0; i < button.length; i++) {
+      if(button.length == '1'){
         dataDialog.actions.push({
-          text: button[i].title,
-          action: button[i].value,
+          text: buttonConfirmDialogAlert.title,
+          action: buttonConfirmDialogAlert.value,
+          primary: primaryButton ? true : null
         });
+
+      } else {
+        for (let i = 0; i < button.length; i++) {
+          dataDialog.actions.push({
+            text: button[i].title,
+            action: button[i].value,
+            primary: primaryButton ? true : null
+          });
+        }
       };      
     }
 
@@ -1782,14 +1791,16 @@ function cronapi() {
    * @description {{buttonConfirmDialogAlertDescription}}
    * @platform W
    * @param {ObjectType.STRING} suggestedActionTitle {{suggestedActionTitle}}
+   * @param {ObjectType.STRING} primaryButton {{primaryButton}}
    * @param {ObjectType.STRING} statementActionValue {{suggestedActionValue}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STATEMENT} @description {{createDefaultModal}} */ statementActionValue) {
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{verticalPosition}}  @blockType util_dropdown  @keys yes|no  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ suggestedActionTitle, /** @type {ObjectType.STATEMENT} @description {{createDefaultModal}} */ statementActionValue) {
     debugger
     return {
       title: suggestedActionTitle,
-      value: statementActionValue
+      value: statementActionValue,
+      primary: primaryButton
     };
   };
 
