@@ -1760,47 +1760,32 @@ function cronapi() {
     }
 
     function setButton(buttonConfirmDialogAlert){
-      let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
+      let buttons = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
+
+      let hasButton = false;
       
-      for (let i = 0; i < button.length; i++) {
-        if(!button[i] && button.length == "1"){
+      for (let i = 0; i < buttons.length; i++) {
+        let button = buttons[i];
+        if(!button){
           dataDialog.actions.push({
-            text: buttonConfirmDialogAlert.title,
-            action: buttonConfirmDialogAlert.value,
-            primary: buttonConfirmDialogAlert.primaryValue == 'true' ? true : null
+            text: button.title,
+            action: button.value,
+            primary: button.primaryValue == 'true' ? true : null
           });
 
-        } else if(button[i] == null && button.length == 1){
-          dataDialog.actions.push({
-            text: 'OK',
-            primary: true
-          });
+          hasButton = true;
 
-        } else if(!button[i]){
-          dataDialog.actions.push({
-            text: button[i].title,
-            action: button[i].value,
-            primary: button[i].primaryValue == 'true' ? true : null
-          });
+        } 
+      };   
+      
+      // If you have not added a button to the modal. Add to be able to close the modal.
+      if(hasButton == false){
+        dataDialog.actions.push({
+          text: "OK",
+          primary: true
+        });
+      };
 
-        } else if(button[i] == null){
-
-          let lastI = button.length - 1;
-          if( i == lastI ){
-            for (let y = 0; y < button.length; y++) {
-              if(button[y] == null){
-                if(y == lastI){
-                  dataDialog.actions.push({
-                    text: 'OK',
-                    primary: true
-                  });
-                }
-              }
-            }
-          }
-
-        }
-      };    
     }
     
    };
