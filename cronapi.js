@@ -1284,6 +1284,13 @@ function cronapi() {
   };
 
   /**
+   * @category {{notificationCategory}}
+   * @categoryTags notification | notification 
+   */
+   this.cronapi.notification = {};
+
+
+  /**
    * @deprecated true
    * @type function
    * @name {{screenNotifyName}}
@@ -1302,12 +1309,6 @@ function cronapi() {
     this.cronapi.$scope.Notification({'message':message.toString() },type);
   };
 
-  /**
-   * @category {{notificationCategory}}
-   * @categoryTags notification | notification 
-   */
-   this.cronapi.notification = {};
-
   
   /**
    * @type function
@@ -1323,7 +1324,6 @@ function cronapi() {
    */
    this.cronapi.notification.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
     
-
     let idCustomNotification = "customNotification" ;
         
     let dataNotification = {
@@ -1341,20 +1341,10 @@ function cronapi() {
         }
       }
     };
-
-    loadClientConfig = async function loadClientConfig() {
-      let res = await window.fetch("/js/config.json");
-      let result = res.json();
-      return result;
-    }
-
-    getClientConfig = async function getClientConfig() {
-      return window.CronappConfig ? window.CronappConfig : window.loadClientConfig();
-    }
-
+    
     notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
 
-    async function notify(message, status, ...options) {       
+    async function notify(message, status, ...options) {   
       if (!options[0] || !options[1] || !options[2] || !options[3]) {
         defaultNotification(message, status);
       } else {
@@ -1363,18 +1353,25 @@ function cronapi() {
     }
   
     async function defaultNotification(message, status) {
-      let clientConfig = await getClientConfig();
-      
-      if (!isNotificationInitialized(clientConfig.notification.id)) {
-        initializeNotification(clientConfig.notification.id, dataNotification);
+
+      let cronappConfig = {
+        id: "CronappNotification",
+        verticalPosition: "top",
+        horizontalPosition: "left",
+        animation: "slide",
+        autoHide: "false"
+      };
+
+      setVerticalPosition(cronappConfig.verticalPosition);
+      setHorizontalPosition(cronappConfig.horizontalPosition);    
+      setAnimation(cronappConfig.animation);        
+      setAutoHide(cronappConfig.autoHide);  
+
+      if (!isNotificationInitialized(cronappConfig.id)) {
+        initializeNotification(cronappConfig.id, dataNotification);
       }
 
-      setVerticalPosition(clientConfig.notification.verticalPosition);
-      setHorizontalPosition(clientConfig.notification.horizontalPosition);    
-      setAnimation(clientConfig.notification.animation);        
-      setAutoHide(clientConfig.notification.autoHide);   
-
-      showNotification(clientConfig.notification.id, message, status);
+      showNotification(cronappConfig.id, message, status);
   
     }
   
@@ -1490,11 +1487,7 @@ function cronapi() {
     function formatJqueryID(id) {
       return `#${id}`;
     }
-  
-    async function getClientConfig() {
-      return window.getClientConfig();
-    }
-  
+    
     function isNotificationInitialized(id) {
       return $(formatJqueryID(id)).getKendoNotification();
     }
@@ -1885,12 +1878,6 @@ function cronapi() {
 
     return null;
   };
-
-  /**
-   * @category {{notificationCategory}}
-   * @categoryTags notification | notification 
-   */
-   this.cronapi.notification = {};
 
 
   /**

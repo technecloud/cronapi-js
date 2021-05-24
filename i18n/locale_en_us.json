@@ -512,7 +512,7 @@
   "no": "No",
   "horizontalPosition": "Horizontal Position",
   "verticalPosition": "Vertical Position",
-  "autoHide": "Hide notification",
+  "autoHide": "Hide notification automatically",
   "searchIds": "Identifier",
   "searchIdsDescription": "Identifier field from screen",
   "second": "Second",

@@ -513,7 +513,7 @@
   "no": "Não",
   "horizontalPosition": "Posição horizontal",
   "verticalPosition": "Posição vertical",
-  "autoHide": "Ocultar notificação",
+  "autoHide": "Ocultar notificação automaticamente",
   "searchIds": "Identificador",
   "searchIdsDescription": "Identificador do campo da tela",
   "second": "Segundo",
