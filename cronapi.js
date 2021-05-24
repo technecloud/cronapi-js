@@ -1722,7 +1722,7 @@ function cronapi() {
       actions: [],
       close: function(e) {
         setInterval(() => {
-          dialog.data("kendoDialog").destroy(); 
+          $(`#${idDialog}`).data("kendoDialog").destroy(); 
         }, 3000); 
       }
     };
@@ -1762,6 +1762,8 @@ function cronapi() {
     function setButton(buttonConfirmDialogAlert){
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
       
+      console.log(button.length)
+      debugger
       if(button.length){
         dataDialog.actions.push({
           text: buttonConfirmDialogAlert.title,
@@ -1793,7 +1795,7 @@ function cronapi() {
    * @param {ObjectType.STRING} value {{buttonConfirmDialogAlert.value}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{verticalPosition}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{buttonConfirmDialogAlert.primaryButton}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
     return {
       title: title,
       value: value,
