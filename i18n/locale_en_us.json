@@ -626,5 +626,18 @@
   "XMLHasRootElementName": "Has Root element?",
   "year": "Year",
   "yearsToIncrement": "Years to increase",
-  "notificationCategory": "Notifications"
+  "confirmDialogAlertName": "Confirmation Modal",
+  "confirmDialogAlertDescription": "A function that displays a confirmation modal, with a custom icon, title, subtitle and action buttons.",
+  "icon": "Icon",
+  "subtitle": "Subtitle",
+  "confimDialogAlert.listButton": "List of buttons",
+  "yes": "Yes",
+  "no": "No",
+  "buttonConfirmDialogAlertDescription": "Function that defines the characteristics of the button(s).",
+  "buttonConfirmDialogAlert": "Modal button",
+  "notificationCategory": "Notifications",
+  "buttonConfirmDialogAlert.value": "Button action",
+  "buttonConfirmDialogAlert.primaryButton": "Highlighted button",
+  "warning": "Warning",
+  "info": "Info"
 }

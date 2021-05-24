@@ -1886,8 +1886,15 @@ function cronapi() {
     return null;
   };
 
+  /**
+   * @category {{notificationCategory}}
+   * @categoryTags notification | notification 
+   */
+   this.cronapi.notification = {};
+
 
   /**
+   * @deprecated true
    * @type function
    * @name {{confirmDialogName}}
    * @nameTags confirmDialog|Confirmar
@@ -1901,6 +1908,130 @@ function cronapi() {
     return value;
   };
 
+  /**
+   * @type function
+   * @name {{confirmDialogAlertName}}
+   * @nameTags confirmDialog | Confirmar | alert | modal | alerta
+   * @description {{confirmDialogAlertDescription}}
+   * @param {ObjectType.STRING} icon {{icon}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.STRING} subtitle {{subtitle}}
+   * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{confimDialogAlert.listButton}}
+   * @platform W
+   * @multilayer true
+   */
+   this.cronapi.notification.confirmDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+
+    let idDialog = 'cronapp-dialog-' + Math.random();
+    let dialog = $(`<span id="${idDialog}"></span>`);
+    $('body').append(dialog);
+    
+    let dataDialog = {
+      width: "450px",
+      title: false,
+      closable: false,
+      modal: true,
+      content: "",
+      animation: {
+        open: {
+          effects: "zoom:in"
+        },
+        close: {
+          effects: "zoom:out"
+        }
+      },
+      buttonLayout: "normal",
+      actions: [],
+      close: function(e) {
+        setInterval(() => {
+          $(`#${idDialog}`).data("kendoDialog").destroy(); 
+        }, 3000); 
+      }
+    };
+
+    setIcon(icon, title, subtitle);  
+    setButton(buttonConfirmDialogAlert);
+
+    dialog.kendoDialog(dataDialog);
+    dialog.data("kendoDialog").open(); 
+
+    async function setIcon(icon, title, subtitle){
+      switch (icon){
+        case "error":
+        icon = '<div class="cronapp-icon cronapp-error" style="display: flex;"> <span class="cronapp-x-mark"><span class="cronapp-x-mark-line-left"></span><span class="cronapp-x-mark-line-right"></span></span></div>';
+        break;
+
+      case "success":
+        icon = '<div class="cronapp-icon cronapp-success"><div class="cronapp-success-circular-line-left"></div><span class="cronapp-success-line-tip"></span> <span class="cronapp-success-line-long"></span><div class="cronapp-success-ring"></div><div class="cronapp-success-fix"></div> <div class="cronapp-success-circular-line-right"></div></div>';
+        break;
+
+      case "warning":
+        icon = '<div class="cronapp-icon cronapp-warning"><div class="cronapp-icon-content">!</div></div>';
+        break;
+
+      case "info":
+        icon = '<div class="cronapp-icon cronapp-info"><div class="cronapp-icon-content">i</div></div>';
+        break;
+      }
+     await setContent(icon, title, subtitle);
+
+    } 
+
+    function setContent(icon, title, subtitle){
+       dataDialog.content = '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>';
+    }
+
+    function setButton(buttonConfirmDialogAlert){
+      let buttons = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
+
+      let hasButton = false;
+      
+      for (let i = 0; i < buttons.length; i++) {
+        let button = buttons[i];
+        if(button){
+          dataDialog.actions.push({
+            text: button.title,
+            action: button.value,
+            primary: button.primaryValue == 'true' ? true : null
+          });
+
+          hasButton = true;
+
+        } 
+      };   
+      
+      // If you have not added a button to the modal. Add to be able to close the modal.
+      if(!hasButton){
+        dataDialog.actions.push({
+          text: "OK",
+          primary: true
+        });
+      };
+
+    }
+    
+   };
+    
+  /**
+   * @type function
+   * @name {{buttonConfirmDialogAlert}}
+   * @nameTags confirmDialog | botão | button | alert | modal | alerta
+   * @description {{buttonConfirmDialogAlertDescription}}
+   * @platform W
+   * @param {ObjectType.BOOLEAN} primaryButton {{buttonConfirmDialogAlert.primaryButton}}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.STRING} value {{buttonConfirmDialogAlert.value}}
+   * @returns {ObjectType.OBJECT}
+   */
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{buttonConfirmDialogAlert.primaryButton}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton, title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
+    return {
+      title: title,
+      value: value,
+      primaryValue: primaryButton
+    };
+  };
+
+  
   /**
    * @type function
    * @name {{createDefaultModalName}}
@@ -5172,7 +5303,7 @@ function cronapi() {
    * @description {{createChartDescription}}
    * @arbitraryParams true
    */
-  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId,  /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea  @values line|bar|horizontalBar|doughnut|pie|polarArea  */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */  chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST}  @description {{createChartSeries}}  */ series) {
+  this.cronapi.chart.createChart = function(/** @type {ObjectType.OBJECT} @description {{createChartId}} @blockType ids_from_screen*/ chartId, /** @type {ObjectType.STRING} @description {{createChartType}} @blockType util_dropdown @keys line|bar|horizontalBar|doughnut|pie|polarArea @values line|bar|horizontalBar|doughnut|pie|polarArea */ type, /** @type {ObjectType.LIST} @description {{createChartLegends}} */ chartLegends, /** @type {ObjectType.LIST} @description {{createChartOptions}} */ options, /** @type {ObjectType.LIST} @description {{createChartSeries}} */ series) {
 
     var CSS_COLOR_NAMES = ["#FF5C00","#0E53A7","#48DD00","#FFD500","#7309AA","#CD0074","#00AF64","#BF8230","#F16D95","#A65000","#A65000","#AF66D5"];
     var colorIndex = 0;
