@@ -1698,7 +1698,7 @@ function cronapi() {
    * @platform W
    * @multilayer true
    */
-   this.cronapi.notification.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+   this.cronapi.notification.confirmDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
 
     let idDialog = 'cronapp-dialog-' + Math.random();
     let dialog = $(`<span id="${idDialog}"></span>`);
@@ -1761,8 +1761,8 @@ function cronapi() {
 
     function setButton(buttonConfirmDialogAlert){
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
-
-      if(button.length == '1'){
+      
+      if(button.length){
         dataDialog.actions.push({
           text: buttonConfirmDialogAlert.title,
           action: buttonConfirmDialogAlert.value,
