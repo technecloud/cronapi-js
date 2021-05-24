@@ -1763,7 +1763,7 @@ function cronapi() {
       let button = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
       
       for (let i = 0; i < button.length; i++) {
-        if(button[i] != null && button.length == "1"){
+        if(!button[i] && button.length == "1"){
           dataDialog.actions.push({
             text: buttonConfirmDialogAlert.title,
             action: buttonConfirmDialogAlert.value,
@@ -1776,7 +1776,7 @@ function cronapi() {
             primary: true
           });
 
-        } else if(button[i] != null){
+        } else if(!button[i]){
           dataDialog.actions.push({
             text: button[i].title,
             action: button[i].value,
