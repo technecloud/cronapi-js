@@ -1766,7 +1766,7 @@ function cronapi() {
       
       for (let i = 0; i < buttons.length; i++) {
         let button = buttons[i];
-        if(!button){
+        if(button){
           dataDialog.actions.push({
             text: button.title,
             action: button.value,
@@ -1779,7 +1779,7 @@ function cronapi() {
       };   
       
       // If you have not added a button to the modal. Add to be able to close the modal.
-      if(hasButton == false){
+      if(!hasButton){
         dataDialog.actions.push({
           text: "OK",
           primary: true
