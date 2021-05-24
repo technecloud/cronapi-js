@@ -5894,4 +5894,44 @@ if (!window.fixedTimeZone) {
 
   }
 
+    /**
+   * @type function
+   * @name {{setCookie}}
+   * @nameTags storage | cookie | armazenamento
+   * @description {{setCookieDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @param {ObjectType.STRING} value {{value}}
+   */
+     this.cronapi.util.setCookie = function(key,value) {
+      var now = new Date(); 
+      var expiration = new Date(); 	 
+      expiration.setTime(now.getTime() + 3600000*24); 
+      document.cookie = key+"="+escape(value) 
+      + ";expires="+expiration.toGMTString(); 
+    };
+  
+    /**
+     * @type function
+     * @name {{getGookie}}
+     * @nameTags storage | cookie | armazenamento
+     * @description {{getCookieDesc}}
+     * @param {ObjectType.STRING} key {{key}}
+     * @returns {ObjectType.STRING}
+     */
+    this.cronapi.util.getCookie = function(key) {
+    var cookies = document.cookie;
+    var halfKey = key + "=";
+    var index = cookies.indexOf("; " + halfKey);
+    if (index == -1) {
+      index = cookies.indexOf(halfKey);
+      if (index != 0)
+        return null;
+    }else
+      index += 2;
+    var end = document.cookie.indexOf(";", index);
+    if (end == -1)
+      end = cookies.length;
+    return unescape(cookies.substring(index + halfKey.length, end));  
+    };
+
 }).bind(window)();
