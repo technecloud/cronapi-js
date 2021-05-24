@@ -625,5 +625,6 @@
   "XMLHasRootElementDescription": "Função que verifica se existe elemento raiz no documento XML",
   "XMLHasRootElementName": "Existe elemento raiz?",
   "year": "Ano",
-  "yearsToIncrement": "Anos a incrementar"
+  "yearsToIncrement": "Anos a incrementar",
+  "notificationCategory": "Notificações"
 }
