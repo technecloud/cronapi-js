@@ -1,4 +1,3 @@
-
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
 }
@@ -1285,6 +1284,14 @@ function cronapi() {
   };
 
   /**
+   * @category {{notificationCategory}}
+   * @categoryTags notification | notification 
+   */
+   this.cronapi.notification = {};
+
+
+  /**
+   * @deprecated true
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
@@ -1300,6 +1307,196 @@ function cronapi() {
     }
 
     this.cronapi.$scope.Notification({'message':message.toString() },type);
+  };
+
+  
+  /**
+   * @type function
+   * @name {{screenNotifySimpleName}}
+   * @description {{screenNotifySimpleDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação
+   * @param {ObjectType.STRING} status {{screenNotifySimpleParam0}}
+   * @param {ObjectType.STRING} message {{screenNotifySimpleParam1}}
+   * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}  
+   * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}  
+   * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}  
+   * @param {ObjectType.STRING} autoHide {{screenNotifySimpleParam5}}  
+   */
+   this.cronapi.notification.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
+    
+    let idCustomNotification = "customNotification" ;
+        
+    let dataNotification = {
+      stacking: "default",
+      autoHideAfter: 5000,
+      position: {
+        pinned: true
+      },
+      animation: {
+        open: {
+          effects: null
+        },
+        close: {
+          effects: null
+        }
+      }
+    };
+     
+    if (animation || verticalPosition || horizontalPosition || autoHide) {
+      customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide); 
+    } else {
+      defaultNotification(message, status); 
+    }
+  
+    async function defaultNotification(message, status) {
+
+      let cronappConfig = {
+        id: "CronappNotification",
+        verticalPosition: "top",
+        horizontalPosition: "left",
+        animation: "slide",
+        autoHide: "false"
+      };
+
+      setVerticalPosition(cronappConfig.verticalPosition);
+      setHorizontalPosition(cronappConfig.horizontalPosition);    
+      setAnimation(cronappConfig.animation);        
+      setAutoHide(cronappConfig.autoHide);  
+
+      if (!isNotificationInitialized(cronappConfig.id)) {
+        initializeNotification(cronappConfig.id, dataNotification);
+      }
+
+      showNotification(cronappConfig.id, message, status);
+  
+    }
+  
+    async function customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide) {   
+           
+      setVerticalPosition(verticalPosition);
+      setHorizontalPosition(horizontalPosition);    
+      setAnimation(animation);        
+      setAutoHide(autoHide);       
+
+      initializeNotification(idCustomNotification, dataNotification);
+      showNotification(idCustomNotification, message, status);
+      
+    }
+
+    function setVerticalPosition(verticalPosition){
+      switch (verticalPosition) {
+        case "bottom":
+          dataNotification.position.bottom = 20;
+          idCustomNotification = idCustomNotification.concat('-bottom');
+          break;
+  
+        default:
+          dataNotification.position.top = 60;
+          idCustomNotification = idCustomNotification.concat('-top');
+  
+      }
+    }
+
+    function setHorizontalPosition(horizontalPosition){
+      switch (horizontalPosition) {
+        case "left":
+          dataNotification.position.right = 20;
+          idCustomNotification = idCustomNotification.concat('-right');
+          break;
+  
+        case "center":
+        dataNotification.show = centerElementScreen;
+          idCustomNotification = idCustomNotification.concat('-center');
+          break;
+  
+        default:
+          dataNotification.position.left = 20;
+          idCustomNotification = idCustomNotification.concat('-left');
+  
+      }
+    }
+
+    function centerElementScreen(e){
+      if (e.sender.getNotifications().length == 1) {
+        var element = e.element.parent(),
+          eWidth = element.width(),
+          wWidth = $(window).width()
+        var newLeft;
+
+        newLeft = Math.floor(wWidth / 2 - eWidth / 2);
+
+        e.element.parent().css({ left: newLeft });
+      }
+    }
+
+    function setAnimation(animation){
+      switch (animation) {
+        case "slide":
+          if (dataNotification.show && dataNotification.position.bottom != null) {
+            dataNotification.animation.open.effects = "slideIn:up";
+            idCustomNotification = idCustomNotification.concat('-slideIn-up');
+  
+          } else if (dataNotification.show && dataNotification.position.top != null) {
+            dataNotification.animation.open.effects = "slideIn:down";
+            idCustomNotification = idCustomNotification.concat('-slideIn-dow');
+  
+          } else if (dataNotification.position.left != null) {
+            dataNotification.animation.open.effects = "slideIn:right";
+            idCustomNotification = idCustomNotification.concat('-slideIn-right');
+  
+          } else if (dataNotification.position.left == null) {
+            dataNotification.animation.open.effects = "slideIn:left";
+            idCustomNotification = idCustomNotification.concat('-slideIn-left');
+          }
+  
+          dataNotification.animation.close.effects = "slideOut";
+          break;
+  
+        case "zoom":
+          dataNotification.animation.open.effects = "zoomIn";
+          dataNotification.animation.close.effects = "zoomOut";
+          idCustomNotification = idCustomNotification.concat('-zoom');
+          break;
+  
+        default:
+          dataNotification.animation.open.effects = "fadeIn";
+          dataNotification.animation.close.effects = "fadeOut";
+          idCustomNotification = idCustomNotification.concat('-fade');
+      }
+    }
+
+    function setAutoHide(autoHide){
+      if(autoHide == "false"){
+        dataNotification.autoHideAfter = 0;
+        idCustomNotification = idCustomNotification.concat('-autoHideAfter');
+      }
+    }
+  
+    async function initializeNotification(id, options) {
+      if (!hasHTMLElement(id)) {
+        let idNotification = $(`<span id="${id}"></span>`);
+        $('body').append(idNotification);
+
+        await $(`#${id}`).kendoNotification(options); 
+        
+        if(horizontalPosition == "center"){
+          centerElementScreen(e)
+        }      
+      }        
+    }
+    
+    function isNotificationInitialized(id) {
+      return $(`#${id}`).getKendoNotification();
+    }
+  
+    function showNotification(id, message, status) {
+      $(`#${id}`).getKendoNotification().show(message, status);
+    }
+  
+    function hasHTMLElement(id) {
+      return document.getElementById(id);
+    }
+
   };
 
   /**
@@ -1663,12 +1860,6 @@ function cronapi() {
 
     return null;
   };
-
-  /**
-   * @category {{notificationCategory}}
-   * @categoryTags notification | notification 
-   */
-   this.cronapi.notification = {};
 
 
   /**
@@ -5048,6 +5239,7 @@ function cronapi() {
 
     return message;
   };
+
 
   /**
    * @type internal
