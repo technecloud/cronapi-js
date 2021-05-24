@@ -1341,15 +1341,11 @@ function cronapi() {
         }
       }
     };
-    
-    notify(message, status, animation, verticalPosition, horizontalPosition, autoHide);
-
-    async function notify(message, status, ...options) {   
-      if (!options[0] || !options[1] || !options[2] || !options[3]) {
-        defaultNotification(message, status);
-      } else {
-        customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide);        
-      }
+     
+    if (animation || verticalPosition || horizontalPosition || autoHide) {
+      customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide); 
+    } else {
+      defaultNotification(message, status); 
     }
   
     async function defaultNotification(message, status) {
@@ -1409,7 +1405,7 @@ function cronapi() {
           break;
   
         case "center":
-          dataNotification.show = centerElementScreen;
+        dataNotification.show = centerElementScreen;
           idCustomNotification = idCustomNotification.concat('-center');
           break;
   
@@ -1478,41 +1474,27 @@ function cronapi() {
   
     async function initializeNotification(id, options) {
       if (!hasHTMLElement(id)) {
-        createAndIncludeHTMLElement(id);          
-        await $(formatJqueryID(id)).kendoNotification(options);
-        await centerElementScreen(e);
+        let idNotification = $(`<span id="${id}"></span>`);
+        $('body').append(idNotification);
+
+        await $(`#${id}`).kendoNotification(options); 
+        
+        if(horizontalPosition == "center"){
+          centerElementScreen(e)
+        }      
       }        
-    }
-  
-    function formatJqueryID(id) {
-      return `#${id}`;
     }
     
     function isNotificationInitialized(id) {
-      return $(formatJqueryID(id)).getKendoNotification();
+      return $(`#${id}`).getKendoNotification();
     }
   
     function showNotification(id, message, status) {
-      $(formatJqueryID(id)).getKendoNotification().show(message, status);
+      $(`#${id}`).getKendoNotification().show(message, status);
     }
   
     function hasHTMLElement(id) {
       return document.getElementById(id);
-    }
-  
-    function createSpan(id) {
-      let span = document.createElement("SPAN");
-      span.id = id;
-      return span;
-    }
-  
-    function createAndIncludeHTMLElement(id) {
-      let span = createSpan(id);
-      appendSpanIntoBody(span);
-    }
-  
-    function appendSpanIntoBody(span) {
-      document.querySelector('body').appendChild(span);
     }
 
   };
