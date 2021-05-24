@@ -508,6 +508,8 @@
   "setCalendarSelectDatesDesc":"Seleciona uma lista de datas do calendário. (Disponível apenas caso o modo de seleção do calendário esteja definido para 'Múltipla')",
   "setCalendarValue":"Definir data atual",
   "setCalendarValueDesc":"Define o valor da seleção única atual do calendário.",
+  "setCookie":"Definir Cookie.",
+  "setCookieDesc":"Função para definir Cookie no navegador do usuário.",
   "setElementValueDescription": "Função que define o conteúdo de um elemento",
   "setElementValueName": "Definir conteúdo do elemento",
   "setLocalStorage": "Adicionar Item na Sessão do navegador",
