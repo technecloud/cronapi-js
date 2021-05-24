@@ -1795,7 +1795,7 @@ function cronapi() {
    * @param {ObjectType.STRING} value {{buttonConfirmDialogAlert.value}}
    * @returns {ObjectType.OBJECT}
    */
-  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{buttonConfirmDialogAlert.primaryButton}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton,/** @type {ObjectType.STRING} */ title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{buttonConfirmDialogAlert.primaryButton}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton, title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
     return {
       title: title,
       value: value,
