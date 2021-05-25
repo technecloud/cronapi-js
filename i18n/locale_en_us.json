@@ -183,6 +183,7 @@
   "executeMultipleSqlDescription": "Execute multiple SQL comands splitted by (;)",
   "executeSql": "Run Command SQL",
   "executeSqlDescription": "Function to execute command SQL.",
+  "expirationTimeInSeconds":"Expiration time(s).",
   "EXTERNAL": "EXTERNAL",
   "extractTextByRegex" : "Extract text with Reg. Expression",
   "extractTextByRegexDescription" : "Function to extract text with Reg. Expression. Returns a list with incidences, if found.",

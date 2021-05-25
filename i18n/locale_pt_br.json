@@ -183,6 +183,7 @@
   "executeMultipleSqlDescription": "Executar Múltiplos Comandos SQL Separados por Ponto e Vírgula (;)",
   "executeSql": "Executar Comando SQL",
   "executeSqlDescription": "Função para executar comando SQL.",
+  "expirationTimeInSeconds":"Tempo de expiração(s)",
   "EXTERNAL": "EXTERNO",
   "extractTextByRegex": "Extrair texto com Exp. Regular",
   "extractTextByRegexDescription": "Função para extrair texto com Exp. Regular. Retorna uma lista com as incidências, caso enconte.",

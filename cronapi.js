@@ -6050,21 +6050,25 @@ function cronapi() {
 
   }
 
-    /**
+  /**
    * @type function
    * @name {{setCookie}}
    * @nameTags storage | cookie | armazenamento
    * @description {{setCookieDesc}}
    * @param {ObjectType.STRING} key {{key}}
    * @param {ObjectType.STRING} value {{value}}
+   * @param {ObjectType.LONG} value {{expirationTimeInSeconds}}
    */
-     this.cronapi.util.setCookie = function(key,value) {
-      var now = new Date(); 
-      var expiration = new Date(); 	 
-      expiration.setTime(now.getTime() + 3600000*24); 
-      document.cookie = key+"="+escape(value) 
-      + ";expires="+expiration.toGMTString(); 
-    };
+   this.cronapi.util.setCookie = function(key,value,expirationTimeInSeconds) {
+    let now = new Date(); 
+    let expiration = new Date();
+    if (this.cronapi.logic.isNullOrEmpty(expirationTimeInSeconds) || expirationTimeInSeconds == 0) {      
+      expiration.setTime(now.getTime() + 1000*60*60*24);      
+    } else {    
+      expiration.setTime(now.getTime() + parseInt(1000*expirationTimeInSeconds));
+    }
+      document.cookie = encodeURIComponent(key)+"="+encodeURIComponent(value)+ "; expires="+expiration.toGMTString();  
+  };
   
     /**
      * @type function
@@ -6074,21 +6078,12 @@ function cronapi() {
      * @param {ObjectType.STRING} key {{key}}
      * @returns {ObjectType.STRING}
      */
-    this.cronapi.util.getCookie = function(key) {
-    var cookies = document.cookie;
-    var halfKey = key + "=";
-    var index = cookies.indexOf("; " + halfKey);
-    if (index == -1) {
-      index = cookies.indexOf(halfKey);
-      if (index != 0)
-        return null;
-    }else
-      index += 2;
-    var end = document.cookie.indexOf(";", index);
-    if (end == -1)
-      end = cookies.length;
-    return unescape(cookies.substring(index + halfKey.length, end));  
-    };
+     this.cronapi.util.getCookie = function(key) {  
+      const value = document.cookie; 
+      const parts = value.split(encodeURIComponent(key)+'='); 
+      if (parts.length === 2) 
+      return decodeURIComponent(parts.pop().split(';').shift());
+    }
 }
 
 (cronapi).bind(window)();
