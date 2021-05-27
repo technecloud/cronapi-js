@@ -6050,12 +6050,13 @@ function cronapi() {
 
   }
 
-  /**
+   /**
    * @type function
    * @name {{setCookie}}
    * @nameTags storage | cookie | armazenamento
    * @description {{setCookieDesc}}
    * @param {ObjectType.STRING} key {{key}}
+   * @param {ObjectType.STRING} value {{value}}
    * @param {ObjectType.STRING} measurementUnit {{measurementUnit}} 
    * @param {ObjectType.LONG} expires {{expirationTime}}
    */
