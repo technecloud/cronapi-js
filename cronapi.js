@@ -1,4 +1,3 @@
-
 if (window.fixedTimeZone === undefined || window.fixedTimeZone === null) {
   window.fixedTimeZone = true;
 }
@@ -1285,6 +1284,14 @@ function cronapi() {
   };
 
   /**
+   * @category {{notificationCategory}}
+   * @categoryTags notification | notification 
+   */
+   this.cronapi.notification = {};
+
+
+  /**
+   * @deprecated true
    * @type function
    * @name {{screenNotifyName}}
    * @description {{screenNotifyDescription}}
@@ -1300,6 +1307,196 @@ function cronapi() {
     }
 
     this.cronapi.$scope.Notification({'message':message.toString() },type);
+  };
+
+  
+  /**
+   * @type function
+   * @name {{screenNotifySimpleName}}
+   * @description {{screenNotifySimpleDescription}}
+   * @nameTags show | exibir | exibe | notification | notificação
+   * @param {ObjectType.STRING} status {{screenNotifySimpleParam0}}
+   * @param {ObjectType.STRING} message {{screenNotifySimpleParam1}}
+   * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}  
+   * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}  
+   * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}  
+   * @param {ObjectType.STRING} autoHide {{screenNotifySimpleParam5}}  
+   */
+   this.cronapi.notification.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
+    
+    let idCustomNotification = "customNotification" ;
+        
+    let dataNotification = {
+      stacking: "default",
+      autoHideAfter: 5000,
+      position: {
+        pinned: true
+      },
+      animation: {
+        open: {
+          effects: null
+        },
+        close: {
+          effects: null
+        }
+      }
+    };
+     
+    if (animation || verticalPosition || horizontalPosition || autoHide) {
+      customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide); 
+    } else {
+      defaultNotification(message, status); 
+    }
+  
+    async function defaultNotification(message, status) {
+
+      let cronappConfig = {
+        id: "CronappNotification",
+        verticalPosition: "top",
+        horizontalPosition: "left",
+        animation: "slide",
+        autoHide: "false"
+      };
+
+      setVerticalPosition(cronappConfig.verticalPosition);
+      setHorizontalPosition(cronappConfig.horizontalPosition);    
+      setAnimation(cronappConfig.animation);        
+      setAutoHide(cronappConfig.autoHide);  
+
+      if (!isNotificationInitialized(cronappConfig.id)) {
+        initializeNotification(cronappConfig.id, dataNotification);
+      }
+
+      showNotification(cronappConfig.id, message, status);
+  
+    }
+  
+    async function customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide) {   
+           
+      setVerticalPosition(verticalPosition);
+      setHorizontalPosition(horizontalPosition);    
+      setAnimation(animation);        
+      setAutoHide(autoHide);       
+
+      initializeNotification(idCustomNotification, dataNotification);
+      showNotification(idCustomNotification, message, status);
+      
+    }
+
+    function setVerticalPosition(verticalPosition){
+      switch (verticalPosition) {
+        case "bottom":
+          dataNotification.position.bottom = 20;
+          idCustomNotification = idCustomNotification.concat('-bottom');
+          break;
+  
+        default:
+          dataNotification.position.top = 60;
+          idCustomNotification = idCustomNotification.concat('-top');
+  
+      }
+    }
+
+    function setHorizontalPosition(horizontalPosition){
+      switch (horizontalPosition) {
+        case "left":
+          dataNotification.position.right = 20;
+          idCustomNotification = idCustomNotification.concat('-right');
+          break;
+  
+        case "center":
+        dataNotification.show = centerElementScreen;
+          idCustomNotification = idCustomNotification.concat('-center');
+          break;
+  
+        default:
+          dataNotification.position.left = 20;
+          idCustomNotification = idCustomNotification.concat('-left');
+  
+      }
+    }
+
+    function centerElementScreen(e){
+      if (e.sender.getNotifications().length == 1) {
+        var element = e.element.parent(),
+          eWidth = element.width(),
+          wWidth = $(window).width()
+        var newLeft;
+
+        newLeft = Math.floor(wWidth / 2 - eWidth / 2);
+
+        e.element.parent().css({ left: newLeft });
+      }
+    }
+
+    function setAnimation(animation){
+      switch (animation) {
+        case "slide":
+          if (dataNotification.show && dataNotification.position.bottom != null) {
+            dataNotification.animation.open.effects = "slideIn:up";
+            idCustomNotification = idCustomNotification.concat('-slideIn-up');
+  
+          } else if (dataNotification.show && dataNotification.position.top != null) {
+            dataNotification.animation.open.effects = "slideIn:down";
+            idCustomNotification = idCustomNotification.concat('-slideIn-dow');
+  
+          } else if (dataNotification.position.left != null) {
+            dataNotification.animation.open.effects = "slideIn:right";
+            idCustomNotification = idCustomNotification.concat('-slideIn-right');
+  
+          } else if (dataNotification.position.left == null) {
+            dataNotification.animation.open.effects = "slideIn:left";
+            idCustomNotification = idCustomNotification.concat('-slideIn-left');
+          }
+  
+          dataNotification.animation.close.effects = "slideOut";
+          break;
+  
+        case "zoom":
+          dataNotification.animation.open.effects = "zoomIn";
+          dataNotification.animation.close.effects = "zoomOut";
+          idCustomNotification = idCustomNotification.concat('-zoom');
+          break;
+  
+        default:
+          dataNotification.animation.open.effects = "fadeIn";
+          dataNotification.animation.close.effects = "fadeOut";
+          idCustomNotification = idCustomNotification.concat('-fade');
+      }
+    }
+
+    function setAutoHide(autoHide){
+      if(autoHide == "false"){
+        dataNotification.autoHideAfter = 0;
+        idCustomNotification = idCustomNotification.concat('-autoHideAfter');
+      }
+    }
+  
+    async function initializeNotification(id, options) {
+      if (!hasHTMLElement(id)) {
+        let idNotification = $(`<span id="${id}"></span>`);
+        $('body').append(idNotification);
+
+        await $(`#${id}`).kendoNotification(options); 
+        
+        if(horizontalPosition == "center"){
+          centerElementScreen(e)
+        }      
+      }        
+    }
+    
+    function isNotificationInitialized(id) {
+      return $(`#${id}`).getKendoNotification();
+    }
+  
+    function showNotification(id, message, status) {
+      $(`#${id}`).getKendoNotification().show(message, status);
+    }
+  
+    function hasHTMLElement(id) {
+      return document.getElementById(id);
+    }
+
   };
 
   /**
@@ -1685,23 +1882,25 @@ function cronapi() {
    * @name {{confirmDialogAlertName}}
    * @nameTags confirmDialog | Confirmar | alert | modal | alerta
    * @description {{confirmDialogAlertDescription}}
-   * @param {ObjectType.STRING} icon {{confimDialogAlert.icon}
-   * @param {ObjectType.STRING} title {{confimDialogAlert.title}}
-   * @param {ObjectType.STRING} subtitle {{confimDialogAlert.subtitle}}
-   * @param {ObjectType.STRING} buttonCancelName {{createDefaultModalParam3}}
-   * @param {ObjectType.STRING} hidebuttonSave {{hidebuttonSave}}
-   * @param {ObjectType.STRING} buttonSaveName {{createDefaultModalParam4}}
+   * @param {ObjectType.STRING} icon {{icon}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.STRING} subtitle {{subtitle}}
+   * @param {ObjectType.OBJECT} buttonConfirmDialogAlert {{confimDialogAlert.listButton}}
    * @platform W
    * @multilayer true
-   * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.screen.confimDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, buttonCancelName,/** @type {ObjectType.STRING} @description {{hidebuttonSave}} @blockType util_dropdown @keys yes|no @values {{yes}}|{{no}} */ hidebuttonSave, buttonSaveName, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam5}} */ onConfirm, /** @type {ObjectType.STATEMENT} @description {{createDefaultModalParam6}}*/ onCancel) {
+   this.cronapi.notification.confirmDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
+
+    let idDialog = 'cronapp-dialog-' + Math.random();
+    let dialog = $(`<span id="${idDialog}"></span>`);
+    $('body').append(dialog);
     
     let dataDialog = {
       width: "450px",
       title: false,
       closable: false,
       modal: true,
+      content: "",
       animation: {
         open: {
           effects: "zoom:in"
@@ -1711,20 +1910,19 @@ function cronapi() {
         }
       },
       buttonLayout: "normal",
-      actions: []
+      actions: [],
+      close: function(e) {
+        setInterval(() => {
+          $(`#${idDialog}`).data("kendoDialog").destroy(); 
+        }, 3000); 
+      }
     };
 
-    let idDialog = 'cronapp-dialog-' + Math.random();
-
-    let dialog = $(`<span id="${idDialog}"></span>`);
-    $('body').append(dialog);
-    
-    setIcon(icon, title, subtitle);    
-    setButtonCancel(buttonCancelName, onCancel);
-    setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm);
+    setIcon(icon, title, subtitle);  
+    setButton(buttonConfirmDialogAlert);
 
     dialog.kendoDialog(dataDialog);
-    dialog.data("kendoDialog").open();
+    dialog.data("kendoDialog").open(); 
 
     async function setIcon(icon, title, subtitle){
       switch (icon){
@@ -1750,55 +1948,59 @@ function cronapi() {
 
     function setContent(icon, title, subtitle){
        dataDialog.content = '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>';
-    } 
-
-    function setButtonConfirm(hidebuttonSave, buttonSaveName, onConfirm){
-       if(hidebuttonSave == "no"){
-        dataDialog.actions.push(
-          {
-            text: buttonSaveName,
-            action: function(ev) {
-                if(onConfirm){
-                  onConfirm();
-                }
-                return false;
-            },
-            primary: true
-          }
-        );   
-      }     
     }
 
-    function setButtonCancel(buttonCancelName, onCancel){
-      dataDialog.actions.push({
-        text: buttonCancelName,
-        action: function(ev) {
-              if(onCancel){
-                onCancel();
-              }
-              return false;
-          },
-      });     
-    }   
+    function setButton(buttonConfirmDialogAlert){
+      let buttons = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
 
-    return dialog;
+      let hasButton = false;
+      
+      for (let i = 0; i < buttons.length; i++) {
+        let button = buttons[i];
+        if(button){
+          dataDialog.actions.push({
+            text: button.title,
+            action: button.value,
+            primary: button.primaryValue == 'true' ? true : null
+          });
+
+          hasButton = true;
+
+        } 
+      };   
+      
+      // If you have not added a button to the modal. Add to be able to close the modal.
+      if(!hasButton){
+        dataDialog.actions.push({
+          text: "OK",
+          primary: true
+        });
+      };
+
+    }
+    
    };
     
   /**
    * @type function
-   * @name {{destroyConfirmDialogAlert}}
-   * @nameTags confirmDialog | dialog | modal | hide | destroy | alert | alerta | destroyConfirmDialogAlert | Esconder | Fechar
-   * @description {{hideModalDesc}}
-   * @param {ObjectType.OBJECT} dialogRef {{dialogRef}}
-   * @multilayer true
+   * @name {{buttonConfirmDialogAlert}}
+   * @nameTags confirmDialog | botão | button | alert | modal | alerta
+   * @description {{buttonConfirmDialogAlertDescription}}
+   * @platform W
+   * @param {ObjectType.BOOLEAN} primaryButton {{buttonConfirmDialogAlert.primaryButton}}
+   * @param {ObjectType.STRING} title {{title}}
+   * @param {ObjectType.STRING} value {{buttonConfirmDialogAlert.value}}
+   * @returns {ObjectType.OBJECT}
    */
-   this.cronapi.screen.destroyConfirmDialogAlert = function(/** @type {ObjectType.OBJECT} @blockType variables_get */ dialogRef) {
-      dialogRef.data("kendoDialog").close();
-      setInterval(() => {
-        dialogRef.data("kendoDialog").destroy(); 
-      }, 3000);      
-   };   
+  this.cronapi.notification.buttonConfirmDialogAlert = function (/** @type {ObjectType.STRING}  @description {{buttonConfirmDialogAlert.primaryButton}}  @blockType util_dropdown  @keys true|false  @values {{yes}}|{{no}}  */ primaryButton, title, /** @type {ObjectType.STATEMENT} @description {{buttonConfirmDialogAlert.value}} */ value) {
+    return {
+      title: title,
+      value: value,
+      primaryValue: primaryButton
+    };
+  };
 
+  
   /**
    * @type function
    * @name {{createDefaultModalName}}
@@ -5038,6 +5240,7 @@ function cronapi() {
     return message;
   };
 
+
   /**
    * @type internal
    */
@@ -6120,6 +6323,7 @@ function cronapi() {
 
   }
 
+ 
 }
 
 (cronapi).bind(window)();
