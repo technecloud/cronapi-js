@@ -6260,33 +6260,70 @@ function cronapi() {
    * @description {{setCookieDesc}}
    * @param {ObjectType.STRING} key {{key}}
    * @param {ObjectType.STRING} value {{value}}
-   * @param {ObjectType.LONG} value {{expirationTimeInSeconds}}
+   * @param {ObjectType.STRING} measurementUnit {{measurementUnit}} 
+   * @param {ObjectType.LONG} expires {{expirationTime}}
    */
-   this.cronapi.util.setCookie = function(key,value,expirationTimeInSeconds) {
-    let now = new Date(); 
+   this.cronapi.util.setCookie = function (key, value,/**@type {ObjectType.STRING} @description {{measurementUnit}} @blockType util_dropdown @keys seconds|minutes|hours|days @values {{seconds}}|{{minutes}}|{{hours}}|{{days}}  */ measurementUnit, expires) {
+
+    let now = new Date();
     let expiration = new Date();
-    if (this.cronapi.logic.isNullOrEmpty(expirationTimeInSeconds) || expirationTimeInSeconds == 0) {      
-      expiration.setTime(now.getTime() + 1000*60*60*24);      
-    } else {    
-      expiration.setTime(now.getTime() + parseInt(1000*expirationTimeInSeconds));
+    let factor = 0;
+    const DAY_IN_MILLISECONDS = 1000 * 60 * 60 * 24;
+
+    function getFactorByMeasurementUnit(measurementUnit) {
+      if (measurementUnit === 'seconds') {
+        factor = 1000;
+      } else if (measurementUnit === 'minutes') {
+        factor = 60000;
+      } else if (measurementUnit === 'hours') {
+        factor = 3600000;
+      } else if (measurementUnit === 'days') {
+        factor = 86400000;
+      }
+      return factor;
+    };
+
+    if (this.cronapi.logic.isNullOrEmpty(expires) || expires == 0) {
+      expiration.setTime(now.getTime() + DAY_IN_MILLISECONDS);
+    } else {
+      expiration.setTime(now.getTime() + parseInt(expires * getFactorByMeasurementUnit(measurementUnit)));
+
     }
-      document.cookie = encodeURIComponent(key)+"="+encodeURIComponent(value)+ "; expires="+expiration.toGMTString();  
+    document.cookie = encodeURIComponent(key) + "=" + encodeURIComponent(value) + "; expires=" + expiration.toGMTString();
   };
-  
-    /**
-     * @type function
-     * @name {{getGookie}}
-     * @nameTags storage | cookie | armazenamento
-     * @description {{getCookieDesc}}
-     * @param {ObjectType.STRING} key {{key}}
-     * @returns {ObjectType.STRING}
-     */
-     this.cronapi.util.getCookie = function(key) {  
-      const value = document.cookie; 
-      const parts = value.split(encodeURIComponent(key)+'='); 
-      if (parts.length === 2) 
-      return decodeURIComponent(parts.pop().split(';').shift());
+
+  /**
+   * @type function
+   * @name {{getGookie}}
+   * @nameTags storage | cookie | armazenamento
+   * @description {{getCookieDesc}}
+   * @param {ObjectType.STRING} key {{key}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.util.getCookie = function (key) {
+
+    const cookies = getAllCokies();
+    const cookie = filterCookieByKey(cookies, key);
+
+    function getAllCokies() {
+      return document.cookie.split('; ');
     }
+
+    function filterCookieByKey(cookies, key) {
+      return cookies.find(row => row.startsWith(key + '='));
+
+    }
+
+    function getCookieValue(cookie) {
+      return (typeof cookie === "undefined" ? null : cookie.split('=').pop());
+
+    }
+
+    return getCookieValue(cookie);
+
+  }
+
+ 
 }
 
 (cronapi).bind(window)();
