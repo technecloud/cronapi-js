@@ -275,6 +275,8 @@
   "getChildrenParam1": "Value to search:A element or a element name to be search key",
   "getConnection": "Network Status",
   "getConnectionDescription": "Function to provides information about the device's cellular and wifi connection",
+  "getCookie":"Get cookie.",
+  "getCookieDesc":"Function to get Cookie on the user's browser.",
   "getCurrentAcceleration": "Get Current Acceleration",
   "getCurrentAccelerationDescription": "Function that provides access to device accelerometer.",
   "getCurrentPosition": "Get geo-referenced position",

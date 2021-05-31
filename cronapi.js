@@ -5935,7 +5935,7 @@ if (!window.fixedTimeZone) {
 
   /**
    * @type function
-   * @name {{getGookie}}
+   * @name {{getCookie}}
    * @nameTags storage | cookie | armazenamento
    * @description {{getCookieDesc}}
    * @param {ObjectType.STRING} key {{key}}
@@ -5963,6 +5963,5 @@ if (!window.fixedTimeZone) {
     return getCookieValue(cookie);
 
   }
-
  
 }).bind(window)();
