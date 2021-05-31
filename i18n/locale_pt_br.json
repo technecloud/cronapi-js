@@ -276,6 +276,8 @@
   "getChildrenParam1": "Valor para buscar:Pode-se passar um elemento ou um nome de elemento a ser buscado",
   "getConnection": "Status da Rede",
   "getConnectionDescription": "Função que fornece informações sobre a conexão celular e wifi do dispositivo",
+  "getCookie":"Obter cookie.",
+  "getCookieDesc":"Função para obter o valor de um cookie do navegador do usuário.",
   "getCurrentAcceleration": "Obter Aceleração de Movimento",
   "getCurrentAccelerationDescription": "Função que fornece acesso ao acelerômetro do dispositivo.",
   "getCurrentPosition": "Obter Georreferenciamento",
