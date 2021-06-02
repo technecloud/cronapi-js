@@ -1892,7 +1892,7 @@ function cronapi() {
    this.cronapi.notification.confirmDialogAlert = function(/** @type {ObjectType.STRING} @description {{icon}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ icon, title, subtitle, /** @type {ObjectType.OBJECT} */ buttonConfirmDialogAlert) {
 
     let idDialog = 'cronapp-dialog-' + Math.random();
-    let dialog = $(`<span id="${idDialog}"></span>`);
+    let dialog = $(`<div id="${idDialog}"></div>`);
     $('body').append(dialog);
     
     let dataDialog = {
@@ -1920,7 +1920,6 @@ function cronapi() {
 
     setIcon(icon, title, subtitle);  
     setButton(buttonConfirmDialogAlert);
-
     dialog.kendoDialog(dataDialog);
     dialog.data("kendoDialog").open(); 
 
