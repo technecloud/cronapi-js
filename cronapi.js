@@ -6321,6 +6321,96 @@ function cronapi() {
     return getCookieValue(cookie);
 
   }
+
+  /**
+   * @category CategoryType.MAP
+   * @categoryTags map|mapa|keypair
+   */
+   this.cronapi.map = {};
+
+  /**
+   * @type function
+   * @name {{createMap}}
+   * @description {{createMapDesc}}
+   * @wizard maps_create_with
+   * @param {ObjectType.OBJECT} values {{createMapVariableParam0}}
+   * @returns {ObjectType.MAP}
+   */
+  this.cronapi.map.createMap = function(values) {
+    return values;
+  };
+
+  /**
+   * @type function
+   * @name {{setMapValueByKey}}
+   * @description {{setMapValueByKeyDesc}}
+   * @param {ObjectType.MAP} map {{setMapValueByKeyParam0}}
+   * @param {ObjectType.STRING} field {{setMapValueByKeyParam1}}
+   * @param {ObjectType.STRING} value {{setMapValueByKeyParam2}}
+   */
+  this.cronapi.map.setMapValueByKey = function(campo, valor) {
+    const arr = {[campo]: valor};
+    mapa.push(arr);
+  };
+
+  /**
+   * @type function
+   * @name {{setMapValueByPath}}
+   * @description {{setMapValueByPathDesc}}
+   * @param {ObjectType.MAP} map {{setMapValueByPathParam0}}
+   * @param {ObjectType.STRING} path {{setMapValueByPathParam1}}
+   * @param {ObjectType.STRING} value {{setMapValueByPathParam2}}
+   */
+  this.cronapi.map.setMapValueByPath = function(mapa, caminho, valor) {
+    const content = {};
+    const keys = caminho.split('.');
+    const lastKey = keys.pop();
+    const lastObj = keys.reduce((content, key) => content[key] = content[key] || {}, content); 
+    lastObj[lastKey] = valor;
+    mapa.push(content);
+  };
+
+  /**
+   * @type function
+   * @name {{getMapValueByPath}}
+   * @description {{getMapValueByPathDesc}}
+   * @param {ObjectType.MAP} map {{getMapValueByPathParam0}}
+   * @param {ObjectType.STRING} path {{getMapValueByPathParam1}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.map.getMapValueByPath = function(mapa, caminho) {
+    let object = null;
+    mapa.forEach(element => {
+      object = element;
+      const parts = caminho.split('.');
+      while(parts.length) {
+        const property = parts.shift();
+        if (!(object.hasOwnProperty(property))) {
+          break;
+        }
+        object = object[property];
+      }
+    });
+    return object;
+  };
+
+  /**
+   * @type function
+   * @name {{getMapValueByKey}}
+   * @description {{getMapValueByKeyDesc}}
+   * @param {ObjectType.MAP} map {{getMapValueByKeyParam0}}
+   * @param {ObjectType.STRING} field {{getMapValueByKeyParam1}}
+   * @returns {ObjectType.STRING}
+   */
+  this.cronapi.map.getMapValueByKey = function(mapa, campo) {
+    let object = null;
+    mapa.forEach(element => {
+      if (element.hasOwnProperty(campo)) {
+        object = element[campo];
+      }
+    });
+    return object;
+  };
  
 }
 
@@ -6328,10 +6418,10 @@ function cronapi() {
 
 
 // This is only for test purpose
-try{
-if(module){
-  module.exports = {
-    window
-  };
-}
-}catch(err){}
+try {
+  if (module) {
+    module.exports = {
+      window
+    };
+  }
+} catch(err) {}
