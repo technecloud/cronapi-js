@@ -49,4 +49,9 @@ function() {
     value.should.equal('bacaca');
   });
 
+  it('formatTextWithReplacement', function() {
+    let value = cronapi.text.formatTextWithReplacement.bind(window)("Hoje é {0} do mês {1} e do ano {2}", "31", "12", "2050");
+    value.should.equal("Hoje é 31 do mês 12 e do ano 2050");
+  });
+
 });
