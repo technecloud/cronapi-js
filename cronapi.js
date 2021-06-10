@@ -6348,9 +6348,9 @@ function cronapi() {
    * @param {ObjectType.STRING} field {{setMapValueByKeyParam1}}
    * @param {ObjectType.STRING} value {{setMapValueByKeyParam2}}
    */
-  this.cronapi.map.setMapValueByKey = function(campo, valor) {
-    const arr = {[campo]: valor};
-    mapa.push(arr);
+  this.cronapi.map.setMapValueByKey = function(map, field, value) {
+    const arr = {[field]: value};
+    map.push(arr);
   };
 
   /**
@@ -6361,13 +6361,13 @@ function cronapi() {
    * @param {ObjectType.STRING} path {{setMapValueByPathParam1}}
    * @param {ObjectType.STRING} value {{setMapValueByPathParam2}}
    */
-  this.cronapi.map.setMapValueByPath = function(mapa, caminho, valor) {
+  this.cronapi.map.setMapValueByPath = function(map, path, value) {
     const content = {};
-    const keys = caminho.split('.');
+    const keys = path.split('.');
     const lastKey = keys.pop();
     const lastObj = keys.reduce((content, key) => content[key] = content[key] || {}, content); 
-    lastObj[lastKey] = valor;
-    mapa.push(content);
+    lastObj[lastKey] = value;
+    map.push(content);
   };
 
   /**
@@ -6378,11 +6378,11 @@ function cronapi() {
    * @param {ObjectType.STRING} path {{getMapValueByPathParam1}}
    * @returns {ObjectType.STRING}
    */
-  this.cronapi.map.getMapValueByPath = function(mapa, caminho) {
+  this.cronapi.map.getMapValueByPath = function(map, path) {
     let object = null;
-    mapa.forEach(element => {
+    map.forEach(element => {
       object = element;
-      const parts = caminho.split('.');
+      const parts = path.split('.');
       while(parts.length) {
         const property = parts.shift();
         if (!(object.hasOwnProperty(property))) {
@@ -6402,11 +6402,11 @@ function cronapi() {
    * @param {ObjectType.STRING} field {{getMapValueByKeyParam1}}
    * @returns {ObjectType.STRING}
    */
-  this.cronapi.map.getMapValueByKey = function(mapa, campo) {
+  this.cronapi.map.getMapValueByKey = function(map, field) {
     let object = null;
-    mapa.forEach(element => {
-      if (element.hasOwnProperty(campo)) {
-        object = element[campo];
+    map.forEach(element => {
+      if (element.hasOwnProperty(field)) {
+        object = element[field];
       }
     });
     return object;
