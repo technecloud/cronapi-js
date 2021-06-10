@@ -2918,7 +2918,7 @@ function cronapi() {
    * @arbitraryParams true
    * @returns {ObjectType.STRING}
    */
-   this.cronapi.text.formatTextiWithReplacement = function(text, ...terms) {
+   this.cronapi.text.formatTextWithReplacement = function(text, ...terms) {
     var args = Array.prototype.slice.call(terms, 0);
     return text.replace(/\{(\d+)\}/g, function (match, index) {
       return args[index];
