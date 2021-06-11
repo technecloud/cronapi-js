@@ -6323,6 +6323,40 @@ function cronapi() {
   }
 
   /**
+   * @type function
+   * @platform M
+   * @name {{fingerPrintRead}}
+   * @nameTags fingerprint | digital | leitor
+   * @description {{fingerPrintReadDescription}}
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @param {ObjectType.LONG} result {{fingerPrintResult}}
+  */
+   this.cronapi.util.fingerPrintRead = function (success, fail) {
+    if(Fingerprint){
+      Fingerprint.isAvailable(isAvailableSuccess, isAvailableError);
+
+      function isAvailableSuccess() {
+        Fingerprint.show({}, successCallback, errorCallback);
+      }
+
+      function successCallback(){
+        success(0);
+      }
+
+      function errorCallback(error){
+        fail(-1);
+      }
+  
+      function isAvailableError() {
+        fail(-2);
+      }
+    }else{
+      fail(-2);
+    }
+  }
+
+  /**
    * @category CategoryType.MAP
    * @categoryTags map|mapa|keypair
    */
