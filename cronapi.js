@@ -2908,7 +2908,24 @@ function cronapi() {
     return null;
   }
 
-     /**
+  /**
+   * @type function
+   * @name {{toSupplyText}}
+   * @description {{toSupplyTextDescription}}
+   * @nameTags text|replace|supply
+   * @param {ObjectType.STRING} text {{toSupplyTextParam0}}
+   * @param {ObjectType.OBJECT} terms {{toSupplyTextParam1}}
+   * @arbitraryParams true
+   * @returns {ObjectType.STRING}
+   */
+   this.cronapi.text.formatTextWithReplacement = function(text, ...terms) {
+    var args = Array.prototype.slice.call(terms, 0);
+    return text.replace(/\{(\d+)\}/g, function (match, index) {
+      return args[index];
+    });
+  };
+
+  /**
    * @type function
    * @name {{newline}}
    * @description {{newlineDescription}}
