@@ -5062,6 +5062,41 @@ function cronapi() {
     }
   };
 
+  this.cronapi.cordova.util = {};
+
+  /**
+   * @type function
+   * @platform M
+   * @name {{fingerPrintRead}}
+   * @nameTags fingerprint | digital | leitor
+   * @description {{fingerPrintReadDescription}}
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @param {ObjectType.STATEMENTSENDER} error {{error}}
+   * @param {ObjectType.LONG} result {{fingerPrintResult}}
+  */
+  this.cronapi.cordova.util.fingerPrintRead = function (success, fail) {
+    if(Fingerprint){
+      Fingerprint.isAvailable(isAvailableSuccess, isAvailableError);
+
+      function isAvailableSuccess() {
+        Fingerprint.show({}, successCallback, errorCallback);
+      }
+
+      function successCallback(){
+        success(0);
+      }
+
+      function errorCallback(error){
+        fail(-1);
+      }
+
+      function isAvailableError() {
+        fail(-2);
+      }
+    }else{
+      fail(-2);
+    }
+  }
 
   //Private variables and functions
   this.cronapi.internal.ptDate = function(varray) {
@@ -6337,40 +6372,6 @@ function cronapi() {
 
     return getCookieValue(cookie);
 
-  }
-
-  /**
-   * @type function
-   * @platform M
-   * @name {{fingerPrintRead}}
-   * @nameTags fingerprint | digital | leitor
-   * @description {{fingerPrintReadDescription}}
-   * @param {ObjectType.STATEMENTSENDER} success {{success}}
-   * @param {ObjectType.STATEMENTSENDER} error {{error}}
-   * @param {ObjectType.LONG} result {{fingerPrintResult}}
-  */
-   this.cronapi.util.fingerPrintRead = function (success, fail) {
-    if(Fingerprint){
-      Fingerprint.isAvailable(isAvailableSuccess, isAvailableError);
-
-      function isAvailableSuccess() {
-        Fingerprint.show({}, successCallback, errorCallback);
-      }
-
-      function successCallback(){
-        success(0);
-      }
-
-      function errorCallback(error){
-        fail(-1);
-      }
-  
-      function isAvailableError() {
-        fail(-2);
-      }
-    }else{
-      fail(-2);
-    }
   }
 
   /**
