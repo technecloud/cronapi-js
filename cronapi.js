@@ -1399,7 +1399,7 @@ function cronapi() {
 
     function setHorizontalPosition(horizontalPosition){
       switch (horizontalPosition) {
-        case "left":
+        case "right":
           dataNotification.position.right = 20;
           idCustomNotification = idCustomNotification.concat('-right');
           break;
