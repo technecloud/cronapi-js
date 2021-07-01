@@ -4623,7 +4623,13 @@ function cronapi() {
     allowEdit = (allowEdit === true || allowEdit === 'true');
     let options = { destinationType: Number(destinationType) , sourceType : Number(pictureSourceType) , mediaType: Number(mediaType) , allowEdit: allowEdit};
     if(window.cordova && window.cordova.platformId && window.cordova.platformId !== 'browser') {
-      navigator.camera.getPicture(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error), options);
+
+      let resultWithData = (data) => {
+        if (data && !data.startsWith("data:image")) data = "data:image/jpeg;base64, " + data;
+        !success || success(data);
+      };
+
+      navigator.camera.getPicture(this.cronapi.util.handleCallback(resultWithData), this.cronapi.util.handleCallback(error), options);
     }else{
       options.allowEdit = allowEdit;
       options.successCallback = success;
