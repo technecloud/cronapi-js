@@ -943,6 +943,20 @@ function cronapi() {
   };
 
   /**
+   * @type function
+   * @name {{openDashboard}}
+   * @nameTags openDashboard|abrirdashboard
+   * @description {{openDashboardDescription}}
+   * @param {ObjectType.STRING} value {{dashboard}}
+   * @multilayer true
+   * @returns {ObjectType.VOID}
+   * @wizard procedures_opendashboard_callnoreturn
+   */
+   this.cronapi.util.openDashboard = function(/** @type {ObjectType.STRING} @blockType util_dashboard_list */ name) {
+    this.cronapi.$scope.getDashboard(name);
+  };
+
+  /**
    * @type internal
    */
   this.cronapi.util.handleCallback = function(ref) {
