@@ -1299,7 +1299,7 @@ function cronapi() {
 
   /**
    * @category {{notificationCategory}}
-   * @categoryTags notification | notification 
+   * @categoryTags notification | notification
    */
    this.cronapi.notification = {};
 
@@ -1323,7 +1323,7 @@ function cronapi() {
     this.cronapi.$scope.Notification({'message':message.toString() },type);
   };
 
-  
+
   /**
    * @type function
    * @name {{screenNotifySimpleName}}
@@ -1331,15 +1331,15 @@ function cronapi() {
    * @nameTags show | exibir | exibe | notification | notificação
    * @param {ObjectType.STRING} status {{screenNotifySimpleParam0}}
    * @param {ObjectType.STRING} message {{screenNotifySimpleParam1}}
-   * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}  
-   * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}  
-   * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}  
-   * @param {ObjectType.STRING} autoHide {{screenNotifySimpleParam5}}  
+   * @param {ObjectType.STRING} animation {{screenNotifySimpleParam2}}
+   * @param {ObjectType.STRING} verticalPosition {{screenNotifySimpleParam3}}
+   * @param {ObjectType.STRING} horizontalPosition {{screenNotifySimpleParam4}}
+   * @param {ObjectType.STRING} autoHide {{screenNotifySimpleParam5}}
    */
    this.cronapi.notification.customNotify = function(/** @type {ObjectType.STRING} @description {{status}} @blockType util_dropdown @keys error|success|warning|info @values {{error}}|{{success}}|{{warning}}|{{info}} */ status, /** @type {ObjectType.STRING} */  message, /** @type {ObjectType.STRING} @description {{animation}} @blockType util_dropdown @keys fade|slide|zoom @values {{fade}}|{{slide}}|{{zoom}}  */ animation, /** @type {ObjectType.STRING} @description {{verticalPosition}} @blockType util_dropdown @keys top|bottom @values {{top}}|{{bottom}} */ verticalPosition, /** @type {ObjectType.STRING} @description {{horizontalPosition}} @blockType util_dropdown @keys left|center|right @values {{left}}|{{center}}|{{right}} */ horizontalPosition, /** @type {ObjectType.STRING} @description {{autoHide}} @blockType util_dropdown @keys true|false @values {{yes}}|{{no}} */ autoHide) {
-    
+
     let idCustomNotification = "customNotification" ;
-        
+
     let dataNotification = {
       stacking: "default",
       autoHideAfter: 5000,
@@ -1355,13 +1355,13 @@ function cronapi() {
         }
       }
     };
-     
+
     if (animation || verticalPosition || horizontalPosition || autoHide) {
-      customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide); 
+      customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide);
     } else {
-      defaultNotification(message, status); 
+      defaultNotification(message, status);
     }
-  
+
     async function defaultNotification(message, status) {
 
       let cronappConfig = {
@@ -1373,28 +1373,28 @@ function cronapi() {
       };
 
       setVerticalPosition(cronappConfig.verticalPosition);
-      setHorizontalPosition(cronappConfig.horizontalPosition);    
-      setAnimation(cronappConfig.animation);        
-      setAutoHide(cronappConfig.autoHide);  
+      setHorizontalPosition(cronappConfig.horizontalPosition);
+      setAnimation(cronappConfig.animation);
+      setAutoHide(cronappConfig.autoHide);
 
       if (!isNotificationInitialized(cronappConfig.id)) {
         initializeNotification(cronappConfig.id, dataNotification);
       }
 
       showNotification(cronappConfig.id, message, status);
-  
+
     }
-  
-    async function customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide) {   
-           
+
+    async function customNotification(message, status, animation, verticalPosition, horizontalPosition, autoHide) {
+
       setVerticalPosition(verticalPosition);
-      setHorizontalPosition(horizontalPosition);    
-      setAnimation(animation);        
-      setAutoHide(autoHide);       
+      setHorizontalPosition(horizontalPosition);
+      setAnimation(animation);
+      setAutoHide(autoHide);
 
       initializeNotification(idCustomNotification, dataNotification);
       showNotification(idCustomNotification, message, status);
-      
+
     }
 
     function setVerticalPosition(verticalPosition){
@@ -1403,11 +1403,11 @@ function cronapi() {
           dataNotification.position.bottom = 20;
           idCustomNotification = idCustomNotification.concat('-bottom');
           break;
-  
+
         default:
           dataNotification.position.top = 60;
           idCustomNotification = idCustomNotification.concat('-top');
-  
+
       }
     }
 
@@ -1417,16 +1417,16 @@ function cronapi() {
           dataNotification.position.right = 20;
           idCustomNotification = idCustomNotification.concat('-right');
           break;
-  
+
         case "center":
         dataNotification.show = centerElementScreen;
           idCustomNotification = idCustomNotification.concat('-center');
           break;
-  
+
         default:
           dataNotification.position.left = 20;
           idCustomNotification = idCustomNotification.concat('-left');
-  
+
       }
     }
 
@@ -1449,29 +1449,29 @@ function cronapi() {
           if (dataNotification.show && dataNotification.position.bottom != null) {
             dataNotification.animation.open.effects = "slideIn:up";
             idCustomNotification = idCustomNotification.concat('-slideIn-up');
-  
+
           } else if (dataNotification.show && dataNotification.position.top != null) {
             dataNotification.animation.open.effects = "slideIn:down";
             idCustomNotification = idCustomNotification.concat('-slideIn-dow');
-  
+
           } else if (dataNotification.position.left != null) {
             dataNotification.animation.open.effects = "slideIn:right";
             idCustomNotification = idCustomNotification.concat('-slideIn-right');
-  
+
           } else if (dataNotification.position.left == null) {
             dataNotification.animation.open.effects = "slideIn:left";
             idCustomNotification = idCustomNotification.concat('-slideIn-left');
           }
-  
+
           dataNotification.animation.close.effects = "slideOut";
           break;
-  
+
         case "zoom":
           dataNotification.animation.open.effects = "zoomIn";
           dataNotification.animation.close.effects = "zoomOut";
           idCustomNotification = idCustomNotification.concat('-zoom');
           break;
-  
+
         default:
           dataNotification.animation.open.effects = "fadeIn";
           dataNotification.animation.close.effects = "fadeOut";
@@ -1485,28 +1485,28 @@ function cronapi() {
         idCustomNotification = idCustomNotification.concat('-autoHideAfter');
       }
     }
-  
+
     async function initializeNotification(id, options) {
       if (!hasHTMLElement(id)) {
         let idNotification = $(`<span id="${id}"></span>`);
         $('body').append(idNotification);
 
-        await $(`#${id}`).kendoNotification(options); 
-        
+        await $(`#${id}`).kendoNotification(options);
+
         if(horizontalPosition == "center"){
           centerElementScreen(e)
-        }      
-      }        
+        }
+      }
     }
-    
+
     function isNotificationInitialized(id) {
       return $(`#${id}`).getKendoNotification();
     }
-  
+
     function showNotification(id, message, status) {
       $(`#${id}`).getKendoNotification().show(message, status);
     }
-  
+
     function hasHTMLElement(id) {
       return document.getElementById(id);
     }
@@ -1908,7 +1908,7 @@ function cronapi() {
     let idDialog = 'cronapp-dialog-' + Math.random();
     let dialog = $(`<div id="${idDialog}"></div>`);
     $('body').append(dialog);
-    
+
     let dataDialog = {
       width: "450px",
       title: false,
@@ -1927,15 +1927,15 @@ function cronapi() {
       actions: [],
       close: function(e) {
         setInterval(() => {
-          $(`#${idDialog}`).data("kendoDialog").destroy(); 
-        }, 3000); 
+          $(`#${idDialog}`).data("kendoDialog").destroy();
+        }, 3000);
       }
     };
 
-    setIcon(icon, title, subtitle);  
+    setIcon(icon, title, subtitle);
     setButton(buttonConfirmDialogAlert);
     dialog.kendoDialog(dataDialog);
-    dialog.data("kendoDialog").open(); 
+    dialog.data("kendoDialog").open();
 
     async function setIcon(icon, title, subtitle){
       switch (icon){
@@ -1957,7 +1957,7 @@ function cronapi() {
       }
      await setContent(icon, title, subtitle);
 
-    } 
+    }
 
     function setContent(icon, title, subtitle){
        dataDialog.content = '<div id="modalBodyConfirmDialog"> <div class="icon">'+ icon +'</div> <h2 class="title">'+ title +'</h2> <h3 class="subtitle">'+ subtitle +'</h3> </div>';
@@ -1967,7 +1967,7 @@ function cronapi() {
       let buttons = (Array.isArray(buttonConfirmDialogAlert) ? buttonConfirmDialogAlert : [buttonConfirmDialogAlert]);
 
       let hasButton = false;
-      
+
       for (let i = 0; i < buttons.length; i++) {
         let button = buttons[i];
         if(button){
@@ -1979,9 +1979,9 @@ function cronapi() {
 
           hasButton = true;
 
-        } 
-      };   
-      
+        }
+      };
+
       // If you have not added a button to the modal. Add to be able to close the modal.
       if(!hasButton){
         dataDialog.actions.push({
@@ -1991,9 +1991,9 @@ function cronapi() {
       };
 
     }
-    
+
    };
-    
+
   /**
    * @type function
    * @name {{buttonConfirmDialogAlert}}
@@ -2013,7 +2013,7 @@ function cronapi() {
     };
   };
 
-  
+
   /**
    * @type function
    * @name {{createDefaultModalName}}
@@ -4575,7 +4575,7 @@ function cronapi() {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.geolocation.getCurrentPosition = function(success, error){
-    navigator.geolocation.getCurrentPosition(success, error);
+    navigator.geolocation.getCurrentPosition(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error));
   };
 
   /**
@@ -4592,7 +4592,7 @@ function cronapi() {
    * @returns {ObjectType.LONG}
    */
   this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
-    return navigator.geolocation.watchPosition(success, error, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
+    return navigator.geolocation.watchPosition(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error), { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
   };
 
   /**
@@ -6437,7 +6437,7 @@ function cronapi() {
     const content = {};
     const keys = path.split('.');
     const lastKey = keys.pop();
-    const lastObj = keys.reduce((content, key) => content[key] = content[key] || {}, content); 
+    const lastObj = keys.reduce((content, key) => content[key] = content[key] || {}, content);
     lastObj[lastKey] = value;
     map.push(content);
   };
@@ -6483,7 +6483,7 @@ function cronapi() {
     });
     return object;
   };
- 
+
 }
 
 (cronapi).bind(window)();
