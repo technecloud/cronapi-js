@@ -5331,6 +5331,20 @@ function cronapi() {
   };
 
   /**
+   * @type function
+   * @name {{watchAcceleration}}
+   * @nameTags watch|acceleration|gyroscope
+   * @param {ObjectType.STATEMENTSENDER} success {{success}}
+   * @description {{watchAccelerationDescription}}
+   * @returns {ObjectType.VOID}
+   */
+  this.cronapi.util.watchAcceleration = function(/** @type {ObjectType.STATEMENTSENDER} @description {{success}} */ success) {
+    window.addEventListener("deviceorientation", function(event){
+      success({"absolute": event.absolute, "alpha": event.alpha, "beta": event.beta, "gamma": event.gamma});
+    }, false);
+  };
+
+  /**
    * @category CategoryType.CHART
    * @categoryTags Gráfico|Chart
    */
