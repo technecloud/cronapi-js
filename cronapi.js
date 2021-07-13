@@ -4187,7 +4187,7 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.VOID}
    */
   this.cronapi.cordova.geolocation.getCurrentPosition = function(success, error){
-    navigator.geolocation.getCurrentPosition(success, error);
+    navigator.geolocation.getCurrentPosition(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error));
   };
 
   /**
@@ -4204,7 +4204,7 @@ if (!window.fixedTimeZone) {
    * @returns {ObjectType.LONG}
    */
   this.cronapi.cordova.geolocation.watchPosition = function(success, error, maximumAge, timeout, enableHighAccuracy){
-    return navigator.geolocation.watchPosition(success, error, { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
+    return navigator.geolocation.watchPosition(this.cronapi.util.handleCallback(success), this.cronapi.util.handleCallback(error), { maximumAge: maximumAge, timeout: timeout, enableHighAccuracy: enableHighAccuracy });
   };
 
   /**
@@ -4240,8 +4240,7 @@ if (!window.fixedTimeZone) {
         if (data && !data.startsWith("data:image")) data = "data:image/jpeg;base64, " + data;
         !success || success(data);
       };
-
-      navigator.camera.getPicture(resultWithData, error, options);
+      navigator.camera.getPicture(this.cronapi.util.handleCallback(resultWithData), this.cronapi.util.handleCallback(error), options);
     }else{
       options.allowEdit = allowEdit;
       options.successCallback = success;
